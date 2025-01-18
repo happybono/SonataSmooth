@@ -343,6 +343,8 @@ namespace NoiseReductionSample
         {
             listBox2.Items.Clear();
             lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            btnCopy2.Enabled = false;
+            btnSelClear2.Enabled = false;
         }
 
         private void btnCopy2_Click(object sender, EventArgs e)
