@@ -14,7 +14,6 @@ This tool implements three different noise reduction algorithms for smoothing da
 - **How It Works**:
   - For each data point in `listBox1`, collect values within the range defined by `NoiseReductionKernelWidth`.
   - Sort the collected values and find the median (middle value).
-  - If the number of values is even, calculate the average of the two middle values.
   - Add the median value to `listBox2`.
 
 ### 3. Binomial Averaging Algorithm
