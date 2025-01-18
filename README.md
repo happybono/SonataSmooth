@@ -1,5 +1,5 @@
 # SonataSmooth
-This tool implements three different noise reduction algorithms for smoothing out data: Rectangular Averaging, Median Filtering, and Binomial Averaging. It processes data from a list and displays the results in another list.
+This tool implements three different noise reduction algorithms for smoothing out data: Rectangular Averaging, Binomial Median Filtering, and Binomial Averaging. It processes data from a list and displays the results in another list.
 
 ## Algorithms
 ### 1. Rectangular Averaging Algorithm
@@ -9,7 +9,7 @@ This tool implements three different noise reduction algorithms for smoothing ou
   - Divide the sum by the number of data points considered to get the average.
   - Add the average value to `listBox2`.
 
-### 2. Median Filtering Algorithm
+### 2. Binomial Median Filtering Algorithm
 - **Description**: Calculates the median of the data points within a specified kernel width.
 - **How It Works**:
   - For each data point in `listBox1`, collect values within the range defined by `NoiseReductionKernelWidth`.
