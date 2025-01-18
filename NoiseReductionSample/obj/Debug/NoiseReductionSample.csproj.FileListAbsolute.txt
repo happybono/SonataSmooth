@@ -1,0 +1,10 @@
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
