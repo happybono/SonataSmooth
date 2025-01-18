@@ -31,3 +31,6 @@ This tool implements three different noise reduction algorithms for smoothing ou
 3. **Calibrate**: Click the `btnCalibrate` button to process the data in `listBox1` using the selected algorithm. The processed values will be displayed in `listBox2`.
 
 These algorithms help smooth out noise in data by averaging or filtering based on the chosen method.
+
+## Demonstation
+![Final Product](SonataSmooth.png)
