@@ -1,6 +1,18 @@
 # SonataSmooth
 This tool implements three different noise reduction algorithms for smoothing data: Rectangular Averaging, Binomial Median Filtering, and Binomial Averaging. It processes data from a list and displays the results in another list.
 
+## What's New
+<details>
+<summary>Click to Expand</summary>
+  
+### v1.0
+#### January 03, 2021
+>[Initial release.](https://github.com/happybono/SonataSmooth/commit/1c9911992e2b0ec6b984828519ac78cbcb5a0a51)
+>[Minor bugs fixed.](https://github.com/happybono/SonataSmooth/commit/a8a9cfd481aa7616bdbc14e27d71a9a6616d171b)
+>[In the README.md, added an explanation of how NoiseReductionKernelWidth ensures an odd number of values and updated the detailed descriptions of the noise reduction algorithms.](https://github.com/happybono/SonataSmooth/commit/4d79bf644d5d2880fb4957a32c425957f5d78337)
+
+</details>
+
 ## Features & Algorithms
 ### 1. Rectangular Averaging Algorithm
 - **Description**: Calculates the average of the data points within a specified kernel width.
