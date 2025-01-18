@@ -18,7 +18,7 @@ This tool implements three different noise reduction algorithms for smoothing da
   - Add the median value to `listBox2`.
 
 ### 3. Binomial Averaging Algorithm
-- **Description**: Uses binomial coefficients to calculate a weighted average of the data points within a specified kernel width.
+- **Description**: Use binomial coefficients to calculate a weighted average of the data points within a specified kernel width.
 - **How It Works**:
   - Calculate binomial coefficients for the given kernel width.
   - For each data point in `listBox1`, multiply the values within the range defined by `NoiseReductionKernelWidth` by the corresponding binomial coefficients.
