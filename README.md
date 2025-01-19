@@ -16,35 +16,148 @@ This tool implements three different noise reduction algorithms for smoothing da
 </details>
 
 ## Features & Algorithms
-### 1. Rectangular Averaging Algorithm
-- **Description**: Calculates the average of the data points within a specified kernel width.
-- **How It Works**:
-  - For each data point in `listBox1`, sum the values within the range defined by `NoiseReductionKernelWidth`.
-  - Divide the sum by the number of data points considered to get the average.
-  - Add the average value to `listBox2`.
+1. **Rectangular Method**
+   - **How it works**: This method calculates the average of a window of values centered around each data point. The width of the window (kernel width) determines the number of neighboring data points included in the averaging process.
+   - **Principle**: By averaging the values within the window, the noise (random fluctuations) is smoothed out, resulting in a clearer, more stable signal.
+   - **Code Implementation**:
+     ```csharp
+     // Rectangular
+     if (rbtnRect.Checked == true)
+     {
+         for (int i = 0; i < listBox1.Items.Count; i++)
+         {
+             double sum = 0;
+             int count = 0;
 
-### 2. Binomial Median Filtering Algorithm
-- **Description**: Calculates the median of the data points within a specified kernel width.
-- **How It Works**:
-  - For each data point in `listBox1`, collect values within the range defined by `NoiseReductionKernelWidth`.
-  - Sort the collected values and find the median (middle value).
-  - Since `NoiseReductionKernelWidth` ensures an odd number of values, there will always be a single middle value. This is because the range `[-NoiseReductionKernelWidth, NoiseReductionKernelWidth]` always includes the center point (0) and extends an equal number of points on either side, resulting in an odd total number of points.
-  - Add the median value to `listBox2`.
+             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
+             {
+                 int dataIndex = i + kernel_index;
+                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
+                 {
+                     count++;
+                     sum += Convert.ToDouble(listBox1.Items[dataIndex]);
+                 }
+             }
 
-### 3. Binomial Averaging Algorithm
-- **Description**: Use binomial coefficients to calculate a weighted average of the data points within a specified kernel width.
-- **How It Works**:
-  - Calculate binomial coefficients for the given kernel width.
-  - For each data point in `listBox1`, multiply the values within the range defined by `NoiseReductionKernelWidth` by the corresponding binomial coefficients.
-  - Sum these weighted values and divide by the sum of the coefficients to get the weighted average.
-  - Add the weighted average value to `listBox2`.
+             listBox2.Items.Add(sum / count);
+             lblCnt2.Text = "Count : " + listBox2.Items.Count;
+         }
+     }
+     ```
 
-## Usage
-1. **Kernel Width Selection**: Input the desired kernel width in the `cbxKernelWidth` combo box.
-2. **Select Algorithm**: Choose one of the radio buttons (`rbtnRect`, `rbtnMed`, `rbtnAvg`) to select the noise reduction algorithm.
-3. **Calibrate**: Click the `btnCalibrate` button to process the data in `listBox1` using the selected algorithm. The processed values will be displayed in `listBox2`.
+2. **Binomial Coefficients Method (Median)**
+   - **How it works**: This method uses the binomial coefficients to weight the data points within the window. The median of the weighted values is then calculated.
+   - **Principle**: The median is less sensitive to extreme values (outliers) than the average, making it effective for noise reduction while preserving the overall trend of the data.
+   - **Code Implementation**:
+     ```csharp
+     // Binomial coefficient (median)
+     else if (rbtnMed.Checked == true)
+     {
+         for (int i = 0; i < listBox1.Items.Count; i++)
+         {
+             List<double> values = new List<double>();
+
+             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
+             {
+                 int dataIndex = i + kernel_index;
+                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
+                 {
+                     values.Add(Convert.ToDouble(listBox1.Items[dataIndex]));
+                 }
+             }
+
+             if (values.Count > 0)
+             {
+                 values.Sort();
+                 double median;
+                 int midIndex = values.Count / 2;
+                 if (values.Count % 2 == 0)
+                 {
+                     median = (values[midIndex - 1] + values[midIndex]) / 2.0;
+                 }
+                 else
+                 {
+                     median = values[midIndex];
+                 }
+
+                 listBox2.Items.Add(median);
+                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
+             }
+         }
+     }
+     ```
+
+3. **Binomial Coefficients Method (Average)**
+   - **How it works**: This method uses binomial coefficients to weight the values within the kernel. The weighted average of these values is then calculated.
+   - **Principle**: Binomial coefficients give more weight to the central values in the window, which helps to preserve the central trend while smoothing out noise.
+   - **Code Implementation**:
+     ```csharp
+     // Binomial coefficient (average)
+     else if (rbtnAvg.Checked == true)
+     {
+         binomialCoefficients = AvgCalcBinomialCoefficients(NoiseReductionKernelWidth * 2 + 1);
+         for (int i = 0; i < listBox1.Items.Count; i++)
+         {
+             List<double> values = new List<double>();
+             int coefficientSum = 0;
+
+             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
+             {
+                 int dataIndex = i + kernel_index;
+                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
+                 {
+                     values.Add(Convert.ToDouble(listBox1.Items[dataIndex]) * binomialCoefficients[NoiseReductionKernelWidth + kernel_index]);
+                     coefficientSum += binomialCoefficients[NoiseReductionKernelWidth + kernel_index];
+                 }
+             }
+
+             if (values.Count > 0)
+             {
+                 double sum = values.Sum();
+                 double average = sum / coefficientSum;
+
+                 listBox2.Items.Add(average);
+                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
+             }
+         }
+     }
+     ```
+
+### Binomial Coefficients Calculation
+1. **Calculating Binomial Coefficients**
+   - **Principle**: Binomial coefficients are derived from Pascal's triangle and represent the coefficients in the expansion of a binomial expression.
+   - **Code Implementation**:
+     ```csharp
+     private int[] AvgCalcBinomialCoefficients(int windowSize)
+     {
+         int[] coefficients = new int[windowSize];
+         coefficients[0] = 1;
+
+         for (int i = 1; i < windowSize; i++)
+         {
+             coefficients[i] = coefficients[i - 1] * (windowSize - i) / i;
+         }
+
+         return coefficients;
+     }
+     ```
 
 These algorithms help smooth out noise in data by averaging or filtering based on the chosen method.
+
+### Data Handling and Processing
+- Implemented drag-and-drop functionality to allow users to easily add data to the application.
+- Used regular expressions to extract and parse numerical data from various formats.
+
+### User Interface and Interaction
+- Designed and developed a user-friendly interface with interactive elements like buttons and list boxes.
+- Provided real-time feedback to the user by updating counts and results dynamically.
+
+### Customization and Configuration
+- Allowed users to select the noise reduction method and kernel width through the interface.
+- Enabled users to calibrate and fine-tune the noise reduction process based on their specific needs.
+
+## Conclusion
+By implementing these techniques, this project effectively reduces noise from the given data, providing clearer and more reliable results.
 
 ## Demonstation
 ![Final Product](SonataSmooth.png)
