@@ -57,37 +57,43 @@ This tool implements three different noise reduction algorithms for smoothing da
      // Binomial coefficient (median)
      else if (rbtnMed.Checked == true)
      {
-         for (int i = 0; i < listBox1.Items.Count; i++)
-         {
-             List<double> values = new List<double>();
+        for (int i = 0; i < listBox1.Items.Count; i++)
+        {
+            List<Tuple<double, int>> weightedValues = new List<Tuple<double, int>>();
 
-             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
-             {
-                 int dataIndex = i + kernel_index;
-                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
-                 {
-                     values.Add(Convert.ToDouble(listBox1.Items[dataIndex]));
-                 }
-             }
+            for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
+            {
+                int dataIndex = i + kernel_index;
+                if (dataIndex >= 0 && dataIndex < listBox1.Items.Count && (NoiseReductionKernelWidth + kernel_index) >= 0 && (NoiseReductionKernelWidth + kernel_index) < binomialCoefficients.Length)
+                {
+                    double value = Convert.ToDouble(listBox1.Items[dataIndex]);
+                    int weight = binomialCoefficients[Math.Abs(kernel_index)];
 
-             if (values.Count > 0)
-             {
-                 values.Sort();
-                 double median;
-                 int midIndex = values.Count / 2;
-                 if (values.Count % 2 == 0)
-                 {
-                     median = (values[midIndex - 1] + values[midIndex]) / 2.0;
-                 }
-                 else
-                 {
-                     median = values[midIndex];
-                 }
+                    for (int w = 0; w < weight; w++)
+                    {
+                        weightedValues.Add(new Tuple<double, int>(value, weight));
+                    }
+                }
+            }
 
-                 listBox2.Items.Add(median);
-                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
-             }
-         }
+            if (weightedValues.Count > 0)
+            {
+                weightedValues.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+                double weightedMedian;
+                int midIndex = weightedValues.Count / 2;
+                if (weightedValues.Count % 2 == 0)
+                {
+                    weightedMedian = (weightedValues[midIndex - 1].Item1 + weightedValues[midIndex].Item1) / 2.0;
+                }
+                else
+                {
+                    weightedMedian = weightedValues[midIndex].Item1;
+                }
+
+                listBox2.Items.Add(weightedMedian);
+                lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            }
+        }
      }
      ```
 
