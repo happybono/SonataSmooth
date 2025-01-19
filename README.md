@@ -12,7 +12,7 @@ This tool implements three different noise reduction algorithms for smoothing da
 ### v1.1
 #### January 19, 2025
 > [Minor bugs fixed.](https://github.com/happybono/SonataSmooth/commit/a8a9cfd481aa7616bdbc14e27d71a9a6616d171b)<br><br>
-> [Explained NoiseReductionKernelWidth and updated algorithm details in README.md.](https://github.com/happybono/SonataSmooth/commit/4d79bf644d5d2880fb4957a32c425957f5d78337)
+> [Explained NoiseReductionKernelWidth and updated algorithm details in README.md.](https://github.com/happybono/SonataSmooth/commit/dbad0337d5c7534902db7f22f6dc23ff60a54a4e)
 </details>
 
 ## Features & Algorithms
