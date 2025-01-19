@@ -56,46 +56,87 @@ namespace NoiseReductionSample
                 }
             }
 
-            // Binomial coefficient (median)
+            //Binomial coefficient (median)
             else if (rbtnMed.Checked == true)
             {
                 for (int i = 0; i < listBox1.Items.Count; i++)
                 {
-                    List<double> values = new List<double>();
+                    List<Tuple<double, int>> weightedValues = new List<Tuple<double, int>>();
 
-                    // Kernel Width calculation.
                     for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
                     {
                         int dataIndex = i + kernel_index;
-                        // Ignore data out of range
-                        if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
+                        if (dataIndex >= 0 && dataIndex < listBox1.Items.Count && (NoiseReductionKernelWidth + kernel_index) >= 0 && (NoiseReductionKernelWidth + kernel_index) < binomialCoefficients.Length)
                         {
-                            // Apply binomial coefficient and add to the list
-                            values.Add(Convert.ToDouble(listBox1.Items[dataIndex]));
+                            double value = Convert.ToDouble(listBox1.Items[dataIndex]);
+                            int weight = binomialCoefficients[Math.Abs(kernel_index)];
+
+                            for (int w = 0; w < weight; w++)
+                            {
+                                weightedValues.Add(new Tuple<double, int>(value, weight));
+                            }
                         }
                     }
 
-                    // Sort values and calculate median
-                    if (values.Count > 0)
+                    if (weightedValues.Count > 0)
                     {
-                        values.Sort();
-                        double median;
-                        int midIndex = values.Count / 2;
-                        if (values.Count % 2 == 0)
+                        weightedValues.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+                        double weightedMedian;
+                        int midIndex = weightedValues.Count / 2;
+                        if (weightedValues.Count % 2 == 0)
                         {
-                            median = (values[midIndex - 1] + values[midIndex]) / 2.0;
+                            weightedMedian = (weightedValues[midIndex - 1].Item1 + weightedValues[midIndex].Item1) / 2.0;
                         }
                         else
                         {
-                            median = values[midIndex];
+                            weightedMedian = weightedValues[midIndex].Item1;
                         }
 
-                        // Add median to ListBox2
-                        listBox2.Items.Add(median);
+                        listBox2.Items.Add(weightedMedian);
                         lblCnt2.Text = "Count : " + listBox2.Items.Count;
                     }
                 }
             }
+
+            //else if (rbtnMed.Checked == true)
+            //{
+            //    for (int i = 0; i < listBox1.Items.Count; i++)
+            //    {
+            //        List<double> values = new List<double>();
+
+            //        // Kernel Width calculation.
+            //        for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
+            //        {
+            //            int dataIndex = i + kernel_index;
+            //            // Ignore data out of range
+            //            if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
+            //            {
+            //                // Apply binomial coefficient and add to the list
+            //                values.Add(Convert.ToDouble(listBox1.Items[dataIndex]));
+            //            }
+            //        }
+
+            //        // Sort values and calculate median
+            //        if (values.Count > 0)
+            //        {
+            //            values.Sort();
+            //            double median;
+            //            int midIndex = values.Count / 2;
+            //            if (values.Count % 2 == 0)
+            //            {
+            //                median = (values[midIndex - 1] + values[midIndex]) / 2.0;
+            //            }
+            //            else
+            //            {
+            //                median = values[midIndex];
+            //            }
+
+            //            // Add median to ListBox2
+            //            listBox2.Items.Add(median);
+            //            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            //        }
+            //    }
+            //}
 
             // Binomial coefficient (average)
             else if (rbtnAvg.Checked == true)
@@ -131,6 +172,8 @@ namespace NoiseReductionSample
                     }
                 }
             }
+            btnCopy2.Enabled = false;
+            btnSelClear2.Enabled = false;
         }
 
         private int[] AvgCalcBinomialCoefficients(int windowSize)
@@ -251,6 +294,7 @@ namespace NoiseReductionSample
         private void btnAdd_Click(object sender, EventArgs e)
         {            
             listBox1.Items.Add(txtVariable.Text);
+            lblCnt1.Text = "Count : " + listBox1.Items.Count;
         }
 
         private void txtVariable_KeyDown(object sender, KeyEventArgs e)
@@ -278,6 +322,10 @@ namespace NoiseReductionSample
         {
             listBox1.Items.Clear();
             lblCnt1.Text = "Count : " + listBox1.Items.Count;
+
+            btnCopy.Enabled = false;
+            btnSelClear.Enabled = false;
+            btnDelete.Enabled = false;
         }
 
         private void btnCopy_Click(object sender, EventArgs e)
