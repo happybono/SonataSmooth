@@ -27,6 +27,7 @@ This tool implements three different noise reduction algorithms for smoothing da
 - **Description**: Calculates the median of the data points within a specified kernel width.
 - **How It Works**:
   - For each data point in `listBox1`, collect values within the range defined by `NoiseReductionKernelWidth`.
+  - Sort the collected values and find the median (middle value).
   - Since `NoiseReductionKernelWidth` ensures an odd number of values, there will always be a single middle value. This is because the range `[-NoiseReductionKernelWidth, NoiseReductionKernelWidth]` always includes the center point (0) and extends an equal number of points on either side, resulting in an odd total number of points.
   - Add the median value to `listBox2`.
 
