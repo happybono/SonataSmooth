@@ -1,6 +1,13 @@
 # SonataSmooth
 This tool implements three different noise reduction algorithms for smoothing data: Rectangular Averaging, Binomial Median Filtering, and Binomial Averaging. It processes data from a list and displays the results in another list.
 
+<div align="center">
+<img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
+<img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
+<img alt="GitHub Repo Languages" src="https://img.shields.io/github/languages/count/happybono/SonataSmooth">
+<img alt="GitHub Top Languages" src="https://img.shields.io/github/languages/top/HappyBono/SonataSmooth">
+</div>
+
 ## What's New
 <details>
 <summary>Click to Expand</summary>
