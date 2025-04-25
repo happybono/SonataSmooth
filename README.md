@@ -28,9 +28,9 @@ This tool implements three different noise reduction algorithms for smoothing da
 
 ## Features & Algorithms
 1. **Rectangular Method**
-   - **How it works**: This method calculates the average of a window of values centered around each data point. The width of the window (kernel width) determines the number of neighboring data points included in the averaging process.
-   - **Principle**: By averaging the values within the window, the noise (random fluctuations) is smoothed out, resulting in a clearer, more stable signal.
-   - **Code Implementation**:
+   - **How it works** : This method calculates the average of a window of values centered around each data point. The width of the window (kernel width) determines the number of neighboring data points included in the averaging process.
+   - **Principle** : By averaging the values within the window, the noise (random fluctuations) is smoothed out, resulting in a clearer, more stable signal.
+   - **Code Implementation** :
      ```csharp
      // Rectangular
      if (rbtnRect.Checked == true)
@@ -57,9 +57,9 @@ This tool implements three different noise reduction algorithms for smoothing da
      ```
 
 2. **Binomial Coefficients Method (Median)**
-   - **How it works**: This method uses the binomial coefficients to weight the data points within the window. The median of the weighted values is then calculated.
-   - **Principle**: The median is less sensitive to extreme values (outliers) than the average, making it effective for noise reduction while preserving the overall trend of the data.
-   - **Code Implementation**:
+   - **How it works** : This method uses the binomial coefficients to weight the data points within the window. The median of the weighted values is then calculated.
+   - **Principle** : The median is less sensitive to extreme values (outliers) than the average, making it effective for noise reduction while preserving the overall trend of the data.
+   - **Code Implementation** :
      ```csharp
      // Binomial coefficient (median)
      else if (rbtnMed.Checked == true)
@@ -105,9 +105,9 @@ This tool implements three different noise reduction algorithms for smoothing da
      ```
 
 3. **Binomial Coefficients Method (Average)**
-   - **How it works**: This method uses binomial coefficients to weight the values within the kernel. The weighted average of these values is then calculated.
-   - **Principle**: Binomial coefficients give more weight to the central values in the window, which helps to preserve the central trend while smoothing out noise.
-   - **Code Implementation**:
+   - **How it works** : This method uses binomial coefficients to weight the values within the kernel. The weighted average of these values is then calculated.
+   - **Principle** : Binomial coefficients give more weight to the central values in the window, which helps to preserve the central trend while smoothing out noise.
+   - **Code Implementation** :
      ```csharp
      // Binomial coefficient (average)
      else if (rbtnAvg.Checked == true)
@@ -142,8 +142,8 @@ This tool implements three different noise reduction algorithms for smoothing da
 
 ### Binomial Coefficients Calculation
 1. **Calculating Binomial Coefficients**
-   - **Principle**: Binomial coefficients are derived from Pascal's triangle and represent the coefficients in the expansion of a binomial expression.
-   - **Code Implementation**:
+   - **Principle** : Binomial coefficients are derived from Pascal's triangle and represent the coefficients in the expansion of a binomial expression.
+   - **Code Implementation** :
      ```csharp
      private int[] AvgCalcBinomialCoefficients(int windowSize)
      {
