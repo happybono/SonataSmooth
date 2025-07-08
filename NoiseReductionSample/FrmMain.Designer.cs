@@ -53,7 +53,9 @@
             this.btnClear2 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -360,6 +362,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.progressBar1);
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.lblCnt1);
             this.groupBox2.Controls.Add(this.btnClear);
@@ -376,8 +379,16 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Original Data";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(36, 437);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(276, 4);
+            this.progressBar1.TabIndex = 16;
+            // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.progressBar2);
             this.groupBox3.Controls.Add(this.listBox2);
             this.groupBox3.Controls.Add(this.lblCnt2);
             this.groupBox3.Controls.Add(this.btnClear2);
@@ -391,6 +402,13 @@
             this.groupBox3.TabIndex = 26;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Calibrated Data";
+            // 
+            // progressBar2
+            // 
+            this.progressBar2.Location = new System.Drawing.Point(36, 437);
+            this.progressBar2.Name = "progressBar2";
+            this.progressBar2.Size = new System.Drawing.Size(276, 4);
+            this.progressBar2.TabIndex = 17;
             // 
             // FrmMain
             // 
@@ -447,6 +465,8 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar progressBar2;
     }
 }
 
