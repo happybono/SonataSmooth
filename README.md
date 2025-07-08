@@ -24,6 +24,23 @@ This tool implements three different noise reduction algorithms for smoothing da
 ### v1.0.2.0
 #### January 20, 2025
 > [Bugs fixed.](https://github.com/happybono/SonataSmooth/commit/f7d0568b4ebf30ed7868885a9bff92960e757b13)<br>
+
+### v2.0.0.0
+#### July 08, 2025
+> Async & Parallel Processing
+> Batch UI Updates
+> Stepwise ProgressBar Feedback
+> True Symmetric Binomial-Weighted Median Filter
+> ListBox Selection & Deletion Optimization
+> Regex Performance Tuning
+> UI-Thread Responsiveness
+> Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)
+> Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort/reverse and using symmetric indexing (binom[k + w]).
+> UI Flicker Prevention (Added BeginUpdate/EndUpdate around all ListBox modifications to eliminate redraw artifacts.)
+
+
+
+
 </details>
 
 ## Features & Algorithms
