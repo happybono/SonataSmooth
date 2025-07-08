@@ -27,16 +27,16 @@ This tool implements three different noise reduction algorithms for smoothing da
 
 ### v2.0.0.0
 #### July 08, 2025
-> Async & Parallel Processing
-> Batch UI Updates
-> Stepwise ProgressBar Feedback
-> True Symmetric Binomial-Weighted Median Filter
-> ListBox Selection & Deletion Optimization
-> Regex Performance Tuning
-> UI-Thread Responsiveness
-> Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)
-> Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort/reverse and using symmetric indexing (binom[k + w]).
-> UI Flicker Prevention (Added BeginUpdate/EndUpdate around all ListBox modifications to eliminate redraw artifacts.)
+> Async & Parallel Processing<br><br>
+> Batch UI Updates<br><br>
+> Stepwise ProgressBar Feedback<br><br>
+> True Symmetric Binomial-Weighted Median Filter<br><br>
+> ListBox Selection & Deletion Optimization<br><br>
+> Regex Performance Tuning<br><br>
+> UI-Thread Responsiveness<br><br>
+> Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
+> Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort/reverse and using symmetric indexing (binom[k + w]).<br><br>
+> UI Flicker Prevention (Added BeginUpdate/EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br><br>
 
 
 
