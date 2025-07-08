@@ -35,8 +35,8 @@ This tool implements three different noise reduction algorithms for smoothing da
 > Regex Performance Tuning<br><br>
 > UI-Thread Responsiveness<br><br>
 > Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
-> Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort/reverse and using symmetric indexing (binom[k + w]).<br><br>
-> UI Flicker Prevention (Added BeginUpdate/EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br>
+> Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort / reverse and using symmetric indexing (binom[k + w]).<br><br>
+> UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br>
 </details>
 
 ## Features & Algorithms
