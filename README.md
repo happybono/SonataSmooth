@@ -60,7 +60,7 @@ for (int i = 0; i < n; i++)
 // 3. Read kernel radius w (half-width)
 int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
 
-// 4. Generate binomial coefficients of length 2*w+1
+// 4. Generate binomial coefficients of length 2 * w + 1
 int[] binom = CalcBinomialCoefficients(2 * w + 1);
 
 // 5. Set up a progress reporter for thread-safe UI updates
@@ -75,7 +75,7 @@ var progressReporter = new Progress<int>(pct =>
 All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
 #### Principle
-Leverage all CPU cores to avoid blocking the UI. PLINQ’s .AsOrdered() preserves the original order, and .WithDegreeOfParallelism matches the number of logical processors.
+Leverage all CPU cores to avoid blocking the UI. PLINQ's .AsOrdered() preserves the original order, and .WithDegreeOfParallelism matches the number of logical processors.
 
 #### Code Implementation
 ```csharp
