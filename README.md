@@ -123,6 +123,7 @@ if (rbtnRect.Checked)
 ```
 
 ### 2.2 Weighted Median Filter
+#### How it works
 Each neighbor’s value is replicated according to its binomial weight, then the combined list is sorted to pick the median.
 
 #### Principle
