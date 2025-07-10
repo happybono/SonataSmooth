@@ -56,6 +56,8 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
+            this.rbtnSG = new System.Windows.Forms.RadioButton();
+            this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -96,7 +98,7 @@
             // 
             this.rbtnAvg.AutoSize = true;
             this.rbtnAvg.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnAvg.Location = new System.Drawing.Point(327, 38);
+            this.rbtnAvg.Location = new System.Drawing.Point(183, 38);
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
             this.rbtnAvg.Size = new System.Drawing.Size(77, 23);
@@ -108,7 +110,7 @@
             // 
             this.rbtnMed.AutoSize = true;
             this.rbtnMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnMed.Location = new System.Drawing.Point(411, 38);
+            this.rbtnMed.Location = new System.Drawing.Point(267, 38);
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
             this.rbtnMed.Size = new System.Drawing.Size(72, 23);
@@ -119,7 +121,7 @@
             // btnCalibrate
             // 
             this.btnCalibrate.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCalibrate.Location = new System.Drawing.Point(13, 721);
+            this.btnCalibrate.Location = new System.Drawing.Point(13, 720);
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
             this.btnCalibrate.Size = new System.Drawing.Size(707, 40);
@@ -178,7 +180,7 @@
             this.rbtnRect.AutoSize = true;
             this.rbtnRect.Checked = true;
             this.rbtnRect.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnRect.Location = new System.Drawing.Point(221, 38);
+            this.rbtnRect.Location = new System.Drawing.Point(77, 38);
             this.rbtnRect.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnRect.Name = "rbtnRect";
             this.rbtnRect.Size = new System.Drawing.Size(100, 23);
@@ -347,6 +349,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cbxPolyOrder);
+            this.groupBox1.Controls.Add(this.rbtnSG);
             this.groupBox1.Controls.Add(this.rbtnRect);
             this.groupBox1.Controls.Add(this.cbxKernelWidth);
             this.groupBox1.Controls.Add(this.rbtnAvg);
@@ -356,7 +360,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(707, 72);
+            this.groupBox1.Size = new System.Drawing.Size(707, 71);
             this.groupBox1.TabIndex = 24;
             this.groupBox1.TabStop = false;
             // 
@@ -410,11 +414,39 @@
             this.progressBar2.Size = new System.Drawing.Size(276, 4);
             this.progressBar2.TabIndex = 17;
             // 
+            // rbtnSG
+            // 
+            this.rbtnSG.AutoSize = true;
+            this.rbtnSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtnSG.Location = new System.Drawing.Point(343, 38);
+            this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
+            this.rbtnSG.Name = "rbtnSG";
+            this.rbtnSG.Size = new System.Drawing.Size(181, 23);
+            this.rbtnSG.TabIndex = 18;
+            this.rbtnSG.Text = "Savitzky–Golay (SG) Filter";
+            this.rbtnSG.UseVisualStyleBackColor = true;
+            // 
+            // cbxPolyOrder
+            // 
+            this.cbxPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxPolyOrder.FormattingEnabled = true;
+            this.cbxPolyOrder.Items.AddRange(new object[] {
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"});
+            this.cbxPolyOrder.Location = new System.Drawing.Point(529, 36);
+            this.cbxPolyOrder.Name = "cbxPolyOrder";
+            this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
+            this.cbxPolyOrder.TabIndex = 19;
+            this.cbxPolyOrder.Text = "2";
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(734, 768);
+            this.ClientSize = new System.Drawing.Size(734, 773);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -467,6 +499,8 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.ProgressBar progressBar2;
+        private System.Windows.Forms.RadioButton rbtnSG;
+        private System.Windows.Forms.ComboBox cbxPolyOrder;
     }
 }
 

@@ -20,6 +20,9 @@ namespace NoiseReductionSample
 {
     public partial class FrmMain : Form
     {
+        private double[] _sgCoeffs;
+        private int _lastWindow = -1, _lastPoly = -1;
+
         private static readonly Regex numberRegex = new Regex(
             @"[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?",
             RegexOptions.Compiled | RegexOptions.CultureInvariant
@@ -43,6 +46,7 @@ namespace NoiseReductionSample
 
         private async void btnCalibrate_Click(object sender, EventArgs e)
         {
+            // 1) ProgressBar 초기화 (UI 스레드)
             progressBar2.Style = ProgressBarStyle.Continuous;
             progressBar2.Minimum = 0;
             progressBar2.Maximum = 100;
@@ -50,12 +54,19 @@ namespace NoiseReductionSample
 
             try
             {
+                // 2) UI 스레드에서 한 번만 값 읽기
                 int n = listBox1.Items.Count;
                 var input = new double[n];
                 for (int i = 0; i < n; i++)
                     input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
 
                 int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
+                int polyOrder = int.Parse(cbxPolyOrder.Text, CultureInfo.InvariantCulture);
+                bool useRect = rbtnRect.Checked;
+                bool useMed = rbtnMed.Checked;
+                bool useAvg = rbtnAvg.Checked;
+                bool useSG = rbtnSG.Checked;
+
                 int[] binom = CalcBinomialCoefficients(2 * w + 1);
 
                 var progressReporter = new Progress<int>(pct =>
@@ -63,17 +74,22 @@ namespace NoiseReductionSample
                     progressBar2.Value = Math.Max(0, Math.Min(100, pct));
                 });
 
+                // 3) 백그라운드에서 연산 (UI 컨트롤 접근 없음)
                 double[] results = await Task.Run(() =>
-                    ParallelEnumerable
+                {
+                    double[] sgCoeffs = null;
+                    if (useSG)
+                        sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
+
+                    return ParallelEnumerable
                         .Range(0, n)
                         .AsOrdered()
                         .WithDegreeOfParallelism(Environment.ProcessorCount)
                         .Select(i =>
                         {
-                            double value = 0;
-
-                            if (rbtnRect.Checked)
+                            if (useRect)
                             {
+                                // 직사각형 평균
                                 double sum = 0; int cnt = 0;
                                 for (int k = -w; k <= w; k++)
                                 {
@@ -84,50 +100,65 @@ namespace NoiseReductionSample
                                         cnt++;
                                     }
                                 }
-                                if (cnt > 0) value = sum / cnt;
+                                return cnt > 0 ? sum / cnt : 0;
                             }
-                            else if (rbtnMed.Checked)
+                            else if (useMed)
                             {
+                                // 이항 중앙값
                                 var weighted = new List<double>();
                                 for (int k = -w; k <= w; k++)
                                 {
                                     int idx = i + k;
                                     if (idx < 0 || idx >= n) continue;
-
                                     double v = input[idx];
                                     int wt = binom[k + w];
                                     for (int z = 0; z < wt; z++)
                                         weighted.Add(v);
                                 }
-                                if (weighted.Count > 0)
-                                {
-                                    weighted.Sort();
-                                    int m = weighted.Count / 2;
-                                    value = (weighted.Count % 2 == 0)
-                                        ? (weighted[m - 1] + weighted[m]) / 2.0
-                                        : weighted[m];
-                                }
+                                if (weighted.Count == 0) return 0;
+                                weighted.Sort();
+                                int m = weighted.Count / 2;
+                                return (weighted.Count % 2 == 0)
+                                     ? (weighted[m - 1] + weighted[m]) / 2.0
+                                     : weighted[m];
                             }
-                            else if (rbtnAvg.Checked)
+                            else if (useAvg)
                             {
+                                // 이항 평균
                                 double sum = 0; int cs = 0;
                                 for (int k = -w; k <= w; k++)
                                 {
                                     int idx = i + k;
                                     if (idx < 0 || idx >= n) continue;
-
                                     double v = input[idx];
                                     int c = binom[k + w];
                                     sum += v * c;
                                     cs += c;
                                 }
-                                if (cs > 0) value = sum / cs;
+                                return cs > 0 ? sum / cs : 0;
                             }
-                            return value;
-                        })
-                        .ToArray()
-                );
+                            else if (useSG)
+                            {
+                                // Savitzky–Golay 필터
+                                double sum = 0;
+                                for (int k = -w; k <= w; k++)
+                                {
+                                    int idx = i + k;
+                                    // 미러링 경계 처리
+                                    double v = (idx < 0) ? input[-idx]
+                                             : (idx >= n) ? input[2 * n - idx - 2]
+                                             : input[idx];
+                                    sum += sgCoeffs[k + w] * v;
+                                }
+                                return sum;
+                            }
 
+                            return 0;
+                        })
+                        .ToArray();
+                });
+
+                // 4) UI 스레드에서 결과 바인딩
                 await AddItemsInBatches(listBox2, results, progressReporter);
                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
                 btnCopy2.Enabled = btnSelClear2.Enabled = false;
@@ -138,6 +169,88 @@ namespace NoiseReductionSample
             }
         }
 
+        /// <summary>
+        /// windowSize = 2*w + 1, polyOrder ≤ windowSize-1
+        /// </summary>
+        private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
+        {
+            int m = polyOrder;
+            int half = windowSize / 2;
+            // Vandermonde 행렬 A (windowSize x (m+1))
+            double[,] A = new double[windowSize, m + 1];
+            for (int i = -half; i <= half; i++)
+            {
+                for (int j = 0; j <= m; j++)
+                    A[i + half, j] = Math.Pow(i, j);
+            }
+
+            // ATA = A^T * A ((m+1)x(m+1))
+            double[,] ATA = new double[m + 1, m + 1];
+            for (int i = 0; i <= m; i++)
+                for (int j = 0; j <= m; j++)
+                    for (int k = 0; k < windowSize; k++)
+                        ATA[i, j] += A[k, i] * A[k, j];
+
+            // ATA 역행렬(invATA)
+            double[,] invATA = InvertMatrix(ATA);
+
+            // AT = A^T ((m+1)xwindowSize)
+            double[,] AT = new double[m + 1, windowSize];
+            for (int i = 0; i <= m; i++)
+                for (int k = 0; k < windowSize; k++)
+                    AT[i, k] = A[k, i];
+
+            // 필터 계수 h[k] = sum_j invATA[0,j] * AT[j,k]
+            var h = new double[windowSize];
+            for (int k = 0; k < windowSize; k++)
+            {
+                double sum = 0;
+                for (int j = 0; j <= m; j++)
+                    sum += invATA[0, j] * AT[j, k];
+                h[k] = sum;
+            }
+            return h;
+        }
+
+        /// <summary>
+        /// 간단한 가우스 소거법 기반 정방 행렬 역행렬 계산
+        /// </summary>
+        private static double[,] InvertMatrix(double[,] a)
+        {
+            int n = a.GetLength(0);
+            var aug = new double[n, 2 * n];
+            // [A | I]
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    aug[i, j] = a[i, j];
+            for (int i = 0; i < n; i++)
+                aug[i, n + i] = 1;
+
+            // 가우스 소거
+            for (int i = 0; i < n; i++)
+            {
+                // 피벗
+                double pivot = aug[i, i];
+                for (int j = 0; j < 2 * n; j++)
+                    aug[i, j] /= pivot;
+
+                // 다른 행 제거
+                for (int r = 0; r < n; r++)
+                {
+                    if (r == i) continue;
+                    double factor = aug[r, i];
+                    for (int c = 0; c < 2 * n; c++)
+                        aug[r, c] -= factor * aug[i, c];
+                }
+            }
+
+            // 결과 I | A^{-1}
+            var inv = new double[n, n];
+            for (int i = 0; i < n; i++)
+                for (int j = 0; j < n; j++)
+                    inv[i, j] = aug[i, j + n];
+            return inv;
+        }
 
         private int[] CalcBinomialCoefficients(int length)
         {
@@ -210,7 +323,7 @@ namespace NoiseReductionSample
             progressBar1.Value = 0;
         }
 
-        private void btnClear_Click(object sender, EventArgs e)
+        private async void btnClear_Click(object sender, EventArgs e)
         {
             listBox1.Items.Clear();
             lblCnt1.Text = "Count : " + listBox1.Items.Count;
@@ -218,6 +331,21 @@ namespace NoiseReductionSample
             btnCopy.Enabled = false;
             btnSelClear.Enabled = false;
             btnDelete.Enabled = false;
+
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+            progressBar1.Value = 0;
+
+            listBox1.BeginUpdate();
+            listBox1.ClearSelected();
+            listBox1.EndUpdate();
+
+            listBox1.Focus();
+            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+
+            progressBar1.Value = 100;
+            await Task.Delay(200);
+            progressBar1.Value = 0;
         }
 
 
