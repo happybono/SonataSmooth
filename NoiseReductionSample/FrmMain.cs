@@ -786,6 +786,7 @@ namespace NoiseReductionSample
         private void frmMain_Load(object sender, EventArgs e)
         {
             cbxKernelWidth.SelectedIndex = 3;
+            cbxPolyOrder.SelectedIndex = 1;
             btnAdd.Enabled = false;
             btnCopy2.Enabled = false;
             btnSelClear2.Enabled = false;

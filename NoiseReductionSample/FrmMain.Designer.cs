@@ -428,6 +428,7 @@
             // 
             // cbxPolyOrder
             // 
+            this.cbxPolyOrder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
             this.cbxPolyOrder.FormattingEnabled = true;
             this.cbxPolyOrder.Items.AddRange(new object[] {
@@ -440,7 +441,6 @@
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 19;
-            this.cbxPolyOrder.Text = "2";
             // 
             // FrmMain
             // 
