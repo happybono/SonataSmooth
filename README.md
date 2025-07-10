@@ -179,6 +179,31 @@ else if (rbtnAvg.Checked)
 }
 ```
 
+### 2.4 Savitzky–Golay Filter
+#### How it works
+Fit a local polynomial of order polyOrder over a window of size 2*w+1 and evaluate it at the center. Precomputed SG coefficients are convolved with the data, with mirrored boundaries.
+
+#### Principle
+Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widths) better than simple averaging, by performing a least‐squares polynomial fit over the window.
+
+#### Code Implementation
+```
+else if (useSG)
+{
+    double sum = 0;
+    for (int k = -w; k <= w; k++)
+    {
+        int idx = i + k;
+        // Mirror boundary handling
+        double v = (idx < 0)    ? input[-idx]
+                 : (idx >= n) ? input[2*n - idx - 2]
+                 : input[idx];
+        sum += sgCoeffs[k + w] * v;
+    }
+    return sum;
+}
+```
+
 ### Results Aggregation & UI Update
 #### How it works
 After filtering, the results array is handed to AddItemsInBatches, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
@@ -227,6 +252,59 @@ private int[] CalcBinomialCoefficients(int length)
 }
 ```
 
+### Savitzky–Golay Coefficients Computation
+#### How it works
+Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting “smoother matrix” yields the filter coefficients.
+
+#### Principle
+Savitzky–Golay filters derive from least‐squares polynomial fitting.
+- Build matrix A where each row contains powers of the relative offset within the window.
+- Form the normal equations (AᵀA), invert them, and multiply by Aᵀ to get the pseudoinverse.
+- The convolution coefficients for smoothing (value at central point) are the first row of this pseudoinverse.
+
+#### Code Implementation
+```csharp
+private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
+{
+    int m    = polyOrder;
+    int half = windowSize / 2;
+
+    // 1) Build Vandermonde matrix A (windowSize x (m+1))
+    double[,] A = new double[windowSize, m + 1];
+    for (int i = -half; i <= half; i++)
+        for (int j = 0; j <= m; j++)
+            A[i + half, j] = Math.Pow(i, j);
+
+    // 2) Compute ATA = Aᵀ * A ((m+1)x(m+1))
+    double[,] ATA = new double[m + 1, m + 1];
+    for (int i = 0; i <= m; i++)
+        for (int j = 0; j <= m; j++)
+            for (int k = 0; k < windowSize; k++)
+                ATA[i, j] += A[k, i] * A[k, j];
+
+    // 3) Invert ATA to get invATA
+    double[,] invATA = InvertMatrix(ATA);
+
+    // 4) Compute AT = Aᵀ ((m+1)xwindowSize)
+    double[,] AT = new double[m + 1, windowSize];
+    for (int i = 0; i <= m; i++)
+        for (int k = 0; k < windowSize; k++)
+            AT[i, k] = A[k, i];
+
+    // 5) Compute filter coefficients h[k] = sum_j invATA[0,j] * AT[j,k]
+    var h = new double[windowSize];
+    for (int k = 0; k < windowSize; k++)
+    {
+        double sum = 0;
+        for (int j = 0; j <= m; j++)
+            sum += invATA[0, j] * AT[j, k];
+        h[k] = sum;
+    }
+
+    return h;
+}
+```
+
 ### Data Handling and Processing
 - Implemented drag-and-drop functionality to allow users to easily add data to the application.
 - Used regular expressions to extract and parse numerical data from various formats.
@@ -240,15 +318,17 @@ private int[] CalcBinomialCoefficients(int length)
 - Enabled users to calibrate and fine-tune the noise reduction process based on their specific needs.
 
 ## Conclusion
-By combining three complementary smoothing strategies—rectangular (uniform) mean, weighted median, and binomial (Gaussian-like) average—this project delivers significantly cleaner and more reliable data outputs. In particular:
+
+By combining four complementary smoothing strategies—rectangular (uniform) mean, weighted median, binomial (Gaussian-like) average, and Savitzky–Golay polynomial smoothing—this project delivers significantly cleaner and more reliable data outputs. In particular :
 
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
 - Weighted median filtering adds robustness against outliers by privileging central values.  
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
+- Savitzky–Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
 
-Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width gives users fine-grained control over the degree of smoothing.  
+Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
-Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals : empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.  
+Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals : empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 
 ## Demonstation
