@@ -81,7 +81,7 @@ Leverage all CPU cores to avoid blocking the UI. PLINQ’s .AsOrdered() preserve
 ```csharp
 double[] results = await Task.Run(() =>
     ParallelEnumerable
-        .Range(0, n)                                       // indices 0..n-1
+        .Range(0, n)                                       // indices 0 ... n - 1
         .AsOrdered()                                       // keep order
         .WithDegreeOfParallelism(Environment.ProcessorCount)
         .Select(i =>
