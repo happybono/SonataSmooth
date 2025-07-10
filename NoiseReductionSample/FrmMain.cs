@@ -630,7 +630,7 @@ namespace NoiseReductionSample
             listBox2.BeginUpdate();
             listBox2.ClearSelected();
 
-            int reportInterval = Math.Max(1, n2 / 100); 
+            int reportInterval = Math.Max(1, n2 / 100);
             for (int i = 0; i < n2; i++)
             {
                 listBox2.SetSelected(i, true);
@@ -782,6 +782,19 @@ namespace NoiseReductionSample
             Clipboard.SetText(string.Join(Environment.NewLine, listBox2.SelectedItems.Cast<double>().ToArray()));
         }
 
+        private void rbtnSG_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbtnSG.Checked)
+            {
+                lblPolyOrder.Enabled = true;
+                cbxPolyOrder.Enabled = true;
+            }
+            else
+            {
+                lblPolyOrder.Enabled = false;
+                cbxPolyOrder.Enabled = false;
+            }
+        }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
