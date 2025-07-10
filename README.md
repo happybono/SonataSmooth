@@ -248,7 +248,7 @@ By combining three complementary smoothing strategies—rectangular (uniform) me
 
 Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width gives users fine-grained control over the degree of smoothing.  
 
-Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals—empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.  
+Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals : empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.  
 
 
 ## Demonstation
