@@ -98,7 +98,7 @@ double[] results = await Task.Run(() =>
 
 ### 2.1 Rectangular (Uniform) Mean Filter
 #### How it works
-A simple sliding-window average over 2*w+1 points, ignoring out-of-bounds indices.
+A simple sliding-window average over 2 * w + 1 points, ignoring out-of-bounds indices.
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
@@ -182,7 +182,7 @@ else if (rbtnAvg.Checked)
 
 ### 2.4 Savitzky–Golay Filter
 #### How it works
-Fit a local polynomial of order polyOrder over a window of size 2*w+1 and evaluate it at the center. Precomputed SG coefficients are convolved with the data, with mirrored boundaries.
+Fit a local polynomial of order polyOrder over a window of size 2 * w + 1 and evaluate it at the center. Precomputed SG coefficients are convolved with the data, with mirrored boundaries.
 
 #### Principle
 Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widths) better than simple averaging, by performing a least‐squares polynomial fit over the window.
@@ -230,7 +230,7 @@ finally
 
 ### Binomial Coefficients Computation
 #### How it works
-Generates one row of Pascal’s triangle (length = 2*w+1) by iteratively applying the binomial recurrence.
+Generates one row of Pascal’s triangle (length = 2 * w + 1) by iteratively applying the binomial recurrence.
 
 #### Principle
 Leverage the relation
@@ -255,7 +255,7 @@ private int[] CalcBinomialCoefficients(int length)
 
 ### Savitzky–Golay Coefficients Computation
 #### How it works
-Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting “smoother matrix” yields the filter coefficients.
+Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
 
 #### Principle
 Savitzky–Golay filters derive from least‐squares polynomial fitting.
