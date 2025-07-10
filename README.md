@@ -72,7 +72,7 @@ var progressReporter = new Progress<int>(pct =>
 
 ### 2. Parallel Kernel Filtering
 #### How it works
-All array indices [0..n-1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
+All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ’s .AsOrdered() preserves the original order, and .WithDegreeOfParallelism matches the number of logical processors.
