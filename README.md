@@ -40,139 +40,192 @@ This tool implements three different noise reduction algorithms for smoothing da
 </details>
 
 ## Features & Algorithms
-1. **Rectangular Method**
-   - **How it works** : This method calculates the average of a window of values centered around each data point. The width of the window (kernel width) determines the number of neighboring data points included in the averaging process.
-   - **Principle** : By averaging the values within the window, the noise (random fluctuations) is smoothed out, resulting in a clearer, more stable signal.
-   - **Code Implementation** :
-     ```csharp
-     // Rectangular
-     if (rbtnRect.Checked == true)
-     {
-         for (int i = 0; i < listBox1.Items.Count; i++)
-         {
-             double sum = 0;
-             int count = 0;
+### 1. Initialization & Input Processing
+#### How it works
+When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel size from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
 
-             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
-             {
-                 int dataIndex = i + kernel_index;
-                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
-                 {
-                     count++;
-                     sum += Convert.ToDouble(listBox1.Items[dataIndex]);
-                 }
-             }
+#### Principle
+Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel “radius” **w**, and generating the binomial weight array ensure that the parallel filtering step has everything it needs.
 
-             listBox2.Items.Add(sum / count);
-             lblCnt2.Text = "Count : " + listBox2.Items.Count;
-         }
-     }
-     ```
+#### Code Implementation
+```csharp
+// 1. Count input values
+int n = listBox1.Items.Count;
 
-2. **Binomial Coefficients Method (Median)**
-   - **How it works** : This method uses the binomial coefficients to weight the data points within the window. The median of the weighted values is then calculated.
-   - **Principle** : The median is less sensitive to extreme values (outliers) than the average, making it effective for noise reduction while preserving the overall trend of the data.
-   - **Code Implementation** :
-     ```csharp
-     // Binomial coefficient (median)
-     else if (rbtnMed.Checked == true)
-     {
-        for (int i = 0; i < listBox1.Items.Count; i++)
+// 2. Copy and convert to double[]
+var input = new double[n];
+for (int i = 0; i < n; i++)
+    input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
+
+// 3. Read kernel radius w (half-width)
+int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
+
+// 4. Generate binomial coefficients of length 2*w+1
+int[] binom = CalcBinomialCoefficients(2 * w + 1);
+
+// 5. Set up a progress reporter for thread-safe UI updates
+var progressReporter = new Progress<int>(pct =>
+{
+    progressBar2.Value = Math.Max(0, Math.Min(100, pct));
+});
+```
+
+### 2. Parallel Kernel Filtering
+#### How it works
+All array indices [0..n-1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
+
+#### Principle
+Leverage all CPU cores to avoid blocking the UI. PLINQ’s .AsOrdered() preserves the original order, and .WithDegreeOfParallelism matches the number of logical processors.
+
+#### Code Implementation
+```csharp
+double[] results = await Task.Run(() =>
+    ParallelEnumerable
+        .Range(0, n)                                       // indices 0..n-1
+        .AsOrdered()                                       // keep order
+        .WithDegreeOfParallelism(Environment.ProcessorCount)
+        .Select(i =>
         {
-            List<Tuple<double, int>> weightedValues = new List<Tuple<double, int>>();
+            double value = 0;
 
-            for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
-            {
-                int dataIndex = i + kernel_index;
-                if (dataIndex >= 0 && dataIndex < listBox1.Items.Count && (NoiseReductionKernelWidth + kernel_index) >= 0 && (NoiseReductionKernelWidth + kernel_index) < binomialCoefficients.Length)
-                {
-                    double value = Convert.ToDouble(listBox1.Items[dataIndex]);
-                    int weight = binomialCoefficients[Math.Abs(kernel_index)];
+            // (Filter implementations go here...)
 
-                    for (int w = 0; w < weight; w++)
-                    {
-                        weightedValues.Add(new Tuple<double, int>(value, weight));
-                    }
-                }
-            }
+            return value;
+        })
+        .ToArray()
+);
+```
 
-            if (weightedValues.Count > 0)
-            {
-                weightedValues.Sort((x, y) => x.Item1.CompareTo(y.Item1));
-                double weightedMedian;
-                int midIndex = weightedValues.Count / 2;
-                if (weightedValues.Count % 2 == 0)
-                {
-                    weightedMedian = (weightedValues[midIndex - 1].Item1 + weightedValues[midIndex].Item1) / 2.0;
-                }
-                else
-                {
-                    weightedMedian = weightedValues[midIndex].Item1;
-                }
+### 2.1 Rectangular (Uniform) Mean Filter
+#### How it works
+A simple sliding-window average over 2*w+1 points, ignoring out-of-bounds indices.
 
-                listBox2.Items.Add(weightedMedian);
-                lblCnt2.Text = "Count : " + listBox2.Items.Count;
-            }
+#### Principle
+Every neighbor contributes equally (uniform weights).
+
+#### Code Implementation
+```csharp
+if (rbtnRect.Checked)
+{
+    double sum = 0, cnt = 0;
+    for (int k = -w; k <= w; k++)
+    {
+        int idx = i + k;
+        if (idx >= 0 && idx < n)
+        {
+            sum += input[idx];
+            cnt++;
         }
-     }
-     ```
+    }
+    if (cnt > 0)
+        value = sum / cnt;
+}
+```
 
-3. **Binomial Coefficients Method (Average)**
-   - **How it works** : This method uses binomial coefficients to weight the values within the kernel. The weighted average of these values is then calculated.
-   - **Principle** : Binomial coefficients give more weight to the central values in the window, which helps to preserve the central trend while smoothing out noise.
-   - **Code Implementation** :
-     ```csharp
-     // Binomial coefficient (average)
-     else if (rbtnAvg.Checked == true)
-     {
-         binomialCoefficients = AvgCalcBinomialCoefficients(NoiseReductionKernelWidth * 2 + 1);
-         for (int i = 0; i < listBox1.Items.Count; i++)
-         {
-             List<double> values = new List<double>();
-             int coefficientSum = 0;
+### 2.2 Weighted Median Filter
+Each neighbor’s value is replicated according to its binomial weight, then the combined list is sorted to pick the median.
 
-             for (int kernel_index = -NoiseReductionKernelWidth; kernel_index <= NoiseReductionKernelWidth; kernel_index++)
-             {
-                 int dataIndex = i + kernel_index;
-                 if (dataIndex >= 0 && dataIndex < listBox1.Items.Count)
-                 {
-                     values.Add(Convert.ToDouble(listBox1.Items[dataIndex]) * binomialCoefficients[NoiseReductionKernelWidth + kernel_index]);
-                     coefficientSum += binomialCoefficients[NoiseReductionKernelWidth + kernel_index];
-                 }
-             }
+#### Principle
+Median filtering is robust against outliers; binomial weights bias the median toward center points.
 
-             if (values.Count > 0)
-             {
-                 double sum = values.Sum();
-                 double average = sum / coefficientSum;
+#### Code Implementation
+```csharp
+else if (rbtnMed.Checked)
+{
+    var weighted = new List<double>();
+    for (int k = -w; k <= w; k++)
+    {
+        int idx = i + k;
+        if (idx < 0 || idx >= n) continue;
+        double v = input[idx];
+        int wt = binom[k + w];
+        for (int z = 0; z < wt; z++)
+            weighted.Add(v);
+    }
+    if (weighted.Count > 0)
+    {
+        weighted.Sort();
+        int m = weighted.Count / 2;
+        value = (weighted.Count % 2 == 0)
+            ? (weighted[m - 1] + weighted[m]) / 2.0
+            : weighted[m];
+    }
+}
+```
 
-                 listBox2.Items.Add(average);
-                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
-             }
-         }
-     }
-     ```
+### 2.3 Binomial (Weighted) Average Filter
+#### How it works
+Multiply each neighbor by its binomial weight, sum them up, then divide by the total weight sum.
 
-### Binomial Coefficients Calculation
-1. **Calculating Binomial Coefficients**
-   - **Principle** : Binomial coefficients are derived from Pascal's triangle and represent the coefficients in the expansion of a binomial expression.
-   - **Code Implementation** :
-     ```csharp
-     private int[] AvgCalcBinomialCoefficients(int windowSize)
-     {
-         int[] coefficients = new int[windowSize];
-         coefficients[0] = 1;
+#### Principle
+A discrete approximation of Gaussian smoothing (binomial coefficients approximate a normal distribution).
 
-         for (int i = 1; i < windowSize; i++)
-         {
-             coefficients[i] = coefficients[i - 1] * (windowSize - i) / i;
-         }
+#### Code Implementation
+```csharp
+else if (rbtnAvg.Checked)
+{
+    double sum = 0, ws = 0;
+    for (int k = -w; k <= w; k++)
+    {
+        int idx = i + k;
+        if (idx < 0 || idx >= n) continue;
+        double v = input[idx];
+        int c = binom[k + w];
+        sum += v * c;
+        ws  += c;
+    }
+    if (ws > 0)
+        value = sum / ws;
+}
+```
 
-         return coefficients;
-     }
-     ```
+### Results Aggregation & UI Update
+#### How it works
+After filtering, the results array is handed to AddItemsInBatches, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
-These algorithms help smooth out noise in data by averaging or filtering based on the chosen method.
+#### Principle
+Batch updates and progress reporting keep the UI responsive. A finally block ensures the progress bar always resets on completion or error.
+
+#### Code Implementation
+```csharp
+// Add filtered values to listBox2 in batches (with progress)
+await AddItemsInBatches(listBox2, results, progressReporter);
+
+// Update count label and disable buttons
+lblCnt2.Text = "Count : " + listBox2.Items.Count;
+btnCopy2.Enabled = btnSelClear2.Enabled = false;
+}
+finally
+{
+    // Always clear the progress bar
+    progressBar2.Value = 0;
+}
+```
+
+### Binomial Coefficients Computation
+#### How it works
+Generates one row of Pascal’s triangle (length = 2*w+1) by iteratively applying the binomial recurrence.
+
+#### Principle
+Leverage the relation
+C(n,k) = C(n,k-1) × (n - (k - 1)) / k
+to compute coefficients in O(n) time without factorials.
+
+#### Code Implementation
+```csharp
+private int[] CalcBinomialCoefficients(int length)
+{
+    if (length < 1)
+        throw new ArgumentException("length must be ≥ 1", nameof(length));
+
+    var c = new int[length];
+    c[0] = 1;                          // C(n,0) = 1
+    for (int i = 1; i < length; i++)
+        c[i] = c[i - 1] * (length - i) / i;
+
+    return c;
+}
+```
 
 ### Data Handling and Processing
 - Implemented drag-and-drop functionality to allow users to easily add data to the application.
@@ -196,4 +249,4 @@ By implementing these techniques, this project effectively reduces noise from th
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ## Copyright 
-Copyright ⓒ HappyBono 2025. All rights Reserved.
+Copyright ⓒ HappyBono 2025. All Rights Reserved.
