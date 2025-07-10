@@ -240,7 +240,16 @@ private int[] CalcBinomialCoefficients(int length)
 - Enabled users to calibrate and fine-tune the noise reduction process based on their specific needs.
 
 ## Conclusion
-By implementing these techniques, this project effectively reduces noise from the given data, providing clearer and more reliable results.
+By combining three complementary smoothing strategies—rectangular (uniform) mean, weighted median, and binomial (Gaussian-like) average—this project delivers significantly cleaner and more reliable data outputs. In particular:
+
+- Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
+- Weighted median filtering adds robustness against outliers by privileging central values.  
+- Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
+
+Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width gives users fine-grained control over the degree of smoothing.  
+
+Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals—empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.  
+
 
 ## Demonstation
 ![Final Product](SonataSmooth.png)
