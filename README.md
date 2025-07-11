@@ -60,7 +60,7 @@ for (int i = 0; i < n; i++)
 // 3. Read kernel radius w (half-width)
 int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
 
-// 4. Generate binomial coefficients of length 2 * w + 1
+// 4. Generate binomial coefficients of length 2 × w + 1
 int[] binom = CalcBinomialCoefficients(2 * w + 1);
 
 // 5. Set up a progress reporter for thread-safe UI updates
@@ -270,13 +270,13 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
     int m    = polyOrder;
     int half = windowSize / 2;
 
-    // 1) Build Vandermonde matrix A (windowSize x (m + 1))
+    // 1) Build Vandermonde matrix A (windowSize × (m + 1))
     double[,] A = new double[windowSize, m + 1];
     for (int i = -half; i <= half; i++)
         for (int j = 0; j <= m; j++)
             A[i + half, j] = Math.Pow(i, j);
 
-    // 2) Compute ATA = Aᵀ * A ((m + 1)x(m + 1))
+    // 2) Compute ATA = Aᵀ * A ((m + 1) × (m + 1))
     double[,] ATA = new double[m + 1, m + 1];
     for (int i = 0; i <= m; i++)
         for (int j = 0; j <= m; j++)
@@ -286,7 +286,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
     // 3) Invert ATA to get invATA
     double[,] invATA = InvertMatrix(ATA);
 
-    // 4) Compute AT = Aᵀ ((m + 1)xwindowSize)
+    // 4) Compute AT = Aᵀ ((m + 1) × windowSize)
     double[,] AT = new double[m + 1, windowSize];
     for (int i = 0; i <= m; i++)
         for (int k = 0; k < windowSize; k++)
