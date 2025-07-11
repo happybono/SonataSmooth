@@ -188,7 +188,7 @@ Fit a local polynomial of order polyOrder over a window of size 2 * w + 1 and ev
 Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widths) better than simple averaging, by performing a least‐squares polynomial fit over the window.
 
 #### Code Implementation
-```
+```csharp
 else if (useSG)
 {
     double sum = 0;
