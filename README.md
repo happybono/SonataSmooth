@@ -234,7 +234,7 @@ Generates one row of Pascal’s triangle (length = 2 * w + 1) by iteratively app
 
 #### Principle
 Leverage the relation
-C(n,k) = C(n,k-1) × (n - (k - 1)) / k
+C(n, k) = C(n, k - 1) × (n - (k - 1)) / k
 to compute coefficients in O(n) time without factorials.
 
 #### Code Implementation
