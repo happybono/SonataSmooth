@@ -98,7 +98,7 @@ double[] results = await Task.Run(() =>
 
 ### 2.1 Rectangular (Uniform) Mean Filter
 #### How it works
-A simple sliding-window average over 2 * w + 1 points, ignoring out-of-bounds indices.
+A simple sliding-window average over 2 × w + 1 points, ignoring out-of-bounds indices.
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
