@@ -320,8 +320,9 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 
 ## Conclusion
 
-By combining four complementary smoothing strategies—rectangular (uniform) mean, weighted median, binomial (Gaussian-like) average, and Savitzky–Golay polynomial smoothing—this project delivers significantly cleaner and more reliable data outputs. In particular :
+This project delivers significantly cleaner and more reliable data outputs by combining four complementary smoothing strategies : rectangular (uniform) mean, weighted median, binomial (Gaussian-like) average, and Savitzky-Golay polynomial smoothing. 
 
+In particular :
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
 - Weighted median filtering adds robustness against outliers by privileging central values.  
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
