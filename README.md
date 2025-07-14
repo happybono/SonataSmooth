@@ -334,7 +334,8 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 
 
 ## Demonstation
-![Final Product](SonataSmooth.png)
+![Final Product](SonataSmooth.png)</br><br>
+![Final Product SG](SonataSmoothSG.png)
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
