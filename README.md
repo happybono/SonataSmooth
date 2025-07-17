@@ -44,7 +44,7 @@ This tool implements four different noise reduction algorithms for smoothing dat
 > Fixed an issue where the application became unresponsive when calibrating large datasets (over 100,000 points) with the Noise Reduction Kernel Width set to 7 or higher using the Weighted Median method.<br><br>
 > Fixed an issue where the txtVariable textbox was not being cleared after its contents were added to the ListBox.<br>
 > Reimplemented and optimized the weighted-median calibration algorithm’s procedures, reducing processing time by more than a factor of 16.<br><br>
-> Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br>
+> Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br><br>
 > Minor bugs fixed.<br>
 </details>
 
