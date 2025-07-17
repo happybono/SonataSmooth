@@ -36,7 +36,16 @@ This tool implements four different noise reduction algorithms for smoothing dat
 > UI-Thread Responsiveness<br><br>
 > Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
 > Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort / reverse and using symmetric indexing (binom[k + w]).<br><br>
-> UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br>
+> UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br><br>
+
+### v3.0.0.0
+#### July 17, 2025
+> Overhauled the graphical user interface.
+> Fixed an issue where the application became unresponsive when calibrating large datasets (over 100,000 points) with the Noise Reduction Kernel Width set to 7 or higher using the Weighted Median method.<br><br>
+> Fixed an issue where the txtVariable textbox was not being cleared after its contents were added to the ListBox.<br>
+> Reimplemented and optimized the weighted-median calibration algorithm’s procedures, reducing processing time by more than a factor of 16.<br><br>
+> Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br>
+> Minor bugs fixed.<br>
 </details>
 
 ## Features & Algorithms
