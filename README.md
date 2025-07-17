@@ -75,7 +75,7 @@ int[] binom = CalcBinomialCoefficients(2 * w + 1);
 // 5. Set up a progress reporter for thread-safe UI updates
 var progressReporter = new Progress<int>(pct =>
 {
-    progressBar2.Value = Math.Max(0, Math.Min(100, pct));
+     progressBar1.Value = Math.Max(0, Math.Min(100, pct));
 });
 ```
 
@@ -140,26 +140,49 @@ Median filtering is robust against outliers; binomial weights bias the median to
 
 #### Code Implementation
 ```csharp
-else if (rbtnMed.Checked)
+private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
 {
-    var weighted = new List<double>();
+    var pairs = new List<(double Value, int Weight)>(2 * w + 1);
     for (int k = -w; k <= w; k++)
     {
-        int idx = i + k;
-        if (idx < 0 || idx >= n) continue;
-        double v = input[idx];
-        int wt = binom[k + w];
-        for (int z = 0; z < wt; z++)
-            weighted.Add(v);
+        int idx = center + k;
+        if (idx < 0 || idx >= data.Length) continue;
+        pairs.Add((data[idx], binom[k + w]));
     }
-    if (weighted.Count > 0)
+    if (pairs.Count == 0)
+        return 0;
+
+    // Sort by value
+    pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+
+    long totalWeight = pairs.Sum(p => p.Weight);
+    long half = totalWeight / 2;
+    bool isEvenTotal = (totalWeight % 2 == 0);
+
+    long accum = 0;
+    for (int i = 0; i < pairs.Count; i++)
     {
-        weighted.Sort();
-        int m = weighted.Count / 2;
-        value = (weighted.Count % 2 == 0)
-            ? (weighted[m - 1] + weighted[m]) / 2.0
-            : weighted[m];
+        accum += pairs[i].Weight;
+
+        // If cumulative weight exceeds half : crossed the lower portion, return current value
+        if (accum > half)
+        {
+            return pairs[i].Value;
+        }
+
+        // If cumulative weight equals exactly half : take average of current and next value
+        if (isEvenTotal && accum == half)
+        {
+            // Bounds check for safety
+            double nextVal = (i + 1 < pairs.Count)
+                             ? pairs[i + 1].Value
+                             : pairs[i].Value;
+            return (pairs[i].Value + nextVal) / 2.0;
+        }
     }
+
+    // If value still not found after full accumulation, return the maximum
+    return pairs[pairs.Count - 1].Value;
 }
 ```
 
@@ -172,9 +195,10 @@ A discrete approximation of Gaussian smoothing (binomial coefficients approximat
 
 #### Code Implementation
 ```csharp
-else if (rbtnAvg.Checked)
+else if (useAvg)
 {
-    double sum = 0, ws = 0;
+    // 이항 평균
+    double sum = 0; int cs = 0;
     for (int k = -w; k <= w; k++)
     {
         int idx = i + k;
@@ -182,10 +206,9 @@ else if (rbtnAvg.Checked)
         double v = input[idx];
         int c = binom[k + w];
         sum += v * c;
-        ws  += c;
+        cs += c;
     }
-    if (ws > 0)
-        value = sum / ws;
+    return cs > 0 ? sum / cs : 0;
 }
 ```
 
@@ -200,17 +223,17 @@ Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widt
 ```csharp
 else if (useSG)
 {
-    double sum = 0;
-    for (int k = -w; k <= w; k++)
-    {
-        int idx = i + k;
-        // Mirror boundary handling
-        double v = (idx < 0)    ? input[-idx]
-                 : (idx >= n) ? input[2*n - idx - 2]
-                 : input[idx];
-        sum += sgCoeffs[k + w] * v;
-    }
-    return sum;
+  // Savitzky-Golay 필터
+  double sum = 0;
+  for (int k = -w; k <= w; k++)
+  {
+      int idx = i + k;
+      double v = (idx < 0) ? input[-idx]
+               : (idx >= n) ? input[2 * n - idx - 2]
+               : input[idx];
+      sum += sgCoeffs[k + w] * v;
+  }
+  return sum;
 }
 ```
 
@@ -228,12 +251,20 @@ await AddItemsInBatches(listBox2, results, progressReporter);
 
 // Update count label and disable buttons
 lblCnt2.Text = "Count : " + listBox2.Items.Count;
-btnCopy2.Enabled = btnSelClear2.Enabled = false;
+slblCalibratedType.Text = useRect ? "Rectangular Average" :
+                            useMed ? "Weighted Median" :
+                            useAvg ? "Binomial Average" :
+                            useSG ? "Savitzky-Golay Filter" : "Unknown";
+slblKernelWidth.Text = w.ToString();
+
+btnCopy2.Enabled = false;
+btnSelClear2.Enabled = false;
 }
 finally
 {
     // Always clear the progress bar
-    progressBar2.Value = 0;
+    progressBar1.Value = 0;
+    btnCalibrate.Enabled = true;
 }
 ```
 
@@ -257,7 +288,6 @@ private int[] CalcBinomialCoefficients(int length)
     c[0] = 1;                          // C(n, 0) = 1
     for (int i = 1; i < length; i++)
         c[i] = c[i - 1] * (length - i) / i;
-
     return c;
 }
 ```
