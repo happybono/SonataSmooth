@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -44,128 +44,199 @@ namespace NoiseReductionSample
 
         private async void btnCalibrate_Click(object sender, EventArgs e)
         {
-            // ProgressBar 초기화 (UI 스레드)
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
-            btnCalibrate.Enabled = false;   
+            btnCalibrate.Enabled = false;
 
             try
             {
-                // UI 스레드에서 한 번만 값 읽기
-                int n = listBox1.Items.Count;
-                var input = new double[n];
-                for (int i = 0; i < n; i++)
-                    input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
+                double[] input;
+                int n;
+                try
+                {
+                    n = listBox1.Items.Count;
+                    input = new double[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        if (listBox1.Items[i] == null)
+                            throw new InvalidOperationException($"The item at index {i} is null.");
 
-                int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
-                int polyOrder = int.Parse(cbxPolyOrder.Text, CultureInfo.InvariantCulture);
+                        string s = listBox1.Items[i].ToString();
+                        if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
+                            throw new FormatException($"Failed to convert item at index {i}: \"{s}\"");
+                    }
+                }
+                catch (Exception ex) when (ex is FormatException || ex is OverflowException || ex is InvalidOperationException)
+                {
+                    MessageBox.Show($"Data input error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                int w, polyOrder;
+                try
+                {
+                    if (!int.TryParse(cbxKernelWidth.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
+                        throw new FormatException($"Failed to parse kernel width: \"{cbxKernelWidth.Text}\".");
+
+                    if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
+                        throw new FormatException($"Failed to parse polynomial order: \"{cbxPolyOrder.Text}\".");
+                }
+                catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+                {
+                    MessageBox.Show($"Parameter error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 bool useRect = rbtnRect.Checked;
                 bool useMed = rbtnMed.Checked;
                 bool useAvg = rbtnAvg.Checked;
                 bool useSG = rbtnSG.Checked;
 
-                int[] binom = CalcBinomialCoefficients(2 * w + 1);
+                int[] binom;
+                try
+                {
+                    binom = CalcBinomialCoefficients(2 * w + 1);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Binomial coefficient calculation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
+                double[] results;
                 var progressReporter = new Progress<int>(pct =>
                 {
-                    progressBar1.Value = Math.Max(0, Math.Min(100, pct));
+                    progressBar1.Value = Math.Max(progressBar1.Minimum, Math.Min(progressBar1.Maximum, pct));
                 });
 
-                // 백그라운드에서 연산 (UI 컨트롤 접근 없음)
-                double[] results = await Task.Run(() =>
+                try
                 {
-                    double[] sgCoeffs = null;
-                    if (useSG)
-                        sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
-
-                    return ParallelEnumerable
-                        .Range(0, n)
-                        .AsOrdered()
-                        .WithDegreeOfParallelism(Environment.ProcessorCount)
-                        .Select(i =>
+                    results = await Task.Run(() =>
+                    {
+                        double[] sgCoeffs = null;
+                        if (useSG)
                         {
-                            if (useRect)
+                            try
                             {
-                                // 직사각형 평균
-                                double sum = 0; int cnt = 0;
-                                for (int k = -w; k <= w; k++)
+                                sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new InvalidOperationException($"SG coefficient computation failed: {ex.Message}", ex);
+                            }
+                        }
+
+                        return ParallelEnumerable
+                            .Range(0, n)
+                            .AsOrdered()
+                            .WithDegreeOfParallelism(Environment.ProcessorCount)
+                            .Select(i =>
+                            {
+                                try
                                 {
-                                    int idx = i + k;
-                                    if (idx >= 0 && idx < n)
+                                    if (useRect)
                                     {
-                                        sum += input[idx];
-                                        cnt++;
+                                        double sum = 0;
+                                        int cnt = 0;
+                                        for (int k = -w; k <= w; k++)
+                                        {
+                                            int idx = i + k;
+                                            if (idx >= 0 && idx < n)
+                                            {
+                                                sum += input[idx];
+                                                cnt++;
+                                            }
+                                        }
+                                        return cnt > 0 ? sum / cnt : 0;
                                     }
+                                    else if (useMed)
+                                    {
+                                        return WeightedMedianAt(input, i, w, binom);
+                                    }
+                                    else if (useAvg)
+                                    {
+                                        double sum = 0;
+                                        int cs = 0;
+                                        for (int k = -w; k <= w; k++)
+                                        {
+                                            int idx = i + k;
+                                            if (idx < 0 || idx >= n) continue;
+                                            sum += input[idx] * binom[k + w];
+                                            cs += binom[k + w];
+                                        }
+                                        return cs > 0 ? sum / cs : 0;
+                                    }
+                                    else if (useSG)
+                                    {
+                                        double sum = 0;
+                                        for (int k = -w; k <= w; k++)
+                                        {
+                                            int idx = i + k;
+                                            int mirrorIdx = idx < 0
+                                                ? -idx - 1
+                                                : idx >= n
+                                                    ? 2 * n - idx - 1
+                                                    : idx;
+
+                                            if (mirrorIdx < 0 || mirrorIdx >= n)
+                                                throw new IndexOutOfRangeException($"mirrorIdx out of range: {mirrorIdx}");
+
+                                            sum += sgCoeffs[k + w] * input[mirrorIdx];
+                                        }
+                                        return sum;
+                                    }
+
+                                    return 0;
                                 }
-                                return cnt > 0 ? sum / cnt : 0;
-                            }
-                            else if (useMed)
-                            {
-                                // 가중 중간값 (중복 없이 수행)
-                                return WeightedMedianAt(input, i, w, binom);
-                            }
-                            else if (useAvg)
-                            {
-                                // 이항 평균
-                                double sum = 0; int cs = 0;
-                                for (int k = -w; k <= w; k++)
+                                catch
                                 {
-                                    int idx = i + k;
-                                    if (idx < 0 || idx >= n) continue;
-                                    double v = input[idx];
-                                    int c = binom[k + w];
-                                    sum += v * c;
-                                    cs += c;
+                                    return 0;
                                 }
-                                return cs > 0 ? sum / cs : 0;
-                            }
-                            else if (useSG)
-                            {
-                                // Savitzky-Golay 필터
-                                double sum = 0;
-                                for (int k = -w; k <= w; k++)
-                                {
-                                    int idx = i + k;
-                                    double v = (idx < 0) ? input[-idx]
-                                             : (idx >= n) ? input[2 * n - idx - 2]
-                                             : input[idx];
-                                    sum += sgCoeffs[k + w] * v;
-                                }
-                                return sum;
-                            }
-                            return 0;
-                        })
-                        .ToArray();
-                });
-
-                // UI 스레드에서 결과 바인딩
-                await AddItemsInBatches(listBox2, results, progressReporter);
-                lblCnt2.Text = "Count : " + listBox2.Items.Count;
-                slblCalibratedType.Text = useRect ? "Rectangular Average" :
-                                            useMed ? "Weighted Median" :
-                                            useAvg ? "Binomial Average" :
-                                            useSG ? "Savitzky-Golay Filter" : "Unknown";
-
-                slblKernelWidth.Text = w.ToString();
-
-                if (useAvg || useMed || useRect)
-                {
-                    toolStripStatusLabel6.Visible = false;
-                    toolStripStatusLabel5.Visible = false;
-                    slblPolynomialOrder.Visible = false;
+                            })
+                            .ToArray();
+                    });
                 }
-                else
+                catch (AggregateException aex)
                 {
-                    toolStripStatusLabel6.Visible = true;
-                    toolStripStatusLabel5.Visible = true;
-                    slblPolynomialOrder.Visible = true;
-                    slblPolynomialOrder.Text = polyOrder.ToString();
+                    MessageBox.Show(
+                        $"An error occurred during parallel computation: {aex.Flatten().InnerException?.Message}",
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error
+                    );
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An unexpected error occurred during computation: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
 
-                btnCopy2.Enabled = false;
-                btnSelClear2.Enabled = false;
+                try
+                {
+                    await AddItemsInBatches(listBox2, results, progressReporter);
+                    lblCnt2.Text = $"Count : {listBox2.Items.Count}";
+                    slblCalibratedType.Text = useRect ? "Rectangular Average"
+                                         : useMed ? "Weighted Median"
+                                         : useAvg ? "Binomial Average"
+                                         : useSG ? "Savitzky-Golay Filter"
+                                                   : "Unknown";
+
+                    slblKernelWidth.Text = w.ToString();
+
+                    bool showPoly = useSG;
+                    toolStripStatusLabel5.Visible = showPoly;
+                    toolStripStatusLabel6.Visible = showPoly;
+                    slblPolynomialOrder.Visible = showPoly;
+                    if (showPoly) slblPolynomialOrder.Text = polyOrder.ToString();
+
+                    btnCopy2.Enabled = false;
+                    btnSelClear2.Enabled = false;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error binding results: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             finally
             {
@@ -847,4 +918,3 @@ namespace NoiseReductionSample
         }
     }
 }
-
