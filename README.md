@@ -197,7 +197,7 @@ A discrete approximation of Gaussian smoothing (binomial coefficients approximat
 ```csharp
 else if (useAvg)
 {
-    // 이항 평균
+    // Binomial-weighted average
     double sum = 0; int cs = 0;
     for (int k = -w; k <= w; k++)
     {
