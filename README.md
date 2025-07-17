@@ -223,7 +223,7 @@ Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widt
 ```csharp
 else if (useSG)
 {
-  // Savitzky-Golay 필터
+  // Savitzky-Golay filter
   double sum = 0;
   for (int k = -w; k <= w; k++)
   {
