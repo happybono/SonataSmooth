@@ -36,8 +36,6 @@
             this.btnCalibrate = new System.Windows.Forms.Button();
             this.btnAdd = new System.Windows.Forms.Button();
             this.txtVariable = new System.Windows.Forms.TextBox();
-            this.lblCnt1 = new System.Windows.Forms.Label();
-            this.lblCnt2 = new System.Windows.Forms.Label();
             this.rbtnRect = new System.Windows.Forms.RadioButton();
             this.btnClear = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
@@ -51,17 +49,30 @@
             this.btnSelectAll2 = new System.Windows.Forms.Button();
             this.btnCopy2 = new System.Windows.Forms.Button();
             this.btnClear2 = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lblPolyOrder = new System.Windows.Forms.Label();
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.rbtnSG = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.lblCnt1 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.progressBar2 = new System.Windows.Forms.ProgressBar();
-            this.lblPolyOrder = new System.Windows.Forms.Label();
-            this.groupBox1.SuspendLayout();
+            this.lblCnt2 = new System.Windows.Forms.Label();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblKernelWidth = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblPolynomialOrder = new System.Windows.Forms.ToolStripStatusLabel();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // listBox1
@@ -97,32 +108,34 @@
             // 
             // rbtnAvg
             // 
-            this.rbtnAvg.AutoSize = true;
+            this.rbtnAvg.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnAvg.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnAvg.Location = new System.Drawing.Point(237, 38);
+            this.rbtnAvg.Location = new System.Drawing.Point(181, 26);
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
-            this.rbtnAvg.Size = new System.Drawing.Size(77, 23);
+            this.rbtnAvg.Size = new System.Drawing.Size(144, 30);
             this.rbtnAvg.TabIndex = 2;
             this.rbtnAvg.Text = "Average";
+            this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnAvg.UseVisualStyleBackColor = true;
             // 
             // rbtnMed
             // 
-            this.rbtnMed.AutoSize = true;
+            this.rbtnMed.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnMed.Location = new System.Drawing.Point(321, 38);
+            this.rbtnMed.Location = new System.Drawing.Point(21, 59);
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
-            this.rbtnMed.Size = new System.Drawing.Size(72, 23);
+            this.rbtnMed.Size = new System.Drawing.Size(150, 30);
             this.rbtnMed.TabIndex = 3;
             this.rbtnMed.Text = "Median";
+            this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnMed.UseVisualStyleBackColor = true;
             // 
             // btnCalibrate
             // 
             this.btnCalibrate.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCalibrate.Location = new System.Drawing.Point(13, 745);
+            this.btnCalibrate.Location = new System.Drawing.Point(13, 748);
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
             this.btnCalibrate.Size = new System.Drawing.Size(707, 40);
@@ -154,40 +167,19 @@
             this.txtVariable.TextChanged += new System.EventHandler(this.txtVariable_TextChanged);
             this.txtVariable.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtVariable_KeyDown);
             // 
-            // lblCnt1
-            // 
-            this.lblCnt1.AutoSize = true;
-            this.lblCnt1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCnt1.Location = new System.Drawing.Point(32, 556);
-            this.lblCnt1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblCnt1.Name = "lblCnt1";
-            this.lblCnt1.Size = new System.Drawing.Size(65, 19);
-            this.lblCnt1.TabIndex = 7;
-            this.lblCnt1.Text = "Count : 0";
-            // 
-            // lblCnt2
-            // 
-            this.lblCnt2.AutoSize = true;
-            this.lblCnt2.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblCnt2.Location = new System.Drawing.Point(32, 556);
-            this.lblCnt2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblCnt2.Name = "lblCnt2";
-            this.lblCnt2.Size = new System.Drawing.Size(65, 19);
-            this.lblCnt2.TabIndex = 8;
-            this.lblCnt2.Text = "Count : 0";
-            // 
             // rbtnRect
             // 
-            this.rbtnRect.AutoSize = true;
+            this.rbtnRect.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnRect.Checked = true;
             this.rbtnRect.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnRect.Location = new System.Drawing.Point(131, 38);
+            this.rbtnRect.Location = new System.Drawing.Point(21, 26);
             this.rbtnRect.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnRect.Name = "rbtnRect";
-            this.rbtnRect.Size = new System.Drawing.Size(100, 23);
+            this.rbtnRect.Size = new System.Drawing.Size(150, 30);
             this.rbtnRect.TabIndex = 9;
             this.rbtnRect.TabStop = true;
             this.rbtnRect.Text = "Rectangular";
+            this.rbtnRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnRect.UseVisualStyleBackColor = true;
             // 
             // btnClear
@@ -282,8 +274,9 @@
             "9",
             "10",
             "11",
-            "12"});
-            this.cbxKernelWidth.Location = new System.Drawing.Point(412, 11);
+            "12",
+            "13"});
+            this.cbxKernelWidth.Location = new System.Drawing.Point(232, 27);
             this.cbxKernelWidth.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelWidth.Name = "cbxKernelWidth";
             this.cbxKernelWidth.Size = new System.Drawing.Size(80, 25);
@@ -293,7 +286,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(212, 14);
+            this.label1.Location = new System.Drawing.Point(32, 30);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(198, 19);
@@ -348,27 +341,20 @@
             this.btnClear2.UseVisualStyleBackColor = true;
             this.btnClear2.Click += new System.EventHandler(this.btnClear2_Click);
             // 
-            // groupBox1
+            // lblPolyOrder
             // 
-            this.groupBox1.Controls.Add(this.lblPolyOrder);
-            this.groupBox1.Controls.Add(this.cbxPolyOrder);
-            this.groupBox1.Controls.Add(this.rbtnSG);
-            this.groupBox1.Controls.Add(this.rbtnRect);
-            this.groupBox1.Controls.Add(this.cbxKernelWidth);
-            this.groupBox1.Controls.Add(this.rbtnAvg);
-            this.groupBox1.Controls.Add(this.rbtnMed);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(13, 643);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(707, 98);
-            this.groupBox1.TabIndex = 24;
-            this.groupBox1.TabStop = false;
+            this.lblPolyOrder.AutoSize = true;
+            this.lblPolyOrder.Enabled = false;
+            this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblPolyOrder.Location = new System.Drawing.Point(72, 62);
+            this.lblPolyOrder.Name = "lblPolyOrder";
+            this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
+            this.lblPolyOrder.TabIndex = 20;
+            this.lblPolyOrder.Text = "Polynomial Order :";
             // 
             // cbxPolyOrder
             // 
-            this.cbxPolyOrder.DropDownHeight = 53;
+            this.cbxPolyOrder.DropDownHeight = 150;
             this.cbxPolyOrder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxPolyOrder.Enabled = false;
             this.cbxPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
@@ -381,27 +367,27 @@
             "5",
             "6",
             "7"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(374, 65);
+            this.cbxPolyOrder.Location = new System.Drawing.Point(193, 59);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 19;
             // 
             // rbtnSG
             // 
-            this.rbtnSG.AutoSize = true;
+            this.rbtnSG.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnSG.Location = new System.Drawing.Point(397, 38);
+            this.rbtnSG.Location = new System.Drawing.Point(181, 59);
             this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnSG.Name = "rbtnSG";
-            this.rbtnSG.Size = new System.Drawing.Size(179, 23);
+            this.rbtnSG.Size = new System.Drawing.Size(144, 30);
             this.rbtnSG.TabIndex = 18;
-            this.rbtnSG.Text = "Savitzky-Golay (SG) Filter";
+            this.rbtnSG.Text = "Savitzky-Golay Filter";
+            this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnSG.UseVisualStyleBackColor = true;
             this.rbtnSG.CheckedChanged += new System.EventHandler(this.rbtnSG_CheckedChanged);
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.progressBar1);
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.lblCnt1);
             this.groupBox2.Controls.Add(this.btnClear);
@@ -418,16 +404,26 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Original Data";
             // 
+            // lblCnt1
+            // 
+            this.lblCnt1.AutoSize = true;
+            this.lblCnt1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.lblCnt1.Location = new System.Drawing.Point(32, 556);
+            this.lblCnt1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblCnt1.Name = "lblCnt1";
+            this.lblCnt1.Size = new System.Drawing.Size(65, 19);
+            this.lblCnt1.TabIndex = 7;
+            this.lblCnt1.Text = "Count : 0";
+            // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(36, 437);
+            this.progressBar1.Location = new System.Drawing.Point(0, 799);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(276, 4);
+            this.progressBar1.Size = new System.Drawing.Size(734, 5);
             this.progressBar1.TabIndex = 16;
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.progressBar2);
             this.groupBox3.Controls.Add(this.listBox2);
             this.groupBox3.Controls.Add(this.lblCnt2);
             this.groupBox3.Controls.Add(this.btnClear2);
@@ -442,47 +438,163 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Calibrated Data";
             // 
-            // progressBar2
+            // lblCnt2
             // 
-            this.progressBar2.Location = new System.Drawing.Point(36, 437);
-            this.progressBar2.Name = "progressBar2";
-            this.progressBar2.Size = new System.Drawing.Size(276, 4);
-            this.progressBar2.TabIndex = 17;
+            this.lblCnt2.AutoSize = true;
+            this.lblCnt2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.lblCnt2.Location = new System.Drawing.Point(32, 556);
+            this.lblCnt2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblCnt2.Name = "lblCnt2";
+            this.lblCnt2.Size = new System.Drawing.Size(65, 19);
+            this.lblCnt2.TabIndex = 8;
+            this.lblCnt2.Text = "Count : 0";
             // 
-            // lblPolyOrder
+            // statusStrip1
             // 
-            this.lblPolyOrder.AutoSize = true;
-            this.lblPolyOrder.Enabled = false;
-            this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(253, 68);
-            this.lblPolyOrder.Name = "lblPolyOrder";
-            this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
-            this.lblPolyOrder.TabIndex = 20;
-            this.lblPolyOrder.Text = "Polynomial Order :";
+            this.statusStrip1.AutoSize = false;
+            this.statusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(145)))), ((int)(((byte)(26)))), ((int)(((byte)(29)))));
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1,
+            this.slblCalibratedType,
+            this.toolStripStatusLabel2,
+            this.toolStripStatusLabel3,
+            this.slblKernelWidth,
+            this.toolStripStatusLabel6,
+            this.toolStripStatusLabel5,
+            this.slblPolynomialOrder});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 804);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(734, 22);
+            this.statusStrip1.SizingGrip = false;
+            this.statusStrip1.TabIndex = 27;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripStatusLabel1.ForeColor = System.Drawing.Color.White;
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(114, 17);
+            this.toolStripStatusLabel1.Text = "Applied Calibration :";
+            // 
+            // slblCalibratedType
+            // 
+            this.slblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblCalibratedType.ForeColor = System.Drawing.Color.White;
+            this.slblCalibratedType.Name = "slblCalibratedType";
+            this.slblCalibratedType.Size = new System.Drawing.Size(17, 17);
+            this.slblCalibratedType.Text = "--";
+            // 
+            // toolStripStatusLabel2
+            // 
+            this.toolStripStatusLabel2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripStatusLabel2.ForeColor = System.Drawing.Color.White;
+            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabel2.Text = "｜";
+            // 
+            // toolStripStatusLabel3
+            // 
+            this.toolStripStatusLabel3.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripStatusLabel3.ForeColor = System.Drawing.Color.White;
+            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(173, 17);
+            this.toolStripStatusLabel3.Text = "Noise Reduction Kernel Width : ";
+            // 
+            // slblKernelWidth
+            // 
+            this.slblKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblKernelWidth.ForeColor = System.Drawing.Color.White;
+            this.slblKernelWidth.Name = "slblKernelWidth";
+            this.slblKernelWidth.Size = new System.Drawing.Size(17, 17);
+            this.slblKernelWidth.Text = "--";
+            // 
+            // toolStripStatusLabel6
+            // 
+            this.toolStripStatusLabel6.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripStatusLabel6.ForeColor = System.Drawing.Color.White;
+            this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
+            this.toolStripStatusLabel6.Size = new System.Drawing.Size(19, 17);
+            this.toolStripStatusLabel6.Text = "｜";
+            this.toolStripStatusLabel6.Visible = false;
+            // 
+            // toolStripStatusLabel5
+            // 
+            this.toolStripStatusLabel5.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripStatusLabel5.ForeColor = System.Drawing.Color.White;
+            this.toolStripStatusLabel5.Name = "toolStripStatusLabel5";
+            this.toolStripStatusLabel5.Size = new System.Drawing.Size(107, 17);
+            this.toolStripStatusLabel5.Text = "Polynomial Order : ";
+            this.toolStripStatusLabel5.Visible = false;
+            // 
+            // slblPolynomialOrder
+            // 
+            this.slblPolynomialOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblPolynomialOrder.ForeColor = System.Drawing.Color.White;
+            this.slblPolynomialOrder.Name = "slblPolynomialOrder";
+            this.slblPolynomialOrder.Size = new System.Drawing.Size(17, 17);
+            this.slblPolynomialOrder.Text = "--";
+            this.slblPolynomialOrder.Visible = false;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.rbtnSG);
+            this.groupBox4.Controls.Add(this.rbtnRect);
+            this.groupBox4.Controls.Add(this.rbtnAvg);
+            this.groupBox4.Controls.Add(this.rbtnMed);
+            this.groupBox4.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.groupBox4.Location = new System.Drawing.Point(13, 644);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(346, 96);
+            this.groupBox4.TabIndex = 21;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Calibration Method";
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.lblPolyOrder);
+            this.groupBox5.Controls.Add(this.cbxPolyOrder);
+            this.groupBox5.Controls.Add(this.cbxKernelWidth);
+            this.groupBox5.Controls.Add(this.label1);
+            this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox5.Location = new System.Drawing.Point(376, 644);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(344, 96);
+            this.groupBox5.TabIndex = 22;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Signal Smoothing Parameters";
             // 
             // FrmMain
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(734, 797);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.BackColor = System.Drawing.Color.White;
+            this.ClientSize = new System.Drawing.Size(734, 826);
+            this.Controls.Add(this.groupBox5);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.txtVariable);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.btnCalibrate);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "FrmMain";
             this.Text = "Sonata Smooth";
             this.Load += new System.EventHandler(this.frmMain_Load);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -497,8 +609,6 @@
         private System.Windows.Forms.Button btnCalibrate;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.TextBox txtVariable;
-        private System.Windows.Forms.Label lblCnt1;
-        private System.Windows.Forms.Label lblCnt2;
         private System.Windows.Forms.RadioButton rbtnRect;
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.Button btnDelete;
@@ -512,14 +622,25 @@
         private System.Windows.Forms.Button btnSelectAll2;
         private System.Windows.Forms.Button btnCopy2;
         private System.Windows.Forms.Button btnClear2;
-        private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.ProgressBar progressBar2;
         private System.Windows.Forms.RadioButton rbtnSG;
         private System.Windows.Forms.ComboBox cbxPolyOrder;
         private System.Windows.Forms.Label lblPolyOrder;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
+        private System.Windows.Forms.Label lblCnt1;
+        private System.Windows.Forms.Label lblCnt2;
+        private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
+        private System.Windows.Forms.ToolStripStatusLabel slblKernelWidth;
+        private System.Windows.Forms.ToolStripStatusLabel slblPolynomialOrder;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.GroupBox groupBox5;
     }
 }
 
