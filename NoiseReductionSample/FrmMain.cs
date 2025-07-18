@@ -397,6 +397,7 @@ namespace NoiseReductionSample
             if (double.TryParse(txtVariable.Text, out double value))
             {
                 listBox1.Items.Add(value);
+                lblCnt1.Text = "Count : " + listBox1.Items.Count;
             }
             else 
             {
