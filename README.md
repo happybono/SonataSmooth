@@ -49,7 +49,7 @@ This tool implements four different noise reduction algorithms for smoothing dat
 
 ### v3.0.0.1
 #### July 18, 2025
-> Fixed a bug in AddItemsInBatches where existing ListBox items were being cleared. (New items are now appended without removing the originals and the scroll position updates correctly.)<br>
+> [Fixed a bug in AddItemsInBatches where existing ListBox items were being cleared. (New items are now appended without removing the originals and the scroll position updates correctly.)](https://github.com/happybono/SonataSmooth/commit/670762bf268f750dac77bf901c05366fdd78f814)<br>
 </details>
 
 ## Features & Algorithms
