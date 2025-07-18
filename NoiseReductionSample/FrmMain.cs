@@ -48,7 +48,6 @@ namespace NoiseReductionSample
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
-            btnCalibrate.Enabled = false;
 
             if (listBox1.Items.Count == 0)
             {
