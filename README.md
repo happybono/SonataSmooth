@@ -372,7 +372,7 @@ Beyond the choice of filter, the implementation harnesses parallel processing (P
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals : empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 
-## Demonstation
+## Demonstration
 ![Final Product](SonataSmooth.png)</br><br>
 ![Final Product SG](SonataSmoothSG.png)
 
