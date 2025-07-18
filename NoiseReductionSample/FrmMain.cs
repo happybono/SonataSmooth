@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -50,9 +50,7 @@ namespace NoiseReductionSample
             progressBar1.Value = 0;
 
             if (listBox1.Items.Count == 0)
-            {
                 return;
-            }
 
             try
             {
@@ -64,10 +62,10 @@ namespace NoiseReductionSample
                     input = new double[n];
                     for (int i = 0; i < n; i++)
                     {
-                        if (listBox1.Items[i] == null)
+                        var item = listBox1.Items[i];
+                        if (item == null)
                             throw new InvalidOperationException($"The item at index {i} is null.");
-
-                        string s = listBox1.Items[i].ToString();
+                        string s = item.ToString();
                         if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
                             throw new FormatException($"Failed to convert item at index {i} : \"{s}\"");
                     }
@@ -79,13 +77,15 @@ namespace NoiseReductionSample
                 }
 
                 int w, polyOrder;
+                double sigma;
                 try
                 {
                     if (!int.TryParse(cbxKernelWidth.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
                         throw new FormatException($"Failed to parse kernel width : \"{cbxKernelWidth.Text}\".");
-
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
                         throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
+                    // sigma를 콤보박스나 텍스트박스에서 받아도 되지만, 여기서는 width에 기반해 기본값 계산
+                    sigma = (2.0 * w + 1) / 6.0;
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException)
                 {
@@ -97,6 +97,7 @@ namespace NoiseReductionSample
                 bool useMed = rbtnMed.Checked;
                 bool useAvg = rbtnAvg.Checked;
                 bool useSG = rbtnSG.Checked;
+                bool useGauss = rbtnGauss.Checked;
 
                 int[] binom;
                 try
@@ -109,12 +110,26 @@ namespace NoiseReductionSample
                     return;
                 }
 
-                double[] results;
+                double[] gaussCoeffs = null;
+                if (useGauss)
+                {
+                    try
+                    {
+                        gaussCoeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Gaussian coefficient computation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+
                 var progressReporter = new Progress<int>(pct =>
                 {
                     progressBar1.Value = Math.Max(progressBar1.Minimum, Math.Min(progressBar1.Maximum, pct));
                 });
 
+                double[] results;
                 try
                 {
                     results = await Task.Run(() =>
@@ -140,6 +155,13 @@ namespace NoiseReductionSample
                             {
                                 try
                                 {
+                                    int Mirror(int idx)
+                                    {
+                                        if (idx < 0) return -idx - 1;
+                                        if (idx >= n) return 2 * n - idx - 1;
+                                        return idx;
+                                    }
+
                                     if (useRect)
                                     {
                                         double sum = 0;
@@ -177,26 +199,27 @@ namespace NoiseReductionSample
                                         double sum = 0;
                                         for (int k = -w; k <= w; k++)
                                         {
-                                            int idx = i + k;
-                                            int mirrorIdx = idx < 0
-                                                ? -idx - 1
-                                                : idx >= n
-                                                    ? 2 * n - idx - 1
-                                                    : idx;
-
-                                            if (mirrorIdx < 0 || mirrorIdx >= n)
-                                                throw new IndexOutOfRangeException($"mirrorIdx out of range: {mirrorIdx}");
-
-                                            sum += sgCoeffs[k + w] * input[mirrorIdx];
+                                            int mi = Mirror(i + k);
+                                            sum += sgCoeffs[k + w] * input[mi];
+                                        }
+                                        return sum;
+                                    }
+                                    else if (useGauss)
+                                    {
+                                        double sum = 0;
+                                        for (int k = -w; k <= w; k++)
+                                        {
+                                            int mi = Mirror(i + k);
+                                            sum += gaussCoeffs[k + w] * input[mi];
                                         }
                                         return sum;
                                     }
 
-                                    return 0;
+                                    return 0.0;
                                 }
                                 catch
                                 {
-                                    return 0;
+                                    return 0.0;
                                 }
                             })
                             .ToArray();
@@ -218,19 +241,25 @@ namespace NoiseReductionSample
 
                 try
                 {
+                    listBox2.BeginUpdate();
+                    listBox2.Items.Clear();
+
                     await AddItemsInBatches(listBox2, results, progressReporter);
+                    listBox2.EndUpdate();
                     lblCnt2.Text = $"Count : {listBox2.Items.Count}";
+
                     slblCalibratedType.Text = useRect ? "Rectangular Average"
                                          : useMed ? "Weighted Median"
                                          : useAvg ? "Binomial Average"
                                          : useSG ? "Savitzky-Golay Filter"
-                                                   : "Unknown";
+                                         : useGauss ? "Gaussian Filter"
+                                                    : "Unknown";
 
                     slblKernelWidth.Text = w.ToString();
 
                     bool showPoly = useSG;
-                    toolStripStatusLabel5.Visible = showPoly;
-                    toolStripStatusLabel6.Visible = showPoly;
+                    toolStripStatusLabel5.Visible =
+                    toolStripStatusLabel6.Visible =
                     slblPolynomialOrder.Visible = showPoly;
                     if (showPoly) slblPolynomialOrder.Text = polyOrder.ToString();
 
@@ -248,6 +277,36 @@ namespace NoiseReductionSample
                 btnCalibrate.Enabled = true;
             }
         }
+
+
+        private static double[] ComputeGaussianCoefficients(int length, double sigma)
+        {
+            if (length < 1)
+                throw new ArgumentException("length must be ≥ 1", nameof(length));
+            if (sigma <= 0)
+                throw new ArgumentException("sigma must be > 0", nameof(sigma));
+
+            var coeffs = new double[length];
+            int w = (length - 1) / 2;
+            double twoSigmaSq = 2 * sigma * sigma;
+            double sum = 0.0;
+
+            for (int i = 0; i < length; i++)
+            {
+                int x = i - w;
+                coeffs[i] = Math.Exp(-(x * x) / twoSigmaSq);
+                sum += coeffs[i];
+            }
+            if (sum <= 0)
+                throw new InvalidOperationException("Gaussian kernel sum is zero or negative.");
+
+            // 정규화
+            for (int i = 0; i < length; i++)
+                coeffs[i] /= sum;
+
+            return coeffs;
+        }
+
 
         private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
         {
@@ -534,14 +593,14 @@ namespace NoiseReductionSample
 
             try
             {
-                // 1) 드래그된 원본 텍스트 추출
+                // 드래그된 원본 텍스트 추출
                 string raw = getDropText(e);
                 progressBar1.Value = 10;
 
                 if (string.IsNullOrWhiteSpace(raw))
                     return;
 
-                // 2) HTML 태그 제거가 필요하면 백그라운드에서 처리
+                // HTML 태그 제거가 필요하면 백그라운드에서 처리
                 if (raw.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     raw = await Task.Run(() =>
@@ -553,7 +612,7 @@ namespace NoiseReductionSample
                         return;
                 }
 
-                // 3) 숫자 파싱: 백그라운드 PLINQ
+                // 숫자 파싱: 백그라운드 PLINQ
                 double[] parsed = await Task.Run(() =>
                 {
                     var ci = CultureInfo.InvariantCulture;
@@ -578,7 +637,7 @@ namespace NoiseReductionSample
                 if (parsed.Length == 0)
                     return;
 
-                // 4) UI에 배치 추가 + 진행률 리포터
+                // UI에 배치 추가 + 진행률 리포터
                 var progressReporter = new Progress<int>(pct =>
                 {
                     pct = Math.Max(0, Math.Min(100, pct));
@@ -588,7 +647,7 @@ namespace NoiseReductionSample
 
                 await AddItemsInBatches(listBox1, parsed, progressReporter);
 
-                // 5) 완료 표시
+                // 완료 표시
                 progressBar1.Value = 100;
                 lblCnt1.Text = "Count : " + listBox1.Items.Count;
                 await Task.Delay(200);  // 100% 상태를 잠깐 보여주기
@@ -859,7 +918,6 @@ namespace NoiseReductionSample
         private void listBox2_KeyDown(object sender, KeyEventArgs e)
         {
             {
-
                 if (e.KeyData == (Keys.Control | Keys.Delete))
                 {
                     btnClear2.PerformClick();
@@ -883,6 +941,7 @@ namespace NoiseReductionSample
                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
             }
         }
+
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
@@ -921,3 +980,4 @@ namespace NoiseReductionSample
         }
     }
 }
+

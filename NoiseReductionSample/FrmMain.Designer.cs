@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
@@ -67,7 +68,9 @@
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblPolynomialOrder = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.rbtnGauss = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -81,11 +84,11 @@
             this.listBox1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBox1.FormattingEnabled = true;
             this.listBox1.ItemHeight = 17;
-            this.listBox1.Location = new System.Drawing.Point(36, 25);
+            this.listBox1.Location = new System.Drawing.Point(8, 31);
             this.listBox1.Margin = new System.Windows.Forms.Padding(2);
             this.listBox1.Name = "listBox1";
             this.listBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBox1.Size = new System.Drawing.Size(276, 412);
+            this.listBox1.Size = new System.Drawing.Size(294, 514);
             this.listBox1.TabIndex = 0;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             this.listBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listBox1_DragDrop);
@@ -97,11 +100,11 @@
             this.listBox2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBox2.FormattingEnabled = true;
             this.listBox2.ItemHeight = 17;
-            this.listBox2.Location = new System.Drawing.Point(36, 25);
+            this.listBox2.Location = new System.Drawing.Point(8, 31);
             this.listBox2.Margin = new System.Windows.Forms.Padding(2);
             this.listBox2.Name = "listBox2";
             this.listBox2.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBox2.Size = new System.Drawing.Size(276, 412);
+            this.listBox2.Size = new System.Drawing.Size(294, 514);
             this.listBox2.TabIndex = 1;
             this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             this.listBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox2_KeyDown);
@@ -113,7 +116,7 @@
             this.rbtnAvg.Location = new System.Drawing.Point(181, 26);
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
-            this.rbtnAvg.Size = new System.Drawing.Size(144, 30);
+            this.rbtnAvg.Size = new System.Drawing.Size(150, 30);
             this.rbtnAvg.TabIndex = 2;
             this.rbtnAvg.Text = "Average";
             this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -135,10 +138,10 @@
             // btnCalibrate
             // 
             this.btnCalibrate.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCalibrate.Location = new System.Drawing.Point(13, 748);
+            this.btnCalibrate.Location = new System.Drawing.Point(15, 786);
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
-            this.btnCalibrate.Size = new System.Drawing.Size(707, 40);
+            this.btnCalibrate.Size = new System.Drawing.Size(705, 40);
             this.btnCalibrate.TabIndex = 4;
             this.btnCalibrate.Text = "Calibrate";
             this.btnCalibrate.UseVisualStyleBackColor = true;
@@ -146,13 +149,13 @@
             // 
             // btnAdd
             // 
-            this.btnAdd.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAdd.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAdd.Location = new System.Drawing.Point(292, 12);
             this.btnAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(67, 28);
+            this.btnAdd.Size = new System.Drawing.Size(67, 30);
             this.btnAdd.TabIndex = 5;
-            this.btnAdd.Text = "Add";
+            this.btnAdd.Text = "";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
@@ -184,73 +187,79 @@
             // 
             // btnClear
             // 
-            this.btnClear.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClear.Location = new System.Drawing.Point(36, 449);
+            this.btnClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClear.Location = new System.Drawing.Point(306, 31);
             this.btnClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(133, 30);
+            this.btnClear.Size = new System.Drawing.Size(30, 30);
             this.btnClear.TabIndex = 10;
-            this.btnClear.Text = "Clear";
+            this.btnClear.Text = "";
+            this.toolTip1.SetToolTip(this.btnClear, "Clear");
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // btnDelete
             // 
-            this.btnDelete.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDelete.Location = new System.Drawing.Point(179, 449);
+            this.btnDelete.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnDelete.Location = new System.Drawing.Point(306, 133);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(133, 30);
+            this.btnDelete.Size = new System.Drawing.Size(30, 30);
             this.btnDelete.TabIndex = 11;
-            this.btnDelete.Text = "Delete";
+            this.btnDelete.Text = "";
+            this.toolTip1.SetToolTip(this.btnDelete, "Delete");
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // btnCopy
             // 
-            this.btnCopy.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopy.Location = new System.Drawing.Point(36, 482);
+            this.btnCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCopy.Location = new System.Drawing.Point(306, 65);
             this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
             this.btnCopy.Name = "btnCopy";
-            this.btnCopy.Size = new System.Drawing.Size(133, 30);
+            this.btnCopy.Size = new System.Drawing.Size(30, 30);
             this.btnCopy.TabIndex = 12;
-            this.btnCopy.Text = "Copy";
+            this.btnCopy.Text = "";
+            this.toolTip1.SetToolTip(this.btnCopy, "Copy");
             this.btnCopy.UseVisualStyleBackColor = true;
             this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
             // 
             // btnPaste
             // 
-            this.btnPaste.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPaste.Location = new System.Drawing.Point(179, 482);
+            this.btnPaste.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPaste.Location = new System.Drawing.Point(306, 99);
             this.btnPaste.Margin = new System.Windows.Forms.Padding(2);
             this.btnPaste.Name = "btnPaste";
-            this.btnPaste.Size = new System.Drawing.Size(133, 30);
+            this.btnPaste.Size = new System.Drawing.Size(30, 30);
             this.btnPaste.TabIndex = 13;
-            this.btnPaste.Text = "Paste";
+            this.btnPaste.Text = "";
+            this.toolTip1.SetToolTip(this.btnPaste, "Paste");
             this.btnPaste.UseVisualStyleBackColor = true;
             this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
             // 
             // btnSelectAll
             // 
-            this.btnSelectAll.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectAll.Location = new System.Drawing.Point(36, 515);
+            this.btnSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelectAll.Location = new System.Drawing.Point(306, 167);
             this.btnSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelectAll.Name = "btnSelectAll";
-            this.btnSelectAll.Size = new System.Drawing.Size(133, 30);
+            this.btnSelectAll.Size = new System.Drawing.Size(30, 30);
             this.btnSelectAll.TabIndex = 14;
-            this.btnSelectAll.Text = "Select All";
+            this.btnSelectAll.Text = "";
+            this.toolTip1.SetToolTip(this.btnSelectAll, "Select All");
             this.btnSelectAll.UseVisualStyleBackColor = true;
             this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click);
             // 
             // btnSelClear
             // 
-            this.btnSelClear.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelClear.Location = new System.Drawing.Point(179, 515);
+            this.btnSelClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelClear.Location = new System.Drawing.Point(306, 201);
             this.btnSelClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelClear.Name = "btnSelClear";
-            this.btnSelClear.Size = new System.Drawing.Size(133, 30);
+            this.btnSelClear.Size = new System.Drawing.Size(30, 30);
             this.btnSelClear.TabIndex = 15;
-            this.btnSelClear.Text = "Selection Clear";
+            this.btnSelClear.Text = "";
+            this.toolTip1.SetToolTip(this.btnSelClear, "Deselect All");
             this.btnSelClear.UseVisualStyleBackColor = true;
             this.btnSelClear.Click += new System.EventHandler(this.btnSelClear_Click);
             // 
@@ -276,7 +285,7 @@
             "11",
             "12",
             "13"});
-            this.cbxKernelWidth.Location = new System.Drawing.Point(232, 27);
+            this.cbxKernelWidth.Location = new System.Drawing.Point(232, 42);
             this.cbxKernelWidth.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelWidth.Name = "cbxKernelWidth";
             this.cbxKernelWidth.Size = new System.Drawing.Size(80, 25);
@@ -286,7 +295,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(32, 30);
+            this.label1.Location = new System.Drawing.Point(32, 45);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(198, 19);
@@ -295,49 +304,53 @@
             // 
             // btnSelClear2
             // 
-            this.btnSelClear2.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelClear2.Location = new System.Drawing.Point(179, 513);
+            this.btnSelClear2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelClear2.Location = new System.Drawing.Point(306, 133);
             this.btnSelClear2.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelClear2.Name = "btnSelClear2";
-            this.btnSelClear2.Size = new System.Drawing.Size(133, 30);
+            this.btnSelClear2.Size = new System.Drawing.Size(30, 30);
             this.btnSelClear2.TabIndex = 23;
-            this.btnSelClear2.Text = "Selection Clear";
+            this.btnSelClear2.Text = "";
+            this.toolTip1.SetToolTip(this.btnSelClear2, "Deselect All");
             this.btnSelClear2.UseVisualStyleBackColor = true;
             this.btnSelClear2.Click += new System.EventHandler(this.btnSelectClear2_Click);
             // 
             // btnSelectAll2
             // 
-            this.btnSelectAll2.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectAll2.Location = new System.Drawing.Point(36, 513);
+            this.btnSelectAll2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelectAll2.Location = new System.Drawing.Point(306, 99);
             this.btnSelectAll2.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelectAll2.Name = "btnSelectAll2";
-            this.btnSelectAll2.Size = new System.Drawing.Size(133, 30);
+            this.btnSelectAll2.Size = new System.Drawing.Size(30, 30);
             this.btnSelectAll2.TabIndex = 22;
-            this.btnSelectAll2.Text = "Select All";
+            this.btnSelectAll2.Text = "";
+            this.toolTip1.SetToolTip(this.btnSelectAll2, "Select All");
             this.btnSelectAll2.UseVisualStyleBackColor = true;
             this.btnSelectAll2.Click += new System.EventHandler(this.btnSelectAll2_Click);
             // 
             // btnCopy2
             // 
-            this.btnCopy2.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopy2.Location = new System.Drawing.Point(36, 480);
+            this.btnCopy2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCopy2.Location = new System.Drawing.Point(306, 65);
             this.btnCopy2.Margin = new System.Windows.Forms.Padding(2);
             this.btnCopy2.Name = "btnCopy2";
-            this.btnCopy2.Size = new System.Drawing.Size(276, 30);
+            this.btnCopy2.Size = new System.Drawing.Size(30, 30);
             this.btnCopy2.TabIndex = 20;
-            this.btnCopy2.Text = "Copy";
+            this.btnCopy2.Text = "";
+            this.toolTip1.SetToolTip(this.btnCopy2, "Copy");
             this.btnCopy2.UseVisualStyleBackColor = true;
             this.btnCopy2.Click += new System.EventHandler(this.btnCopy2_Click);
             // 
             // btnClear2
             // 
-            this.btnClear2.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClear2.Location = new System.Drawing.Point(36, 447);
+            this.btnClear2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClear2.Location = new System.Drawing.Point(306, 31);
             this.btnClear2.Margin = new System.Windows.Forms.Padding(2);
             this.btnClear2.Name = "btnClear2";
-            this.btnClear2.Size = new System.Drawing.Size(276, 30);
+            this.btnClear2.Size = new System.Drawing.Size(30, 30);
             this.btnClear2.TabIndex = 18;
-            this.btnClear2.Text = "Clear";
+            this.btnClear2.Text = "";
+            this.toolTip1.SetToolTip(this.btnClear2, "Clear");
             this.btnClear2.UseVisualStyleBackColor = true;
             this.btnClear2.Click += new System.EventHandler(this.btnClear2_Click);
             // 
@@ -346,7 +359,7 @@
             this.lblPolyOrder.AutoSize = true;
             this.lblPolyOrder.Enabled = false;
             this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(72, 62);
+            this.lblPolyOrder.Location = new System.Drawing.Point(72, 83);
             this.lblPolyOrder.Name = "lblPolyOrder";
             this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
             this.lblPolyOrder.TabIndex = 20;
@@ -367,7 +380,7 @@
             "5",
             "6",
             "7"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(193, 59);
+            this.cbxPolyOrder.Location = new System.Drawing.Point(193, 80);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 19;
@@ -376,10 +389,10 @@
             // 
             this.rbtnSG.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnSG.Location = new System.Drawing.Point(181, 59);
+            this.rbtnSG.Location = new System.Drawing.Point(21, 93);
             this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnSG.Name = "rbtnSG";
-            this.rbtnSG.Size = new System.Drawing.Size(144, 30);
+            this.rbtnSG.Size = new System.Drawing.Size(150, 30);
             this.rbtnSG.TabIndex = 18;
             this.rbtnSG.Text = "Savitzky-Golay Filter";
             this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -408,7 +421,7 @@
             // 
             this.lblCnt1.AutoSize = true;
             this.lblCnt1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblCnt1.Location = new System.Drawing.Point(32, 556);
+            this.lblCnt1.Location = new System.Drawing.Point(7, 555);
             this.lblCnt1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblCnt1.Name = "lblCnt1";
             this.lblCnt1.Size = new System.Drawing.Size(65, 19);
@@ -417,7 +430,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(0, 799);
+            this.progressBar1.Location = new System.Drawing.Point(0, 833);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(734, 5);
             this.progressBar1.TabIndex = 16;
@@ -442,7 +455,7 @@
             // 
             this.lblCnt2.AutoSize = true;
             this.lblCnt2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblCnt2.Location = new System.Drawing.Point(32, 556);
+            this.lblCnt2.Location = new System.Drawing.Point(7, 555);
             this.lblCnt2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblCnt2.Name = "lblCnt2";
             this.lblCnt2.Size = new System.Drawing.Size(65, 19);
@@ -462,7 +475,7 @@
             this.toolStripStatusLabel6,
             this.toolStripStatusLabel5,
             this.slblPolynomialOrder});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 804);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 839);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(734, 22);
             this.statusStrip1.SizingGrip = false;
@@ -538,17 +551,31 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.rbtnGauss);
             this.groupBox4.Controls.Add(this.rbtnSG);
             this.groupBox4.Controls.Add(this.rbtnRect);
             this.groupBox4.Controls.Add(this.rbtnAvg);
             this.groupBox4.Controls.Add(this.rbtnMed);
             this.groupBox4.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
-            this.groupBox4.Location = new System.Drawing.Point(13, 644);
+            this.groupBox4.Location = new System.Drawing.Point(15, 644);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(346, 96);
+            this.groupBox4.Size = new System.Drawing.Size(344, 130);
             this.groupBox4.TabIndex = 21;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Calibration Method";
+            // 
+            // rbtnGauss
+            // 
+            this.rbtnGauss.Appearance = System.Windows.Forms.Appearance.Button;
+            this.rbtnGauss.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtnGauss.Location = new System.Drawing.Point(181, 59);
+            this.rbtnGauss.Margin = new System.Windows.Forms.Padding(2);
+            this.rbtnGauss.Name = "rbtnGauss";
+            this.rbtnGauss.Size = new System.Drawing.Size(150, 30);
+            this.rbtnGauss.TabIndex = 19;
+            this.rbtnGauss.Text = "Gaussian Filter";
+            this.rbtnGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.rbtnGauss.UseVisualStyleBackColor = true;
             // 
             // groupBox5
             // 
@@ -559,7 +586,7 @@
             this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox5.Location = new System.Drawing.Point(376, 644);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(344, 96);
+            this.groupBox5.Size = new System.Drawing.Size(344, 130);
             this.groupBox5.TabIndex = 22;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Signal Smoothing Parameters";
@@ -569,7 +596,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(734, 826);
+            this.ClientSize = new System.Drawing.Size(734, 861);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBox4);
@@ -641,6 +668,8 @@
         private System.Windows.Forms.ToolStripStatusLabel slblPolynomialOrder;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.RadioButton rbtnGauss;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
