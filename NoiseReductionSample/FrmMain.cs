@@ -50,6 +50,11 @@ namespace NoiseReductionSample
             progressBar1.Value = 0;
             btnCalibrate.Enabled = false;
 
+            if (listBox1.Items.Count == 0)
+            {
+                return;
+            }
+
             try
             {
                 double[] input;
@@ -65,12 +70,12 @@ namespace NoiseReductionSample
 
                         string s = listBox1.Items[i].ToString();
                         if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
-                            throw new FormatException($"Failed to convert item at index {i}: \"{s}\"");
+                            throw new FormatException($"Failed to convert item at index {i} : \"{s}\"");
                     }
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException || ex is InvalidOperationException)
                 {
-                    MessageBox.Show($"Data input error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Data input error : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -78,14 +83,14 @@ namespace NoiseReductionSample
                 try
                 {
                     if (!int.TryParse(cbxKernelWidth.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
-                        throw new FormatException($"Failed to parse kernel width: \"{cbxKernelWidth.Text}\".");
+                        throw new FormatException($"Failed to parse kernel width : \"{cbxKernelWidth.Text}\".");
 
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
-                        throw new FormatException($"Failed to parse polynomial order: \"{cbxPolyOrder.Text}\".");
+                        throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException)
                 {
-                    MessageBox.Show($"Parameter error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Parameter error : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
