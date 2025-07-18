@@ -241,6 +241,73 @@ else if (useSG)
 }
 ```
 
+### 2.5 Gaussian Filter
+#### How it works
+A fixed-size window of length 2·w+1 slides over the 1D signal. At each position, out-of-bounds indices are “mirrored” back into the valid range, then each neighbor’s value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
+
+#### Principle
+Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
+
+#### Code Implementation
+```csharp
+// 1) Compute normalized 1D Gaussian kernel
+private static double[] ComputeGaussianCoefficients(int length, double sigma)
+{
+    if (length < 1)
+        throw new ArgumentException("length must be ≥ 1", nameof(length));
+    if (sigma <= 0)
+        throw new ArgumentException("sigma must be > 0", nameof(sigma));
+
+    int w = (length - 1) / 2;
+    double twoSigmaSq = 2 * sigma * sigma;
+    double[] coeffs = new double[length];
+    double sum = 0.0;
+
+    for (int i = 0; i < length; i++)
+    {
+        int x = i - w;
+        coeffs[i] = Math.Exp(-x * x / twoSigmaSq);
+        sum += coeffs[i];
+    }
+    if (sum <= 0)
+        throw new InvalidOperationException("Gaussian kernel sum must be positive.");
+
+    for (int i = 0; i < length; i++)
+        coeffs[i] /= sum;
+
+    return coeffs;
+}
+
+// 2) Mirror boundary handler
+private static int Mirror(int idx, int n)
+{
+    if (idx < 0)      return -idx - 1;
+    if (idx >= n)     return 2 * n - idx - 1;
+    return idx;
+}
+
+// 3) Apply Gaussian Filter to 1D input array
+public static double[] ApplyGaussianFilter(double[] input, int w, double sigma)
+{
+    int n = input.Length;
+    double[] coeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
+    double[] output = new double[n];
+
+    Parallel.For(0, n, i =>
+    {
+        double sum = 0.0;
+        for (int k = -w; k <= w; k++)
+        {
+            int mi = Mirror(i + k, n);
+            sum += coeffs[k + w] * input[mi];
+        }
+        output[i] = sum;
+    });
+
+    return output;
+}
+```
+
 ### Results Aggregation & UI Update
 #### How it works
 After filtering, the results array is handed to AddItemsInBatches, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
