@@ -46,6 +46,10 @@ This tool implements four different noise reduction algorithms for smoothing dat
 > Reimplemented and optimized the weighted-median calibration algorithm’s procedures, reducing processing time by more than a factor of 16.<br><br>
 > Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br><br>
 > Minor bugs fixed.<br>
+
+### v3.0.0.1
+#### July 18, 2025
+> Fixed a bug in AddItemsInBatches where existing ListBox items were being cleared. (New items are now appended without removing the originals and the scroll position updates correctly.)<br>
 </details>
 
 ## Features & Algorithms
