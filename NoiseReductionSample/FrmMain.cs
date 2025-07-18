@@ -608,7 +608,6 @@ namespace NoiseReductionSample
             int total = items.Length, done = 0;
 
             box.BeginUpdate();
-            box.Items.Clear();
 
             while (done < total)
             {
@@ -884,7 +883,6 @@ namespace NoiseReductionSample
                 lblCnt2.Text = "Count : " + listBox2.Items.Count;
             }
         }
-
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
