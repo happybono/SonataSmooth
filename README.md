@@ -56,7 +56,8 @@ This tool implements four different noise reduction algorithms for smoothing dat
 > Added Gaussian Filter mode that computes and applies a normalized 1D Gaussian kernel with mirror-mode boundary handling in parallel.<br><br>
 > Improved tooltips and labels: clarified filter options and renamed “Clear Selection” to “Deselect All.”<br><br>
 > Fixed ListBox2 update to clear old items before adding new results, ensuring the correct order and smooth refresh.<br><br>
-> Repositioned the listbox control buttons and added descriptive icons to each button.
+> Repositioned the listbox control buttons and added descriptive icons to each button.<br><br>
+> Added required font files to the Resources / Fonts directory.
 </details>
 
 ## Features & Algorithms
