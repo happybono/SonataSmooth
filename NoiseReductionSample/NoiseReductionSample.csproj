@@ -95,10 +95,19 @@
     <Compile Include="FrmMain.Designer.cs">
       <DependentUpon>FrmMain.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmModify.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmModify.Designer.cs">
+      <DependentUpon>FrmModify.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FrmMain.resx">
       <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmModify.resx">
+      <DependentUpon>FrmModify.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -119,6 +128,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Resources\Fonts\SegoeIcons.ttf" />
+    <None Include="Resources\Fonts\SegUIVar.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

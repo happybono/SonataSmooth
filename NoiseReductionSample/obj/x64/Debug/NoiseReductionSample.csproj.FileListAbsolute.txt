@@ -31,3 +31,4 @@ D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\x64\Debug\NoiseReductionSa
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\x64\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\x64\Debug\NoiseReductionSample.exe
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\x64\Debug\NoiseReductionSample.pdb
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\x64\Debug\NoiseReductionSample.FrmModify.resources

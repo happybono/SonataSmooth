@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -40,6 +40,24 @@ namespace NoiseReductionSample
         public FrmMain()
         {
             InitializeComponent();
+
+            // 키보드 Delete → btnDelete 클릭 처리
+            this.KeyPreview = true;
+            this.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Delete && listBox1.Focused)
+                    btnDelete.PerformClick();
+            };
+
+            // 선택 상태에 따라 버튼 활성/비활성 토글
+            listBox1.SelectedIndexChanged += (s, e) =>
+            {
+                bool hasSelection = listBox1.SelectedIndex >= 0;
+                btnDelete.Enabled = hasSelection;
+                btnEdit.Enabled = hasSelection;
+                btnCopy.Enabled = hasSelection;
+                btnSelClear.Enabled = hasSelection;
+            };
         }
 
         private async void btnCalibrate_Click(object sender, EventArgs e)
@@ -84,7 +102,7 @@ namespace NoiseReductionSample
                         throw new FormatException($"Failed to parse kernel width : \"{cbxKernelWidth.Text}\".");
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
                         throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
-                    // sigma 를 콤보박스나 텍스트박스에서 받아도 되지만, 여기서는 width 에 기반해 기본값 계산
+                    // sigma를 콤보박스나 텍스트박스에서 받아도 되지만, 여기서는 width에 기반해 기본값 계산
                     sigma = (2.0 * w + 1) / 6.0;
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException)
@@ -497,7 +515,8 @@ namespace NoiseReductionSample
         private async void btnSelectAll_Click(object sender, EventArgs e)
         {
             int n = listBox1.Items.Count;
-            if (n == 0) return;
+            if (n == 0)
+                return;
 
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
@@ -507,44 +526,69 @@ namespace NoiseReductionSample
             listBox1.BeginUpdate();
             listBox1.ClearSelected();
 
+            if (n == 1)
+            {
+                listBox1.SetSelected(0, true);
+                progressBar1.Value = 100;
+                listBox1.EndUpdate();
+
+                listBox1.Focus();
+                UpdateButtonStates();
+
+                await Task.Delay(200);
+                progressBar1.Value = 0;
+                return;
+            }
+
             int reportInterval = Math.Max(1, n / 100);
+
             for (int i = 0; i < n; i++)
             {
                 listBox1.SetSelected(i, true);
 
-                if ((i % reportInterval) == 0)
+                if (i % reportInterval == 0)
                 {
-                    progressBar1.Value = (int)((i / (double)(n - 1)) * 100);
-                    await Task.Yield();
+                    double ratio = (i + 1) / (double)n;
+                    int pct = (int)Math.Round(ratio * 100.0);
+                    pct = Math.Min(progressBar1.Maximum,
+                          Math.Max(progressBar1.Minimum, pct));
+                    progressBar1.Value = pct;
                 }
             }
+
             listBox1.EndUpdate();
+
             progressBar1.Value = 100;
+            listBox1.Focus();
+            UpdateButtonStates();
+
             await Task.Delay(200);
             progressBar1.Value = 0;
         }
 
         private async void btnClear_Click(object sender, EventArgs e)
         {
+            listBox1.BeginUpdate();
             listBox1.Items.Clear();
+            listBox1.ClearSelected();
+            listBox1.EndUpdate();
+
             lblCnt1.Text = "Count : " + listBox1.Items.Count;
+            lblCnt2.Text = "Count : " + listBox2.Items.Count;
 
             btnCopy.Enabled = false;
             btnSelClear.Enabled = false;
             btnDelete.Enabled = false;
+            btnEdit.Enabled = false;
 
+            progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
-
-            listBox1.BeginUpdate();
-            listBox1.ClearSelected();
-            listBox1.EndUpdate();
+            progressBar1.Value = 100;
+            progressBar1.Refresh();
 
             listBox1.Focus();
-            lblCnt2.Text = "Count : " + listBox2.Items.Count;
 
-            progressBar1.Value = 100;
             await Task.Delay(200);
             progressBar1.Value = 0;
         }
@@ -772,75 +816,86 @@ namespace NoiseReductionSample
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
+            int n = listBox1.Items.Count;
+            if (n == 0) return;
+
+            progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
 
-            try
+            int[] oldSel = listBox1.SelectedIndices
+                                    .Cast<int>()
+                                    .OrderBy(i => i)
+                                    .ToArray();
+            if (oldSel.Length == 0) return;
+
+            object[] allItems = new object[n];
+            listBox1.Items.CopyTo(allItems, 0);
+
+            progressBar1.Value = 30;
+            object[] remaining = await Task.Run(() =>
             {
-                progressBar1.Value = 10;
-                var allItems = listBox1.Items.Cast<object>().ToArray();
-                var selIdxSet = listBox1.SelectedIndices.Cast<int>().ToHashSet();
+                return allItems
+                    .Where((item, idx) => !oldSel.Contains(idx))
+                    .ToArray();
+            });
 
-                progressBar1.Value = 30;
-                var remaining = await Task.Run(() =>
-                    allItems
-                        .AsParallel()
-                        .WithDegreeOfParallelism(Environment.ProcessorCount)
-                        .Where((item, idx) => !selIdxSet.Contains(idx))
-                        .ToArray()
-                );
+            progressBar1.Value = 70;
+            listBox1.BeginUpdate();
+            listBox1.Items.Clear();
+            listBox1.Items.AddRange(remaining);
+            listBox1.EndUpdate();
 
-                progressBar1.Value = 70;
-                listBox1.BeginUpdate();
-                listBox1.Items.Clear();
-                listBox1.Items.AddRange(remaining);
-                listBox1.EndUpdate();
+            progressBar1.Value = 100;
+            lblCnt1.Text = $"Count: {listBox1.Items.Count}";
+            await Task.Delay(150);
+            progressBar1.Value = 0;
 
-                progressBar1.Value = 100;
-                lblCnt1.Text = "Count : " + listBox1.Items.Count;
-                await Task.Delay(200);
-            }
-            finally
-            {
-                progressBar1.Value = 0;
+            listBox1.ClearSelected();
+            foreach (int idx in oldSel)
+                if (idx >= 0 && idx < listBox1.Items.Count)
+                    listBox1.SetSelected(idx, true);
 
-                if (listBox1.Items.Count == 0)
-                {
-                    btnCopy.Enabled = false;
-                    btnSelClear.Enabled = false;
-                }
-                else
-                {
-                    btnCopy.Enabled = true;
-                }
-            }
+            listBox1.Focus();
+            UpdateButtonStates();
+        }
+
+        private void UpdateButtonStates()
+        {
+            bool hasSel = listBox1.SelectedItems.Count > 0;
+            btnDelete.Enabled = hasSel;
+            btnEdit.Enabled = hasSel;
+            btnCopy.Enabled = hasSel;
+            btnSelClear.Enabled = hasSel;
         }
 
         private async void btnClear2_Click(object sender, EventArgs e)
         {
+            progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
 
             listBox2.BeginUpdate();
-            listBox2.Items.Clear();
+            listBox2.Items.Clear();      
             listBox2.EndUpdate();
 
             progressBar1.Value = 100;
-            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            progressBar1.Refresh();
 
+            lblCnt2.Text = "Count : " + listBox2.Items.Count;
             slblCalibratedType.Text = "--";
             slblKernelWidth.Text = "--";
-            
             toolStripStatusLabel6.Visible = false;
             toolStripStatusLabel5.Visible = false;
             slblPolynomialOrder.Visible = false;
             slblPolynomialOrder.Text = "--";
-            
+
             await Task.Delay(200);
             progressBar1.Value = 0;
         }
+
 
         private async void btnSelectAll2_Click(object sender, EventArgs e)
         {
@@ -856,17 +911,23 @@ namespace NoiseReductionSample
             listBox2.ClearSelected();
 
             int reportInterval = Math.Max(1, n2 / 100);
+
             for (int i = 0; i < n2; i++)
             {
                 listBox2.SetSelected(i, true);
 
-                if ((i % reportInterval) == 0)
+                if (i % reportInterval == 0)
                 {
-                    progressBar1.Value = (int)((i / (double)(n2 - 1)) * 100);
-                    await Task.Yield();
+                    double ratio = (i + 1) / (double)n2;
+                    int pct = (int)Math.Round(ratio * 100.0);
+                    pct = Math.Min(progressBar1.Maximum,
+                          Math.Max(progressBar1.Minimum, pct));
+                    progressBar1.Value = pct;
                 }
             }
+
             listBox2.EndUpdate();
+
             progressBar1.Value = 100;
             await Task.Delay(200);
             progressBar1.Value = 0;
@@ -902,6 +963,7 @@ namespace NoiseReductionSample
             {
                 btnCopy2.Enabled = false;
                 btnSelClear2.Enabled = false;
+                btnEdit.Enabled = false;
             }
             else
             {
@@ -929,6 +991,11 @@ namespace NoiseReductionSample
             {
                 btnClear.PerformClick();
             }
+
+            if (e.KeyData == Keys.F2)
+            {
+                btnEdit.PerformClick();
+            }    
 
             if (e.KeyData == (Keys.Control | Keys.C))
             {
@@ -1018,11 +1085,28 @@ namespace NoiseReductionSample
             cbxKernelWidth.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
             btnAdd.Enabled = false;
+            btnEdit.Enabled = false;
             btnCopy2.Enabled = false;
             btnSelClear2.Enabled = false;
             btnCopy.Enabled = false;
             btnSelClear.Enabled = false;
             btnDelete.Enabled = false;
+
+            this.KeyPreview = true;
+            this.KeyDown += (s, evt) =>
+            {
+                if (evt.KeyCode == Keys.Delete && listBox1.Focused)
+                    btnDelete.PerformClick();
+            };
+
+            listBox1.SelectedIndexChanged += (s, evt) =>
+            {
+                bool hasSel = listBox1.SelectedIndex >= 0;
+                btnDelete.Enabled = hasSel;
+                btnEdit.Enabled = hasSel;
+                btnCopy.Enabled = hasSel;
+                btnSelClear.Enabled = hasSel;
+            };
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -1031,11 +1115,32 @@ namespace NoiseReductionSample
             {
                 btnCopy.Enabled = false;
                 btnSelClear.Enabled = false;
+                btnEdit.Enabled = false;
             }
             else
             {
                 btnCopy.Enabled = true;
             }
+
+            if (listBox1.SelectedItems.Count == 0)
+            {
+                btnEdit.Enabled = false;
+                btnSelClear.Enabled = false;
+            }
+            else
+            {
+                btnSelClear.Enabled = true;
+                btnEdit.Enabled = true;
+            }
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            var frm = new FrmModify();
+            frm.ShowDialog();
+
+            frm.textBox1.Select();
         }
     }
 }
+

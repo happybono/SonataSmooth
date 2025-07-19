@@ -1,4 +1,4 @@
-namespace NoiseReductionSample
+﻿namespace NoiseReductionSample
 {
     partial class FrmMain
     {
@@ -54,6 +54,7 @@ namespace NoiseReductionSample
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.rbtnSG = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnEdit = new System.Windows.Forms.Button();
             this.lblCnt1 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -201,7 +202,7 @@ namespace NoiseReductionSample
             // btnDelete
             // 
             this.btnDelete.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDelete.Location = new System.Drawing.Point(306, 133);
+            this.btnDelete.Location = new System.Drawing.Point(306, 167);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(30, 30);
@@ -240,7 +241,7 @@ namespace NoiseReductionSample
             // btnSelectAll
             // 
             this.btnSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectAll.Location = new System.Drawing.Point(306, 167);
+            this.btnSelectAll.Location = new System.Drawing.Point(306, 201);
             this.btnSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelectAll.Name = "btnSelectAll";
             this.btnSelectAll.Size = new System.Drawing.Size(30, 30);
@@ -253,7 +254,7 @@ namespace NoiseReductionSample
             // btnSelClear
             // 
             this.btnSelClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelClear.Location = new System.Drawing.Point(306, 201);
+            this.btnSelClear.Location = new System.Drawing.Point(306, 235);
             this.btnSelClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelClear.Name = "btnSelClear";
             this.btnSelClear.Size = new System.Drawing.Size(30, 30);
@@ -401,6 +402,7 @@ namespace NoiseReductionSample
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnEdit);
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.lblCnt1);
             this.groupBox2.Controls.Add(this.btnClear);
@@ -416,6 +418,20 @@ namespace NoiseReductionSample
             this.groupBox2.TabIndex = 25;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Original Data";
+            // 
+            // btnEdit
+            // 
+            this.btnEdit.Enabled = false;
+            this.btnEdit.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEdit.Location = new System.Drawing.Point(306, 133);
+            this.btnEdit.Margin = new System.Windows.Forms.Padding(2);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(30, 30);
+            this.btnEdit.TabIndex = 16;
+            this.btnEdit.Text = "";
+            this.toolTip1.SetToolTip(this.btnEdit, "Edit");
+            this.btnEdit.UseVisualStyleBackColor = true;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // lblCnt1
             // 
@@ -628,9 +644,6 @@ namespace NoiseReductionSample
         }
 
         #endregion
-
-        private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.RadioButton rbtnAvg;
         private System.Windows.Forms.RadioButton rbtnMed;
         private System.Windows.Forms.Button btnCalibrate;
@@ -661,7 +674,6 @@ namespace NoiseReductionSample
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
-        private System.Windows.Forms.Label lblCnt1;
         private System.Windows.Forms.Label lblCnt2;
         private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
         private System.Windows.Forms.ToolStripStatusLabel slblKernelWidth;
@@ -670,5 +682,10 @@ namespace NoiseReductionSample
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.RadioButton rbtnGauss;
         private System.Windows.Forms.ToolTip toolTip1;
+        public System.Windows.Forms.ListBox listBox1;
+        public System.Windows.Forms.ListBox listBox2;
+        private System.Windows.Forms.Button btnEdit;
+        public System.Windows.Forms.Label lblCnt1;
     }
 }
+
