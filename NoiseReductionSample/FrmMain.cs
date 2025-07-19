@@ -515,8 +515,7 @@ namespace NoiseReductionSample
         private async void btnSelectAll_Click(object sender, EventArgs e)
         {
             int n = listBox1.Items.Count;
-            if (n == 0)
-                return;
+            if (n == 0) return;
 
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
@@ -541,6 +540,7 @@ namespace NoiseReductionSample
             }
 
             int reportInterval = Math.Max(1, n / 100);
+            int yieldInterval = Math.Max(1, n / 1000);  // 0.1% 단위로 UI에 양보
 
             for (int i = 0; i < n; i++)
             {
@@ -554,6 +554,9 @@ namespace NoiseReductionSample
                           Math.Max(progressBar1.Minimum, pct));
                     progressBar1.Value = pct;
                 }
+
+                if (i % yieldInterval == 0)
+                    await Task.Yield();
             }
 
             listBox1.EndUpdate();
@@ -830,16 +833,14 @@ namespace NoiseReductionSample
                                     .ToArray();
             if (oldSel.Length == 0) return;
 
-            object[] allItems = new object[n];
-            listBox1.Items.CopyTo(allItems, 0);
-
             progressBar1.Value = 30;
-            object[] remaining = await Task.Run(() =>
-            {
-                return allItems
+            var allItems = new object[n];
+            listBox1.Items.CopyTo(allItems, 0);
+            var remaining = await Task.Run(() =>
+                allItems
                     .Where((item, idx) => !oldSel.Contains(idx))
-                    .ToArray();
-            });
+                    .ToArray()
+            );
 
             progressBar1.Value = 70;
             listBox1.BeginUpdate();
@@ -853,9 +854,16 @@ namespace NoiseReductionSample
             progressBar1.Value = 0;
 
             listBox1.ClearSelected();
-            foreach (int idx in oldSel)
+            int yieldInterval = Math.Max(1, oldSel.Length / 100);
+            for (int i = 0; i < oldSel.Length; i++)
+            {
+                int idx = oldSel[i];
                 if (idx >= 0 && idx < listBox1.Items.Count)
                     listBox1.SetSelected(idx, true);
+
+                if (i % yieldInterval == 0)
+                    await Task.Yield();
+            }
 
             listBox1.Focus();
             UpdateButtonStates();
@@ -900,7 +908,8 @@ namespace NoiseReductionSample
         private async void btnSelectAll2_Click(object sender, EventArgs e)
         {
             int n2 = listBox2.Items.Count;
-            if (n2 == 0) return;
+            if (n2 == 0)
+                return;
 
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
@@ -911,6 +920,7 @@ namespace NoiseReductionSample
             listBox2.ClearSelected();
 
             int reportInterval = Math.Max(1, n2 / 100);
+            int yieldInterval = Math.Max(1, n2 / 1000);  // UI에 양보할 빈도
 
             for (int i = 0; i < n2; i++)
             {
@@ -924,6 +934,9 @@ namespace NoiseReductionSample
                           Math.Max(progressBar1.Minimum, pct));
                     progressBar1.Value = pct;
                 }
+
+                if (i % yieldInterval == 0)
+                    await Task.Yield();
             }
 
             listBox2.EndUpdate();
