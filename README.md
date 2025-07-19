@@ -8,7 +8,7 @@ This tool reads a sequence of numerical data from an input list, lets you config
   selects the median value within the window after applying user-defined weights.<br><br>
    
 - **Binomial (Gaussian-like) average** :<br>
-  performs a moving average weighted by Pascal’s triangle coefficients.<br><br>
+  performs a moving average weighted by Pascal's triangle coefficients.<br><br>
   
 - **Gaussian filter** :<br>
   convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).<br><br>
@@ -71,7 +71,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 ### v3.1.0.0
 #### July 19, 2025
 > Added Gaussian Filter mode that computes and applies a normalized 1D Gaussian kernel with mirror-mode boundary handling in parallel.<br><br>
-> Improved tooltips and labels: clarified filter options and renamed “Clear Selection” to “Deselect All.”<br><br>
+> Improved tooltips and labels: clarified filter options and renamed "Clear Selection" to "Deselect All".<br><br>
 > Fixed ListBox2 update to clear old items before adding new results, ensuring the correct order and smooth refresh.<br><br>
 > Repositioned the listbox control buttons and added descriptive icons to each button.<br><br>
 > Added required font files to the Resources / Fonts directory.<br><br>
@@ -87,7 +87,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 ### v3.6.1.0
 #### July 20, 2025
 > Removed beep sound during various operations (such as adding or editing items) via keyboard input (e.g. Enter) in the listbox.<br><br>
-> Improved processing and response speed when performing “Select All” followed by "Delete All".<br>
+> Improved processing and response speed when performing "Select All" followed by "Delete All".<br>
 </details>
 
 ## Features & Algorithms
@@ -96,7 +96,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel size from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
 
 #### Principle
-Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel “radius” **w**, and generating the binomial weight array ensure that the parallel filtering step has everything it needs.
+Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **w**, and generating the binomial weight array ensure that the parallel filtering step has everything it needs.
 
 #### Code Implementation
 ```csharp
@@ -281,7 +281,7 @@ else if (useSG)
 
 ### 2.5 Gaussian Filter
 #### How it works
-A fixed-size window of length 2·w+1 slides over the 1D signal. At each position, out-of-bounds indices are “mirrored” back into the valid range, then each neighbor’s value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
+A fixed-size window of length 2·w+1 slides over the 1D signal. At each position, out-of-bounds indices are "mirrored" back into the valid range, then each neighbor’s value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
 
 #### Principle
 Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
