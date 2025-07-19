@@ -74,7 +74,19 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 > Improved tooltips and labels: clarified filter options and renamed “Clear Selection” to “Deselect All.”<br><br>
 > Fixed ListBox2 update to clear old items before adding new results, ensuring the correct order and smooth refresh.<br><br>
 > Repositioned the listbox control buttons and added descriptive icons to each button.<br><br>
-> Added required font files to the Resources / Fonts directory.
+> Added required font files to the Resources / Fonts directory.<br><br>
+
+### v3.5.0.0
+#### July 19, 2025
+> Added functionality to edit selected items in the Initial Dataset/ (supports both single and multiple item edits)<br>
+  (The number of selected items for editing is now displayed in the StatusBar.)<br><br>
+> Updated copy behavior: even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
+  (If only some items in the listbox are selected, only those selected items will be copied.)<br><br>
+> Minor bugs fixed.
+
+### v3.6.1.0
+> Removed beep sound during various operations (such as adding or editing items) via keyboard input (e.g. Enter) in the listbox.<br><br>
+> Improved processing and response speed when performing “Select All” followed by “Delete All”<br>
 </details>
 
 ## Features & Algorithms
