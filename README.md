@@ -1,5 +1,22 @@
 # SonataSmooth
-This tool implements four different noise reduction algorithms for smoothing data : rectangular (uniform) mean, weighted median, binomial (Gaussian-like) average, and Savitzky-Golay polynomial smoothing. It processes data from a list and displays the results in another list.
+This tool reads a sequence of numerical data from an input list, lets you configure parameters such as window size, weight coefficients, Gaussian sigma, or polynomial order, and then applies one of five smoothing algorithms:
+
+- **Rectangular (uniform) mean** :
+  computes a simple moving average over a fixed window of equal weights.
+  
+- **Weighted median** :
+  selects the median value within the window after applying user-defined weights.
+   
+- **Binomial (Gaussian-like) average** :
+  performs a moving average weighted by Pascal’s triangle coefficients.
+  
+- **Gaussian filter** :
+  convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).
+  
+- **Savitzky–Golay polynomial smoothing** :
+  fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.
+
+After processing is complete, the tool writes the smoothed sequence to a separate output list and updates a progress bar in real time to indicate the computation's progress.
 
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
