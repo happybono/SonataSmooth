@@ -85,6 +85,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 > Minor bugs fixed.
 
 ### v3.6.1.0
+#### July 20, 2025
 > Removed beep sound during various operations (such as adding or editing items) via keyboard input (e.g. Enter) in the listbox.<br><br>
 > Improved processing and response speed when performing “Select All” followed by “Delete All”<br>
 </details>
