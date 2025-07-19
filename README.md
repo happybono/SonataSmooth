@@ -96,7 +96,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel size from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
 
 #### Principle
-Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **w**, and generating the binomial weight array ensure that the parallel filtering step has everything it needs.
+Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **w**, and generating the binomial weight array ensures the parallel filtering step has everything it needs.
 
 #### Code Implementation
 ```csharp
@@ -126,7 +126,7 @@ var progressReporter = new Progress<int>(pct =>
 All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
 #### Principle
-Leverage all CPU cores to avoid blocking the UI. PLINQ's .AsOrdered() preserves the original order, and .WithDegreeOfParallelism matches the number of logical processors.
+Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.
 
 #### Code Implementation
 ```csharp
@@ -348,7 +348,7 @@ public static double[] ApplyGaussianFilter(double[] input, int w, double sigma)
 
 ### Results Aggregation & UI Update
 #### How it works
-After filtering, the results array is handed to AddItemsInBatches, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
+After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
 #### Principle
 Batch updates and progress reporting keep the UI responsive. A finally block ensures the progress bar always resets on completion or error.
@@ -455,8 +455,8 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 ```
 
 ### Data Handling and Processing
-- Implemented drag-and-drop functionality to allow users to easily add data to the application.
-- Used regular expressions to extract and parse numerical data from various formats.
+- Implemented drag-and-drop functionality to allow users to add data to the application easily.
+- Regular expressions were used to extract and parse numerical data from various formats.
 
 ### User Interface and Interaction
 - Designed and developed a user-friendly interface with interactive elements like buttons and list boxes.
@@ -464,7 +464,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 
 ### Customization and Configuration
 - Allowed users to select the noise reduction method and kernel width through the interface.
-- Enabled users to calibrate and fine-tune the noise reduction process based on their specific needs.
+- Enabled users to calibrate and fine-tune the noise reduction process based on their needs.
 
 ## Conclusion
 
@@ -476,9 +476,9 @@ In particular :
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
 - Savitzky–Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
 
-Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
+Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
-Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals : empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
+Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 
 ## Demonstration
