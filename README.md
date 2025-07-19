@@ -454,6 +454,7 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 ## Demonstration
 ![Final Product](SonataSmooth.png)<br><br>
 ![Final Product SG](SonataSmoothSG.png)<br><br>
+![Final Product_EditEntries](SonataSmooth-EditEntries.png)<br><br>
 ![Calibrated Results](PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
 
 ## License
