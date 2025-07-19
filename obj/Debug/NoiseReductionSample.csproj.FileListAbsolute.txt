@@ -1,0 +1,55 @@
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+C:\Users\HappyBono\source\repos\NoiseReductionSample\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe.config
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+D:\My Lifestyle\Products\C#\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe.config
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmModify.resources
