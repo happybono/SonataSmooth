@@ -627,6 +627,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.MaximizeBox = false;
             this.Name = "FrmMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Sonata Smooth";
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.groupBox2.ResumeLayout(false);
