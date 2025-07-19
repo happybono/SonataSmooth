@@ -1,4 +1,4 @@
-﻿namespace NoiseReductionSample
+namespace NoiseReductionSample
 {
     partial class FrmMain
     {
@@ -430,7 +430,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(0, 833);
+            this.progressBar1.Location = new System.Drawing.Point(0, 834);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(734, 5);
             this.progressBar1.TabIndex = 16;
@@ -672,4 +672,3 @@
         private System.Windows.Forms.ToolTip toolTip1;
     }
 }
-
