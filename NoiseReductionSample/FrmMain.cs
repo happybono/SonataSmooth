@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -263,7 +263,6 @@ namespace NoiseReductionSample
                     slblPolynomialOrder.Visible = showPoly;
                     if (showPoly) slblPolynomialOrder.Text = polyOrder.ToString();
 
-                    btnCopy2.Enabled = false;
                     btnSelClear2.Enabled = false;
                 }
                 catch (Exception ex)
@@ -273,6 +272,17 @@ namespace NoiseReductionSample
             }
             finally
             {
+                if (listBox2.Items.Count > 0)
+                {
+                    btnCopy2.Enabled = true;
+                    btnSelClear2.Enabled = true;
+                }
+                else
+                {
+                    btnCopy2.Enabled = false;
+                    btnSelClear2.Enabled = false;
+                }
+
                 progressBar1.Value = 0;
                 btnCalibrate.Enabled = true;
             }
@@ -458,10 +468,20 @@ namespace NoiseReductionSample
                 listBox1.Items.Add(value);
                 lblCnt1.Text = "Count : " + listBox1.Items.Count;
             }
-            else 
+            else
             {
                 txtVariable.Focus();
                 txtVariable.SelectAll();
+            }
+
+            if (listBox1.Items.Count > 0)
+            {
+                btnCopy.Enabled = true;
+                btnDelete.Enabled = true;
+            }
+            else
+            {
+                return;
             }
         }
 
@@ -654,6 +674,17 @@ namespace NoiseReductionSample
             }
             finally
             {
+                if (listBox1.Items.Count > 0)
+                {
+                    btnCopy.Enabled = true;
+                    btnDelete.Enabled = true;
+                }
+                else
+                {
+                    btnCopy.Enabled = false;
+                    btnDelete.Enabled = false;
+                }
+
                 // 최종 초기화
                 progressBar1.Value = 0;
                 btnCalibrate.Enabled = true;
@@ -730,12 +761,6 @@ namespace NoiseReductionSample
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
-            if (listBox1.SelectedItems.Count == 0)
-            {
-                btnCopy.Enabled = false;
-                return;
-            }
-
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
@@ -768,6 +793,16 @@ namespace NoiseReductionSample
             finally
             {
                 progressBar1.Value = 0;
+
+                if (listBox1.Items.Count == 0)
+                {
+                    btnCopy.Enabled = false;
+                    btnSelClear.Enabled = false;
+                }
+                else
+                {
+                    btnCopy.Enabled = true;
+                }
             }
         }
 
@@ -852,7 +887,7 @@ namespace NoiseReductionSample
 
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBox2.SelectedItems.Count == 0)
+            if (listBox2.Items.Count == 0)
             {
                 btnCopy2.Enabled = false;
                 btnSelClear2.Enabled = false;
@@ -860,23 +895,15 @@ namespace NoiseReductionSample
             else
             {
                 btnCopy2.Enabled = true;
-                btnSelClear2.Enabled = true;
             }
-        }
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (listBox1.SelectedItems.Count == 0)
+            if (listBox2.SelectedItems.Count == 0)
             {
-                btnCopy.Enabled = false;
-                btnSelClear.Enabled = false;
-                btnDelete.Enabled = false;
+                btnSelClear2.Enabled = false;
             }
             else
             {
-                btnCopy.Enabled = true;
-                btnSelClear.Enabled = true;
-                btnDelete.Enabled = true;
+                btnSelClear2.Enabled = true;
             }
         }
 
@@ -945,12 +972,20 @@ namespace NoiseReductionSample
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(string.Join(Environment.NewLine, listBox1.SelectedItems.Cast<double>().ToArray()));
+            var items = listBox1.SelectedItems.Count > 0
+                ? listBox1.SelectedItems.Cast<double>()
+                : listBox1.Items.Cast<double>();
+
+            Clipboard.SetText(string.Join(Environment.NewLine, items));
         }
 
         private void btnCopy2_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(string.Join(Environment.NewLine, listBox2.SelectedItems.Cast<double>().ToArray()));
+            var items = listBox2.SelectedItems.Count > 0
+                ? listBox2.SelectedItems.Cast<double>()
+                : listBox2.Items.Cast<double>();
+
+            Clipboard.SetText(string.Join(Environment.NewLine, items));
         }
 
         private void rbtnSG_CheckedChanged(object sender, EventArgs e)
@@ -978,6 +1013,18 @@ namespace NoiseReductionSample
             btnSelClear.Enabled = false;
             btnDelete.Enabled = false;
         }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBox1.Items.Count == 0)
+            {
+                btnCopy.Enabled = false;
+                btnSelClear.Enabled = false;
+            }
+            else
+            {
+                btnCopy.Enabled = true;
+            }
+        }
     }
 }
-
