@@ -80,7 +80,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 #### July 19, 2025
 > Added functionality to edit selected items in the Initial Dataset/ (supports both single and multiple item edits)<br>
   (The number of selected items for editing is now displayed in the StatusBar.)<br><br>
-> Updated copy behavior: even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
+> Updated copy behavior : even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
   (If only some items in the listbox are selected, only those selected items will be copied.)<br><br>
 > Minor bugs fixed.
 
