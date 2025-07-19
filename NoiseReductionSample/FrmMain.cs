@@ -596,6 +596,17 @@ namespace NoiseReductionSample
             }
             finally
             {
+                if (listBox1.Items.Count > 0)
+                {
+                    btnCopy.Enabled = true;
+                    btnDelete.Enabled = true;
+                }
+                else
+                {
+                    btnCopy.Enabled = false;
+                    btnDelete.Enabled = false;
+                }
+
                 progressBar1.Value = 0;
                 btnCalibrate.Enabled = true;
             }
