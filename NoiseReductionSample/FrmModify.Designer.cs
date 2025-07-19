@@ -85,6 +85,7 @@
             this.Cancel_Button.TabIndex = 3;
             this.Cancel_Button.Text = "";
             this.Cancel_Button.UseVisualStyleBackColor = true;
+            this.Cancel_Button.Click += new System.EventHandler(this.Cancel_Button_Click);
             // 
             // OK_Button
             // 
@@ -104,10 +105,10 @@
             this.Label1.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.Label1.Location = new System.Drawing.Point(12, 39);
             this.Label1.Name = "Label1";
-            this.Label1.Size = new System.Drawing.Size(243, 34);
+            this.Label1.Size = new System.Drawing.Size(270, 34);
             this.Label1.TabIndex = 24;
-            this.Label1.Text = "Apply changes to the selected items. \r\nEnter the numeric value you\'d like to set " +
-    ":";
+            this.Label1.Text = "Apply changes to the selected items. \r\nEnter the numeric value you would like to " +
+    "set :";
             // 
             // ProgressBar1
             // 

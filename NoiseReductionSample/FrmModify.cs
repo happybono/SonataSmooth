@@ -125,5 +125,10 @@ namespace NoiseReductionSample
         {
             OK_Button.Enabled = textBox1.Text.Length > 0 && double.TryParse(textBox1.Text, out _);
         }
+
+        private void Cancel_Button_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }
