@@ -43,7 +43,7 @@
             // StatusStrip1
             // 
             this.StatusStrip1.AutoSize = false;
-            this.StatusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(145)))), ((int)(((byte)(26)))), ((int)(((byte)(29)))));
+            this.StatusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
             this.StatusStrip1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.StatusStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.StatusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -58,6 +58,7 @@
             // ToolStripStatusLabel1
             // 
             this.ToolStripStatusLabel1.AutoSize = false;
+            this.ToolStripStatusLabel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
             this.ToolStripStatusLabel1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F);
             this.ToolStripStatusLabel1.ForeColor = System.Drawing.Color.White;
             this.ToolStripStatusLabel1.Name = "ToolStripStatusLabel1";
@@ -110,7 +111,7 @@
             // 
             // ProgressBar1
             // 
-            this.ProgressBar1.Location = new System.Drawing.Point(0, 113);
+            this.ProgressBar1.Location = new System.Drawing.Point(0, 114);
             this.ProgressBar1.Name = "ProgressBar1";
             this.ProgressBar1.Size = new System.Drawing.Size(438, 5);
             this.ProgressBar1.TabIndex = 29;

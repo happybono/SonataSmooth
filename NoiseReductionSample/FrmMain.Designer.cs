@@ -157,6 +157,7 @@
             this.btnAdd.Size = new System.Drawing.Size(67, 30);
             this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "";
+            this.toolTip1.SetToolTip(this.btnAdd, "Add");
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
@@ -481,7 +482,7 @@
             // statusStrip1
             // 
             this.statusStrip1.AutoSize = false;
-            this.statusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(145)))), ((int)(((byte)(26)))), ((int)(((byte)(29)))));
+            this.statusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.slblCalibratedType,
