@@ -1,22 +1,22 @@
 # SonataSmooth
-This tool reads a sequence of numerical data from an input list, lets you configure parameters such as window size, weight coefficients, Gaussian sigma, or polynomial order, and then applies one of five smoothing algorithms:
+This tool reads a sequence of numerical data from an input list, lets you configure parameters such as window size, weight coefficients, Gaussian sigma, or polynomial order, and then applies one of five smoothing algorithms :
 
-- **Rectangular (uniform) mean** :
-  computes a simple moving average over a fixed window of equal weights.
+- **Rectangular (uniform) mean** :<br>
+  computes a simple moving average over a fixed window of equal weights.<br><br>
   
-- **Weighted median** :
-  selects the median value within the window after applying user-defined weights.
+- **Weighted median** :<br>
+  selects the median value within the window after applying user-defined weights.<br><br>
    
-- **Binomial (Gaussian-like) average** :
-  performs a moving average weighted by Pascal’s triangle coefficients.
+- **Binomial (Gaussian-like) average** :<br>
+  performs a moving average weighted by Pascal’s triangle coefficients.<br><br>
   
-- **Gaussian filter** :
-  convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).
+- **Gaussian filter** :<br>
+  convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).<br><br>
   
-- **Savitzky–Golay polynomial smoothing** :
-  fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.
+- **Savitzky–Golay polynomial smoothing** :<br>
+  fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.<br><br>
 
-After processing is complete, the tool writes the smoothed sequence to a separate output list and updates a progress bar in real time to indicate the computation's progress.
+After processing is complete, the tool writes the smoothed sequence to a separate output list and updates a progress bar in real time to indicate the computation's progress.<br><br>
 
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
