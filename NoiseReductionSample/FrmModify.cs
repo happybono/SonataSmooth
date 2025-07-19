@@ -21,7 +21,6 @@ namespace NoiseReductionSample
 
         private async void OK_Button_Click(object sender, EventArgs e)
         {
-            // 1) 메인 폼 가져오기
             var mainForm = Application.OpenForms
                                       .OfType<FrmMain>()
                                       .FirstOrDefault();
@@ -32,7 +31,6 @@ namespace NoiseReductionSample
                 return;
             }
 
-            // 2) 입력 검사
             if (string.IsNullOrEmpty(textBox1.Text)
                 || !double.TryParse(textBox1.Text, out double numericValue))
             {
@@ -41,7 +39,6 @@ namespace NoiseReductionSample
                 return;
             }
 
-            // 3) 선택 인덱스 캡처 & 정렬
             int[] indices = mainForm.listBox1
                                     .SelectedIndices
                                     .Cast<int>()
@@ -51,42 +48,33 @@ namespace NoiseReductionSample
             if (total == 0)
                 return;
 
-            // 4) ProgressBar 초기화
             ProgressBar1.Minimum = 0;
             ProgressBar1.Maximum = total;
             ProgressBar1.Value = 0;
 
-            // 5) BeginUpdate
             var lb = mainForm.listBox1;
             lb.BeginUpdate();
 
-            // 6) 비동기 “무거운 계산” (예: ToString 포맷)
             string newValue = await Task.Run(() => numericValue.ToString("G"));
 
-            // 7) 싱글 스레드 루프: 아이템 교체 + 프로그래스바 업데이트
             for (int i = 0; i < total; i++)
             {
                 lb.Items[indices[i]] = newValue;
                 ProgressBar1.Value = i + 1;
             }
 
-            // 8) 선택 재설정
             lb.ClearSelected();
             foreach (int idx in indices)
                 if (idx >= 0 && idx < lb.Items.Count)
                     lb.SetSelected(idx, true);
-
-            // 9) EndUpdate
+                    
             lb.EndUpdate();
 
-            // 10) 다이얼로그 닫힌 후 ListBox에 Focus 예약
-            //     → BeginInvoke를 쓰면 this.Close() 이후에 실행됩니다.
             mainForm.BeginInvoke((Action)(() =>
             {
                 mainForm.listBox1.Focus();
             }));
 
-            // 11) 상태바 리셋 및 다이얼로그 닫기
             ProgressBar1.Value = 0;
             this.Close();
         }
