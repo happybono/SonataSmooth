@@ -84,7 +84,7 @@ namespace NoiseReductionSample
                         throw new FormatException($"Failed to parse kernel width : \"{cbxKernelWidth.Text}\".");
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
                         throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
-                    // sigma를 콤보박스나 텍스트박스에서 받아도 되지만, 여기서는 width에 기반해 기본값 계산
+                    // sigma 를 콤보박스나 텍스트박스에서 받아도 되지만, 여기서는 width 에 기반해 기본값 계산
                     sigma = (2.0 * w + 1) / 6.0;
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException)
