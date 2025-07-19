@@ -36,6 +36,9 @@ namespace NoiseReductionSample
             RegexOptions.Compiled | RegexOptions.CultureInvariant
             );
 
+        private CancellationTokenSource _ctsSelectAll1;
+        private CancellationTokenSource _ctsSelectAll2;
+
 
         public FrmMain()
         {
@@ -49,7 +52,7 @@ namespace NoiseReductionSample
                     btnDelete.PerformClick();
             };
 
-            // 선택 상태에 따라 버튼 활성/비활성 토글
+            // 선택 상태에 따라 버튼 활성 / 비활성 토글
             listBox1.SelectedIndexChanged += (s, e) =>
             {
                 bool hasSelection = listBox1.SelectedIndex >= 0;
@@ -377,7 +380,7 @@ namespace NoiseReductionSample
                 }
             }
 
-            // 모든 가중치 합산 후에도 못 찾았다면 최댓값 반환
+            // 모든 가중치 합산 후에도 못 찾았다면 최대값 반환
             return pairs[pairs.Count - 1].Value;
         }
 
@@ -509,11 +512,16 @@ namespace NoiseReductionSample
             {
                 btnAdd.PerformClick();
                 txtVariable.Text = String.Empty;
+                e.SuppressKeyPress = true;
             }
         }
 
         private async void btnSelectAll_Click(object sender, EventArgs e)
         {
+            _ctsSelectAll1?.Cancel(); // 이전 작업 취소
+            _ctsSelectAll1 = new CancellationTokenSource();
+            var token = _ctsSelectAll1.Token;
+
             int n = listBox1.Items.Count;
             if (n == 0) return;
 
@@ -530,72 +538,75 @@ namespace NoiseReductionSample
                 listBox1.SetSelected(0, true);
                 progressBar1.Value = 100;
                 listBox1.EndUpdate();
-
                 listBox1.Focus();
                 UpdateButtonStates();
-
                 await Task.Delay(200);
                 progressBar1.Value = 0;
                 return;
             }
 
             int reportInterval = Math.Max(1, n / 100);
-            int yieldInterval = Math.Max(1, n / 1000);  // 0.1% 단위로 UI에 양보
+            int yieldInterval = Math.Max(1, n / 1000);
 
-            for (int i = 0; i < n; i++)
+            try
             {
-                listBox1.SetSelected(i, true);
-
-                if (i % reportInterval == 0)
+                for (int i = 0; i < n; i++)
                 {
-                    double ratio = (i + 1) / (double)n;
-                    int pct = (int)Math.Round(ratio * 100.0);
-                    pct = Math.Min(progressBar1.Maximum,
-                          Math.Max(progressBar1.Minimum, pct));
-                    progressBar1.Value = pct;
+                    if (token.IsCancellationRequested) break;
+
+                    listBox1.SetSelected(i, true);
+
+                    if (i % reportInterval == 0)
+                    {
+                        double ratio = (i + 1) / (double)n;
+                        int pct = (int)Math.Round(ratio * 100.0);
+                        progressBar1.Value = Math.Min(100, Math.Max(0, pct));
+                    }
+
+                    if (i % yieldInterval == 0)
+                        await Task.Yield();
                 }
-
-                if (i % yieldInterval == 0)
-                    await Task.Yield();
             }
-
-            listBox1.EndUpdate();
+            finally
+            {
+                listBox1.EndUpdate();
+            }
 
             progressBar1.Value = 100;
             listBox1.Focus();
             UpdateButtonStates();
-
             await Task.Delay(200);
             progressBar1.Value = 0;
         }
 
         private async void btnClear_Click(object sender, EventArgs e)
         {
+            progressBar1.Style = ProgressBarStyle.Continuous;
+            progressBar1.Minimum = 0;
+            progressBar1.Maximum = 100;
+            progressBar1.Value = 0;
+
             listBox1.BeginUpdate();
-            listBox1.Items.Clear();
             listBox1.ClearSelected();
+            listBox1.Items.Clear();
             listBox1.EndUpdate();
 
-            lblCnt1.Text = "Count : " + listBox1.Items.Count;
-            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            await Task.Yield();
 
+            lblCnt1.Text = $"Count : {listBox1.Items.Count}";
             btnCopy.Enabled = false;
             btnSelClear.Enabled = false;
             btnDelete.Enabled = false;
             btnEdit.Enabled = false;
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
             progressBar1.Value = 100;
             progressBar1.Refresh();
 
-            listBox1.Focus();
-
-            await Task.Delay(200);
+            await Task.Yield();
             progressBar1.Value = 0;
-        }
 
+            listBox1.Focus();
+        }
 
         private async void btnPaste_Click(object sender, EventArgs e)
         {
@@ -886,8 +897,11 @@ namespace NoiseReductionSample
             progressBar1.Value = 0;
 
             listBox2.BeginUpdate();
-            listBox2.Items.Clear();      
+            listBox2.Items.Clear();
+            listBox2.ClearSelected();
             listBox2.EndUpdate();
+
+            await Task.Yield();
 
             progressBar1.Value = 100;
             progressBar1.Refresh();
@@ -900,13 +914,18 @@ namespace NoiseReductionSample
             slblPolynomialOrder.Visible = false;
             slblPolynomialOrder.Text = "--";
 
-            await Task.Delay(200);
+            await Task.Yield();
             progressBar1.Value = 0;
-        }
 
+            listBox2.Focus();
+        }
 
         private async void btnSelectAll2_Click(object sender, EventArgs e)
         {
+            _ctsSelectAll2?.Cancel(); // 이전 작업 취소
+            _ctsSelectAll2 = new CancellationTokenSource();
+            var token = _ctsSelectAll2.Token;
+
             int n2 = listBox2.Items.Count;
             if (n2 == 0)
                 return;
@@ -920,29 +939,35 @@ namespace NoiseReductionSample
             listBox2.ClearSelected();
 
             int reportInterval = Math.Max(1, n2 / 100);
-            int yieldInterval = Math.Max(1, n2 / 1000);  // UI에 양보할 빈도
+            int yieldInterval = Math.Max(1, n2 / 1000);
 
-            for (int i = 0; i < n2; i++)
+            try
             {
-                listBox2.SetSelected(i, true);
-
-                if (i % reportInterval == 0)
+                for (int i = 0; i < n2; i++)
                 {
-                    double ratio = (i + 1) / (double)n2;
-                    int pct = (int)Math.Round(ratio * 100.0);
-                    pct = Math.Min(progressBar1.Maximum,
-                          Math.Max(progressBar1.Minimum, pct));
-                    progressBar1.Value = pct;
-                }
+                    if (token.IsCancellationRequested)
+                        break;
 
-                if (i % yieldInterval == 0)
-                    await Task.Yield();
+                    listBox2.SetSelected(i, true);
+
+                    if (i % reportInterval == 0)
+                    {
+                        double ratio = (i + 1) / (double)n2;
+                        int pct = (int)Math.Round(ratio * 100.0);
+                        progressBar1.Value = Math.Min(100, Math.Max(0, pct));
+                    }
+
+                    if (i % yieldInterval == 0)
+                        await Task.Yield();
+                }
+            }
+            finally
+            {
+                listBox2.EndUpdate();
             }
 
-            listBox2.EndUpdate();
-
             progressBar1.Value = 100;
-            await Task.Delay(200);
+            await Task.Delay(200).ContinueWith(_ => { });
             progressBar1.Value = 0;
         }
 
@@ -998,36 +1023,43 @@ namespace NoiseReductionSample
             if (e.KeyData == Keys.Delete)
             {
                 btnDelete.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.Delete))
             {
                 btnClear.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == Keys.F2)
             {
                 btnEdit.PerformClick();
+                e.SuppressKeyPress = true;
             }    
 
             if (e.KeyData == (Keys.Control | Keys.C))
             {
                 btnCopy.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.V))
             {
                 btnPaste.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.A))
             {
                 btnSelectAll.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == Keys.Escape)
             {
                 btnSelClear.PerformClick();
+                e.SuppressKeyPress = true;
             }
 
             lblCnt1.Text = "Count : " + listBox1.Items.Count;
@@ -1039,21 +1071,25 @@ namespace NoiseReductionSample
                 if (e.KeyData == (Keys.Control | Keys.Delete))
                 {
                     btnClear2.PerformClick();
+                    e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == (Keys.Control | Keys.C))
                 {
                     btnCopy2.PerformClick();
+                    e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == (Keys.Control | Keys.A))
                 {
                     btnSelectAll2.PerformClick();
+                    e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == Keys.Escape)
                 {
                     btnSelClear2.PerformClick();
+                    e.SuppressKeyPress = true;
                 }
 
                 lblCnt2.Text = "Count : " + listBox2.Items.Count;

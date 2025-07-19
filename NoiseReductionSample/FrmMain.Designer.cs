@@ -90,7 +90,7 @@
             this.listBox1.Name = "listBox1";
             this.listBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBox1.Size = new System.Drawing.Size(294, 514);
-            this.listBox1.TabIndex = 0;
+            this.listBox1.TabIndex = 3;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             this.listBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listBox1_DragDrop);
             this.listBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.listBox1_DragEnter);
@@ -106,7 +106,7 @@
             this.listBox2.Name = "listBox2";
             this.listBox2.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBox2.Size = new System.Drawing.Size(294, 514);
-            this.listBox2.TabIndex = 1;
+            this.listBox2.TabIndex = 19;
             this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             this.listBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox2_KeyDown);
             // 
@@ -118,7 +118,7 @@
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
             this.rbtnAvg.Size = new System.Drawing.Size(150, 30);
-            this.rbtnAvg.TabIndex = 2;
+            this.rbtnAvg.TabIndex = 12;
             this.rbtnAvg.Text = "Average";
             this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnAvg.UseVisualStyleBackColor = true;
@@ -131,7 +131,7 @@
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
             this.rbtnMed.Size = new System.Drawing.Size(150, 30);
-            this.rbtnMed.TabIndex = 3;
+            this.rbtnMed.TabIndex = 13;
             this.rbtnMed.Text = "Median";
             this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnMed.UseVisualStyleBackColor = true;
@@ -143,7 +143,7 @@
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
             this.btnCalibrate.Size = new System.Drawing.Size(705, 40);
-            this.btnCalibrate.TabIndex = 4;
+            this.btnCalibrate.TabIndex = 18;
             this.btnCalibrate.Text = "Calibrate";
             this.btnCalibrate.UseVisualStyleBackColor = true;
             this.btnCalibrate.Click += new System.EventHandler(this.btnCalibrate_Click);
@@ -155,7 +155,7 @@
             this.btnAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(67, 30);
-            this.btnAdd.TabIndex = 5;
+            this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
@@ -167,7 +167,7 @@
             this.txtVariable.Margin = new System.Windows.Forms.Padding(2);
             this.txtVariable.Name = "txtVariable";
             this.txtVariable.Size = new System.Drawing.Size(262, 25);
-            this.txtVariable.TabIndex = 6;
+            this.txtVariable.TabIndex = 1;
             this.txtVariable.TextChanged += new System.EventHandler(this.txtVariable_TextChanged);
             this.txtVariable.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtVariable_KeyDown);
             // 
@@ -180,7 +180,7 @@
             this.rbtnRect.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnRect.Name = "rbtnRect";
             this.rbtnRect.Size = new System.Drawing.Size(150, 30);
-            this.rbtnRect.TabIndex = 9;
+            this.rbtnRect.TabIndex = 11;
             this.rbtnRect.TabStop = true;
             this.rbtnRect.Text = "Rectangular";
             this.rbtnRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -193,7 +193,7 @@
             this.btnClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(30, 30);
-            this.btnClear.TabIndex = 10;
+            this.btnClear.TabIndex = 4;
             this.btnClear.Text = "";
             this.toolTip1.SetToolTip(this.btnClear, "Clear");
             this.btnClear.UseVisualStyleBackColor = true;
@@ -206,7 +206,7 @@
             this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(30, 30);
-            this.btnDelete.TabIndex = 11;
+            this.btnDelete.TabIndex = 8;
             this.btnDelete.Text = "";
             this.toolTip1.SetToolTip(this.btnDelete, "Delete");
             this.btnDelete.UseVisualStyleBackColor = true;
@@ -219,7 +219,7 @@
             this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(30, 30);
-            this.btnCopy.TabIndex = 12;
+            this.btnCopy.TabIndex = 5;
             this.btnCopy.Text = "";
             this.toolTip1.SetToolTip(this.btnCopy, "Copy");
             this.btnCopy.UseVisualStyleBackColor = true;
@@ -232,7 +232,7 @@
             this.btnPaste.Margin = new System.Windows.Forms.Padding(2);
             this.btnPaste.Name = "btnPaste";
             this.btnPaste.Size = new System.Drawing.Size(30, 30);
-            this.btnPaste.TabIndex = 13;
+            this.btnPaste.TabIndex = 6;
             this.btnPaste.Text = "";
             this.toolTip1.SetToolTip(this.btnPaste, "Paste");
             this.btnPaste.UseVisualStyleBackColor = true;
@@ -245,7 +245,7 @@
             this.btnSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelectAll.Name = "btnSelectAll";
             this.btnSelectAll.Size = new System.Drawing.Size(30, 30);
-            this.btnSelectAll.TabIndex = 14;
+            this.btnSelectAll.TabIndex = 9;
             this.btnSelectAll.Text = "";
             this.toolTip1.SetToolTip(this.btnSelectAll, "Select All");
             this.btnSelectAll.UseVisualStyleBackColor = true;
@@ -258,7 +258,7 @@
             this.btnSelClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnSelClear.Name = "btnSelClear";
             this.btnSelClear.Size = new System.Drawing.Size(30, 30);
-            this.btnSelClear.TabIndex = 15;
+            this.btnSelClear.TabIndex = 10;
             this.btnSelClear.Text = "";
             this.toolTip1.SetToolTip(this.btnSelClear, "Deselect All");
             this.btnSelClear.UseVisualStyleBackColor = true;
@@ -336,7 +336,7 @@
             this.btnCopy2.Margin = new System.Windows.Forms.Padding(2);
             this.btnCopy2.Name = "btnCopy2";
             this.btnCopy2.Size = new System.Drawing.Size(30, 30);
-            this.btnCopy2.TabIndex = 20;
+            this.btnCopy2.TabIndex = 21;
             this.btnCopy2.Text = "";
             this.toolTip1.SetToolTip(this.btnCopy2, "Copy");
             this.btnCopy2.UseVisualStyleBackColor = true;
@@ -349,7 +349,7 @@
             this.btnClear2.Margin = new System.Windows.Forms.Padding(2);
             this.btnClear2.Name = "btnClear2";
             this.btnClear2.Size = new System.Drawing.Size(30, 30);
-            this.btnClear2.TabIndex = 18;
+            this.btnClear2.TabIndex = 20;
             this.btnClear2.Text = "";
             this.toolTip1.SetToolTip(this.btnClear2, "Clear");
             this.btnClear2.UseVisualStyleBackColor = true;
@@ -384,7 +384,7 @@
             this.cbxPolyOrder.Location = new System.Drawing.Point(193, 80);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
-            this.cbxPolyOrder.TabIndex = 19;
+            this.cbxPolyOrder.TabIndex = 17;
             // 
             // rbtnSG
             // 
@@ -394,7 +394,7 @@
             this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnSG.Name = "rbtnSG";
             this.rbtnSG.Size = new System.Drawing.Size(150, 30);
-            this.rbtnSG.TabIndex = 18;
+            this.rbtnSG.TabIndex = 15;
             this.rbtnSG.Text = "Savitzky-Golay Filter";
             this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnSG.UseVisualStyleBackColor = true;
@@ -417,7 +417,7 @@
             this.groupBox2.Size = new System.Drawing.Size(344, 586);
             this.groupBox2.TabIndex = 25;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Original Data";
+            this.groupBox2.Text = "Initial Dataset";
             // 
             // btnEdit
             // 
@@ -427,7 +427,7 @@
             this.btnEdit.Margin = new System.Windows.Forms.Padding(2);
             this.btnEdit.Name = "btnEdit";
             this.btnEdit.Size = new System.Drawing.Size(30, 30);
-            this.btnEdit.TabIndex = 16;
+            this.btnEdit.TabIndex = 7;
             this.btnEdit.Text = "";
             this.toolTip1.SetToolTip(this.btnEdit, "Edit");
             this.btnEdit.UseVisualStyleBackColor = true;
@@ -465,7 +465,7 @@
             this.groupBox3.Size = new System.Drawing.Size(344, 586);
             this.groupBox3.TabIndex = 26;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Calibrated Data";
+            this.groupBox3.Text = "Refined Dataset";
             // 
             // lblCnt2
             // 
@@ -588,7 +588,7 @@
             this.rbtnGauss.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnGauss.Name = "rbtnGauss";
             this.rbtnGauss.Size = new System.Drawing.Size(150, 30);
-            this.rbtnGauss.TabIndex = 19;
+            this.rbtnGauss.TabIndex = 14;
             this.rbtnGauss.Text = "Gaussian Filter";
             this.rbtnGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnGauss.UseVisualStyleBackColor = true;
