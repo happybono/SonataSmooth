@@ -53,3 +53,15 @@ D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
 D:\SonataSmooth\SonataSmooth\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmModify.resources
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe.config
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.exe
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\bin\Debug\NoiseReductionSample.pdb
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.AssemblyReference.cache
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe.config
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmMain.resources
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmModify.resources
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.Properties.Resources.resources
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.GenerateResource.cache
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
+D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
