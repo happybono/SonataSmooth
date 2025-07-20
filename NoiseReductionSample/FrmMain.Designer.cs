@@ -114,12 +114,12 @@
             // 
             this.rbtnAvg.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnAvg.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnAvg.Location = new System.Drawing.Point(181, 26);
+            this.rbtnAvg.Location = new System.Drawing.Point(175, 25);
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
-            this.rbtnAvg.Size = new System.Drawing.Size(150, 30);
+            this.rbtnAvg.Size = new System.Drawing.Size(163, 30);
             this.rbtnAvg.TabIndex = 12;
-            this.rbtnAvg.Text = "Average";
+            this.rbtnAvg.Text = "Binomial Averaging";
             this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnAvg.UseVisualStyleBackColor = true;
             // 
@@ -127,12 +127,12 @@
             // 
             this.rbtnMed.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnMed.Location = new System.Drawing.Point(21, 59);
+            this.rbtnMed.Location = new System.Drawing.Point(7, 59);
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
-            this.rbtnMed.Size = new System.Drawing.Size(150, 30);
+            this.rbtnMed.Size = new System.Drawing.Size(331, 30);
             this.rbtnMed.TabIndex = 13;
-            this.rbtnMed.Text = "Median";
+            this.rbtnMed.Text = "Binomial Median Filtering";
             this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnMed.UseVisualStyleBackColor = true;
             // 
@@ -177,13 +177,13 @@
             this.rbtnRect.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnRect.Checked = true;
             this.rbtnRect.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnRect.Location = new System.Drawing.Point(21, 26);
+            this.rbtnRect.Location = new System.Drawing.Point(7, 25);
             this.rbtnRect.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnRect.Name = "rbtnRect";
-            this.rbtnRect.Size = new System.Drawing.Size(150, 30);
+            this.rbtnRect.Size = new System.Drawing.Size(163, 30);
             this.rbtnRect.TabIndex = 11;
             this.rbtnRect.TabStop = true;
-            this.rbtnRect.Text = "Rectangular";
+            this.rbtnRect.Text = "Rectangular Averaging";
             this.rbtnRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnRect.UseVisualStyleBackColor = true;
             // 
@@ -391,12 +391,12 @@
             // 
             this.rbtnSG.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnSG.Location = new System.Drawing.Point(21, 93);
+            this.rbtnSG.Location = new System.Drawing.Point(175, 93);
             this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnSG.Name = "rbtnSG";
-            this.rbtnSG.Size = new System.Drawing.Size(150, 30);
+            this.rbtnSG.Size = new System.Drawing.Size(163, 30);
             this.rbtnSG.TabIndex = 15;
-            this.rbtnSG.Text = "Savitzky-Golay Filter";
+            this.rbtnSG.Text = "Savitzky-Golay Filtering";
             this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnSG.UseVisualStyleBackColor = true;
             this.rbtnSG.CheckedChanged += new System.EventHandler(this.rbtnSG_CheckedChanged);
@@ -585,12 +585,12 @@
             // 
             this.rbtnGauss.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnGauss.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnGauss.Location = new System.Drawing.Point(181, 59);
+            this.rbtnGauss.Location = new System.Drawing.Point(7, 93);
             this.rbtnGauss.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnGauss.Name = "rbtnGauss";
-            this.rbtnGauss.Size = new System.Drawing.Size(150, 30);
+            this.rbtnGauss.Size = new System.Drawing.Size(163, 30);
             this.rbtnGauss.TabIndex = 14;
-            this.rbtnGauss.Text = "Gaussian Filter";
+            this.rbtnGauss.Text = "Gaussian Filtering";
             this.rbtnGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnGauss.UseVisualStyleBackColor = true;
             // 
