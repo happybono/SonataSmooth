@@ -1,5 +1,5 @@
 # SonataSmooth
-**SonataSmooth** is a C#.NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.
+**SonataSmooth** is a C#.NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
 
 - **Rectangular (uniform) mean** :<br>
   computes a simple moving average over a fixed window of equal weights.<br><br>
@@ -124,15 +124,15 @@ var progressReporter = new Progress<int>(pct =>
 
 ### 2. Parallel Kernel Filtering
 #### How it works
-All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
+All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position `i`, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
 When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized for performance using PLINQ.
 
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.
 
--	Parallel Processing : Uses all available CPU cores for fast computation.
--	Kernel Filtering : Applies the selected filter to each data point using a moving window.
+-	**Parallel Processing** : Uses all available CPU cores for fast computation.
+-	**Kernel Filtering** : Applies the selected filter to each data point using a moving window.
 
 #### Code Implementation
 ```csharp
@@ -158,8 +158,8 @@ A simple sliding-window average over 2 × w + 1 points, ignoring out-of-bounds i
 #### Principle
 Every neighbor contributes equally (uniform weights).
 
--	Uniform Weights : Each value in the window contributes equally.
--	Noise Reduction : Smooths out short-term fluctuations.
+-	**Uniform Weights** : Each value in the window contributes equally.
+-	**Noise Reduction** : Smooths out short-term fluctuations.
 
 #### Code Implementation
 ```csharp
@@ -187,8 +187,8 @@ Computes the median of values in the window, weighted by binomial coefficients, 
 #### Principle
 Median filtering is robust against outliers; binomial weights bias the median toward center points.
 
--	Weighted Median : Each value's influence is determined by its weight.
--	Edge Preservation : More robust to outliers than mean filters.
+-	**Weighted Median** : Each value's influence is determined by its weight.
+-	**Edge Preservation** : More robust to outliers than mean filters.
 
 #### Code Implementation
 ```csharp
@@ -244,8 +244,8 @@ Averages values in the window, but each value is weighted according to binomial 
 #### Principle
 A discrete approximation of Gaussian smoothing (binomial coefficients approximate a normal distribution).
 
--	Binomial Weights : Central values have higher influence.
--	Smoother Output : Reduces noise while maintaining signal shape.
+-	**Binomial Weights** : Central values have higher influence.
+-	**Smoother Output** : Reduces noise while maintaining signal shape.
 
 #### Code Implementation
 ```csharp
@@ -273,8 +273,8 @@ As a result, fits a low-degree polynomial to the data within the window and eval
 #### Principle
 Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
 
--	Polynomial Fitting : Least-squares fit within the window.
--	Feature Preservation : Maintains higher moments (e.g., slope, curvature).
+-	**Polynomial Fitting** : Least-squares fit within the window.
+-	**Feature Preservation** : Maintains higher moments (e.g., slope, curvature).
 
 #### Code Implementation
 ```csharp
@@ -301,11 +301,11 @@ private static double[] ComputeGolayCoefficients(int windowSize, int polyOrder)
 After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
 #### Principle
-Batch updates and progress reporting keep the UI responsive. A finally block ensures the progress bar always resets on completion or error.
+Batch updates and progress reporting keep the UI responsive. A finally block ensures the progressbar always resets on completion or error.
 
--	Batch UI Update : Efficiently updates the list box.
--	Progress Feedback : Shows operation progress to the user.
--	Status Reporting : Updates labels and enables/disables controls.
+-	**Batch UI Update** : Efficiently updates the list box.
+-	**Progress Feedback** : Shows operation progress to the user.
+-	**Status Reporting** : Updates labels and enables/disables controls.
 
 #### Code Implementation
 ```csharp
@@ -329,8 +329,8 @@ slblKernelWidth.Text = w.ToString();
 Calculates binomial coefficients for a given window size, which are used as weights in the binomial average and weighted median filters.
 
 #### Principle
--	Pascal's Triangle : Each coefficient is the sum of the two above it, or mathematically, C(n, k) = n! / (k! (n-k)!).
--	Symmetry : The coefficients are symmetric and always sum to a power of two.
+-	**Pascal's Triangle** : Each coefficient is the sum of the two above it, or mathematically, C(n, k) = n! / (k! (n-k)!).
+-	**Symmetry** : The coefficients are symmetric and always sum to a power of two.
 
 #### Code Implementation
 ```csharp
