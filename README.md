@@ -16,7 +16,7 @@
 - **Savitzky-Golay polynomial smoothing** :<br>
   fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.<br><br>
 
-After processing is complete, the tool writes the smoothed sequence to a separate output list and updates a progress bar in real time to indicate the computation's progress.<br><br>
+After processing is complete, the application writes the smoothed sequence to a separate output list and updates a progress bar in real-time to indicate the smoothing progress.<br><br>
 
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
