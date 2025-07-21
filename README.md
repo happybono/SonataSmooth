@@ -51,7 +51,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 > ListBox Selection & Deletion Optimization<br><br>
 > Regex Performance Tuning<br><br>
 > UI-Thread Responsiveness<br><br>
-> Median Filter Bias (Fixed the original code’s one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
+> Median Filter Bias (Fixed the original code's one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
 > Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort / reverse and using symmetric indexing (binom[k + w]).<br><br>
 > UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br><br>
 
@@ -60,7 +60,7 @@ After processing is complete, the tool writes the smoothed sequence to a separat
 > Overhauled the graphical user interface.<br><br>
 > Fixed an issue where the application became unresponsive when calibrating large datasets (over 100,000 entries) with the Noise Reduction Kernel Width set to 7 or higher using the Weighted Median method.<br><br>
 > Fixed an issue where the txtVariable textbox was not being cleared after its contents were added to the ListBox.<br><br>
-> Reimplemented and optimized the weighted-median calibration algorithm’s procedures, reducing processing time by more than a factor of 16.<br><br>
+> Reimplemented and optimized the weighted-median calibration algorithm's procedures, reducing processing time by more than a factor of 16.<br><br>
 > Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br><br>
 > Minor bugs fixed.<br>
 
@@ -101,21 +101,21 @@ Prepare raw data and parameters before any heavy computation. Converting inputs 
 
 #### Code Implementation
 ```csharp
-// 1. Count input values
+// Count input values
 int n = listBox1.Items.Count;
 
-// 2. Copy and convert to double[]
+// Copy and convert to double[]
 var input = new double[n];
 for (int i = 0; i < n; i++)
     input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
 
-// 3. Read kernel radius w (half-width)
+// Read kernel radius w (half-width)
 int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
 
-// 4. Generate binomial coefficients of length 2 × w + 1
+// Generate binomial coefficients of length 2 × w + 1
 int[] binom = CalcBinomialCoefficients(2 * w + 1);
 
-// 5. Set up a progress reporter for thread-safe UI updates
+// Set up a progress reporter for thread-safe UI updates
 var progressReporter = new Progress<int>(pct =>
 {
      progressBar1.Value = Math.Max(0, Math.Min(100, pct));
@@ -126,40 +126,47 @@ var progressReporter = new Progress<int>(pct =>
 #### How it works
 All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position i, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
+When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized for performance using PLINQ.
+
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.
 
+-	Parallel Processing : Uses all available CPU cores for fast computation.
+-	Kernel Filtering : Applies the selected filter to each data point using a moving window.
+
 #### Code Implementation
 ```csharp
-double[] results = await Task.Run(() =>
-    ParallelEnumerable
-        .Range(0, n)                                       // indices 0 ... n - 1
-        .AsOrdered()                                       // keep order
+results = await Task.Run(() =>
+{
+    // ... (filter coefficient preparation)
+    return ParallelEnumerable
+        .Range(0, n)
+        .AsOrdered()
         .WithDegreeOfParallelism(Environment.ProcessorCount)
         .Select(i =>
         {
-            double value = 0;
-
-            // (Filter implementations go here...)
-
-            return value;
+            // Filtering logic (see below)
         })
-        .ToArray()
-);
+        .ToArray();
+});
 ```
 
-### 2.1 Rectangular (Uniform) Mean Filter
+### 3. Rectangular (Uniform) Mean Filter
 #### How it works
 A simple sliding-window average over 2 × w + 1 points, ignoring out-of-bounds indices.
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
 
+-	Uniform Weights : Each value in the window contributes equally.
+-	Noise Reduction : Smooths out short-term fluctuations.
+
 #### Code Implementation
 ```csharp
-if (rbtnRect.Checked)
+if (useRect)
 {
-    double sum = 0, cnt = 0;
+    double sum = 0;
+    int cnt = 0;
     for (int k = -w; k <= w; k++)
     {
         int idx = i + k;
@@ -169,20 +176,28 @@ if (rbtnRect.Checked)
             cnt++;
         }
     }
-    if (cnt > 0)
-        value = sum / cnt;
+    return cnt > 0 ? sum / cnt : 0;
 }
 ```
 
-### 2.2 Weighted Median Filter
+### 4. Weighted Median Filter
 #### How it works
-Each neighbor’s value is replicated according to its binomial weight, then the combined list is sorted to pick the median.
+Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.
 
 #### Principle
 Median filtering is robust against outliers; binomial weights bias the median toward center points.
 
+-	Weighted Median : Each value's influence is determined by its weight.
+-	Edge Preservation : More robust to outliers than mean filters.
+
 #### Code Implementation
 ```csharp
+else if (useMed)
+{
+    return WeightedMedianAt(input, i, w, binom);
+}
+
+// WeightedMedianAt implementation :
 private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
 {
     var pairs = new List<(double Value, int Weight)>(2 * w + 1);
@@ -206,203 +221,134 @@ private static double WeightedMedianAt(double[] data, int center, int w, int[] b
     for (int i = 0; i < pairs.Count; i++)
     {
         accum += pairs[i].Weight;
-
-        // If cumulative weight exceeds half : crossed the lower portion, return current value
         if (accum > half)
         {
             return pairs[i].Value;
         }
-
-        // If cumulative weight equals exactly half : take average of current and next value
         if (isEvenTotal && accum == half)
         {
-            // Bounds check for safety
             double nextVal = (i + 1 < pairs.Count)
                              ? pairs[i + 1].Value
                              : pairs[i].Value;
             return (pairs[i].Value + nextVal) / 2.0;
         }
     }
-
-    // If value still not found after full accumulation, return the maximum
     return pairs[pairs.Count - 1].Value;
 }
 ```
 
-### 2.3 Binomial (Weighted) Average Filter
+### 5. Binomial (Weighted) Average Filter
 #### How it works
-Multiply each neighbor by its binomial weight, sum them up, then divide by the total weight sum.
+Averages values in the window, but each value is weighted according to binomial coefficients, giving more importance to central values.
 
 #### Principle
 A discrete approximation of Gaussian smoothing (binomial coefficients approximate a normal distribution).
+
+-	Binomial Weights : Central values have higher influence.
+-	Smoother Output : Reduces noise while maintaining signal shape.
 
 #### Code Implementation
 ```csharp
 else if (useAvg)
 {
-    // Binomial-weighted average
-    double sum = 0; int cs = 0;
+    double sum = 0;
+    int cs = 0;
     for (int k = -w; k <= w; k++)
     {
         int idx = i + k;
         if (idx < 0 || idx >= n) continue;
-        double v = input[idx];
-        int c = binom[k + w];
-        sum += v * c;
-        cs += c;
+        sum += input[idx] * binom[k + w];
+        cs += binom[k + w];
     }
     return cs > 0 ? sum / cs : 0;
 }
 ```
 
-### 2.4 Savitzky–Golay Filter
+### 6. Savitzky–Golay Filter
 #### How it works
-Fit a local polynomial of order polyOrder over a window of size 2 * w + 1 and evaluate it at the center. Precomputed SG coefficients are convolved with the data, with mirrored boundaries.
+A fixed-size window of length 2 × w + 1 slides over the 1D signal. At each position, out-of-bounds indices are "mirrored" back into the valid range, then each neighbor's value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
+
+As a result, fits a low-degree polynomial to the data within the window and evaluates the central point, preserving features like peaks and edges.
 
 #### Principle
-Savitzky–Golay smoothing preserves higher‐order moments (like peaks and widths) better than simple averaging, by performing a least‐squares polynomial fit over the window.
+Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
+
+-	Polynomial Fitting : Least-squares fit within the window.
+-	Feature Preservation : Maintains higher moments (e.g., slope, curvature).
 
 #### Code Implementation
 ```csharp
 else if (useSG)
 {
-  // Savitzky-Golay filter
-  double sum = 0;
-  for (int k = -w; k <= w; k++)
-  {
-      int idx = i + k;
-      double v = (idx < 0) ? input[-idx]
-               : (idx >= n) ? input[2 * n - idx - 2]
-               : input[idx];
-      sum += sgCoeffs[k + w] * v;
-  }
-  return sum;
-}
-```
-
-### 2.5 Gaussian Filter
-#### How it works
-A fixed-size window of length 2·w+1 slides over the 1D signal. At each position, out-of-bounds indices are "mirrored" back into the valid range, then each neighbor’s value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
-
-#### Principle
-Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
-
-#### Code Implementation
-```csharp
-// 1) Compute normalized 1D Gaussian kernel
-private static double[] ComputeGaussianCoefficients(int length, double sigma)
-{
-    if (length < 1)
-        throw new ArgumentException("length must be ≥ 1", nameof(length));
-    if (sigma <= 0)
-        throw new ArgumentException("sigma must be > 0", nameof(sigma));
-
-    int w = (length - 1) / 2;
-    double twoSigmaSq = 2 * sigma * sigma;
-    double[] coeffs = new double[length];
-    double sum = 0.0;
-
-    for (int i = 0; i < length; i++)
+    double sum = 0;
+    for (int k = -w; k <= w; k++)
     {
-        int x = i - w;
-        coeffs[i] = Math.Exp(-x * x / twoSigmaSq);
-        sum += coeffs[i];
+        int mi = Mirror(i + k);
+        sum += sgCoeffs[k + w] * input[mi];
     }
-    if (sum <= 0)
-        throw new InvalidOperationException("Gaussian kernel sum must be positive.");
-
-    for (int i = 0; i < length; i++)
-        coeffs[i] /= sum;
-
-    return coeffs;
+    return sum;
 }
 
-// 2) Mirror boundary handler
-private static int Mirror(int idx, int n)
+// Coefficient calculation :
+private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
 {
-    if (idx < 0)      return -idx - 1;
-    if (idx >= n)     return 2 * n - idx - 1;
-    return idx;
-}
-
-// 3) Apply Gaussian Filter to 1D input array
-public static double[] ApplyGaussianFilter(double[] input, int w, double sigma)
-{
-    int n = input.Length;
-    double[] coeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
-    double[] output = new double[n];
-
-    Parallel.For(0, n, i =>
-    {
-        double sum = 0.0;
-        for (int k = -w; k <= w; k++)
-        {
-            int mi = Mirror(i + k, n);
-            sum += coeffs[k + w] * input[mi];
-        }
-        output[i] = sum;
-    });
-
-    return output;
+    // ... (matrix construction and inversion)
 }
 ```
 
-### Results Aggregation & UI Update
+### 7. Results Aggregation & UI Update
 #### How it works
 After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
 #### Principle
 Batch updates and progress reporting keep the UI responsive. A finally block ensures the progress bar always resets on completion or error.
 
+-	Batch UI Update : Efficiently updates the list box.
+-	Progress Feedback : Shows operation progress to the user.
+-	Status Reporting : Updates labels and enables/disables controls.
+
 #### Code Implementation
 ```csharp
-// Add filtered values to listBox2 in batches (with progress)
+listBox2.BeginUpdate();
+listBox2.Items.Clear();
 await AddItemsInBatches(listBox2, results, progressReporter);
+listBox2.EndUpdate();
+lblCnt2.Text = $"Count : {listBox2.Items.Count}";
 
-// Update count label and disable buttons
-lblCnt2.Text = "Count : " + listBox2.Items.Count;
-slblCalibratedType.Text = useRect ? "Rectangular Average" :
-                            useMed ? "Weighted Median" :
-                            useAvg ? "Binomial Average" :
-                            useSG ? "Savitzky-Golay Filter" : "Unknown";
+slblCalibratedType.Text = useRect ? "Rectangular Average"
+                     : useMed ? "Weighted Median"
+                     : useAvg ? "Binomial Average"
+                     : useSG ? "Savitzky-Golay Filter"
+                     : useGauss ? "Gaussian Filter"
+                                : "Unknown";
 slblKernelWidth.Text = w.ToString();
-
-btnCopy2.Enabled = false;
-btnSelClear2.Enabled = false;
-}
-finally
-{
-    // Always clear the progress bar
-    progressBar1.Value = 0;
-    btnCalibrate.Enabled = true;
-}
 ```
 
-### Binomial Coefficients Computation
+### 8. Pascal's Triangle (Binomial Coefficient Calculation)
 #### How it works
-Generates one row of Pascal’s triangle (length = 2 * w + 1) by iteratively applying the binomial recurrence.
+Calculates binomial coefficients for a given window size, which are used as weights in the binomial average and weighted median filters.
 
 #### Principle
-Leverage the relation
-C(n, k) = C(n, k - 1) × (n - (k - 1)) / k
-to compute coefficients in O(n) time without factorials.
+-	Pascal's Triangle : Each coefficient is the sum of the two above it, or mathematically, C(n, k) = n! / (k! (n-k)!).
+-	Symmetry : The coefficients are symmetric and always sum to a power of two.
 
 #### Code Implementation
 ```csharp
-private int[] CalcBinomialCoefficients(int length)
+private static int[] CalcBinomialCoefficients(int length)
 {
     if (length < 1)
         throw new ArgumentException("length must be ≥ 1", nameof(length));
 
     var c = new int[length];
-    c[0] = 1;                          // C(n, 0) = 1
+    c[0] = 1;
     for (int i = 1; i < length; i++)
         c[i] = c[i - 1] * (length - i) / i;
     return c;
 }
 ```
+-	This function generates the coefficients for the (length-1)th row of Pascal's triangle, which are used as weights for the filters.
 
-### Savitzky–Golay Coefficients Computation
+### 9. Savitzky–Golay Coefficients Computation
 #### How it works
 Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
 
@@ -419,29 +365,29 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
     int m    = polyOrder;
     int half = windowSize / 2;
 
-    // 1) Build Vandermonde matrix A (windowSize × (m + 1))
+    // Build Vandermonde matrix A (windowSize × (m + 1))
     double[,] A = new double[windowSize, m + 1];
     for (int i = -half; i <= half; i++)
         for (int j = 0; j <= m; j++)
             A[i + half, j] = Math.Pow(i, j);
 
-    // 2) Compute ATA = Aᵀ * A ((m + 1) × (m + 1))
+    // Compute ATA = Aᵀ × A ((m + 1) × (m + 1))
     double[,] ATA = new double[m + 1, m + 1];
     for (int i = 0; i <= m; i++)
         for (int j = 0; j <= m; j++)
             for (int k = 0; k < windowSize; k++)
                 ATA[i, j] += A[k, i] * A[k, j];
 
-    // 3) Invert ATA to get invATA
+    // Invert ATA to get invATA
     double[,] invATA = InvertMatrix(ATA);
 
-    // 4) Compute AT = Aᵀ ((m + 1) × windowSize)
+    // Compute AT = Aᵀ ((m + 1) × windowSize)
     double[,] AT = new double[m + 1, windowSize];
     for (int i = 0; i <= m; i++)
         for (int k = 0; k < windowSize; k++)
             AT[i, k] = A[k, i];
 
-    // 5) Compute filter coefficients h[k] = sum_j invATA[0, j] * AT[j, k]
+    // Compute filter coefficients h[k] = sum_j invATA[0, j] × AT[j, k]
     var h = new double[windowSize];
     for (int k = 0; k < windowSize; k++)
     {
@@ -456,20 +402,30 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 ```
 
 ### Data Handling and Processing
-- Implemented drag-and-drop functionality to allow users to add data to the application easily.
-- Regular expressions were used to extract and parse numerical data from various formats.
+-	Supports data input via manual entry, clipboard paste, and drag-and-drop.
+-	Automatically parses and validates numeric data, removing non-numeric content (e.g., HTML tags).
+-	Stores data as high-precision double values for accurate processing.
+-	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky–Golay, and Gaussian filters.
+-	Utilizes parallel processing (PLINQ) for efficient computation on large datasets.
+-	Calculates binomial coefficients using Pascal’s Triangle for weighted filters.
+-	Displays processed results in a separate output list for further use.
 
 ### User Interface and Interaction
-- Designed and developed a user-friendly interface with interactive elements like buttons and list boxes.
-- Provided real-time feedback to the user by updating counts and results dynamically.
+-	Intuitive Windows Forms interface with controls for data entry, editing, and deletion.
+-	Provides options to select noise reduction algorithm and configure parameters (kernel width, polynomial order).
+-	Supports keyboard shortcuts for common actions (delete, copy, paste, select all, etc.).
+-	Real-time feedback through progress bars and status labels during operations.
+-	Allows batch selection, editing, and clearing of data points.
+-	Responsive UI with asynchronous updates to maintain smooth user experience.
 
 ### Customization and Configuration
-- Allowed users to select the noise reduction method and kernel width through the interface.
-- Enabled users to calibrate and fine-tune the noise reduction process based on their needs.
+-	Users can choose the filter type and adjust kernel width and polynomial order via combo boxes.
+-	Input validation prevents invalid parameter configurations.
+-	Modular code structure allows easy addition or extension of filters and configuration options.
+-	UI is designed to accommodate future enhancements and custom settings.
 
-## Conclusion
-
-This project delivers significantly cleaner and more reliable data outputs by combining four complementary smoothing strategies : rectangular (uniform) mean, weighted median, binomial (Gaussian-like) average, and Savitzky-Golay polynomial smoothing. 
+### Conclusion
+This application provides a robust and user-friendly environment for noise reduction analysis on numerical datasets. By combining flexible data input methods, a responsive and informative user interface, and efficient parallel processing of advanced filtering algorithms, it enables users to quickly and accurately process their data. The use of Pascal’s Triangle for binomial weighting, along with support for a variety of filters, ensures both mathematical rigor and practical versatility. 
 
 In particular :
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
@@ -480,7 +436,6 @@ In particular :
 Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
-
 
 ## Demonstration
 ![Final Product](SonataSmooth.png)<br><br>
