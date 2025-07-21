@@ -1,5 +1,5 @@
 # SonataSmooth
-This tool reads a sequence of numerical data from an input list, lets you configure parameters such as window size, weight coefficients, Gaussian sigma, or polynomial order, and then applies one of five smoothing algorithms :
+**SonataSmooth** is a Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.
 
 - **Rectangular (uniform) mean** :<br>
   computes a simple moving average over a fixed window of equal weights.<br><br>
@@ -13,7 +13,7 @@ This tool reads a sequence of numerical data from an input list, lets you config
 - **Gaussian filter** :<br>
   convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).<br><br>
   
-- **Savitzky–Golay polynomial smoothing** :<br>
+- **Savitzky-Golay polynomial smoothing** :<br>
   fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.<br><br>
 
 After processing is complete, the tool writes the smoothed sequence to a separate output list and updates a progress bar in real time to indicate the computation's progress.<br><br>
@@ -264,7 +264,7 @@ else if (useAvg)
 }
 ```
 
-### 6. Savitzky–Golay Filter
+### 6. Savitzky-Golay Filter
 #### How it works
 A fixed-size window of length 2 × w + 1 slides over the 1D signal. At each position, out-of-bounds indices are "mirrored" back into the valid range, then each neighbor's value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
 
@@ -290,7 +290,7 @@ else if (useSG)
 }
 
 // Coefficient calculation :
-private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
+private static double[] ComputeGolayCoefficients(int windowSize, int polyOrder)
 {
     // ... (matrix construction and inversion)
 }
@@ -348,12 +348,12 @@ private static int[] CalcBinomialCoefficients(int length)
 ```
 -	This function generates the coefficients for the (length-1)th row of Pascal's triangle, which are used as weights for the filters.
 
-### 9. Savitzky–Golay Coefficients Computation
+### 9. Savitzky-Golay Coefficients Computation
 #### How it works
 Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
 
 #### Principle
-Savitzky–Golay filters derive from least‐squares polynomial fitting.
+Savitzky-Golay filters derive from least‐squares polynomial fitting.
 - Build matrix A where each row contains powers of the relative offset within the window.
 - Form the normal equations (AᵀA), invert them, and multiply by Aᵀ to get the pseudoinverse.
 - The convolution coefficients for smoothing (value at central point) are the first row of this pseudoinverse.
@@ -405,7 +405,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 -	Supports data input via manual entry, clipboard paste, and drag-and-drop.
 -	Automatically parses and validates numeric data, removing non-numeric content (e.g., HTML tags).
 -	Stores data as high-precision double values for accurate processing.
--	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky–Golay, and Gaussian filters.
+-	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters.
 -	Utilizes parallel processing (PLINQ) for efficient computation on large datasets.
 -	Calculates binomial coefficients using Pascal’s Triangle for weighted filters.
 -	Displays processed results in a separate output list for further use.
@@ -431,7 +431,7 @@ In particular :
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
 - Weighted median filtering adds robustness against outliers by privileging central values.  
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
-- Savitzky–Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
+- Savitzky-Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
 
 Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
