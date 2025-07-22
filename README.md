@@ -31,7 +31,7 @@ After processing is complete, the application writes the smoothed sequence to a 
   
 ### v1.0.0.0
 #### January 19, 2025
->[Initial release.](https://github.com/happybono/SonataSmooth/commit/1c9911992e2b0ec6b984828519ac78cbcb5a0a51)<br>
+>[Initial release.](https://github.com/happybono/SonataSmooth/commit/1c9911992e2b0ec6b984828519ac78cbcb5a0a51)
 
 ### v1.0.1.0
 #### January 19, 2025
@@ -40,7 +40,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 
 ### v1.0.2.0
 #### January 20, 2025
-> [Bugs fixed.](https://github.com/happybono/SonataSmooth/commit/f7d0568b4ebf30ed7868885a9bff92960e757b13)<br>
+> [Bugs fixed.](https://github.com/happybono/SonataSmooth/commit/f7d0568b4ebf30ed7868885a9bff92960e757b13)
 
 ### v2.0.0.0
 #### July 08, 2025
@@ -53,7 +53,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 > UI-Thread Responsiveness<br><br>
 > Median Filter Bias (Fixed the original code's one-sided kernel bug to correctly include both left and right neighbors in the weighted median.)<br><br>
 > Binomial Coefficient Indexing (Resolved mis-mapping by removing unnecessary sort / reverse and using symmetric indexing (binom[k + w]).<br><br>
-> UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)<br><br>
+> UI Flicker Prevention (Added BeginUpdate / EndUpdate around all ListBox modifications to eliminate redraw artifacts.)
 
 ### v3.0.0.0
 #### July 17, 2025
@@ -62,11 +62,11 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Fixed an issue where the txtVariable textbox was not being cleared after its contents were added to the ListBox.<br><br>
 > Reimplemented and optimized the weighted-median calibration algorithm's procedures, reducing processing time by more than a factor of 16.<br><br>
 > Fixed a bug in the median-based calibration algorithm that prevented it from producing correct corrected values.<br><br>
-> Minor bugs fixed.<br>
+> Minor bugs fixed.
 
 ### v3.0.0.1
 #### July 18, 2025
-> [Fixed a bug in AddItemsInBatches where existing ListBox items were being cleared. (New items are now appended without removing the originals and the scroll position updates correctly.)](https://github.com/happybono/SonataSmooth/commit/670762bf268f750dac77bf901c05366fdd78f814)<br><br>
+> [Fixed a bug in AddItemsInBatches where existing ListBox items were being cleared. (New items are now appended without removing the originals and the scroll position updates correctly.)](https://github.com/happybono/SonataSmooth/commit/670762bf268f750dac77bf901c05366fdd78f814)
 
 ### v3.1.0.0
 #### July 19, 2025
@@ -74,7 +74,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Improved tooltips and labels: clarified filter options and renamed "Clear Selection" to "Deselect All".<br><br>
 > Fixed ListBox2 update to clear old items before adding new results, ensuring the correct order and smooth refresh.<br><br>
 > Repositioned the listbox control buttons and added descriptive icons to each button.<br><br>
-> Added required font files to the Resources / Fonts directory.<br><br>
+> Added required font files to the Resources / Fonts directory.
 
 ### v3.5.0.0
 #### July 19, 2025
@@ -82,13 +82,13 @@ After processing is complete, the application writes the smoothed sequence to a 
   (The number of selected items for editing is now displayed in the StatusBar.)<br><br>
 > Updated copy behavior : even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
   (If only some items in the listbox are selected, only those selected items will be copied.)<br><br>
-> Minor bugs fixed.<br><br>
+> Minor bugs fixed.
 
 ### v3.6.1.0
 #### July 20, 2025
 > Removed beep sound during various operations (such as adding or editing items) via keyboard input (e.g. Enter) in the listbox.<br><br>
 > Improved processing and response speed when performing "Select All" followed by "Delete All".<br><br>
-> Minor bugs fixed.<br><br>
+> Minor bugs fixed.
 
 ### v3.6.2.0
 #### July 22, 2025
