@@ -22,3 +22,15 @@ D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Release\Nois
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.csproj.CoreCompileInputs.cache
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.exe
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Release\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Release\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\Release\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.FrmModify.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.Properties.Resources.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Release\NoiseReductionSample.pdb

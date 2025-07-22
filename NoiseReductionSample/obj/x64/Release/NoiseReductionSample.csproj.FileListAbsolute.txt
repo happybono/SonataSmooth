@@ -22,3 +22,15 @@ D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.csproj.CoreCompileInputs.cache
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.exe
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\x64\Release\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\x64\Release\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\bin\x64\Release\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.csproj.AssemblyReference.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.FrmModify.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.Properties.Resources.resources
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.csproj.GenerateResource.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.exe
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\x64\Release\NoiseReductionSample.pdb

@@ -46,11 +46,6 @@ namespace NoiseReductionSample
 
             // 키보드 Delete → btnDelete 클릭 처리
             this.KeyPreview = true;
-            this.KeyDown += (s, e) =>
-            {
-                if (e.KeyCode == Keys.Delete && listBox1.Focused)
-                    btnDelete.PerformClick();
-            };
 
             // 선택 상태에 따라 버튼 활성 / 비활성 토글
             listBox1.SelectedIndexChanged += (s, e) =>
@@ -265,7 +260,7 @@ namespace NoiseReductionSample
                     listBox2.BeginUpdate();
                     listBox2.Items.Clear();
 
-                    await AddItemsInBatches(listBox2, results, progressReporter);
+                    await AddItemsInBatches(listBox2, results, progressReporter, 60);
                     listBox2.EndUpdate();
                     lblCnt2.Text = $"Count : {listBox2.Items.Count}";
 
@@ -673,7 +668,6 @@ namespace NoiseReductionSample
 
         private async void listBox1_DragDrop(object sender, DragEventArgs e)
         {
-            // Calibrate 버튼 비활성 + ProgressBar 초기화
             btnCalibrate.Enabled = false;
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
@@ -682,14 +676,12 @@ namespace NoiseReductionSample
 
             try
             {
-                // 드래그된 원본 텍스트 추출
                 string raw = getDropText(e);
                 progressBar1.Value = 10;
 
                 if (string.IsNullOrWhiteSpace(raw))
                     return;
 
-                // HTML 태그 제거가 필요하면 백그라운드에서 처리
                 if (raw.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     raw = await Task.Run(() =>
@@ -701,7 +693,6 @@ namespace NoiseReductionSample
                         return;
                 }
 
-                // 숫자 파싱: 백그라운드 PLINQ
                 double[] parsed = await Task.Run(() =>
                 {
                     var ci = CultureInfo.InvariantCulture;
@@ -712,7 +703,6 @@ namespace NoiseReductionSample
                         .WithDegreeOfParallelism(Environment.ProcessorCount)
                         .Select(m =>
                         {
-                            // 천 단위 구분자 제거 후 파싱
                             string tok = m.Value.Replace(",", "").Trim();
                             return double.TryParse(tok, NumberStyles.Any, ci, out double d)
                                 ? d
@@ -726,45 +716,38 @@ namespace NoiseReductionSample
                 if (parsed.Length == 0)
                     return;
 
-                // UI에 배치 추가 + 진행률 리포터
+                // 진행률 보고자: 60~100 사이 값만 처리하도록 설정
+                int baseProgress = 60;
                 var progressReporter = new Progress<int>(pct =>
                 {
-                    pct = Math.Max(0, Math.Min(100, pct));
-                    progressBar1.Value = pct;
+                    int adjustedPct = Math.Max(baseProgress, Math.Min(100, pct));
+                    progressBar1.Value = adjustedPct;
                     progressBar1.Refresh();
                 });
 
-                await AddItemsInBatches(listBox1, parsed, progressReporter);
+                await AddItemsInBatches(listBox1, parsed, progressReporter, baseProgress);
 
-                // 완료 표시
                 progressBar1.Value = 100;
                 lblCnt1.Text = "Count : " + listBox1.Items.Count;
-                await Task.Delay(200);  // 100% 상태를 잠깐 보여주기
+                await Task.Delay(200);
             }
             finally
             {
-                if (listBox1.Items.Count > 0)
-                {
-                    btnCopy.Enabled = true;
-                    btnDelete.Enabled = true;
-                }
-                else
-                {
-                    btnCopy.Enabled = false;
-                    btnDelete.Enabled = false;
-                }
+                bool hasItems = listBox1.Items.Count > 0;
+                btnCopy.Enabled = hasItems;
+                btnDelete.Enabled = hasItems;
 
-                // 최종 초기화
                 progressBar1.Value = 0;
                 btnCalibrate.Enabled = true;
             }
         }
 
         private async Task AddItemsInBatches(
-            ListBox box, double[] items, IProgress<int> progress)
+            ListBox box, double[] items, IProgress<int> progress, int baseProgress)
         {
             const int BatchSize = 1000;
-            int total = items.Length, done = 0;
+            int total = items.Length;
+            int done = 0;
 
             box.BeginUpdate();
 
@@ -780,10 +763,10 @@ namespace NoiseReductionSample
                 box.Items.AddRange(chunk);
                 done += cnt;
 
-                int pct = (int)(done * 100L / total);
+                // 60~100% 범위로 진행률 환산
+                int pct = baseProgress + (int)(done * (100L - baseProgress) / total);
                 progress.Report(pct);
 
-                Application.DoEvents();
                 await Task.Delay(1);
             }
 
@@ -828,56 +811,77 @@ namespace NoiseReductionSample
             Task.Delay(200).ContinueWith(_ => progressBar1.Value = 0, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        private async void btnDelete_Click(object sender, EventArgs e)
+        private async Task DeleteSelectedItemsPreserveSelection(ListBox lb, System.Windows.Forms.ProgressBar progressBar, Label lblCount)
         {
-            int n = listBox1.Items.Count;
-            if (n == 0) return;
+            var indices = lb.SelectedIndices.Cast<int>().OrderByDescending(i => i).ToArray();
+            int total = indices.Length;
+            if (total == 0) return;
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            progressBar.Minimum = 0;
+            progressBar.Maximum = total;
+            progressBar.Value = 0;
 
-            int[] oldSel = listBox1.SelectedIndices
-                                    .Cast<int>()
-                                    .OrderBy(i => i)
-                                    .ToArray();
-            if (oldSel.Length == 0) return;
+            // Calculate indices to reselect after deletion
+            var newSelections = new List<int>();
+            var shiftMap = new Dictionary<int, bool>();
 
-            progressBar1.Value = 30;
-            var allItems = new object[n];
-            listBox1.Items.CopyTo(allItems, 0);
-            var remaining = await Task.Run(() =>
-                allItems
-                    .Where((item, idx) => !oldSel.Contains(idx))
-                    .ToArray()
-            );
-
-            progressBar1.Value = 70;
-            listBox1.BeginUpdate();
-            listBox1.Items.Clear();
-            listBox1.Items.AddRange(remaining);
-            listBox1.EndUpdate();
-
-            progressBar1.Value = 100;
-            lblCnt1.Text = $"Count: {listBox1.Items.Count}";
-            await Task.Delay(150);
-            progressBar1.Value = 0;
-
-            listBox1.ClearSelected();
-            int yieldInterval = Math.Max(1, oldSel.Length / 100);
-            for (int i = 0; i < oldSel.Length; i++)
+            foreach (var idx in indices)
             {
-                int idx = oldSel[i];
-                if (idx >= 0 && idx < listBox1.Items.Count)
-                    listBox1.SetSelected(idx, true);
-
-                if (i % yieldInterval == 0)
-                    await Task.Yield();
+                shiftMap[idx] = true;
+                if (idx < lb.Items.Count - 1)
+                {
+                    newSelections.Add(idx); // Try to keep selection at the same position
+                }
             }
 
-            listBox1.Focus();
-            UpdateButtonStates();
+            lb.SuspendLayout();
+            lb.BeginUpdate();
+
+            // Deletion process
+            int updateInterval = Math.Max(1, total / 100);
+            for (int i = 0; i < total; i++)
+            {
+                lb.Items.RemoveAt(indices[i]);
+                if (((i + 1) % updateInterval == 0) || i == total - 1)
+                {
+                    progressBar.Value = i + 1;
+                    Application.DoEvents();
+                }
+            }
+
+            lb.EndUpdate();
+            lb.ResumeLayout();
+
+            // Restore selection (as much as possible)
+            lb.SelectedIndices.Clear();
+            foreach (var idx in newSelections)
+            {
+                if (idx < lb.Items.Count)
+                    lb.SelectedIndices.Add(idx);
+            }
+
+            lblCount.Text = $"Count : {lb.Items.Count}";
+            await Task.Delay(200);
+            progressBar.Value = 0;
+        }
+
+        private async void btnDelete_Click(object sender, EventArgs e)
+        {
+            // Optimize for full selection
+            if (listBox1.SelectedIndices.Count == listBox1.Items.Count)
+            {
+                listBox1.Items.Clear();
+                btnCopy.Enabled = false;
+                lblCnt1.Text = "Count : 0";
+                listBox1.Select();
+                progressBar1.Value = 0;
+                return;
+            }
+
+            // Use original method for partial selection
+            await DeleteSelectedItemsPreserveSelection(listBox1, progressBar1, lblCnt1);
+            lblCnt1.Text = $"Count : {listBox1.Items.Count}";
+            listBox1.Select();
         }
 
         private void UpdateButtonStates()
@@ -1142,11 +1146,6 @@ namespace NoiseReductionSample
             btnDelete.Enabled = false;
 
             this.KeyPreview = true;
-            this.KeyDown += (s, evt) =>
-            {
-                if (evt.KeyCode == Keys.Delete && listBox1.Focused)
-                    btnDelete.PerformClick();
-            };
 
             listBox1.SelectedIndexChanged += (s, evt) =>
             {
@@ -1189,6 +1188,11 @@ namespace NoiseReductionSample
             frm.ShowDialog();
 
             frm.textBox1.Select();
+        }
+
+        private void listBox1_Leave(object sender, EventArgs e)
+        {
+            btnEdit.Enabled = false;
         }
     }
 }

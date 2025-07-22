@@ -65,3 +65,4 @@ D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseR
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.csproj.CoreCompileInputs.cache
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.exe
 D:\SonataSmooth-main (3)\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main\SonataSmooth-main\NoiseReductionSample\obj\Debug\NoiseReductionSample.FrmModify.resources
