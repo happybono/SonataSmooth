@@ -716,7 +716,6 @@ namespace NoiseReductionSample
                 if (parsed.Length == 0)
                     return;
 
-                // 진행률 보고자: 60~100 사이 값만 처리하도록 설정
                 int baseProgress = 60;
                 var progressReporter = new Progress<int>(pct =>
                 {
