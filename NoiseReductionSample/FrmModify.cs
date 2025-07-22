@@ -21,9 +21,11 @@ namespace NoiseReductionSample
 
         private async void OK_Button_Click(object sender, EventArgs e)
         {
+            // mainForm 인스턴스 가져오기
             var mainForm = Application.OpenForms
                                       .OfType<FrmMain>()
                                       .FirstOrDefault();
+
             if (mainForm == null)
             {
                 MessageBox.Show("Main form not found.",
@@ -31,22 +33,23 @@ namespace NoiseReductionSample
                 return;
             }
 
-            if (string.IsNullOrEmpty(textBox1.Text)
-                || !double.TryParse(textBox1.Text, out double numericValue))
+            // 입력 유효성 검사
+            if (string.IsNullOrEmpty(textBox1.Text) ||
+                !double.TryParse(textBox1.Text, out double numericValue))
             {
                 textBox1.Select();
                 textBox1.SelectAll();
                 return;
             }
 
+            // 선택된 Index 정렬하여 배열로 전환
             int[] indices = mainForm.listBox1
                                     .SelectedIndices
                                     .Cast<int>()
                                     .OrderBy(x => x)
                                     .ToArray();
             int total = indices.Length;
-            if (total == 0)
-                return;
+            if (total == 0) return;
 
             ProgressBar1.Minimum = 0;
             ProgressBar1.Maximum = total;
@@ -55,33 +58,77 @@ namespace NoiseReductionSample
             var lb = mainForm.listBox1;
             lb.BeginUpdate();
 
-            string newValue = await Task.Run(() => numericValue.ToString("G"));
+            string newValue = numericValue.ToString("G");
 
-            for (int i = 0; i < total; i++)
+            const int BatchSize = 1000;
+            int done = 0;
+
+            // 배치 단위로 UI 스레드에서 항목 변경
+            while (done < total)
             {
-                lb.Items[indices[i]] = newValue;
-                ProgressBar1.Value = i + 1;
+                int cnt = Math.Min(BatchSize, total - done);
+                int[] batchIndices = indices.Skip(done).Take(cnt).ToArray();
+
+                // UI 스레드에서 항목 변경
+                if (lb.InvokeRequired)
+                {
+                    lb.Invoke((Action)(() =>
+                    {
+                        for (int i = 0; i < batchIndices.Length; i++)
+                        {
+                            lb.Items[batchIndices[i]] = newValue;
+                        }
+                        ProgressBar1.Value = Math.Min(done + cnt, total);
+                    }));
+                }
+                else
+                {
+                    for (int i = 0; i < batchIndices.Length; i++)
+                    {
+                        lb.Items[batchIndices[i]] = newValue;
+                    }
+                    ProgressBar1.Value = Math.Min(done + cnt, total);
+                }
+
+                done += cnt;
+                await Task.Yield();
             }
 
-            lb.ClearSelected();
-            foreach (int idx in indices)
-                if (idx >= 0 && idx < lb.Items.Count)
-                    lb.SetSelected(idx, true);
-
-            lb.EndUpdate();
-
-            mainForm.BeginInvoke((Action)(() =>
+            // 변경된 항목 재선택 및 마무리
+            if (lb.InvokeRequired)
             {
+                lb.Invoke((Action)(() =>
+                {
+                    lb.ClearSelected();
+                    foreach (int idx in indices)
+                    {
+                        if (idx >= 0 && idx < lb.Items.Count)
+                            lb.SetSelected(idx, true);
+                    }
+                    lb.EndUpdate();
+                    mainForm.listBox1.Focus();
+                    ProgressBar1.Value = 0;
+                    this.Close();
+                }));
+            }
+            else
+            {
+                lb.ClearSelected();
+                foreach (int idx in indices)
+                {
+                    if (idx >= 0 && idx < lb.Items.Count)
+                        lb.SetSelected(idx, true);
+                }
+                lb.EndUpdate();
                 mainForm.listBox1.Focus();
-            }));
-
-            ProgressBar1.Value = 0;
-            this.Close();
+                ProgressBar1.Value = 0;
+                this.Close();
+            }
         }
 
         private void FrmModify_Load(object sender, EventArgs e)
         {
-            // Get the main form instance
+            // mainForm 인스턴스 가져오기
             var mainForm = Application.OpenForms
                                       .OfType<FrmMain>()
                                       .FirstOrDefault();
