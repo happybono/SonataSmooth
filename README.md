@@ -95,6 +95,12 @@ After processing is complete, the application writes the smoothed sequence to a 
 >	Improved bulk deletion performance in ListBox by optimizing the deletion logic for full selection scenarios.<br><br>
 >	Added a fast path to instantly clear all items and reset the progress bar when all entries are selected.<br><br>
 >	Ensured the progress bar and UI remain responsive during partial deletions of large datasets.
+
+### v3.6.5.0
+#### July 22, 2025
+> Refactored `frmModify`'s `OK_Button_Click` to apply ListBox updates in configurable batches (default 1000) for improved bulk-edit performance.<br><br>
+> Added `await Task.Yield()` between batches and InvokeRequired / Invoke checks to ensure smooth, thread-safe UI responsiveness during large updates.<br><br>
+> Collapsed final reselection, EndUpdate, focus shift, progress-bar reset, and dialog close into a single synchronized UI call.
 </details>
 
 ## Features & Algorithms
