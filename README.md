@@ -82,13 +82,19 @@ After processing is complete, the application writes the smoothed sequence to a 
   (The number of selected items for editing is now displayed in the StatusBar.)<br><br>
 > Updated copy behavior : even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
   (If only some items in the listbox are selected, only those selected items will be copied.)<br><br>
-> Minor bugs fixed.
+> Minor bugs fixed.<br><br>
 
 ### v3.6.1.0
 #### July 20, 2025
 > Removed beep sound during various operations (such as adding or editing items) via keyboard input (e.g. Enter) in the listbox.<br><br>
 > Improved processing and response speed when performing "Select All" followed by "Delete All".<br><br>
-> Minor bugs fixed.
+> Minor bugs fixed.<br><br>
+
+### v3.6.2.0
+#### July 22, 2025
+>	Improved bulk deletion performance in ListBox by optimizing the deletion logic for full selection scenarios.<br><br>
+>	Added a fast path to instantly clear all items and reset the progress bar when all entries are selected.<br><br>
+>	Ensured the progress bar and UI remain responsive during partial deletions of large datasets.<br><br>
 </details>
 
 ## Features & Algorithms
