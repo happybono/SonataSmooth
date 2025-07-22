@@ -1,4 +1,14 @@
 # SonataSmooth
+## SonataSmooth : A Harmonious Approach to Data Smoothing
+SonataSmooth is a compound of "sonata" and "smooth." A sonata is a musical form in which multiple movements blend into a single, harmonious whole-here serving as a metaphor for different smoothing algorithms working together in concert. "Smooth" highlights the sleek process of gently removing noise from data.
+
+**Key components**
+- **Sonata** : Evokes the idea of various movements (algorithms) uniting to produce a harmonious result
+- **Smooth** : Emphasizes the smoothing function that gracefully eliminates data noise
+
+True to its name, SonataSmooth embodies the philosophy of applying multiple techniques in harmony to process data as smoothly and clearly as a piece of music.
+
+## Project Overview
 **SonataSmooth** is a C#.NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
 
 - **Rectangular (uniform) mean** :<br>
