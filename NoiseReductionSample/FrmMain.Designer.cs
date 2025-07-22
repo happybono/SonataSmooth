@@ -95,7 +95,6 @@
             this.listBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listBox1_DragDrop);
             this.listBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.listBox1_DragEnter);
             this.listBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox1_KeyDown);
-            this.listBox1.Leave += new System.EventHandler(this.listBox1_Leave);
             // 
             // listBox2
             // 

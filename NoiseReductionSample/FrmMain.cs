@@ -763,7 +763,7 @@ namespace NoiseReductionSample
                 box.Items.AddRange(chunk);
                 done += cnt;
 
-                // 60~100% 범위로 진행률 환산
+                // 60 ~ 100% 범위로 진행률 환산
                 int pct = baseProgress + (int)(done * (100L - baseProgress) / total);
                 progress.Report(pct);
 
@@ -1188,11 +1188,6 @@ namespace NoiseReductionSample
             frm.ShowDialog();
 
             frm.textBox1.Select();
-        }
-
-        private void listBox1_Leave(object sender, EventArgs e)
-        {
-            btnEdit.Enabled = false;
         }
     }
 }
