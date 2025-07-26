@@ -111,6 +111,10 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Refactored `frmModify`'s `OK_Button_Click` to apply ListBox updates in configurable batches (default 1000) for improved bulk-edit performance.<br><br>
 > Added `await Task.Yield()` between batches and InvokeRequired / Invoke checks to ensure smooth, thread-safe UI responsiveness during large updates.<br><br>
 > Collapsed final reselection, EndUpdate, focus shift, progress-bar reset, and dialog close into a single synchronized UI call.
+
+### v4.0.0.0
+#### July 26, 2025
+> Renamed all code elements, file names, and app metadata to reflect the 'SonataSmooth' project name.
 </details>
 
 ## Features & Algorithms
