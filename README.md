@@ -460,8 +460,8 @@ Beyond the choice of filter, the implementation harnesses parallel processing (P
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 ## Demonstration
-![Final Product](SonataSmooth.png)<br><br>
-![Final Product SG](SonataSmoothSG.png)<br><br>
+![Final Product-Gaussian](SonataSmooth-GaussianFiltering)<br><br>
+![Final Product SG](SonataSmooth-SGFiltering)<br><br>
 ![Final Product_EditEntries](SonataSmooth-EditEntries.png)<br><br>
 ![Calibrated Results](PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
 
