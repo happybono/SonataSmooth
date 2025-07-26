@@ -1,0 +1,12 @@
+D:\SonataSmooth\SonataSmooth\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+D:\SonataSmooth\SonataSmooth\SonataSmooth\bin\Debug\SonataSmooth.exe
+D:\SonataSmooth\SonataSmooth\SonataSmooth\bin\Debug\SonataSmooth.pdb
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.exe
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.pdb
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.exe.config
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
