@@ -63,13 +63,13 @@ namespace SonataSmooth
             const int BatchSize = 1000;
             int done = 0;
 
-            // 배치 단위로 UI 스레드에서 항목 변경
+            // 배치 단위로 UI Thread 에서 항목 변경
             while (done < total)
             {
                 int cnt = Math.Min(BatchSize, total - done);
                 int[] batchIndices = indices.Skip(done).Take(cnt).ToArray();
 
-                // UI 스레드에서 항목 변경
+                // UI Thread 에서 항목 변경
                 if (lb.InvokeRequired)
                 {
                     lb.Invoke((Action)(() =>
