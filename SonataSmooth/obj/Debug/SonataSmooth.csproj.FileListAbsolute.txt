@@ -10,3 +10,30 @@ D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.pdb
 D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.exe.config
 D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
 D:\SonataSmooth\SonataSmooth\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+C:\Users\happybono\Desktop\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+C:\Users\happybono\Desktop\SonataSmooth\bin\Debug\SonataSmooth.exe
+C:\Users\happybono\Desktop\SonataSmooth\bin\Debug\SonataSmooth.pdb
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.exe
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.pdb
+C:\Users\happybono\Desktop\SonataSmooth\obj\Debug\SonataSmooth.exe.config
+E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe
+E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.pdb
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.exe.config
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.exe
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.pdb
