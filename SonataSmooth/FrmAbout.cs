@@ -27,5 +27,10 @@ namespace SonataSmooth
         {
             lblVersion.Select();
         }
+
+        private void btnDonation_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://www.paypal.com/ncp/payment/UF8ANWF5TVQS2");
+        }
     }
 }

@@ -23,6 +23,8 @@ namespace SonataSmooth
 {
     public partial class FrmMain : Form
     {
+        private const string ExcelTitlePlaceholder = "Click to Add Title";
+
         private static readonly Regex numberRegex = new Regex(
             @"[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?",
             RegexOptions.Compiled | RegexOptions.CultureInvariant
@@ -938,10 +940,13 @@ namespace SonataSmooth
             bool hasItems = listBox1.Items.Count > 0;
             bool hasSelection = listBox1.SelectedItems.Count > 0;
 
+            btnAdd.Enabled = txtVariable.Text.Length > 0 && double.TryParse(txtVariable.Text, out _);
             btnCopy.Enabled = hasItems;
             btnEdit.Enabled = hasSelection;
             btnCalibrate.Enabled = hasItems;
-            btnExportExcel.Enabled = hasItems;
+            btnExportExcel.Enabled = hasItems
+                && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
+                && txtExcelTitle.Text != ExcelTitlePlaceholder;
             btnDelete.Enabled = hasSelection;
             btnClear.Enabled = hasItems;
             btnSelClear.Enabled = hasSelection;
@@ -1255,6 +1260,13 @@ namespace SonataSmooth
         {
             cbxKernelWidth.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
+
+            txtExcelTitle.Text = ExcelTitlePlaceholder;
+            txtExcelTitle.ForeColor = Color.Gray;
+            txtExcelTitle.Enter += txtExcelTitle_Enter;
+            txtExcelTitle.Leave += txtExcelTitle_Leave;
+            txtExcelTitle.TextChanged += txtExcelTitle_TextChanged;
+            UpdateExportExcelButtonState();
 
             settingsForm.chbRect.Checked = true;
             settingsForm.chbAvg.Checked = true;
@@ -1849,6 +1861,48 @@ namespace SonataSmooth
             if (aboutForm == null || aboutForm.IsDisposed)
                 aboutForm = new FrmAbout();
             aboutForm.ShowDialog(this);
+        }
+
+        private void txtExcelTitle_Enter(object sender, EventArgs e)
+        {
+            if (txtExcelTitle.Text == ExcelTitlePlaceholder)
+            {
+                txtExcelTitle.Text = "";
+                txtExcelTitle.ForeColor = SystemColors.WindowText;
+                txtExcelTitle.TextAlign = HorizontalAlignment.Left;
+            }
+        }
+
+        private void txtExcelTitle_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtExcelTitle.Text))
+            {
+                txtExcelTitle.Text = ExcelTitlePlaceholder;
+                txtExcelTitle.ForeColor = Color.Gray;
+                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+            }
+        }
+
+        private void txtExcelTitle_TextChanged(object sender, EventArgs e)
+        {
+           UpdateExportExcelButtonState();
+        }
+
+        private void UpdateExportExcelButtonState()
+        {
+            bool hasItems = listBox1.Items.Count > 0;
+            bool isValid = hasItems
+                && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
+                && txtExcelTitle.Text != ExcelTitlePlaceholder;
+            btnExportExcel.Enabled = isValid;
+        }
+
+        private void txtExcelTitle_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Tab)
+            {
+
+            }
         }
     }
 }

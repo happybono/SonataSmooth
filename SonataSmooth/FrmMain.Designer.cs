@@ -662,6 +662,8 @@
             this.txtExcelTitle.Name = "txtExcelTitle";
             this.txtExcelTitle.Size = new System.Drawing.Size(265, 25);
             this.txtExcelTitle.TabIndex = 29;
+            this.txtExcelTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtExcelTitle.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtExcelTitle_KeyDown);
             // 
             // FrmMain
             // 

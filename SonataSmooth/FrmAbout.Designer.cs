@@ -135,6 +135,7 @@
             this.btnDonation.TabIndex = 32;
             this.btnDonation.Text = "Buy Me a Coffee";
             this.btnDonation.UseVisualStyleBackColor = true;
+            this.btnDonation.Click += new System.EventHandler(this.btnDonation_Click);
             // 
             // pictureBox1
             // 
