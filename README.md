@@ -115,6 +115,21 @@ After processing is complete, the application writes the smoothed sequence to a 
 ### v4.0.0.0
 #### July 26, 2025
 > Renamed all code elements, file names, and app metadata to reflect the 'SonataSmooth' project name.
+
+### v4.1.2.0
+#### August 1, 2025
+August 2, 2025
+> Added support for execution guidance and environment setup validation, including `.NET Framework` version and Excel `interop` requirements.
+> Implemented structured export initialization with improved parameter validation and error handling for both `.CSV` and `Excel (.xlsx)` modes.
+> Enhanced export logic to support large dataset segmentation and metadata embedding (title, kernel width, polynomial order, timestamp).
+> Integrated parallel filtering for all export modes using `Parallel.For`, significantly improving performance for large datasets.
+> Added automatic chart generation in Excel export to visualize filter results across multiple smoothing algorithms.
+> Improved UI responsiveness during export operations using `Task.Yield()` and progress reporting.
+> Added support for mirrored boundary handling in Gaussian and Savitzky-Golay filters during export.
+> Minor improvements to input parsing, filter selection logic, and export configuration synchronization.
+> Added `FrmAbout` displaying app version and copyright information.
+> Added `Buy Me a Coffee` feature via PayPal, integrated directly into the `FrmAbout` to support the developer.
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
