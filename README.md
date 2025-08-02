@@ -117,6 +117,34 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Renamed all code elements, file names, and app metadata to reflect the 'SonataSmooth' project name.
 </details>
 
+## Required Components & Setup
+### Prerequisites
+- .NET Framework 4.7.2 or later
+- Windows Operating System (Windows 10 or later recommended)
+- Visual Studio 2019 or newer (for development)
+- Microsoft Office (Excel) – **Required for Excel export functionality** via Interop
+
+### Dependencies
+- `System.Windows.Forms`
+- `System.Threading.Tasks`
+- `System.Linq`
+- `Microsoft.Office.Interop.Excel` (for Excel export)
+
+### Initial Setup
+- Clone or download the repository.
+- Open the solution file (.sln) in Visual Studio.
+- Add necessary references if required.
+- Build the project.
+- Run the application.
+
+## Execution Instructions
+1. **Launch the Application** : Run the compiled .exe file or start the project from Visual Studio.
+2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text/HTML.
+3. **Select Filter** : Choose a smoothing algorithm and configure kernel width and polynomial order.
+4. **Calibrate** : Click the Calibrate button to apply the selected filter.
+5. **Review Results** : View the smoothed output in the second list box.
+6. **Export** : Click Export to save results as CSV or Excel, with optional chart visualization.
+
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
 #### How it works
@@ -427,6 +455,117 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 }
 ```
 
+### 10. CSV Export Functionality
+#### How it works
+When the user selects the CSV export option and clicks Export, the application:
+
+- Reads the initial dataset and selected smoothing parameters.
+- Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay).
+- Splits the output into multiple CSV files if the dataset exceeds Excel's row limit.
+- Writes metadata, parameters, and results to each file in a structured format.
+
+#### Principle
+- **Modular Export** : Each filter result is stored in a separate column.
+- **Scalable Output** : Automatically splits large datasets across multiple files.
+- **Metadata Embedding** : Includes kernel width, polynomial order, and timestamp for reproducibility.
+
+#### Code Implementation
+``` csharp
+await sw.WriteLineAsync(txtExcelTitle.Text);
+await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
+await sw.WriteLineAsync(string.Empty);
+await sw.WriteLineAsync("Smoothing Parameters");
+await sw.WriteLineAsync($"Kernel Width : {w}");
+if (doSG)
+    await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
+await sw.WriteLineAsync(string.Join(",", columns.Select(c => c.Header)));
+for (int i = startRow; i < startRow + rowCount; i++)
+{
+    string line = string.Join(",", columns.Select(c => c.Data[i].ToString(CultureInfo.InvariantCulture)));
+    await sw.WriteLineAsync(line);
+}
+```
+
+### 11. Excel Export Functionality
+#### How it works
+When the user selects the Excel export option and clicks Export, the application:
+
+- Applies all selected filters to the dataset.
+- Writes each filter result to a separate column in an Excel worksheet.
+- Adds a line chart visualizing the smoothed data.
+- Embeds metadata and smoothing parameters at the top of the sheet.
+
+#### Principle
+- **Visual Feedback** : Automatically generates a chart comparing filter outputs.
+- **Structured Layout** : Each filter result is placed in its own section.
+- **Mirror Boundary Handling** : Ensures smooth filtering at data edges.
+
+#### Code Implemenation
+```csharp
+ws.Cells[1, 1] = txtExcelTitle.Text;
+ws.Cells[3, 1] = "Smoothing Parameters";
+ws.Cells[4, 1] = $"Kernel Width : {w}";
+ws.Cells[5, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
+
+chart.ChartType = Excel.XlChartType.xlLine;
+chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
+chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
+chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
+foreach (var (Title, StartCol, EndCol) in sections)
+{
+    Excel.Range unionRange = ...; // Union of all data ranges
+    var series = chart.SeriesCollection().NewSeries();
+    series.Name = Title;
+    series.Values = unionRange;
+}
+```
+
+### Implementation Details
+#### Input Handling
+- **Manual Entry** : Users can type numeric values into a textbox and press Enter or click the Add button to insert them into the dataset.
+- **Clipboard Paste** : Pressing Ctrl + V or clicking the Paste button automatically parses and adds numeric values from the clipboard.
+- **Drag & Drop** : Users can drag HTML or plain text into the list box; the application extracts and adds valid numeric entries.
+- **Regex-Based Filtering** : Regular expressions are used to clean HTML tags and extract numbers, allowing flexible input formats.
+
+#### Smoothing Workflow
+When the user clicks **Calibrate** Button :
+- All input values are converted to a double[] array.
+- Kernel width and polynomial order are parsed from combo-boxes.
+- The selected filter is applied using parallel processing (PLINQ).
+- Results are added to the output list box in batches, with progress feedback.
+
+#### Filter Algorithm Implementation
+- **Rectangular Mean** : Computes the average of values within a fixed-size window.
+- **Weighted Median** : Uses binomial coefficients as weights to compute a robust median.
+- **Binomial Average** : Applies Pascal’s triangle coefficients for a Gaussian-like smoothing.
+- **Savitzky-Golay** : Constructs a Vandermonde matrix and performs least-squares polynomial fitting.
+- **Gaussian Filter** : Generates a normalized Gaussian kernel and applies it with mirrored boundary handling.
+
+#### Parallel Processing & UI Responsiveness
+- All filtering operations are executed using `ParallelEnumerable` or `Parallel.For` to utilize all CPU cores.
+- `Progress<T>` is used to update the UI progress bar in real-time.
+- `BeginUpdate` / `EndUpdate` prevent flickering during listbox updates.
+- `Task.Yield()` ensures the UI thread remains responsive during long operations.
+
+#### Export Functionality
+##### CSV & Excel Export
+- Filtered results are saved in separate columns.
+- Excel export includes automatic chart generation.
+- Large datasets are split into multiple files if needed.
+
+##### Export Settings
+- Users can configure filters, kernel width, polynomial order, and automatically open the file after save options.
+
+#### Keyboard Shortcuts
+- **`Ctrl` + `C`** : Copy
+- **`Ctrl` + `V`** : Paste
+- **`Ctrl` + `A`** : Select All
+- **`Ctrl` + `Delete`** : Delete All
+- **`Delete`** : Delete selected items
+- **`F2`** : Edit selected item(s)
+- **`Esc`** : Deselect all
+  
 ### Data Handling and Processing
 -	Supports data input via manual entry, clipboard paste, and drag-and-drop.
 -	Automatically parses and validates numeric data, removing non-numeric content (e.g., HTML tags).
