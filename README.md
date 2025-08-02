@@ -132,7 +132,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 
 ### Initial Setup
 - Clone or download the repository.
-- Open the solution file (.sln) in Visual Studio.
+- Open the solution file (`.sln`) in Visual Studio.
 - Add necessary references if required.
 - Build the project.
 - Run the application.
