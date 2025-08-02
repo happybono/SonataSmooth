@@ -117,7 +117,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Renamed all code elements, file names, and app metadata to reflect the 'SonataSmooth' project name.
 
 ### v4.1.2.0
-#### August 1, 2025
+#### August 01, 2025
 > Implemented structured export initialization with improved parameter validation and error handling for both `.CSV` and `Excel (.xlsx)` modes.<br><br>
 > Enhanced export logic to support large dataset segmentation and metadata embedding (title, kernel width, polynomial order, timestamp).<br><br>
 > Integrated parallel filtering for all export modes using `Parallel.For`, significantly improving performance for large datasets.<br><br>
@@ -129,6 +129,12 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Added `Buy Me a Coffee` feature via PayPal, integrated directly into the `FrmAbout` to support the developer.<br><br>
 > Added execution instructions and initial setup requirements to the README.md, including `.NET Framework` version, platform dependencies, and environment configuration.<br><br>
 > Minor bugs fixed.
+
+### v4.2.3.0
+#### August 02, 2025
+> All UI data is accessed only on the UI thread, heavy calculations and file writing are parallelized in the background, progress is safely reported to the UI, large exports are split automatically.<br><br>
+> UI remains responsive, large data is processed quickly and safely, and all UI / COM access is thread-safe.<br><br>
+> Synchronize selection and scroll position between the two listboxes. (**These buttons are only enabled when the Initial Dataset and Refined Dataset listboxes have the same number of items.**)
 </details>
 
 ## Required Components & Setup
