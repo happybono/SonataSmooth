@@ -118,7 +118,6 @@ After processing is complete, the application writes the smoothed sequence to a 
 
 ### v4.1.2.0
 #### August 1, 2025
-> Added support for execution guidance and environment setup validation, including `.NET Framework` version and Excel `interop` requirements.<br><br>
 > Implemented structured export initialization with improved parameter validation and error handling for both `.CSV` and `Excel (.xlsx)` modes.<br><br>
 > Enhanced export logic to support large dataset segmentation and metadata embedding (title, kernel width, polynomial order, timestamp).<br><br>
 > Integrated parallel filtering for all export modes using `Parallel.For`, significantly improving performance for large datasets.<br><br>
