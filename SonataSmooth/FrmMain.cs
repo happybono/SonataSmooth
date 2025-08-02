@@ -55,8 +55,8 @@ namespace SonataSmooth
 
             this.KeyPreview = true;
 
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
             settingsForm = new FrmExportSettings(this);
             aboutForm = null; 
         }
@@ -132,7 +132,7 @@ namespace SonataSmooth
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Binomial coefficient calculation error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Binomial coefficient calculation error : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -169,7 +169,7 @@ namespace SonataSmooth
                             }
                             catch (Exception ex)
                             {
-                                throw new InvalidOperationException($"SG coefficient computation failed: {ex.Message}", ex);
+                                throw new InvalidOperationException($"SG coefficient computation failed : {ex.Message}", ex);
                             }
                         }
 
@@ -254,16 +254,16 @@ namespace SonataSmooth
                 catch (AggregateException aex)
                 {
                     MessageBox.Show(
-                        $"An error occurred during parallel computation: {aex.Flatten().InnerException?.Message}",
+                        $"An error occurred during parallel computation : {aex.Flatten().InnerException?.Message}",
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error                        
                     );
-                    UpdateListBox2BtnStates(null, EventArgs.Empty);
+                    UpdateListBox2BtnsState(null, EventArgs.Empty);
                     return;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"An unexpected error occurred during computation: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    UpdateListBox2BtnStates(null, EventArgs.Empty);
+                    MessageBox.Show($"An unexpected error occurred during computation : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    UpdateListBox2BtnsState(null, EventArgs.Empty);
                     return;
                 }
 
@@ -293,14 +293,14 @@ namespace SonataSmooth
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error binding results: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Error binding results : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             finally
             {
                 btnCalibrate.Enabled = true;
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
-                UpdateListBox2BtnStates(null, EventArgs.Empty);
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                UpdateListBox2BtnsState(null, EventArgs.Empty);
             }
                 progressBar1.Value = 0;
         }
@@ -359,13 +359,13 @@ namespace SonataSmooth
             {
                 accum += pairs[i].Weight;
 
-                // 누적 가중치 > 절반: 기존보다 작은 쪽 넘어섰으면 current 반환
+                // 누적 가중치 > 절반 : 기존보다 작은 쪽 넘어섰으면 current 반환
                 if (accum > half)
                 {
                     return pairs[i].Value;
                 }
-
-                // 누적 가중치 == 절반인 순간: 다음 값과 평균 처리
+                 
+                // 누적 가중치 == 절반인 순간 : 다음 값과 평균 처리
                 if (isEvenTotal && accum == half)
                 {
                     // 안전하게 bounds 체크
@@ -506,7 +506,8 @@ namespace SonataSmooth
 
             if (listBox1.Items.Count > 0)
             {
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                UpdateListBox2BtnsState(null, EventArgs.Empty);
             }
             else
             {
@@ -547,7 +548,7 @@ namespace SonataSmooth
                 progressBar1.Value = 100;
                 listBox1.EndUpdate();
                 listBox1.Focus();
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
                 await Task.Delay(200);
                 progressBar1.Value = 0;
                 return;
@@ -582,7 +583,7 @@ namespace SonataSmooth
 
             progressBar1.Value = 100;
             listBox1.Focus();
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
             await Task.Delay(200);
             progressBar1.Value = 0;
         }
@@ -591,7 +592,7 @@ namespace SonataSmooth
         {
             int itemCount = listBox1.Items.Count;
 
-            var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Initial Dataset listbox.\n\nAre you sure you want to proceed?",
+            var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Initial Dataset listbox.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?",
                                          "Delete Confirmation",
                                          MessageBoxButtons.YesNo,
                                          MessageBoxIcon.Warning);
@@ -609,11 +610,13 @@ namespace SonataSmooth
             listBox1.BeginUpdate();
             listBox1.ClearSelected();
             listBox1.Items.Clear();
+            listBox2.Items.Clear();
             listBox1.EndUpdate();
 
             await Task.Yield();
 
             lblCnt1.Text = $"Count : {listBox1.Items.Count}";
+            lblCnt2.Text = $"Count : {listBox1.Items.Count}";
 
             progressBar1.Value = 100;
             progressBar1.Refresh();
@@ -621,10 +624,13 @@ namespace SonataSmooth
             await Task.Yield();
             progressBar1.Value = 0;
 
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
 
-            listBox1.Focus();
-
+            txtExcelTitle.Text = ExcelTitlePlaceholder;
+            txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+            txtExcelTitle.ForeColor = Color.Gray;
+            txtVariable.Select();
         }
 
         public void SetComboValues(string kernelWidth, string polyOrder)
@@ -680,7 +686,8 @@ namespace SonataSmooth
             }
             finally
             {
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                UpdateListBox2BtnsState(null, EventArgs.Empty);
 
                 progressBar1.Value = 0;
                 btnCalibrate.Enabled = true;
@@ -703,7 +710,7 @@ namespace SonataSmooth
 
         private async void listBox1_DragDrop(object sender, DragEventArgs e)
         {
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100;
@@ -773,7 +780,7 @@ namespace SonataSmooth
                 btnDelete.Enabled = hasItems;
 
                 progressBar1.Value = 0;
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
             }
         }
 
@@ -844,7 +851,7 @@ namespace SonataSmooth
             lblCnt1.Text = "Count : " + listBox1.Items.Count;
 
             Task.Delay(200).ContinueWith(_ => progressBar1.Value = 0, TaskScheduler.FromCurrentSynchronizationContext());
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
         }
 
         private async Task DeleteSelectedItemsPreserveSelection(ListBox lb, System.Windows.Forms.ProgressBar progressBar, Label lblCount)
@@ -904,7 +911,7 @@ namespace SonataSmooth
             int selectedCount = listBox1.SelectedIndices.Count;
 
             string message = selectedCount == listBox1.Items.Count
-                ? $"You are about to delete all {selectedCount} items from the list.\n\nAre you sure you want to proceed?"
+                ? $"You are about to delete all {selectedCount} items from the list.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?"
                 : $"You are about to delete {selectedCount} selected item{(selectedCount > 1 ? "s" : "")} from the list.\n\nAre you sure you want to proceed?";
 
             var result = MessageBox.Show(message,
@@ -921,10 +928,17 @@ namespace SonataSmooth
             if (selectedCount == listBox1.Items.Count)
             {
                 listBox1.Items.Clear();
-                lblCnt1.Text = "Count : 0";
+                listBox2.Items.Clear();
+                lblCnt1.Text = $"Count : {listBox1.Items.Count}";
+                lblCnt2.Text = $"Count : {listBox2.Items.Count}";
                 listBox1.Select();
                 progressBar1.Value = 0;
-                UpdateListBox1BtnStates(null, EventArgs.Empty);
+
+                txtExcelTitle.Text = ExcelTitlePlaceholder;
+                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+                txtExcelTitle.ForeColor = Color.Gray;
+                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                txtVariable.Select();
                 return;
             }
 
@@ -932,13 +946,15 @@ namespace SonataSmooth
             lblCnt1.Text = $"Count : {listBox1.Items.Count}";
             listBox1.Select();
 
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
         }
 
-        private void UpdateListBox1BtnStates(object s, EventArgs e)
+        private void UpdateListBox1BtnsState(object s, EventArgs e)
         {
             bool hasItems = listBox1.Items.Count > 0;
             bool hasSelection = listBox1.SelectedItems.Count > 0;
+            bool canSync = hasSelection && listBox1.Items.Count == listBox2.Items.Count && listBox1.Items.Count > 0;
 
             btnAdd.Enabled = txtVariable.Text.Length > 0 && double.TryParse(txtVariable.Text, out _);
             btnCopy.Enabled = hasItems;
@@ -951,6 +967,7 @@ namespace SonataSmooth
             btnClear.Enabled = hasItems;
             btnSelClear.Enabled = hasSelection;
             btnSelectAll.Enabled = hasItems;
+            btnSync1.Enabled = canSync;
 
             if (!hasItems)
             {
@@ -958,6 +975,7 @@ namespace SonataSmooth
                 btnDelete.Enabled = false;
                 btnClear.Enabled = false;
                 btnSelClear.Enabled = false;
+                btnSync1.Enabled = false;
                 listBox1.ClearSelected();
             }
             else
@@ -966,23 +984,28 @@ namespace SonataSmooth
                 btnDelete.Enabled = hasSelection;
                 btnClear.Enabled = hasItems;
                 btnSelClear.Enabled = hasSelection;
+                btnSync1.Enabled = canSync;
             }
         }
 
-        private void UpdateListBox2BtnStates(object s, EventArgs e)
+        private void UpdateListBox2BtnsState(object s, EventArgs e)
         {
             bool hasItems = listBox2.Items.Count > 0;
             bool hasSelection = listBox2.SelectedItems.Count > 0;
+            bool canSync = hasSelection && listBox2.Items.Count == listBox1.Items.Count && listBox2.Items.Count > 0;
+
             btnCopy2.Enabled = hasItems;
             btnClear2.Enabled = hasItems;
             btnSelClear2.Enabled = hasSelection;
             btnSelectAll2.Enabled = hasItems;
+            btnSync2.Enabled = canSync;
 
             if (!hasItems)
             {
                 btnCopy2.Enabled = false;
                 btnClear2.Enabled = false;
                 btnSelClear2.Enabled = false;
+                btnSync2.Enabled = false;
                 listBox2.ClearSelected();
             }
             else
@@ -990,6 +1013,7 @@ namespace SonataSmooth
                 btnCopy2.Enabled = true;
                 btnClear2.Enabled = true;
                 btnSelClear2.Enabled = hasSelection;
+                btnSync2.Enabled = canSync;
             }
         }
 
@@ -1033,7 +1057,8 @@ namespace SonataSmooth
             await Task.Yield();
             progressBar1.Value = 0;
 
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
 
             listBox2.Focus();
         }
@@ -1086,7 +1111,7 @@ namespace SonataSmooth
 
             progressBar1.Value = 100;
             await Task.Delay(200).ContinueWith(_ => { });
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
             progressBar1.Value = 0;
         }
 
@@ -1105,7 +1130,7 @@ namespace SonataSmooth
 
             progressBar1.Value = 100;
             await Task.Delay(200);
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
             progressBar1.Value = 0;
         }
 
@@ -1117,7 +1142,7 @@ namespace SonataSmooth
 
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
         }
 
         private void listBox1_KeyDown(object sender, KeyEventArgs e)
@@ -1281,8 +1306,8 @@ namespace SonataSmooth
             settingsForm.cbxKernelWidth.Text = cbxKernelWidth.Text;
             settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
 
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
-            UpdateListBox2BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdateListBox2BtnsState(null, EventArgs.Empty);
 
             dataCount = listBox1.Items.Count;
 
@@ -1295,7 +1320,7 @@ namespace SonataSmooth
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            UpdateListBox1BtnStates(null, EventArgs.Empty);
+            UpdateListBox1BtnsState(null, EventArgs.Empty);
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
@@ -1309,31 +1334,58 @@ namespace SonataSmooth
 
         private async Task ExportCsvAsync()
         {
-            int w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
-            int polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+            int w = 2, polyOrder = 2, n = 0;
+            bool doRect = false, doAvg = false, doMed = false, doGauss = false, doSG = false;
+            string excelTitle = "";
+            double[] initialData = null;
 
-            bool doRect = settingsForm.chbRect.Checked;
-            bool doAvg = settingsForm.chbAvg.Checked;
-            bool doMed = settingsForm.chbMed.Checked;
-            bool doGauss = settingsForm.chbGauss.Checked;
-            bool doSG = settingsForm.chbSG.Checked;
-
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
-
-            var initialData = listBox1.Items
-                .Cast<object>()
-                .Select(x => double.TryParse(
-                         x?.ToString(),
-                         NumberStyles.Any,
-                         CultureInfo.InvariantCulture,
-                         out var d)
-                       ? d
-                       : 0.0)
-                .ToArray();
-            int n = initialData.Length;
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
+                    polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+                    doRect = settingsForm.chbRect.Checked;
+                    doAvg = settingsForm.chbAvg.Checked;
+                    doMed = settingsForm.chbMed.Checked;
+                    doGauss = settingsForm.chbGauss.Checked;
+                    doSG = settingsForm.chbSG.Checked;
+                    excelTitle = txtExcelTitle.Text;
+                    initialData = listBox1.Items
+                        .Cast<object>()
+                        .Select(x => double.TryParse(
+                                 x?.ToString(),
+                                 NumberStyles.Any,
+                                 CultureInfo.InvariantCulture,
+                                 out var d)
+                               ? d
+                               : 0.0)
+                        .ToArray();
+                    n = initialData.Length;
+                }));
+            }
+            else
+            {
+                w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
+                polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+                doRect = settingsForm.chbRect.Checked;
+                doAvg = settingsForm.chbAvg.Checked;
+                doMed = settingsForm.chbMed.Checked;
+                doGauss = settingsForm.chbGauss.Checked;
+                doSG = settingsForm.chbSG.Checked;
+                excelTitle = txtExcelTitle.Text;
+                initialData = listBox1.Items
+                    .Cast<object>()
+                    .Select(x => double.TryParse(
+                             x?.ToString(),
+                             NumberStyles.Any,
+                             CultureInfo.InvariantCulture,
+                             out var d)
+                           ? d
+                           : 0.0)
+                    .ToArray();
+                n = initialData.Length;
+            }
 
             if (!ValidateSmoothingParameters(n, w, polyOrder))
                 return;
@@ -1361,7 +1413,7 @@ namespace SonataSmooth
             {
                 Parallel.For(0, n, i =>
                 {
-                    // Rectangular Avg
+                    // Rectangular Average
                     double sum = 0; int cnt = 0;
                     for (int k = -w; k <= w; k++)
                     {
@@ -1374,7 +1426,7 @@ namespace SonataSmooth
                     }
                     rectAvg[i] = cnt > 0 ? sum / cnt : 0.0;
 
-                    // Binomial Avg
+                    // Binomial Average
                     sum = 0; cnt = 0;
                     for (int k = -w; k <= w; k++)
                     {
@@ -1410,21 +1462,37 @@ namespace SonataSmooth
                 });
             });
 
-            // CSV 저장 경로 선택
-            string basePath;
-            using (var dlg = new SaveFileDialog())
+            string basePath = null;
+            if (InvokeRequired)
             {
-                dlg.Filter = "CSV files (*.csv)|*.csv";
-                dlg.DefaultExt = "csv";
-                dlg.AddExtension = true;
+                Invoke(new Action(() =>
+                {
+                    using (var dlg = new SaveFileDialog())
+                    {
+                        dlg.Filter = "CSV files (*.csv)|*.csv";
+                        dlg.DefaultExt = "csv";
+                        dlg.AddExtension = true;
 
-                if (dlg.ShowDialog() != DialogResult.OK)
-                    return;   // 취소 버튼 클릭
-
-                basePath = dlg.FileName;
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                            basePath = dlg.FileName;
+                    }
+                }));
             }
+            else
+            {
+                using (var dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "CSV files (*.csv)|*.csv";
+                    dlg.DefaultExt = "csv";
+                    dlg.AddExtension = true;
 
-            // 컬럼 리스트 생성
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                        basePath = dlg.FileName;
+                }
+            }
+            if (string.IsNullOrEmpty(basePath))
+                return;
+
             var columns = new List<(string Header, double[] Data)> {
         ("Initial Dataset", initialData)
     };
@@ -1434,32 +1502,30 @@ namespace SonataSmooth
             if (doGauss) columns.Add(("Gaussian Filtering", gaussFilt));
             if (doSG) columns.Add(("Savitzky–Golay Filtering", sgFilt));
 
-            // Excel 행 제한에 따른 분할 저장 
             const int ExcelMaxRows = 1_048_576;
-
             int headerLines =
-                1   // Title
-              + 1   // Part x of y
+                1   // 제목
+              + 1   // 전체 중 'n' 번째 부분 (분할 저장 시)
               + 1   // 빈 줄
               + 1   // Smoothing Parameters
               + 1   // Kernel Width
-              + (doSG ? 1 : 0) // Polynomial Order
+              + (doSG ? 1 : 0) // 다항식의 차수
               + 1   // 빈 줄
-              + 1   // Generated : DateTime
+              + 1   // Generated : 생성 일시
               + 1   // 빈 줄
-              + 1;  // Column Header
+              + 1;  // 행 Header
 
             int maxDataRows = ExcelMaxRows - headerLines;
             int partCount = (n + maxDataRows - 1) / maxDataRows;
 
             IProgress<int> progress = new Progress<int>(percent =>
             {
-                // UI 스레드에서 ProgressBar 갱신
-                progressBar1.Value = percent;
+                if (progressBar1.InvokeRequired)
+                    progressBar1.Invoke(new Action(() => progressBar1.Value = percent));
+                else
+                    progressBar1.Value = percent;
             });
 
-
-            // 파일명 분리
             string dir = Path.GetDirectoryName(basePath);
             string nameOnly = Path.GetFileNameWithoutExtension(basePath);
             string ext = Path.GetExtension(basePath);
@@ -1485,8 +1551,7 @@ namespace SonataSmooth
                            useAsync: true))
                 using (var sw = new StreamWriter(fs, encoding, bufSize))
                 {
-                    // 상단 Metadata
-                    await sw.WriteLineAsync(txtExcelTitle.Text); 
+                    await sw.WriteLineAsync(excelTitle);
                     await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
                     await sw.WriteLineAsync(string.Empty);
                     await sw.WriteLineAsync("Smoothing Parameters");
@@ -1497,7 +1562,7 @@ namespace SonataSmooth
                     await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
                     await sw.WriteLineAsync(string.Empty);
 
-                    // Column Header
+                    // 행 Header 쓰기
                     await sw.WriteLineAsync(string.Join(
                         ",", columns.Select(c => c.Header)));
 
@@ -1511,22 +1576,52 @@ namespace SonataSmooth
                                     CultureInfo.InvariantCulture)));
                         await sw.WriteLineAsync(line);
 
-                        // 전체 대비 진행률
+                        // Progress
                         int percent = (int)(((double)(i + 1) / n) * 100);
                         progress.Report(percent);
                     }
                 }
             }
 
-            // 마무리
-            progressBar1.Value = 0;
-            MessageBox.Show(
-                "CSV export completed.",
-                "Export CSV",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            if (progressBar1.InvokeRequired)
+                progressBar1.Invoke(new Action(() => progressBar1.Value = 0));
+            else
+                progressBar1.Value = 0;
 
-            if (settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked)
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    MessageBox.Show(
+                        "CSV export completed.",
+                        "Export CSV",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }));
+            }
+            else
+            {
+                MessageBox.Show(
+                    "CSV export completed.",
+                    "Export CSV",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+
+            bool openFile = false;
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() =>
+                {
+                    openFile = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
+                }));
+            }
+            else
+            {
+                openFile = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
+            }
+
+            if (openFile)
             {
                 try
                 {
@@ -1541,7 +1636,17 @@ namespace SonataSmooth
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"파일을 자동으로 여는 데 실패했습니다.\n{ex.Message}", "Open File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    if (InvokeRequired)
+                    {
+                        Invoke(new Action(() =>
+                        {
+                            MessageBox.Show($"Failed to open the file automatically.\n{ex.Message}", "Open File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }));
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Failed to open the file automatically.\n{ex.Message}", "Open File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
         }
@@ -1886,7 +1991,7 @@ namespace SonataSmooth
         {
            UpdateExportExcelButtonState();
 
-            // 텍스트가 placeholder가 아니고 비어있지 않으면 우측 정렬
+            // 텍스트가 placeholder 가 아니고 비어있지 않으면 우측 정렬
             if (txtExcelTitle.Text != ExcelTitlePlaceholder)
             {
                 txtExcelTitle.TextAlign = HorizontalAlignment.Left;
@@ -1912,6 +2017,58 @@ namespace SonataSmooth
             if (e.KeyCode == Keys.Tab)
             {
 
+            }
+        }
+
+        private void btnSync1_Click(object sender, EventArgs e)
+        {
+            int count = listBox1.Items.Count;
+            if (count != listBox2.Items.Count || listBox1.SelectedIndices.Count == 0)
+                return;
+
+            listBox2.BeginUpdate();
+            try
+            {
+                listBox2.ClearSelected();
+
+                var indices = new int[listBox1.SelectedIndices.Count];
+                listBox1.SelectedIndices.CopyTo(indices, 0);
+
+                for (int i = 0; i < indices.Length; i++)
+                    listBox2.SetSelected(indices[i], true);
+
+                // 스크롤 위치 동기화
+                listBox2.TopIndex = listBox1.TopIndex;
+            }
+            finally
+            {
+                listBox2.EndUpdate();
+            }
+        }
+
+        private void btnSync2_Click(object sender, EventArgs e)
+        {
+            int count = listBox2.Items.Count;
+            if (count != listBox1.Items.Count || listBox2.SelectedIndices.Count == 0)
+                return;
+
+            listBox1.BeginUpdate();
+            try
+            {
+                listBox1.ClearSelected();
+
+                var indices = new int[listBox2.SelectedIndices.Count];
+                listBox2.SelectedIndices.CopyTo(indices, 0);
+
+                for (int i = 0; i < indices.Length; i++)
+                    listBox1.SetSelected(indices[i], true);
+
+                // 스크롤 위치 동기화
+                listBox1.TopIndex = listBox2.TopIndex;
+            }
+            finally
+            {
+                listBox1.EndUpdate();
             }
         }
     }

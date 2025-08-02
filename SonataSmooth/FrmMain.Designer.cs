@@ -54,10 +54,12 @@
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.rbtnSG = new System.Windows.Forms.RadioButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnSync1 = new System.Windows.Forms.Button();
             this.btnEdit = new System.Windows.Forms.Button();
             this.lblCnt1 = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.btnSync2 = new System.Windows.Forms.Button();
             this.lblCnt2 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -410,6 +412,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnSync1);
             this.groupBox2.Controls.Add(this.btnEdit);
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.lblCnt1);
@@ -426,6 +429,17 @@
             this.groupBox2.TabIndex = 25;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Initial Dataset";
+            // 
+            // btnSync1
+            // 
+            this.btnSync1.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSync1.Location = new System.Drawing.Point(306, 270);
+            this.btnSync1.Name = "btnSync1";
+            this.btnSync1.Size = new System.Drawing.Size(30, 30);
+            this.btnSync1.TabIndex = 11;
+            this.btnSync1.Text = "";
+            this.btnSync1.UseVisualStyleBackColor = true;
+            this.btnSync1.Click += new System.EventHandler(this.btnSync1_Click);
             // 
             // btnEdit
             // 
@@ -461,6 +475,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.btnSync2);
             this.groupBox3.Controls.Add(this.listBox2);
             this.groupBox3.Controls.Add(this.lblCnt2);
             this.groupBox3.Controls.Add(this.btnClear2);
@@ -474,6 +489,17 @@
             this.groupBox3.TabIndex = 26;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Refined Dataset";
+            // 
+            // btnSync2
+            // 
+            this.btnSync2.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSync2.Location = new System.Drawing.Point(306, 168);
+            this.btnSync2.Name = "btnSync2";
+            this.btnSync2.Size = new System.Drawing.Size(30, 30);
+            this.btnSync2.TabIndex = 12;
+            this.btnSync2.Text = "";
+            this.btnSync2.UseVisualStyleBackColor = true;
+            this.btnSync2.Click += new System.EventHandler(this.btnSync2_Click);
             // 
             // lblCnt2
             // 
@@ -663,6 +689,7 @@
             this.txtExcelTitle.Size = new System.Drawing.Size(265, 25);
             this.txtExcelTitle.TabIndex = 29;
             this.txtExcelTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtExcelTitle.TextChanged += new System.EventHandler(this.txtExcelTitle_TextChanged);
             this.txtExcelTitle.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtExcelTitle_KeyDown);
             // 
             // FrmMain
@@ -753,6 +780,8 @@
         public System.Windows.Forms.ComboBox cbxKernelWidth;
         private System.Windows.Forms.ComboBox cbxPolyOrder;
         private System.Windows.Forms.Button btnInfo;
+        private System.Windows.Forms.Button btnSync1;
+        private System.Windows.Forms.Button btnSync2;
     }
 }
 
