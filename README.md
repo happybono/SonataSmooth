@@ -127,7 +127,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 > Minor improvements to input parsing, filter selection logic, and export configuration synchronization.<br><br>
 > Added `FrmAbout` displaying app version and copyright information.<br><br>
 > Added `Buy Me a Coffee` feature via PayPal, integrated directly into the `FrmAbout` to support the developer.<br><br>
-> Added detailed documentation for execution steps and initial setup requirements, including .NET Framework version, platform dependencies, and environment configuration.
+> Added execution instructions and initial setup requirements to the README.md, including `.NET Framework` version, platform dependencies, and environment configuration.<br><br>
 > Minor bugs fixed.
 </details>
 
