@@ -9,7 +9,7 @@ SonataSmooth is a compound of "sonata" and "smooth". A sonata is a musical form 
 True to its name, SonataSmooth embodies the philosophy of applying multiple techniques in harmony to process data as smoothly and clearly as a piece of music.
 
 ## Project Overview
-**SonataSmooth** is a C#.NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
+**SonataSmooth** is a C# .NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
 
 - **Rectangular (uniform) mean** :<br>
   computes a simple moving average over a fixed window of equal weights.<br><br>
@@ -119,10 +119,10 @@ After processing is complete, the application writes the smoothed sequence to a 
 
 ## Required Components & Setup
 ### Prerequisites
-- .NET Framework 4.7.2 or later
+- [.NET Framework 4.7.2](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net472) or later ([.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) recommended)
 - Windows Operating System (Windows 10 or later recommended)
-- Visual Studio 2019 or newer (for development)
-- Microsoft Office (Excel) – **Required for Excel export functionality** via Interop
+- [Visual Studio 2019 or newer](https://visualstudio.microsoft.com/) (for development)
+- [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) – **Required for Microsoft Excel export functionality** via `Interop`
 
 ### Dependencies
 - `System.Windows.Forms`
