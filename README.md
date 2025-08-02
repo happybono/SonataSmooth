@@ -1,5 +1,5 @@
 # SonataSmooth
-## SonataSmooth : A Harmonious Approach to Data Smoothing
+## A Harmonious Approach to Data Smoothing
 SonataSmooth is a compound of "sonata" and "smooth". A sonata is a musical form in which multiple movements blend into a single, harmonious whole-here serving as a metaphor for different smoothing algorithms working together in concert. "Smooth" highlights the sleek process of gently removing noise from data.
 
 **Key components**
