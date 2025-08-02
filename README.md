@@ -138,12 +138,12 @@ After processing is complete, the application writes the smoothed sequence to a 
 - Run the application.
 
 ## Execution Instructions
-1. **Launch the Application** : Run the compiled .exe file or start the project from Visual Studio.
-2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text/HTML.
+1. **Launch the Application** : Run the compiled `.exe` file or start the project from Visual Studio.
+2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text / HTML.
 3. **Select Filter** : Choose a smoothing algorithm and configure kernel width and polynomial order.
-4. **Calibrate** : Click the Calibrate button to apply the selected filter.
-5. **Review Results** : View the smoothed output in the second list box.
-6. **Export** : Click Export to save results as CSV or Excel, with optional chart visualization.
+4. **Calibrate** : Click the 'Calibrate' button to apply the selected filter.
+5. **Review Results** : View the smoothed output in the second listbox.
+6. **Export** : Click Export to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization.
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
@@ -538,7 +538,7 @@ When the user clicks **Calibrate** Button :
 #### Filter Algorithm Implementation
 - **Rectangular Mean** : Computes the average of values within a fixed-size window.
 - **Weighted Median** : Uses binomial coefficients as weights to compute a robust median.
-- **Binomial Average** : Applies Pascal’s triangle coefficients for a Gaussian-like smoothing.
+- **Binomial Average** : Applies Pascal's triangle coefficients for a Gaussian-like smoothing.
 - **Savitzky-Golay** : Constructs a Vandermonde matrix and performs least-squares polynomial fitting.
 - **Gaussian Filter** : Generates a normalized Gaussian kernel and applies it with mirrored boundary handling.
 
@@ -572,7 +572,7 @@ When the user clicks **Calibrate** Button :
 -	Stores data as high-precision double values for accurate processing.
 -	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters.
 -	Utilizes parallel processing (PLINQ) for efficient computation on large datasets.
--	Calculates binomial coefficients using Pascal’s Triangle for weighted filters.
+-	Calculates binomial coefficients using Pascal's Triangle for weighted filters.
 -	Displays processed results in a separate output list for further use.
 
 ### User Interface and Interaction
@@ -590,7 +590,7 @@ When the user clicks **Calibrate** Button :
 -	UI is designed to accommodate future enhancements and custom settings.
 
 ### Conclusion
-This application provides a robust and user-friendly environment for noise reduction analysis on numerical datasets. By combining flexible data input methods, a responsive and informative user interface, and efficient parallel processing of advanced filtering algorithms, it enables users to quickly and accurately process their data. The use of Pascal’s Triangle for binomial weighting, along with support for a variety of filters, ensures both mathematical rigor and practical versatility. 
+This application provides a robust and user-friendly environment for noise reduction analysis on numerical datasets. By combining flexible data input methods, a responsive and informative user interface, and efficient parallel processing of advanced filtering algorithms, it enables users to quickly and accurately process their data. The use of Pascal's Triangle for binomial weighting, along with support for a variety of filters, ensures both mathematical rigor and practical versatility. 
 
 In particular :
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
