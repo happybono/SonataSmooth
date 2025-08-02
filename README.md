@@ -136,7 +136,7 @@ After processing is complete, the application writes the smoothed sequence to a 
 - [.NET Framework 4.7.2](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net472) or later ([.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) recommended)
 - Windows Operating System (Windows 10 or later recommended)
 - [Visual Studio 2019 or newer](https://visualstudio.microsoft.com/) (for development)
-- [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) – **Required for Microsoft Excel export functionality** via `Interop`
+- [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) - **Required for Microsoft Excel export functionality** via `Interop`
 
 ### Dependencies
 - `System.Windows.Forms`
