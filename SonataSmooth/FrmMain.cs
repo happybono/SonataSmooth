@@ -23,7 +23,7 @@ namespace SonataSmooth
 {
     public partial class FrmMain : Form
     {
-        private const string ExcelTitlePlaceholder = "Click to Add Title";
+        private const string ExcelTitlePlaceholder = "Click here to enter a title for your dataset.";
 
         private static readonly Regex numberRegex = new Regex(
             @"[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?",
@@ -944,7 +944,7 @@ namespace SonataSmooth
             btnCopy.Enabled = hasItems;
             btnEdit.Enabled = hasSelection;
             btnCalibrate.Enabled = hasItems;
-            btnExportExcel.Enabled = hasItems
+            btnExport.Enabled = hasItems
                 && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
                 && txtExcelTitle.Text != ExcelTitlePlaceholder;
             btnDelete.Enabled = hasSelection;
@@ -1605,9 +1605,8 @@ namespace SonataSmooth
             });
         }
 
-        private async void btnExportExcel_Click(object sender, EventArgs e)
+        private async void btnExport_Click(object sender, EventArgs e)
         {
-
             bool doXLSX = settingsForm.rbtnXLSX.Checked;
             bool doCSV = settingsForm.rbtnCSV.Checked;
 
@@ -1869,8 +1868,8 @@ namespace SonataSmooth
             {
                 txtExcelTitle.Text = "";
                 txtExcelTitle.ForeColor = SystemColors.WindowText;
-                txtExcelTitle.TextAlign = HorizontalAlignment.Left;
             }
+            txtExcelTitle.TextAlign = HorizontalAlignment.Left;
         }
 
         private void txtExcelTitle_Leave(object sender, EventArgs e)
@@ -1886,6 +1885,17 @@ namespace SonataSmooth
         private void txtExcelTitle_TextChanged(object sender, EventArgs e)
         {
            UpdateExportExcelButtonState();
+
+            // 텍스트가 placeholder가 아니고 비어있지 않으면 우측 정렬
+            if (txtExcelTitle.Text != ExcelTitlePlaceholder)
+            {
+                txtExcelTitle.TextAlign = HorizontalAlignment.Left;
+            }
+            else
+            {
+                // placeholder 또는 빈 값일 때는 가운데 정렬
+                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+            }
         }
 
         private void UpdateExportExcelButtonState()
@@ -1894,7 +1904,7 @@ namespace SonataSmooth
             bool isValid = hasItems
                 && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
                 && txtExcelTitle.Text != ExcelTitlePlaceholder;
-            btnExportExcel.Enabled = isValid;
+            btnExport.Enabled = isValid;
         }
 
         private void txtExcelTitle_KeyDown(object sender, KeyEventArgs e)

@@ -73,7 +73,7 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnExportSettings = new System.Windows.Forms.Button();
-            this.btnExportExcel = new System.Windows.Forms.Button();
+            this.btnExport = new System.Windows.Forms.Button();
             this.btnInfo = new System.Windows.Forms.Button();
             this.txtExcelTitle = new System.Windows.Forms.TextBox();
             this.groupBox2.SuspendLayout();
@@ -629,17 +629,17 @@
             this.btnExportSettings.UseVisualStyleBackColor = true;
             this.btnExportSettings.Click += new System.EventHandler(this.btnExportSettings_Click);
             // 
-            // btnExportExcel
+            // btnExport
             // 
-            this.btnExportExcel.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.75F);
-            this.btnExportExcel.Location = new System.Drawing.Point(486, 782);
-            this.btnExportExcel.Name = "btnExportExcel";
-            this.btnExportExcel.Size = new System.Drawing.Size(234, 40);
-            this.btnExportExcel.TabIndex = 28;
-            this.btnExportExcel.Text = "";
-            this.toolTip1.SetToolTip(this.btnExportExcel, "Export");
-            this.btnExportExcel.UseVisualStyleBackColor = true;
-            this.btnExportExcel.Click += new System.EventHandler(this.btnExportExcel_Click);
+            this.btnExport.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.75F);
+            this.btnExport.Location = new System.Drawing.Point(486, 782);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(234, 40);
+            this.btnExport.TabIndex = 28;
+            this.btnExport.Text = "";
+            this.toolTip1.SetToolTip(this.btnExport, "Export");
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // btnInfo
             // 
@@ -674,7 +674,7 @@
             this.Controls.Add(this.btnInfo);
             this.Controls.Add(this.btnExportSettings);
             this.Controls.Add(this.txtExcelTitle);
-            this.Controls.Add(this.btnExportExcel);
+            this.Controls.Add(this.btnExport);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBox4);
@@ -747,7 +747,7 @@
         public System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.Button btnEdit;
         public System.Windows.Forms.Label lblCnt1;
-        private System.Windows.Forms.Button btnExportExcel;
+        private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.TextBox txtExcelTitle;
         private System.Windows.Forms.Button btnExportSettings;
         public System.Windows.Forms.ComboBox cbxKernelWidth;
