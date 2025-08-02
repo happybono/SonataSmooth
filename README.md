@@ -400,7 +400,7 @@ private static int[] CalcBinomialCoefficients(int length)
     return c;
 }
 ```
--	This function generates the coefficients for the (length-1)th row of Pascal's triangle, which are used as weights for the filters.
+-	This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters.
 
 ### 9. Savitzky-Golay Coefficients Computation
 #### How it works
