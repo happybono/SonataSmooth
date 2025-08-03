@@ -135,6 +135,11 @@ After processing is complete, the application writes the smoothed sequence to a 
 > All UI data is accessed only on the UI thread, heavy calculations and file writing are parallelized in the background, progress is safely reported to the UI, large exports are split automatically.<br><br>
 > UI remains responsive, large data is processed quickly and safely, and all UI / COM access is thread-safe.<br><br>
 > Synchronize selection and scroll position between the two listboxes. (**These buttons are only enabled when the Initial Dataset and Refined Dataset listboxes have the same number of items.**)
+
+### v4.2.3.2
+#### August 03, 2025
+> Adjusted TabIndex to ensure controls are selected in the correct order.<br><br>
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
