@@ -11,23 +11,6 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ## Project Overview
 **SonataSmooth** is a C# .NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
 
-- **Rectangular (uniform) mean** :<br>
-  computes a simple moving average over a fixed window of equal weights.<br><br>
-  
-- **Weighted median** :<br>
-  selects the median value within the window after applying user-defined weights.<br><br>
-   
-- **Binomial (Gaussian-like) average** :<br>
-  performs a moving average weighted by Pascal's triangle coefficients.<br><br>
-  
-- **Gaussian filter** :<br>
-  convolves the data with a Gaussian kernel defined by a configurable standard deviation (sigma).<br><br>
-  
-- **Savitzky-Golay polynomial smoothing** :<br>
-  fits a low-degree polynomial to each window via least-squares and replaces the center point with the fitted value.<br><br>
-
-After processing is complete, the application writes the smoothed sequence to a separate output list and updates a progress bar in real-time to indicate the smoothing progress.<br><br>
-
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
 <img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
@@ -169,6 +152,67 @@ After processing is complete, the application writes the smoothed sequence to a 
 4. **Calibrate** : Click the 'Calibrate' button to apply the selected filter.
 5. **Review Results** : View the smoothed output in the second listbox.
 6. **Export** : Click Export to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization.
+
+## Noise Filter Comparison
+This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
+
+### Filter Comparison Table
+| Signal Pattern                             | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Filtering | Savitzky–Golay Filtering |
+|:-------------------------------------------|:---------------------:|:------------------:|:------------------------:|:------------------:|:------------------------:|
+| Occasional random noise                    | OK                    | Good               | Very Good                 | Good               | Very Good                |
+| Frequent random noise                      | Poor                  | Fair               | Excellent                 | Fair               | Fair                     |
+| Large slow trend changes                   | Poor                  | Good               | Good                      | Good               | Excellent                |
+| Sudden spikes (sharp single jumps)         | Poor                  | Fair               | Excellent                 | Fair               | Fair                     |
+| Regular large-amplitude waves              | Poor                  | Fair               | Fair                      | Fair               | Excellent                |
+| Step changes (sudden level shifts)         | Poor                  | Fair               | Good                      | Fair               | Fair                     |
+| Mixed-frequency oscillations               | Poor                  | Good               | Fair                      | Good               | Excellent                |
+| Periodic high-frequency noise (steady tone)| Excellent             | Fair               | Fair                      | Good               | Good                     |
+| Slowly drifting baseline with tiny jitter  | Good                  | Good               | Very Good                 | Good               | Very Good                |
+
+## What Is Pascal's Triangle?
+Pascal’s Triangle is a triangle of numbers built like this :
+
+- Start with `1` at the top.
+- Each new row adds two numbers from the row above to get a new one.
+- The edges of each row are always `1`.
+
+### Example :
+Row 1 :　　　　　　1<br>
+Row 2 :　　　　　1　 1<br>
+Row 3 :　　　　1　 2　 1<br>
+Row 4 :　　　1　 3　 3　 1<br>
+Row 5 :　　1　 4 　6　 4　 1<br>
+
+Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. Bigger numbers in the middle give more importance to center values when filtering.
+
+## Filter Descriptions
+- **Rectangular Averaging (Moving Average)**<br>
+  Adds up a group of points and divides by how many there are. It's simple and fast. Best for removing constant buzz or small jitters.
+
+- **Binomial Averaging**<br>
+  Like a moving average, but with weights from Pascal’s Triangle. The center gets more focus. Keeps the shape of your signal better while smoothing small noise.
+
+- **Binomial Median Filtering**<br>
+  Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
+  
+- **Gaussian Filtering**<br>
+  Uses a bell-shaped curve for weights. Very smooth, but may let sharp jumps stay.
+
+- **Savitzky–Golay Filtering**<br>
+  Fits tiny curves to chunks of data. Keeps wave shapes and slow changes almost perfectly, but not as strong for sudden spikes.
+
+### Example of Using Pascal's Triangle in Filtering
+Let’s say we use the 5th row : `1 4 6 4 1`
+
+1. **Total** = `1` + `4` + `6` + `4` + `1` = `16`
+2. **Weights** = [`1 / 16`, `4 / 16`, `6 / 16`, `4 / 16`, `1 / 16`]
+   → [`0.0625` , `0.25` , `0.375` , `0.25` , `0.0625`]
+3. **Data Window** = [`2`, `5`, `1`, `3`, `4`]
+
+Apply the weights :  
+`2 × 0.0625 + 5 × 0.25 + 1 × 0.375 + 3 × 0.25 + 4 × 0.0625 = 2.75`
+
+That final value (`2.75`) becomes your new filtered point.
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
