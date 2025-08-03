@@ -54,3 +54,4 @@ E:\My Lifestyle\Products\C#\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.Gen
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.CoreCompileInputs.cache
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\x64\Release\SonataSmooth.exe
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\x64\Release\SonataSmooth.pdb
+E:\My Lifestyle\Products\C#\SonataSmooth\obj\x64\Release\SonataSmooth.exe.config
