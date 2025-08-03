@@ -672,10 +672,12 @@ Beyond the choice of filter, the implementation harnesses parallel processing (P
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 ## Demonstration
-![Final Product-Gaussian](SonataSmooth-GaussianFiltering.png)<br><br>
-![Final Product SG](SonataSmooth-SGFiltering.png)<br><br>
-![Final Product_EditEntries](SonataSmooth-EditEntries.png)<br><br>
-![Calibrated Results](PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
+![SonataSmooth_Gaussian](SonataSmooth-GaussianFiltering.png)<br><br>
+![SonataSmooth SG](SonataSmooth-SGFiltering.png)<br><br>
+![SonataSmooth_EditEntries](SonataSmooth-EditEntries.png)<br><br>
+![SonataSmooth_MatchSelection](SonataSmooth-MatchSelection.png)<br><br>
+![SonataSmooth_ExportSettings](SonataSmooth-ExportSettings.png)<br><br>
+![SonataSmooth_Calibrated Results](PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
