@@ -44,9 +44,9 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chbOpenFile = new System.Windows.Forms.CheckBox();
             this.rbtnCSV = new System.Windows.Forms.RadioButton();
             this.rbtnXLSX = new System.Windows.Forms.RadioButton();
-            this.chbOpenFile = new System.Windows.Forms.CheckBox();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -61,7 +61,7 @@
             this.chbRect.Location = new System.Drawing.Point(6, 25);
             this.chbRect.Name = "chbRect";
             this.chbRect.Size = new System.Drawing.Size(163, 30);
-            this.chbRect.TabIndex = 0;
+            this.chbRect.TabIndex = 1;
             this.chbRect.Text = "Rectangular Averaging";
             this.chbRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbRect.UseVisualStyleBackColor = true;
@@ -75,7 +75,7 @@
             this.chbAvg.Location = new System.Drawing.Point(175, 25);
             this.chbAvg.Name = "chbAvg";
             this.chbAvg.Size = new System.Drawing.Size(163, 30);
-            this.chbAvg.TabIndex = 1;
+            this.chbAvg.TabIndex = 2;
             this.chbAvg.Text = "Binomial Averaging";
             this.chbAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbAvg.UseVisualStyleBackColor = true;
@@ -89,7 +89,7 @@
             this.chbMed.Location = new System.Drawing.Point(7, 59);
             this.chbMed.Name = "chbMed";
             this.chbMed.Size = new System.Drawing.Size(331, 30);
-            this.chbMed.TabIndex = 2;
+            this.chbMed.TabIndex = 3;
             this.chbMed.Text = "Binomial Median Filtering";
             this.chbMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbMed.UseVisualStyleBackColor = true;
@@ -103,7 +103,7 @@
             this.chbGauss.Location = new System.Drawing.Point(7, 93);
             this.chbGauss.Name = "chbGauss";
             this.chbGauss.Size = new System.Drawing.Size(163, 30);
-            this.chbGauss.TabIndex = 3;
+            this.chbGauss.TabIndex = 4;
             this.chbGauss.Text = "Gaussian Filtering";
             this.chbGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbGauss.UseVisualStyleBackColor = true;
@@ -117,7 +117,7 @@
             this.chbSG.Location = new System.Drawing.Point(175, 93);
             this.chbSG.Name = "chbSG";
             this.chbSG.Size = new System.Drawing.Size(163, 30);
-            this.chbSG.TabIndex = 4;
+            this.chbSG.TabIndex = 5;
             this.chbSG.Text = "Savitzky-Golay Filtering";
             this.chbSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbSG.UseVisualStyleBackColor = true;
@@ -166,7 +166,7 @@
             this.cbxPolyOrder.Location = new System.Drawing.Point(193, 80);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
-            this.cbxPolyOrder.TabIndex = 17;
+            this.cbxPolyOrder.TabIndex = 7;
             // 
             // cbxKernelWidth
             // 
@@ -194,7 +194,7 @@
             this.cbxKernelWidth.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelWidth.Name = "cbxKernelWidth";
             this.cbxKernelWidth.Size = new System.Drawing.Size(80, 25);
-            this.cbxKernelWidth.TabIndex = 16;
+            this.cbxKernelWidth.TabIndex = 6;
             // 
             // label1
             // 
@@ -228,7 +228,7 @@
             this.btnCancel.Location = new System.Drawing.Point(654, 272);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 24);
-            this.btnCancel.TabIndex = 25;
+            this.btnCancel.TabIndex = 12;
             this.btnCancel.Text = "";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -239,7 +239,7 @@
             this.btnSave.Location = new System.Drawing.Point(563, 272);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(85, 24);
-            this.btnSave.TabIndex = 26;
+            this.btnSave.TabIndex = 11;
             this.btnSave.Text = "";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -267,6 +267,20 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Data Export Options";
             // 
+            // chbOpenFile
+            // 
+            this.chbOpenFile.AutoSize = true;
+            this.chbOpenFile.Checked = true;
+            this.chbOpenFile.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chbOpenFile.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chbOpenFile.Location = new System.Drawing.Point(208, 58);
+            this.chbOpenFile.Name = "chbOpenFile";
+            this.chbOpenFile.Size = new System.Drawing.Size(289, 21);
+            this.chbOpenFile.TabIndex = 10;
+            this.chbOpenFile.Text = "Open the saved file automatically after saving.";
+            this.chbOpenFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chbOpenFile.UseVisualStyleBackColor = true;
+            // 
             // rbtnCSV
             // 
             this.rbtnCSV.Appearance = System.Windows.Forms.Appearance.Button;
@@ -274,7 +288,7 @@
             this.rbtnCSV.Location = new System.Drawing.Point(385, 21);
             this.rbtnCSV.Name = "rbtnCSV";
             this.rbtnCSV.Size = new System.Drawing.Size(163, 30);
-            this.rbtnCSV.TabIndex = 1;
+            this.rbtnCSV.TabIndex = 9;
             this.rbtnCSV.TabStop = true;
             this.rbtnCSV.Text = "Export as CSV";
             this.rbtnCSV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -287,25 +301,11 @@
             this.rbtnXLSX.Location = new System.Drawing.Point(157, 21);
             this.rbtnXLSX.Name = "rbtnXLSX";
             this.rbtnXLSX.Size = new System.Drawing.Size(163, 30);
-            this.rbtnXLSX.TabIndex = 0;
+            this.rbtnXLSX.TabIndex = 8;
             this.rbtnXLSX.TabStop = true;
             this.rbtnXLSX.Text = "Open in Excel";
             this.rbtnXLSX.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnXLSX.UseVisualStyleBackColor = true;
-            // 
-            // chbOpenFile
-            // 
-            this.chbOpenFile.AutoSize = true;
-            this.chbOpenFile.Checked = true;
-            this.chbOpenFile.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chbOpenFile.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chbOpenFile.Location = new System.Drawing.Point(208, 58);
-            this.chbOpenFile.Name = "chbOpenFile";
-            this.chbOpenFile.Size = new System.Drawing.Size(289, 21);
-            this.chbOpenFile.TabIndex = 2;
-            this.chbOpenFile.Text = "Open the saved file automatically after saving.";
-            this.chbOpenFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.chbOpenFile.UseVisualStyleBackColor = true;
             // 
             // FrmExportSettings
             // 

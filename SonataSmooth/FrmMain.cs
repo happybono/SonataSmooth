@@ -630,6 +630,7 @@ namespace SonataSmooth
             txtExcelTitle.Text = ExcelTitlePlaceholder;
             txtExcelTitle.TextAlign = HorizontalAlignment.Center;
             txtExcelTitle.ForeColor = Color.Gray;
+            txtVariable.Text = string.Empty;
             txtVariable.Select();
         }
 
@@ -2010,14 +2011,6 @@ namespace SonataSmooth
                 && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
                 && txtExcelTitle.Text != ExcelTitlePlaceholder;
             btnExport.Enabled = isValid;
-        }
-
-        private void txtExcelTitle_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Tab)
-            {
-
-            }
         }
 
         private void btnSync1_Click(object sender, EventArgs e)
