@@ -157,7 +157,6 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
 
 ### Filter Comparison Table
-
 | Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Filtering | Savitzky–Golay Filtering |
 |:--------------------------------------------------------|:---------------------:|:------------------:|:------------------------:|:------------------:|:------------------------:|
 | Occasional random noise                                 | OK                    | Good               | Very Good                 | Good               | Very Good                |
@@ -171,6 +170,13 @@ This guide explains how different noise filters work with different types of sig
 | Slowly drifting baseline with tiny jitter               | Good                  | Good               | Very Good                 | Good               | Very Good                |
 | Natural signal flow with smooth curves & gentle noise   | Fair                  | Good               | Good                      | **Excellent**      | Very Good                |
 | Stable periodic signal with moderate high-frequency noise | Fair           | **Excellent**      | Fair                      | Good               | Good                     |
+
+### Verdict
+- **Rectangular Averaging** is simple, but surprisingly effective for steady high-frequency noise.
+- **Binomial Averaging** is a good middle ground : especially for periodic signals with moderate noise.
+- **Binomial Median Filtering** is a powerhouse for handling spikes, frequent noise, and step changes : great for robustness.
+- **Gaussian Filtering** offers smooth results but may not handle abrupt changes well.
+- **Savitzky–Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
 
 ## What Is Pascal's Triangle?
 Pascal’s Triangle is a triangle of numbers built like this :
