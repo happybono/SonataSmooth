@@ -77,7 +77,7 @@
             this.btnExportSettings = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.btnInfo = new System.Windows.Forms.Button();
-            this.txtExcelTitle = new System.Windows.Forms.TextBox();
+            this.txtDatasetTitle = new System.Windows.Forms.TextBox();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -433,8 +433,8 @@
             // 
             // btnSync1
             // 
-            this.btnSync1.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSync1.Location = new System.Drawing.Point(306, 270);
+            this.btnSync1.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
+            this.btnSync1.Location = new System.Drawing.Point(306, 269);
             this.btnSync1.Name = "btnSync1";
             this.btnSync1.Size = new System.Drawing.Size(30, 30);
             this.btnSync1.TabIndex = 12;
@@ -494,8 +494,8 @@
             // 
             // btnSync2
             // 
-            this.btnSync2.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSync2.Location = new System.Drawing.Point(306, 168);
+            this.btnSync2.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
+            this.btnSync2.Location = new System.Drawing.Point(306, 167);
             this.btnSync2.Name = "btnSync2";
             this.btnSync2.Size = new System.Drawing.Size(30, 30);
             this.btnSync2.TabIndex = 29;
@@ -684,15 +684,15 @@
             this.btnInfo.UseVisualStyleBackColor = true;
             this.btnInfo.Click += new System.EventHandler(this.btnInfo_Click);
             // 
-            // txtExcelTitle
+            // txtDatasetTitle
             // 
-            this.txtExcelTitle.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.txtExcelTitle.Location = new System.Drawing.Point(385, 14);
-            this.txtExcelTitle.Name = "txtExcelTitle";
-            this.txtExcelTitle.Size = new System.Drawing.Size(265, 25);
-            this.txtExcelTitle.TabIndex = 30;
-            this.txtExcelTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtExcelTitle.TextChanged += new System.EventHandler(this.txtExcelTitle_TextChanged);
+            this.txtDatasetTitle.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.txtDatasetTitle.Location = new System.Drawing.Point(385, 14);
+            this.txtDatasetTitle.Name = "txtDatasetTitle";
+            this.txtDatasetTitle.Size = new System.Drawing.Size(265, 25);
+            this.txtDatasetTitle.TabIndex = 30;
+            this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtExcelTitle_TextChanged);
             // 
             // FrmMain
             // 
@@ -702,7 +702,7 @@
             this.ClientSize = new System.Drawing.Size(734, 861);
             this.Controls.Add(this.btnInfo);
             this.Controls.Add(this.btnExportSettings);
-            this.Controls.Add(this.txtExcelTitle);
+            this.Controls.Add(this.txtDatasetTitle);
             this.Controls.Add(this.btnExport);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.progressBar1);
@@ -777,7 +777,7 @@
         private System.Windows.Forms.Button btnEdit;
         public System.Windows.Forms.Label lblCnt1;
         private System.Windows.Forms.Button btnExport;
-        private System.Windows.Forms.TextBox txtExcelTitle;
+        private System.Windows.Forms.TextBox txtDatasetTitle;
         private System.Windows.Forms.Button btnExportSettings;
         public System.Windows.Forms.ComboBox cbxKernelWidth;
         private System.Windows.Forms.ComboBox cbxPolyOrder;

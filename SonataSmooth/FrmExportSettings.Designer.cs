@@ -289,7 +289,6 @@
             this.rbtnCSV.Name = "rbtnCSV";
             this.rbtnCSV.Size = new System.Drawing.Size(163, 30);
             this.rbtnCSV.TabIndex = 9;
-            this.rbtnCSV.TabStop = true;
             this.rbtnCSV.Text = "Export as CSV";
             this.rbtnCSV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnCSV.UseVisualStyleBackColor = true;
@@ -297,6 +296,7 @@
             // rbtnXLSX
             // 
             this.rbtnXLSX.Appearance = System.Windows.Forms.Appearance.Button;
+            this.rbtnXLSX.Checked = true;
             this.rbtnXLSX.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rbtnXLSX.Location = new System.Drawing.Point(157, 21);
             this.rbtnXLSX.Name = "rbtnXLSX";

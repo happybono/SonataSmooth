@@ -22,7 +22,7 @@ namespace SonataSmooth
         public bool DoGauss { get; set; } = true;
         public bool DoSavitzky { get; set; } = true;
 
-        public bool DoExcelExport { get; set; } = true;
+        public bool DoExcelExport { get; set; } = false;
         public bool DoCSVExport { get; set; } = true;
         public bool DoAutoSave { get; set; } = true;
 

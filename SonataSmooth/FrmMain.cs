@@ -627,9 +627,9 @@ namespace SonataSmooth
             UpdateListBox1BtnsState(null, EventArgs.Empty);
             UpdateListBox2BtnsState(null, EventArgs.Empty);
 
-            txtExcelTitle.Text = ExcelTitlePlaceholder;
-            txtExcelTitle.TextAlign = HorizontalAlignment.Center;
-            txtExcelTitle.ForeColor = Color.Gray;
+            txtDatasetTitle.Text = ExcelTitlePlaceholder;
+            txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
+            txtDatasetTitle.ForeColor = Color.Gray;
             txtVariable.Text = string.Empty;
             txtVariable.Select();
         }
@@ -935,9 +935,9 @@ namespace SonataSmooth
                 listBox1.Select();
                 progressBar1.Value = 0;
 
-                txtExcelTitle.Text = ExcelTitlePlaceholder;
-                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
-                txtExcelTitle.ForeColor = Color.Gray;
+                txtDatasetTitle.Text = ExcelTitlePlaceholder;
+                txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
+                txtDatasetTitle.ForeColor = Color.Gray;
                 UpdateListBox1BtnsState(null, EventArgs.Empty);
                 txtVariable.Select();
                 return;
@@ -962,8 +962,8 @@ namespace SonataSmooth
             btnEdit.Enabled = hasSelection;
             btnCalibrate.Enabled = hasItems;
             btnExport.Enabled = hasItems
-                && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
-                && txtExcelTitle.Text != ExcelTitlePlaceholder;
+                && !string.IsNullOrWhiteSpace(txtDatasetTitle.Text)
+                && txtDatasetTitle.Text != ExcelTitlePlaceholder;
             btnDelete.Enabled = hasSelection;
             btnClear.Enabled = hasItems;
             btnSelClear.Enabled = hasSelection;
@@ -1287,11 +1287,11 @@ namespace SonataSmooth
             cbxKernelWidth.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
 
-            txtExcelTitle.Text = ExcelTitlePlaceholder;
-            txtExcelTitle.ForeColor = Color.Gray;
-            txtExcelTitle.Enter += txtExcelTitle_Enter;
-            txtExcelTitle.Leave += txtExcelTitle_Leave;
-            txtExcelTitle.TextChanged += txtExcelTitle_TextChanged;
+            txtDatasetTitle.Text = ExcelTitlePlaceholder;
+            txtDatasetTitle.ForeColor = Color.Gray;
+            txtDatasetTitle.Enter += txtExcelTitle_Enter;
+            txtDatasetTitle.Leave += txtExcelTitle_Leave;
+            txtDatasetTitle.TextChanged += txtExcelTitle_TextChanged;
             UpdateExportExcelButtonState();
 
             settingsForm.chbRect.Checked = true;
@@ -1351,7 +1351,7 @@ namespace SonataSmooth
                     doMed = settingsForm.chbMed.Checked;
                     doGauss = settingsForm.chbGauss.Checked;
                     doSG = settingsForm.chbSG.Checked;
-                    excelTitle = txtExcelTitle.Text;
+                    excelTitle = txtDatasetTitle.Text;
                     initialData = listBox1.Items
                         .Cast<object>()
                         .Select(x => double.TryParse(
@@ -1374,7 +1374,7 @@ namespace SonataSmooth
                 doMed = settingsForm.chbMed.Checked;
                 doGauss = settingsForm.chbGauss.Checked;
                 doSG = settingsForm.chbSG.Checked;
-                excelTitle = txtExcelTitle.Text;
+                excelTitle = txtDatasetTitle.Text;
                 initialData = listBox1.Items
                     .Cast<object>()
                     .Select(x => double.TryParse(
@@ -1474,7 +1474,7 @@ namespace SonataSmooth
                         dlg.DefaultExt = "csv";
                         dlg.AddExtension = true;
 
-                        if (dlg.ShowDialog() == DialogResult.OK)
+                        if (dlg.ShowDialog(this) == DialogResult.OK)
                             basePath = dlg.FileName;
                     }
                 }));
@@ -1487,7 +1487,7 @@ namespace SonataSmooth
                     dlg.DefaultExt = "csv";
                     dlg.AddExtension = true;
 
-                    if (dlg.ShowDialog() == DialogResult.OK)
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
                         basePath = dlg.FileName;
                 }
             }
@@ -1631,8 +1631,21 @@ namespace SonataSmooth
                         string openPath = partCount == 1
                             ? basePath
                             : Path.Combine(dir, $"{nameOnly}_Part{part + 1}{ext}");
+
                         if (File.Exists(openPath))
-                            Process.Start(openPath);
+                        {
+                            try
+                            {
+                                Process.Start(new ProcessStartInfo(openPath) { UseShellExecute = true });
+                            }
+                            catch (System.ComponentModel.Win32Exception)
+                            {
+                                Process.Start(new ProcessStartInfo("rundll32.exe", $"shell32.dll,OpenAs_RunDLL \"{openPath}\"")
+                                {
+                                    UseShellExecute = true
+                                });
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1829,7 +1842,7 @@ namespace SonataSmooth
             var ws = (Excel.Worksheet)wb.Worksheets[1];
             //excel.Visible = true;
 
-            ws.Cells[1, 1] = txtExcelTitle.Text;
+            ws.Cells[1, 1] = txtDatasetTitle.Text;
             ws.Cells[3, 1] = "Smoothing Parameters";
             ws.Cells[4, 1] = $"Kernel Width : {w}";
             ws.Cells[5, 1] = doSG
@@ -1903,7 +1916,8 @@ namespace SonataSmooth
 
             chart.ChartType = Excel.XlChartType.xlLine;
             chart.HasTitle = true;
-            chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
+            chart.ChartTitle.Text = txtDatasetTitle.Text;
+            //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
 
             chart.HasLegend = true;
             chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
@@ -1970,21 +1984,21 @@ namespace SonataSmooth
 
         private void txtExcelTitle_Enter(object sender, EventArgs e)
         {
-            if (txtExcelTitle.Text == ExcelTitlePlaceholder)
+            if (txtDatasetTitle.Text == ExcelTitlePlaceholder)
             {
-                txtExcelTitle.Text = "";
-                txtExcelTitle.ForeColor = SystemColors.WindowText;
+                txtDatasetTitle.Text = "";
+                txtDatasetTitle.ForeColor = SystemColors.WindowText;
             }
-            txtExcelTitle.TextAlign = HorizontalAlignment.Left;
+            txtDatasetTitle.TextAlign = HorizontalAlignment.Left;
         }
 
         private void txtExcelTitle_Leave(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtExcelTitle.Text))
+            if (string.IsNullOrWhiteSpace(txtDatasetTitle.Text))
             {
-                txtExcelTitle.Text = ExcelTitlePlaceholder;
-                txtExcelTitle.ForeColor = Color.Gray;
-                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+                txtDatasetTitle.Text = ExcelTitlePlaceholder;
+                txtDatasetTitle.ForeColor = Color.Gray;
+                txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
             }
         }
 
@@ -1993,14 +2007,14 @@ namespace SonataSmooth
            UpdateExportExcelButtonState();
 
             // 텍스트가 placeholder 가 아니고 비어있지 않으면 우측 정렬
-            if (txtExcelTitle.Text != ExcelTitlePlaceholder)
+            if (txtDatasetTitle.Text != ExcelTitlePlaceholder)
             {
-                txtExcelTitle.TextAlign = HorizontalAlignment.Left;
+                txtDatasetTitle.TextAlign = HorizontalAlignment.Left;
             }
             else
             {
                 // placeholder 또는 빈 값일 때는 가운데 정렬
-                txtExcelTitle.TextAlign = HorizontalAlignment.Center;
+                txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
             }
         }
 
@@ -2008,8 +2022,8 @@ namespace SonataSmooth
         {
             bool hasItems = listBox1.Items.Count > 0;
             bool isValid = hasItems
-                && !string.IsNullOrWhiteSpace(txtExcelTitle.Text)
-                && txtExcelTitle.Text != ExcelTitlePlaceholder;
+                && !string.IsNullOrWhiteSpace(txtDatasetTitle.Text)
+                && txtDatasetTitle.Text != ExcelTitlePlaceholder;
             btnExport.Enabled = isValid;
         }
 
