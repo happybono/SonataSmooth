@@ -1,0 +1,13 @@
+D:\My Lifestyle\Products\C#\SonataSmooth\bin\ARM64\Release\SonataSmooth.exe.config
+D:\My Lifestyle\Products\C#\SonataSmooth\bin\ARM64\Release\SonataSmooth.exe
+D:\My Lifestyle\Products\C#\SonataSmooth\bin\ARM64\Release\SonataSmooth.pdb
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.csproj.AssemblyReference.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.FrmAbout.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.FrmExportSettings.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.FrmMain.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.FrmModify.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.Properties.Resources.resources
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.csproj.GenerateResource.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.csproj.CoreCompileInputs.cache
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.exe
+D:\My Lifestyle\Products\C#\SonataSmooth\obj\ARM64\Release\SonataSmooth.pdb
