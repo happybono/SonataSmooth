@@ -125,6 +125,8 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Minor bugs fixed.
 
 #### August 10, 2025
+### v4.2.5.7
+> A program selection screen appears when opening a saved file with no associated application.
 > Include an ARM64-native variant of the executable.
 </details>
 
