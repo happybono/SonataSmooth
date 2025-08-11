@@ -124,8 +124,8 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Adjusted TabIndex to ensure controls are selected in the correct order.<br><br>
 > Minor bugs fixed.
 
-#### August 10, 2025
 ### v4.2.5.7
+#### August 10, 2025
 > A program selection screen appears when opening a saved file with no associated application.<br><br>
 > Include an ARM64-native variant of the executable.
 </details>
