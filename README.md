@@ -123,6 +123,9 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 #### August 03, 2025
 > Adjusted TabIndex to ensure controls are selected in the correct order.<br><br>
 > Minor bugs fixed.
+
+#### August 10, 2025
+> Include an ARM64-native variant of the executable.
 </details>
 
 ## Required Components & Setup
