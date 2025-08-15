@@ -37,3 +37,17 @@ E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateR
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.exe
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.pdb
+D:\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+D:\SonataSmooth\bin\Debug\SonataSmooth.exe
+D:\SonataSmooth\bin\Debug\SonataSmooth.pdb
+D:\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+D:\SonataSmooth\obj\Debug\SonataSmooth.exe.config
+D:\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
+D:\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
+D:\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+D:\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+D:\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+D:\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+D:\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+D:\SonataSmooth\obj\Debug\SonataSmooth.exe
+D:\SonataSmooth\obj\Debug\SonataSmooth.pdb
