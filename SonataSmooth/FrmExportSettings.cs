@@ -12,8 +12,8 @@ namespace SonataSmooth
 {
     public partial class FrmExportSettings : Form
     {
-        public int KernelWidth { get; set; } = 4;
-        public int PolyOrder { get; set; } = 3;
+        public int kernelRadius { get; set; } = 4;
+        public int polyOrder { get; set; } = 3;
         private FrmMain _mainForm;
 
         public bool DoRectAvg { get; set; } = true;
@@ -43,11 +43,11 @@ namespace SonataSmooth
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (int.TryParse(cbxKernelWidth.Text, out var w))
-                KernelWidth = w;
+            if (int.TryParse(cbxKernelWidth.Text, out var r))
+                kernelRadius = r;
 
             if (int.TryParse(cbxPolyOrder.Text, out var p))
-                PolyOrder = p;
+                polyOrder = p;
 
             DoRectAvg = chbRect.Checked;
             DoBinomAvg = chbAvg.Checked;
@@ -70,8 +70,8 @@ namespace SonataSmooth
         {
             base.OnShown(e);
 
-            cbxKernelWidth.Text = KernelWidth.ToString();
-            cbxPolyOrder.Text = PolyOrder.ToString();
+            cbxKernelWidth.Text = kernelRadius.ToString();
+            cbxPolyOrder.Text = kernelRadius.ToString();
 
             chbRect.Checked = DoRectAvg;
             chbAvg.Checked = DoBinomAvg;
@@ -96,8 +96,8 @@ namespace SonataSmooth
             cbxKernelWidth.Text = kernelWidth;
             cbxPolyOrder.Text = polyOrder;
 
-            if (int.TryParse(kernelWidth, out var w)) KernelWidth = w;
-            if (int.TryParse(polyOrder, out var p)) PolyOrder = p;
+            if (int.TryParse(kernelWidth, out var r)) kernelRadius = r;
+            if (int.TryParse(polyOrder, out var p)) this.polyOrder = p;
         }
 
         private void chbSG_CheckedChanged(object sender, EventArgs e)

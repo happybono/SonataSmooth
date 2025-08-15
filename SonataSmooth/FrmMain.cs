@@ -283,7 +283,7 @@ namespace SonataSmooth
                                          : useGauss ? "Gaussian Filter"
                                                     : "Unknown";
 
-                    slblKernelWidth.Text = w.ToString();
+                    slblKernelRadius.Text = w.ToString();
 
                     bool showPoly = useSG;
                     toolStripStatusLabel5.Visible =
@@ -472,20 +472,30 @@ namespace SonataSmooth
             if (windowSize > dataCount)
             {
                 MessageBox.Show(
-                    $"Kernel width is too large.\nThe window size ({windowSize}) must not exceed the number of data points ({dataCount}).",
+                    $"Kernel radius is too large.\n\n" +
+                    $"Window size formula : (2 × radius) + 1\n" +
+                    $"Current : (2 × {w}) + 1 = {windowSize}\n" +
+                    $"Data count : {dataCount}\n\n" +
+                    $"Rule : windowSize ≤ dataCount\n" +
+                    $"Result : {windowSize} ≤ {dataCount} → Violation",
                     "Parameter Error",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    MessageBoxIcon.Error
+                );
                 return false;
             }
 
             if (useSG && polyOrder >= windowSize)
             {
                 MessageBox.Show(
-                    $"Polynomial order must be smaller than the window size ({windowSize}).",
+                    $"Polynomial order must be smaller than the window size.\n\n" +
+                    $"Rule : polyOrder < windowSize\n" +
+                    $"Result : {polyOrder} ≤ {windowSize} → {(polyOrder < windowSize ? "OK" : "Violation")}\n\n" +
+                    $"Tip : windowSize = (2 × radius) + 1",
                     "Parameter Error",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    MessageBoxIcon.Error
+                );
                 return false;
             }
             return true;
@@ -634,9 +644,9 @@ namespace SonataSmooth
             txtVariable.Select();
         }
 
-        public void SetComboValues(string kernelWidth, string polyOrder)
+        public void SetComboValues(string kernelRadius, string polyOrder)
         {
-            cbxKernelWidth.Text = kernelWidth;
+            cbxKernelWidth.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
         }
 
@@ -1049,7 +1059,7 @@ namespace SonataSmooth
 
             lblCnt2.Text = "Count : " + listBox2.Items.Count;
             slblCalibratedType.Text = "--";
-            slblKernelWidth.Text = "--";
+            slblKernelRadius.Text = "--";
             toolStripStatusLabel6.Visible = false;
             toolStripStatusLabel5.Visible = false;
             slblPolynomialOrder.Visible = false;
@@ -1668,7 +1678,7 @@ namespace SonataSmooth
         private Task WriteCsvOptimizedAsync(
             string path,
             string title,
-            int kernelWidth,
+            int kernelRadius,
             int? polyOrder,
             List<(string Header, double[] Data)> columns,
             int totalRows,
@@ -1690,7 +1700,7 @@ namespace SonataSmooth
                     await sw.WriteLineAsync(title);
                     await sw.WriteLineAsync();
                     await sw.WriteLineAsync("Smoothing Parameters");
-                    await sw.WriteLineAsync($"Kernel Width,{kernelWidth}");
+                    await sw.WriteLineAsync($"Kernel Width,{kernelRadius}");
                     await sw.WriteLineAsync($"Polynomial Order,{(polyOrder.HasValue ? polyOrder.Value.ToString() : "N/A")}");
                     await sw.WriteLineAsync();
 
@@ -1959,13 +1969,13 @@ namespace SonataSmooth
 
         private void cbxKernelWidth_SelectedIndexChanged(object sender, EventArgs e)
         {
-            settingsForm.KernelWidth = int.TryParse(cbxKernelWidth.Text, out var w) ? w : settingsForm.KernelWidth;
+            settingsForm.kernelRadius = int.TryParse(cbxKernelWidth.Text, out var w) ? w : settingsForm.kernelRadius;
             settingsForm.cbxKernelWidth.Text = cbxKernelWidth.Text;
         }
 
         private void cbxPolyOrder_SelectedIndexChanged(object sender, EventArgs e)
         {
-            settingsForm.PolyOrder = int.TryParse(cbxPolyOrder.Text, out var p) ? p : settingsForm.PolyOrder;
+            settingsForm.polyOrder = int.TryParse(cbxPolyOrder.Text, out var p) ? p : settingsForm.polyOrder;
             settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
         }
 

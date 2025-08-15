@@ -66,7 +66,7 @@
             this.slblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.slblKernelWidth = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblKernelRadius = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblPolynomialOrder = new System.Windows.Forms.ToolStripStatusLabel();
@@ -308,9 +308,9 @@
             this.label1.Location = new System.Drawing.Point(32, 45);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(198, 19);
+            this.label1.Size = new System.Drawing.Size(201, 19);
             this.label1.TabIndex = 17;
-            this.label1.Text = "Noise Reduction Kernel Width : ";
+            this.label1.Text = "Noise Reduction Kernel Radius : ";
             // 
             // btnSelClear2
             // 
@@ -525,7 +525,7 @@
             this.slblCalibratedType,
             this.toolStripStatusLabel2,
             this.toolStripStatusLabel3,
-            this.slblKernelWidth,
+            this.slblKernelRadius,
             this.toolStripStatusLabel6,
             this.toolStripStatusLabel5,
             this.slblPolynomialOrder});
@@ -565,16 +565,16 @@
             this.toolStripStatusLabel3.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.toolStripStatusLabel3.ForeColor = System.Drawing.Color.White;
             this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(173, 19);
-            this.toolStripStatusLabel3.Text = "Noise Reduction Kernel Width : ";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(176, 19);
+            this.toolStripStatusLabel3.Text = "Noise Reduction Kernel Radius : ";
             // 
-            // slblKernelWidth
+            // slblKernelRadius
             // 
-            this.slblKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblKernelWidth.ForeColor = System.Drawing.Color.White;
-            this.slblKernelWidth.Name = "slblKernelWidth";
-            this.slblKernelWidth.Size = new System.Drawing.Size(17, 19);
-            this.slblKernelWidth.Text = "--";
+            this.slblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblKernelRadius.ForeColor = System.Drawing.Color.White;
+            this.slblKernelRadius.Name = "slblKernelRadius";
+            this.slblKernelRadius.Size = new System.Drawing.Size(17, 19);
+            this.slblKernelRadius.Text = "--";
             // 
             // toolStripStatusLabel6
             // 
@@ -766,7 +766,7 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
         private System.Windows.Forms.Label lblCnt2;
         private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
-        private System.Windows.Forms.ToolStripStatusLabel slblKernelWidth;
+        private System.Windows.Forms.ToolStripStatusLabel slblKernelRadius;
         private System.Windows.Forms.ToolStripStatusLabel slblPolynomialOrder;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.GroupBox groupBox5;
