@@ -153,7 +153,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ## Execution Instructions
 1. **Launch the Application** : Run the compiled `.exe` file or start the project from Visual Studio.
 2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text / HTML.
-3. **Select Filter** : Choose a smoothing algorithm and configure kernel width and polynomial order.
+3. **Select Filter** : Choose a smoothing algorithm and configure kernel radius and polynomial order.
 4. **Calibrate** : Click the 'Calibrate' button to apply the selected filter.
 5. **Review Results** : View the smoothed output in the second listbox.
 6. **Export** : Click Export to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization.
@@ -550,7 +550,7 @@ When the user selects the CSV export option and clicks Export, the application:
 #### Principle
 - **Modular Export** : Each filter result is stored in a separate column.
 - **Scalable Output** : Automatically splits large datasets across multiple files.
-- **Metadata Embedding** : Includes kernel width, polynomial order, and timestamp for reproducibility.
+- **Metadata Embedding** : Includes kernel radius, polynomial order, and timestamp for reproducibility.
 
 #### Code Implementation
 ``` csharp
@@ -558,7 +558,7 @@ await sw.WriteLineAsync(txtExcelTitle.Text);
 await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
 await sw.WriteLineAsync(string.Empty);
 await sw.WriteLineAsync("Smoothing Parameters");
-await sw.WriteLineAsync($"Kernel Width : {w}");
+await sw.WriteLineAsync($"Kernel radius : {w}");
 if (doSG)
     await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
 await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
@@ -588,7 +588,7 @@ When the user selects the Excel export option and clicks Export, the application
 ```csharp
 ws.Cells[1, 1] = txtExcelTitle.Text;
 ws.Cells[3, 1] = "Smoothing Parameters";
-ws.Cells[4, 1] = $"Kernel Width : {w}";
+ws.Cells[4, 1] = $"Kernel Radius : {w}";
 ws.Cells[5, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
 
 chart.ChartType = Excel.XlChartType.xlLine;
@@ -614,7 +614,7 @@ foreach (var (Title, StartCol, EndCol) in sections)
 #### Smoothing Workflow
 When the user clicks **Calibrate** Button :
 - All input values are converted to a double[] array.
-- Kernel width and polynomial order are parsed from combo-boxes.
+- Kernel radius and polynomial order are parsed from combo-boxes.
 - The selected filter is applied using parallel processing (PLINQ).
 - Results are added to the output list box in batches, with progress feedback.
 
@@ -638,7 +638,7 @@ When the user clicks **Calibrate** Button :
 - Large datasets are split into multiple files if needed.
 
 ##### Export Settings
-- Users can configure filters, kernel width, polynomial order, and automatically open the file after save options.
+- Users can configure filters, kernel radius, polynomial order, and automatically open the file after save options.
 
 #### Keyboard Shortcuts
 - **`Ctrl` + `C`** : Copy
@@ -660,14 +660,14 @@ When the user clicks **Calibrate** Button :
 
 ### User Interface and Interaction
 -	Intuitive Windows Forms interface with controls for data entry, editing, and deletion.
--	Provides options to select noise reduction algorithm and configure parameters (kernel width, polynomial order).
+-	Provides options to select noise reduction algorithm and configure parameters (kernel radius, polynomial order).
 -	Supports keyboard shortcuts for common actions (delete, copy, paste, select all, etc.).
 -	Real-time feedback through progress bars and status labels during operations.
 -	Allows batch selection, editing, and clearing of data points.
 -	Responsive UI with asynchronous updates to maintain smooth user experience.
 
 ### Customization and Configuration
--	Users can choose the filter type and adjust kernel width and polynomial order via combo boxes.
+-	Users can choose the filter type and adjust kernel radius and polynomial order via combo boxes.
 -	Input validation prevents invalid parameter configurations.
 -	Modular code structure allows easy addition or extension of filters and configuration options.
 -	UI is designed to accommodate future enhancements and custom settings.
@@ -681,7 +681,7 @@ In particular :
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
 - Savitzky-Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
 
-Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel width and polynomial order give users fine-grained control over the degree and nature of smoothing.
+Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel radius and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
