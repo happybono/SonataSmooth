@@ -43,7 +43,7 @@ namespace SonataSmooth
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (int.TryParse(cbxKernelWidth.Text, out var r))
+            if (int.TryParse(cbxKernelRadius.Text, out var r))
                 kernelRadius = r;
 
             if (int.TryParse(cbxPolyOrder.Text, out var p))
@@ -59,7 +59,7 @@ namespace SonataSmooth
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
-            _mainForm.SetComboValues(cbxKernelWidth.Text, cbxPolyOrder.Text);
+            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -70,7 +70,7 @@ namespace SonataSmooth
         {
             base.OnShown(e);
 
-            cbxKernelWidth.Text = kernelRadius.ToString();
+            cbxKernelRadius.Text = kernelRadius.ToString();
             cbxPolyOrder.Text = kernelRadius.ToString();
 
             chbRect.Checked = DoRectAvg;
@@ -91,12 +91,12 @@ namespace SonataSmooth
             cbxPolyOrder.Enabled = chbSG.Checked;
         }
 
-        public void ApplyParameters(string kernelWidth, string polyOrder)
+        public void ApplyParameters(string kernelRadius, string polyOrder)
         {
-            cbxKernelWidth.Text = kernelWidth;
+            cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
 
-            if (int.TryParse(kernelWidth, out var r)) kernelRadius = r;
+            if (int.TryParse(kernelRadius, out var r)) this.kernelRadius = r;
             if (int.TryParse(polyOrder, out var p)) this.polyOrder = p;
         }
 

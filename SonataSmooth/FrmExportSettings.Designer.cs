@@ -37,7 +37,7 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.lblPolyOrder = new System.Windows.Forms.Label();
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
-            this.cbxKernelWidth = new System.Windows.Forms.ComboBox();
+            this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -127,7 +127,7 @@
             // 
             this.groupBox5.Controls.Add(this.lblPolyOrder);
             this.groupBox5.Controls.Add(this.cbxPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxKernelWidth);
+            this.groupBox5.Controls.Add(this.cbxKernelRadius);
             this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox5.Location = new System.Drawing.Point(372, 45);
@@ -168,15 +168,15 @@
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 7;
             // 
-            // cbxKernelWidth
+            // cbxKernelRadius
             // 
-            this.cbxKernelWidth.DropDownHeight = 150;
-            this.cbxKernelWidth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxKernelWidth.FormattingEnabled = true;
-            this.cbxKernelWidth.IntegralHeight = false;
-            this.cbxKernelWidth.ItemHeight = 17;
-            this.cbxKernelWidth.Items.AddRange(new object[] {
+            this.cbxKernelRadius.DropDownHeight = 150;
+            this.cbxKernelRadius.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxKernelRadius.FormattingEnabled = true;
+            this.cbxKernelRadius.IntegralHeight = false;
+            this.cbxKernelRadius.ItemHeight = 17;
+            this.cbxKernelRadius.Items.AddRange(new object[] {
             "1",
             "2",
             "3",
@@ -190,22 +190,22 @@
             "11",
             "12",
             "13"});
-            this.cbxKernelWidth.Location = new System.Drawing.Point(232, 42);
-            this.cbxKernelWidth.Margin = new System.Windows.Forms.Padding(2);
-            this.cbxKernelWidth.Name = "cbxKernelWidth";
-            this.cbxKernelWidth.Size = new System.Drawing.Size(80, 25);
-            this.cbxKernelWidth.TabIndex = 6;
+            this.cbxKernelRadius.Location = new System.Drawing.Point(232, 42);
+            this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
+            this.cbxKernelRadius.Name = "cbxKernelRadius";
+            this.cbxKernelRadius.Size = new System.Drawing.Size(80, 25);
+            this.cbxKernelRadius.TabIndex = 6;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(32, 45);
+            this.label1.Location = new System.Drawing.Point(28, 45);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(198, 19);
+            this.label1.Size = new System.Drawing.Size(201, 19);
             this.label1.TabIndex = 17;
-            this.label1.Text = "Noise Reduction Kernel Width : ";
+            this.label1.Text = "Noise Reduction Kernel Radius : ";
             // 
             // groupBox4
             // 
@@ -346,7 +346,7 @@
         internal System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Label label2;
         public System.Windows.Forms.ComboBox cbxPolyOrder;
-        public System.Windows.Forms.ComboBox cbxKernelWidth;
+        public System.Windows.Forms.ComboBox cbxKernelRadius;
         public System.Windows.Forms.CheckBox chbRect;
         public System.Windows.Forms.CheckBox chbAvg;
         public System.Windows.Forms.CheckBox chbMed;

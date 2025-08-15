@@ -63,7 +63,7 @@ namespace SonataSmooth
 
         private async void btnCalibrate_Click(object sender, EventArgs e)
         {
-            settingsForm.ApplyParameters(cbxKernelWidth.Text, cbxPolyOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
 
             progressBar1.Style = ProgressBarStyle.Continuous;
             progressBar1.Minimum = 0;
@@ -103,8 +103,8 @@ namespace SonataSmooth
                 double sigma;
                 try
                 {
-                    if (!int.TryParse(cbxKernelWidth.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
-                        throw new FormatException($"Failed to parse kernel width : \"{cbxKernelWidth.Text}\".");
+                    if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
+                        throw new FormatException($"Failed to parse kernel width : \"{cbxKernelRadius.Text}\".");
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
                         throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
                     // sigma 변수를 comboBox 나 textBox 에서 받아도 되지만, 여기서는 width 에 기반해 기본값 계산
@@ -646,7 +646,7 @@ namespace SonataSmooth
 
         public void SetComboValues(string kernelRadius, string polyOrder)
         {
-            cbxKernelWidth.Text = kernelRadius;
+            cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
         }
 
@@ -1294,7 +1294,7 @@ namespace SonataSmooth
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            cbxKernelWidth.SelectedIndex = 3;
+            cbxKernelRadius.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
 
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
@@ -1314,7 +1314,7 @@ namespace SonataSmooth
             settingsForm.DoAutoSave = true;
 
             // ComboBox 등 동기화
-            settingsForm.cbxKernelWidth.Text = cbxKernelWidth.Text;
+            settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
             settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
 
             UpdateListBox1BtnsState(null, EventArgs.Empty);
@@ -1323,7 +1323,7 @@ namespace SonataSmooth
             dataCount = listBox1.Items.Count;
 
             // ComboBox 값으로부터 파싱
-            int.TryParse(cbxKernelWidth.Text, out w);
+            int.TryParse(cbxKernelRadius.Text, out w);
             int.TryParse(cbxPolyOrder.Text, out polyOrder);
 
             this.KeyPreview = true;
@@ -1354,7 +1354,7 @@ namespace SonataSmooth
             {
                 Invoke(new Action(() =>
                 {
-                    w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
+                    w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                     polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
@@ -1377,7 +1377,7 @@ namespace SonataSmooth
             }
             else
             {
-                w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
+                w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                 polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
                 doRect = settingsForm.chbRect.Checked;
                 doAvg = settingsForm.chbAvg.Checked;
@@ -1754,7 +1754,7 @@ namespace SonataSmooth
 
         private async void ExportExcelAsync()
         {
-            int w = int.TryParse(settingsForm.cbxKernelWidth.Text, out var tmpW) ? tmpW : 2;
+            int w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
             int polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
 
             bool doRect = settingsForm.chbRect.Checked;
@@ -1967,10 +1967,10 @@ namespace SonataSmooth
             progressBar1.Value = 0;
         }
 
-        private void cbxKernelWidth_SelectedIndexChanged(object sender, EventArgs e)
+        private void cbxKernelRadius_SelectedIndexChanged(object sender, EventArgs e)
         {
-            settingsForm.kernelRadius = int.TryParse(cbxKernelWidth.Text, out var w) ? w : settingsForm.kernelRadius;
-            settingsForm.cbxKernelWidth.Text = cbxKernelWidth.Text;
+            settingsForm.kernelRadius = int.TryParse(cbxKernelRadius.Text, out var w) ? w : settingsForm.kernelRadius;
+            settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
         }
 
         private void cbxPolyOrder_SelectedIndexChanged(object sender, EventArgs e)
@@ -1981,7 +1981,7 @@ namespace SonataSmooth
 
         private void btnExportSettings_Click(object sender, EventArgs e)
         {
-            settingsForm.ApplyParameters(cbxKernelWidth.Text, cbxPolyOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
             settingsForm.ShowDialog();
         }
 

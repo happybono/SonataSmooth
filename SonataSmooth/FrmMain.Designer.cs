@@ -44,7 +44,7 @@
             this.btnPaste = new System.Windows.Forms.Button();
             this.btnSelectAll = new System.Windows.Forms.Button();
             this.btnSelClear = new System.Windows.Forms.Button();
-            this.cbxKernelWidth = new System.Windows.Forms.ComboBox();
+            this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnSelClear2 = new System.Windows.Forms.Button();
             this.btnSelectAll2 = new System.Windows.Forms.Button();
@@ -272,15 +272,15 @@
             this.btnSelClear.UseVisualStyleBackColor = true;
             this.btnSelClear.Click += new System.EventHandler(this.btnSelClear_Click);
             // 
-            // cbxKernelWidth
+            // cbxKernelRadius
             // 
-            this.cbxKernelWidth.DropDownHeight = 150;
-            this.cbxKernelWidth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxKernelWidth.FormattingEnabled = true;
-            this.cbxKernelWidth.IntegralHeight = false;
-            this.cbxKernelWidth.ItemHeight = 17;
-            this.cbxKernelWidth.Items.AddRange(new object[] {
+            this.cbxKernelRadius.DropDownHeight = 150;
+            this.cbxKernelRadius.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxKernelRadius.FormattingEnabled = true;
+            this.cbxKernelRadius.IntegralHeight = false;
+            this.cbxKernelRadius.ItemHeight = 17;
+            this.cbxKernelRadius.Items.AddRange(new object[] {
             "1",
             "2",
             "3",
@@ -294,18 +294,18 @@
             "11",
             "12",
             "13"});
-            this.cbxKernelWidth.Location = new System.Drawing.Point(232, 42);
-            this.cbxKernelWidth.Margin = new System.Windows.Forms.Padding(2);
-            this.cbxKernelWidth.Name = "cbxKernelWidth";
-            this.cbxKernelWidth.Size = new System.Drawing.Size(80, 25);
-            this.cbxKernelWidth.TabIndex = 20;
-            this.cbxKernelWidth.SelectedIndexChanged += new System.EventHandler(this.cbxKernelWidth_SelectedIndexChanged);
+            this.cbxKernelRadius.Location = new System.Drawing.Point(232, 42);
+            this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
+            this.cbxKernelRadius.Name = "cbxKernelRadius";
+            this.cbxKernelRadius.Size = new System.Drawing.Size(80, 25);
+            this.cbxKernelRadius.TabIndex = 20;
+            this.cbxKernelRadius.SelectedIndexChanged += new System.EventHandler(this.cbxKernelRadius_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(32, 45);
+            this.label1.Location = new System.Drawing.Point(28, 45);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(201, 19);
@@ -635,7 +635,7 @@
             // 
             this.groupBox5.Controls.Add(this.lblPolyOrder);
             this.groupBox5.Controls.Add(this.cbxPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxKernelWidth);
+            this.groupBox5.Controls.Add(this.cbxKernelRadius);
             this.groupBox5.Controls.Add(this.label1);
             this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox5.Location = new System.Drawing.Point(376, 644);
@@ -779,7 +779,7 @@
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.TextBox txtDatasetTitle;
         private System.Windows.Forms.Button btnExportSettings;
-        public System.Windows.Forms.ComboBox cbxKernelWidth;
+        public System.Windows.Forms.ComboBox cbxKernelRadius;
         private System.Windows.Forms.ComboBox cbxPolyOrder;
         private System.Windows.Forms.Button btnInfo;
         private System.Windows.Forms.Button btnSync1;
