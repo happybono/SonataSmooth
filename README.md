@@ -246,8 +246,8 @@ var input = new double[n];
 for (int i = 0; i < n; i++)
     input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
 
-// Read kernel radius w (half-width)
-int w = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
+// Read kernel radius r (half-width)
+int r = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
 
 // Generate binomial coefficients of length 2 × w + 1
 int[] binom = CalcBinomialCoefficients(2 * w + 1);
