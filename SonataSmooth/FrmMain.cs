@@ -46,7 +46,7 @@ namespace SonataSmooth
         private readonly FrmExportSettings settingsForm;
         private FrmAbout aboutForm;
         private int dataCount;
-        private int w;
+        private int r;
         private int polyOrder;
 
         public FrmMain()
@@ -99,16 +99,16 @@ namespace SonataSmooth
                     return;
                 }
 
-                int w, polyOrder;
+                int r, polyOrder;
                 double sigma;
                 try
                 {
-                    if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out w))
-                        throw new FormatException($"Failed to parse kernel width : \"{cbxKernelRadius.Text}\".");
+                    if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
+                        throw new FormatException($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".");
                     if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
                         throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
                     // sigma 변수를 comboBox 나 textBox 에서 받아도 되지만, 여기서는 width 에 기반해 기본값 계산
-                    sigma = (2.0 * w + 1) / 6.0;
+                    sigma = (2.0 * r + 1) / 6.0;
                 }
                 catch (Exception ex) when (ex is FormatException || ex is OverflowException)
                 {
@@ -116,7 +116,7 @@ namespace SonataSmooth
                     return;
                 }
 
-                if (!ValidateSmoothingParameters(listBox1.Items.Count, w, polyOrder))
+                if (!ValidateSmoothingParameters(listBox1.Items.Count, r, polyOrder))
                     return;
 
                 bool useRect = rbtnRect.Checked;
@@ -128,7 +128,7 @@ namespace SonataSmooth
                 int[] binom;
                 try
                 {
-                    binom = CalcBinomialCoefficients(2 * w + 1);
+                    binom = CalcBinomialCoefficients(2 * r + 1);
                 }
                 catch (Exception ex)
                 {
@@ -141,7 +141,7 @@ namespace SonataSmooth
                 {
                     try
                     {
-                        gaussCoeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
+                        gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
                     }
                     catch (Exception ex)
                     {
@@ -165,7 +165,7 @@ namespace SonataSmooth
                         {
                             try
                             {
-                                sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
+                                sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
                             }
                             catch (Exception ex)
                             {
@@ -192,7 +192,7 @@ namespace SonataSmooth
                                     {
                                         double sum = 0;
                                         int cnt = 0;
-                                        for (int k = -w; k <= w; k++)
+                                        for (int k = -r; k <= r; k++)
                                         {
                                             int idx = i + k;
                                             if (idx >= 0 && idx < n)
@@ -205,38 +205,38 @@ namespace SonataSmooth
                                     }
                                     else if (useMed)
                                     {
-                                        return WeightedMedianAt(input, i, w, binom);
+                                        return WeightedMedianAt(input, i, r, binom);
                                     }
                                     else if (useAvg)
                                     {
                                         double sum = 0;
                                         int cs = 0;
-                                        for (int k = -w; k <= w; k++)
+                                        for (int k = -r; k <= r; k++)
                                         {
                                             int idx = i + k;
                                             if (idx < 0 || idx >= n) continue;
-                                            sum += input[idx] * binom[k + w];
-                                            cs += binom[k + w];
+                                            sum += input[idx] * binom[k + r];
+                                            cs += binom[k + r];
                                         }
                                         return cs > 0 ? sum / cs : 0;
                                     }
                                     else if (useSG)
                                     {
                                         double sum = 0;
-                                        for (int k = -w; k <= w; k++)
+                                        for (int k = -r; k <= r; k++)
                                         {
                                             int mi = Mirror(i + k);
-                                            sum += sgCoeffs[k + w] * input[mi];
+                                            sum += sgCoeffs[k + r] * input[mi];
                                         }
                                         return sum;
                                     }
                                     else if (useGauss)
                                     {
                                         double sum = 0;
-                                        for (int k = -w; k <= w; k++)
+                                        for (int k = -r; k <= r; k++)
                                         {
                                             int mi = Mirror(i + k);
-                                            sum += gaussCoeffs[k + w] * input[mi];
+                                            sum += gaussCoeffs[k + r] * input[mi];
                                         }
                                         return sum;
                                     }
@@ -283,7 +283,7 @@ namespace SonataSmooth
                                          : useGauss ? "Gaussian Filter"
                                                     : "Unknown";
 
-                    slblKernelRadius.Text = w.ToString();
+                    slblKernelRadius.Text = r.ToString();
 
                     bool showPoly = useSG;
                     toolStripStatusLabel5.Visible =
@@ -1323,7 +1323,7 @@ namespace SonataSmooth
             dataCount = listBox1.Items.Count;
 
             // ComboBox 값으로부터 파싱
-            int.TryParse(cbxKernelRadius.Text, out w);
+            int.TryParse(cbxKernelRadius.Text, out r);
             int.TryParse(cbxPolyOrder.Text, out polyOrder);
 
             this.KeyPreview = true;
@@ -1345,7 +1345,7 @@ namespace SonataSmooth
 
         private async Task ExportCsvAsync()
         {
-            int w = 2, polyOrder = 2, n = 0;
+            int r = 2, polyOrder = 2, n = 0;
             bool doRect = false, doAvg = false, doMed = false, doGauss = false, doSG = false;
             string excelTitle = "";
             double[] initialData = null;
@@ -1354,7 +1354,7 @@ namespace SonataSmooth
             {
                 Invoke(new Action(() =>
                 {
-                    w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
+                    r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                     polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
@@ -1377,7 +1377,7 @@ namespace SonataSmooth
             }
             else
             {
-                w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
+                r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                 polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
                 doRect = settingsForm.chbRect.Checked;
                 doAvg = settingsForm.chbAvg.Checked;
@@ -1398,7 +1398,7 @@ namespace SonataSmooth
                 n = initialData.Length;
             }
 
-            if (!ValidateSmoothingParameters(n, w, polyOrder))
+            if (!ValidateSmoothingParameters(n, r, polyOrder))
                 return;
 
             if (n == 0)
@@ -1411,8 +1411,8 @@ namespace SonataSmooth
                 return;
             }
 
-            double sigma = (2.0 * w + 1) / 6.0;
-            int[] binom = CalcBinomialCoefficients(2 * w + 1);
+            double sigma = (2.0 * r + 1) / 6.0;
+            int[] binom = CalcBinomialCoefficients(2 * r + 1);
 
             var rectAvg = new double[n];
             var binomAvg = new double[n];
@@ -1426,7 +1426,7 @@ namespace SonataSmooth
                 {
                     // Rectangular Average
                     double sum = 0; int cnt = 0;
-                    for (int k = -w; k <= w; k++)
+                    for (int k = -r; k <= r; k++)
                     {
                         int idx = i + k;
                         if (idx >= 0 && idx < n)
@@ -1439,36 +1439,36 @@ namespace SonataSmooth
 
                     // Binomial Average
                     sum = 0; cnt = 0;
-                    for (int k = -w; k <= w; k++)
+                    for (int k = -r; k <= r; k++)
                     {
                         int idx = i + k;
                         if (idx >= 0 && idx < n)
                         {
-                            sum += initialData[idx] * binom[k + w];
-                            cnt += binom[k + w];
+                            sum += initialData[idx] * binom[k + r];
+                            cnt += binom[k + r];
                         }
                     }
                     binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
 
                     // Weighted Median
-                    binomMed[i] = WeightedMedianAt(initialData, i, w, binom);
+                    binomMed[i] = WeightedMedianAt(initialData, i, r, binom);
 
                     // Gaussian Filter (Mirror)
-                    var gaussCoeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
+                    var gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
                     sum = 0;
                     int Mirror(int idx) =>
                         idx < 0 ? -idx - 1 :
                         idx >= n ? 2 * n - idx - 1 :
                         idx;
-                    for (int k = -w; k <= w; k++)
-                        sum += gaussCoeffs[k + w] * initialData[Mirror(i + k)];
+                    for (int k = -r; k <= r; k++)
+                        sum += gaussCoeffs[k + r] * initialData[Mirror(i + k)];
                     gaussFilt[i] = sum;
 
                     // Savitzky–Golay
-                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
+                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
                     sum = 0;
-                    for (int k = -w; k <= w; k++)
-                        sum += sgCoeffs[k + w] * initialData[Mirror(i + k)];
+                    for (int k = -r; k <= r; k++)
+                        sum += sgCoeffs[k + r] * initialData[Mirror(i + k)];
                     sgFilt[i] = sum;
                 });
             });
@@ -1519,6 +1519,7 @@ namespace SonataSmooth
               + 1   // 전체 중 'n' 번째 부분 (분할 저장 시)
               + 1   // 빈 줄
               + 1   // Smoothing Parameters
+              + 1   // Kernel Radius
               + 1   // Kernel Width
               + (doSG ? 1 : 0) // 다항식의 차수
               + 1   // 빈 줄
@@ -1528,6 +1529,7 @@ namespace SonataSmooth
 
             int maxDataRows = ExcelMaxRows - headerLines;
             int partCount = (n + maxDataRows - 1) / maxDataRows;
+            int kernelWidth = 2 * r + 1;
 
             IProgress<int> progress = new Progress<int>(percent =>
             {
@@ -1566,7 +1568,8 @@ namespace SonataSmooth
                     await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
                     await sw.WriteLineAsync(string.Empty);
                     await sw.WriteLineAsync("Smoothing Parameters");
-                    await sw.WriteLineAsync($"Kernel Width : {w}");
+                    await sw.WriteLineAsync($"Kernel Radius : {r}");
+                    await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
                     if (doSG)
                         await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
                     await sw.WriteLineAsync(string.Empty);
@@ -1700,7 +1703,7 @@ namespace SonataSmooth
                     await sw.WriteLineAsync(title);
                     await sw.WriteLineAsync();
                     await sw.WriteLineAsync("Smoothing Parameters");
-                    await sw.WriteLineAsync($"Kernel Width,{kernelRadius}");
+                    await sw.WriteLineAsync($"Kernel Radius,{kernelRadius}");
                     await sw.WriteLineAsync($"Polynomial Order,{(polyOrder.HasValue ? polyOrder.Value.ToString() : "N/A")}");
                     await sw.WriteLineAsync();
 
@@ -1754,7 +1757,7 @@ namespace SonataSmooth
 
         private async void ExportExcelAsync()
         {
-            int w = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
+            int r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
             int polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
 
             bool doRect = settingsForm.chbRect.Checked;
@@ -1777,12 +1780,12 @@ namespace SonataSmooth
             int n = initialData.Length;
 
 
-            if (!ValidateSmoothingParameters(n, w, polyOrder))
+            if (!ValidateSmoothingParameters(n, r, polyOrder))
                 return;
 
             const int maxRows = 1_048_573;
-            double sigma = (2.0 * w + 1) / 6.0;
-            int[] binom = CalcBinomialCoefficients(2 * w + 1);
+            double sigma = (2.0 * r + 1) / 6.0;
+            int[] binom = CalcBinomialCoefficients(2 * r + 1);
 
             if (n == 0)
             {
@@ -1806,7 +1809,7 @@ namespace SonataSmooth
                 {
                     // Rectangular
                     double sum = 0; int cnt = 0;
-                    for (int k = -w; k <= w; k++)
+                    for (int k = -r; k <= r; k++)
                     {
                         int idx = i + k;
                         if (idx >= 0 && idx < n) { sum += initialData[idx]; cnt++; }
@@ -1815,34 +1818,34 @@ namespace SonataSmooth
 
                     // Binomial average
                     sum = 0; cnt = 0;
-                    for (int k = -w; k <= w; k++)
+                    for (int k = -r; k <= r; k++)
                     {
                         int idx = i + k;
                         if (idx >= 0 && idx < n)
                         {
-                            sum += initialData[idx] * binom[k + w];
-                            cnt += binom[k + w];
+                            sum += initialData[idx] * binom[k + r];
+                            cnt += binom[k + r];
                         }
                     }
                     binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
 
                     // Weighted median
-                    binomMed[i] = WeightedMedianAt(initialData, i, w, binom);
+                    binomMed[i] = WeightedMedianAt(initialData, i, r, binom);
 
                     // Gaussian filter (mirror)
-                    var gaussCoeffs = ComputeGaussianCoefficients(2 * w + 1, sigma);
+                    var gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
                     sum = 0;
                     int Mirror(int idx) =>
                         idx < 0 ? -idx - 1 : (idx >= n ? 2 * n - idx - 1 : idx);
-                    for (int k = -w; k <= w; k++)
-                        sum += gaussCoeffs[k + w] * initialData[Mirror(i + k)];
+                    for (int k = -r; k <= r; k++)
+                        sum += gaussCoeffs[k + r] * initialData[Mirror(i + k)];
                     gaussFilt[i] = sum;
 
                     // Savitzky–Golay filter
-                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * w + 1, polyOrder);
+                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
                     sum = 0;
-                    for (int k = -w; k <= w; k++)
-                        sum += sgCoeffs[k + w] * initialData[Mirror(i + k)];
+                    for (int k = -r; k <= r; k++)
+                        sum += sgCoeffs[k + r] * initialData[Mirror(i + k)];
                     sgFilt[i] = sum;
                 });
             });
@@ -1854,8 +1857,9 @@ namespace SonataSmooth
 
             ws.Cells[1, 1] = txtDatasetTitle.Text;
             ws.Cells[3, 1] = "Smoothing Parameters";
-            ws.Cells[4, 1] = $"Kernel Width : {w}";
-            ws.Cells[5, 1] = doSG
+            ws.Cells[4, 1] = $"Kernel Radius : {r}";
+            ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
+            ws.Cells[6, 1] = doSG
                 ? $"Polynomial Order : {polyOrder}"
                 : "Polynomial Order : N/A";
 
@@ -1870,8 +1874,8 @@ namespace SonataSmooth
                     int chunk = Math.Min(maxRows, total - idx);
                     var arr = new double[chunk, 1];
 
-                    for (int r = 0; r < chunk; r++, idx++)
-                        arr[r, 0] = data[idx];
+                    for (int row = 0; row < chunk; row++, idx++) 
+                        arr[row, 0] = data[idx];
 
                     var range = ws.Range[
                         ws.Cells[4, curCol],
@@ -1949,13 +1953,13 @@ namespace SonataSmooth
                         : n - fullCols * maxRows;
                     if (rowsInCol <= 0) break;
 
-                    var r = ws.Range[
+                    var dataRange = ws.Range[
                         ws.Cells[4, c],
                         ws.Cells[4 + rowsInCol - 1, c]
                     ];
                     unionRange = unionRange == null
-                        ? r
-                        : excel.Application.Union(unionRange, r);
+                        ? dataRange
+                        : excel.Application.Union(unionRange, dataRange);
                 }
 
                 var series = chart.SeriesCollection().NewSeries();
