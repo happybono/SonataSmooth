@@ -237,10 +237,31 @@ That final value (`2.75`) becomes your new filtered point.
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
 #### How it works
-When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel size from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
+When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel radius from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
 
 #### Principle
 Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **w**, and generating the binomial weight array ensures the parallel filtering step has everything it needs.
+
+#### Kernel Radius (`r`)
+Kernel radius specifies how many data points on each side of the center element are included in the filtering window.  In other words, if you set a radius of `r`, the filter will consider `r` values before and `r` values after the current point.
+
+The total window length (kernel width) is calculated as :
+
+$$
+\[
+\text{kernelWidth} = 2 \cdot r + 1
+\]
+$$
+
+For example, if \(r = 2\):
+
+$$
+\[
+\text{kernelWidth} = 2 \cdot 2 + 1 = 5
+\]
+$$
+
+This means your median (or any other sliding-window) filter will span 5 consecutive samples at each position.
 
 #### Code Implementation
 ```csharp
@@ -296,7 +317,7 @@ results = await Task.Run(() =>
 
 ### 3. Rectangular (Uniform) Mean Filter
 #### How it works
-A simple sliding-window average over 2 × w + 1 points, ignoring out-of-bounds indices.
+A simple sliding-window average over 2 × r + 1 points, ignoring out-of-bounds indices.
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
@@ -310,7 +331,7 @@ if (useRect)
 {
     double sum = 0;
     int cnt = 0;
-    for (int k = -w; k <= w; k++)
+    for (int k = -r; k <= r; k++)
     {
         int idx = i + k;
         if (idx >= 0 && idx < n)
@@ -337,47 +358,48 @@ Median filtering is robust against outliers; binomial weights bias the median to
 ```csharp
 else if (useMed)
 {
-    return WeightedMedianAt(input, i, w, binom);
+    return WeightedMedianAt(input, i, r, binom);
 }
 
 // WeightedMedianAt implementation :
-private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
-{
-    var pairs = new List<(double Value, int Weight)>(2 * w + 1);
-    for (int k = -w; k <= w; k++)
-    {
-        int idx = center + k;
-        if (idx < 0 || idx >= data.Length) continue;
-        pairs.Add((data[idx], binom[k + w]));
-    }
-    if (pairs.Count == 0)
-        return 0;
-
-    // Sort by value
-    pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
-
-    long totalWeight = pairs.Sum(p => p.Weight);
-    long half = totalWeight / 2;
-    bool isEvenTotal = (totalWeight % 2 == 0);
-
-    long accum = 0;
-    for (int i = 0; i < pairs.Count; i++)
-    {
-        accum += pairs[i].Weight;
-        if (accum > half)
+ private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
         {
-            return pairs[i].Value;
+            var pairs = new List<(double Value, int Weight)>(2 * w + 1);
+            for (int k = -w; k <= w; k++)
+            {
+                int idx = center + k;
+                if (idx < 0 || idx >= data.Length) continue;
+                pairs.Add((data[idx], binom[k + w]));
+            }
+            if (pairs.Count == 0)
+                return 0;
+
+            pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+
+            long totalWeight = pairs.Sum(p => p.Weight);
+            long half = totalWeight / 2;
+            bool isEvenTotal = (totalWeight % 2 == 0);
+
+            long accum = 0;
+            for (int i = 0; i < pairs.Count; i++)
+            {
+                accum += pairs[i].Weight;
+
+                if (accum > half)
+                {
+                    return pairs[i].Value;
+                }
+
+                if (isEvenTotal && accum == half)
+                {
+                    double nextVal = (i + 1 < pairs.Count)
+                                     ? pairs[i + 1].Value
+                                     : pairs[i].Value;
+                    return (pairs[i].Value + nextVal) / 2.0;
+                }
+            }
+            return pairs[pairs.Count - 1].Value;
         }
-        if (isEvenTotal && accum == half)
-        {
-            double nextVal = (i + 1 < pairs.Count)
-                             ? pairs[i + 1].Value
-                             : pairs[i].Value;
-            return (pairs[i].Value + nextVal) / 2.0;
-        }
-    }
-    return pairs[pairs.Count - 1].Value;
-}
 ```
 
 ### 5. Binomial (Weighted) Average Filter
@@ -396,12 +418,12 @@ else if (useAvg)
 {
     double sum = 0;
     int cs = 0;
-    for (int k = -w; k <= w; k++)
+    for (int k = -r; k <= r; k++)
     {
         int idx = i + k;
         if (idx < 0 || idx >= n) continue;
-        sum += input[idx] * binom[k + w];
-        cs += binom[k + w];
+        sum += input[idx] * binom[k + r];
+        cs += binom[k + r];
     }
     return cs > 0 ? sum / cs : 0;
 }
@@ -424,10 +446,10 @@ Gaussian filtering performs a weighted moving average where weights follow the b
 else if (useSG)
 {
     double sum = 0;
-    for (int k = -w; k <= w; k++)
+    for (int k = -r; k <= r; k++)
     {
         int mi = Mirror(i + k);
-        sum += sgCoeffs[k + w] * input[mi];
+        sum += sgCoeffs[k + r] * input[mi];
     }
     return sum;
 }
@@ -505,32 +527,27 @@ Savitzky-Golay filters derive from least‐squares polynomial fitting.
 ```csharp
 private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
 {
-    int m    = polyOrder;
+    int m = polyOrder;
     int half = windowSize / 2;
-
-    // Build Vandermonde matrix A (windowSize × (m + 1))
     double[,] A = new double[windowSize, m + 1];
+
     for (int i = -half; i <= half; i++)
         for (int j = 0; j <= m; j++)
             A[i + half, j] = Math.Pow(i, j);
 
-    // Compute ATA = Aᵀ × A ((m + 1) × (m + 1))
-    double[,] ATA = new double[m + 1, m + 1];
+    var ATA = new double[m + 1, m + 1];
     for (int i = 0; i <= m; i++)
         for (int j = 0; j <= m; j++)
             for (int k = 0; k < windowSize; k++)
                 ATA[i, j] += A[k, i] * A[k, j];
 
-    // Invert ATA to get invATA
-    double[,] invATA = InvertMatrix(ATA);
+    var invATA = InvertMatrix(ATA);
 
-    // Compute AT = Aᵀ ((m + 1) × windowSize)
-    double[,] AT = new double[m + 1, windowSize];
+    var AT = new double[m + 1, windowSize];
     for (int i = 0; i <= m; i++)
         for (int k = 0; k < windowSize; k++)
             AT[i, k] = A[k, i];
 
-    // Compute filter coefficients h[k] = sum_j invATA[0, j] × AT[j, k]
     var h = new double[windowSize];
     for (int k = 0; k < windowSize; k++)
     {
@@ -560,20 +577,29 @@ When the user selects the CSV export option and clicks Export, the application:
 
 #### Code Implementation
 ``` csharp
-await sw.WriteLineAsync(txtExcelTitle.Text);
+await sw.WriteLineAsync(excelTitle);
 await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
 await sw.WriteLineAsync(string.Empty);
 await sw.WriteLineAsync("Smoothing Parameters");
-await sw.WriteLineAsync($"Kernel radius : {w}");
+await sw.WriteLineAsync($"Kernel Radius : {r}");
+await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
 if (doSG)
     await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+await sw.WriteLineAsync(string.Empty);
 await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
-await sw.WriteLineAsync(string.Join(",", columns.Select(c => c.Header)));
+await sw.WriteLineAsync(string.Empty);
+
+await sw.WriteLineAsync(string.Join(
+    ",", columns.Select(c => c.Header)));
+
 for (int i = startRow; i < startRow + rowCount; i++)
 {
-    string line = string.Join(",", columns.Select(c => c.Data[i].ToString(CultureInfo.InvariantCulture)));
+    string line = string.Join(
+        ",",
+        columns.Select(c =>
+            c.Data[i].ToString(
+                CultureInfo.InvariantCulture)));
     await sw.WriteLineAsync(line);
-}
 ```
 
 ### 11. Excel Export Functionality
@@ -592,22 +618,34 @@ When the user selects the Excel export option and clicks Export, the application
 
 #### Code Implemenation
 ```csharp
-ws.Cells[1, 1] = txtExcelTitle.Text;
+ws.Cells[1, 1] = txtDatasetTitle.Text;
 ws.Cells[3, 1] = "Smoothing Parameters";
-ws.Cells[4, 1] = $"Kernel Radius : {w}";
-ws.Cells[5, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
+ws.Cells[4, 1] = $"Kernel Radius : {r}";
+ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
+ws.Cells[6, 1] = doSG
+    ? $"Polynomial Order : {polyOrder}"
+    : "Polynomial Order : N/A";
 
-chart.ChartType = Excel.XlChartType.xlLine;
-chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
-chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
-chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
-foreach (var (Title, StartCol, EndCol) in sections)
-{
-    Excel.Range unionRange = ...; // Union of all data ranges
-    var series = chart.SeriesCollection().NewSeries();
-    series.Name = Title;
-    series.Values = unionRange;
-}
+            chart.ChartType = Excel.XlChartType.xlLine;
+            chart.HasTitle = true;
+            chart.ChartTitle.Text = txtDatasetTitle.Text;
+            //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
+
+            chart.HasLegend = true;
+            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+
+            chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
+            chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
+            chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
+            chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
+
+            foreach (var (Title, StartCol, EndCol) in sections)
+            {
+                Excel.Range unionRange = ...; // Union of all data ranges
+                var series = chart.SeriesCollection().NewSeries();
+                series.Name = Title;
+                series.Values = unionRange;
+            }
 ```
 
 ### Implementation Details
