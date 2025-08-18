@@ -240,7 +240,7 @@ That final value (`2.75`) becomes your new filtered point.
 When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel radius from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
 
 #### Principle
-Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **w**, and generating the binomial weight array ensures the parallel filtering step has everything it needs.
+Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **`w`**, and generating the binomial weight array ensures the parallel filtering step has everything it needs.
 
 #### Kernel Radius (`r`)
 Kernel radius specifies how many data points on each side of the center element are included in the filtering window.  In other words, if you set a radius of `r`, the filter will consider `r` values before and `r` values after the current point.
