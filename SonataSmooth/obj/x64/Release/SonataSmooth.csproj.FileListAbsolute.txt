@@ -69,3 +69,17 @@ D:\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.GenerateResource.cache
 D:\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.CoreCompileInputs.cache
 D:\SonataSmooth\obj\x64\Release\SonataSmooth.exe
 D:\SonataSmooth\obj\x64\Release\SonataSmooth.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\bin\x64\Release\SonataSmooth.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\bin\x64\Release\SonataSmooth.exe
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\bin\x64\Release\SonataSmooth.pdb
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.AssemblyReference.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.exe.config
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.FrmAbout.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.FrmExportSettings.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.FrmMain.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.FrmModify.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.Properties.Resources.resources
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.GenerateResource.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.csproj.CoreCompileInputs.cache
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.exe
+C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\x64\Release\SonataSmooth.pdb
