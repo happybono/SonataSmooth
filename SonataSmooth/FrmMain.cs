@@ -1259,8 +1259,8 @@ namespace SonataSmooth
         private void btnCopy2_Click(object sender, EventArgs e)
         {
             IEnumerable<object> source = listBox2.SelectedItems.Count > 0
-                ? listBox1.SelectedItems.Cast<object>()
-                : listBox1.Items.Cast<object>();
+                ? listBox2.SelectedItems.Cast<object>()
+                : listBox2.Items.Cast<object>();
 
             var doubles = source
                 .Select(item =>
