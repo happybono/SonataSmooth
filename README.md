@@ -274,10 +274,10 @@ for (int i = 0; i < n; i++)
     input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
 
 // Read kernel radius r (half-width)
-int r = int.Parse(cbxKernelWidth.Text, CultureInfo.InvariantCulture);
+int r = int.Parse(cbxKernelRadius.Text, CultureInfo.InvariantCulture);
 
 // Generate binomial coefficients of length 2 × w + 1
-int[] binom = CalcBinomialCoefficients(2 * w + 1);
+int[] binom = CalcBinomialCoefficients(2 * r + 1);
 
 // Set up a progress reporter for thread-safe UI updates
 var progressReporter = new Progress<int>(pct =>
@@ -429,17 +429,22 @@ else if (useAvg)
 }
 ```
 
-### 6. Savitzky-Golay Filter
+### 6. Savitzky–Golay Filter
 #### How it works
-A fixed-size window of length 2 × w + 1 slides over the 1D signal. At each position, out-of-bounds indices are "mirrored" back into the valid range, then each neighbor's value is multiplied by its precomputed Gaussian weight and summed to produce the smoothed output.
+A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
+At each position:
 
-As a result, fits a low-degree polynomial to the data within the window and evaluates the central point, preserving features like peaks and edges.
+1. Out‑of‑bounds indices are “mirrored” back into the valid range to handle boundaries smoothly.
+2. Each sample in the window is multiplied by its **precomputed Savitzky–Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
+
+This method preserves important features such as peaks and edges better than simple moving averages.
 
 #### Principle
-Gaussian filtering performs a weighted moving average where weights follow the bell-shaped Gaussian curve. Central samples have higher influence, high-frequency noise is attenuated smoothly, and signal edges are preserved without abrupt distortion thanks to mirror boundary handling.
+Savitzky–Golay filtering performs a **least‑squares fit** of a low‑degree polynomial to the samples in the window, then evaluates the polynomial at the center.  
+Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curve, but are determined analytically to minimize the mean‑squared error for the chosen polynomial degree.
 
--	**Polynomial Fitting** : Least-squares fit within the window.
--	**Feature Preservation** : Maintains higher moments (e.g., slope, curvature).
+- **Polynomial Fitting**: Fits a polynomial of specified degree within the window.
+- **Feature Preservation**: Retains higher‑order moments (e.g., slope, curvature) while reducing high‑frequency noise.
 
 #### Code Implementation
 ```csharp
@@ -455,7 +460,7 @@ else if (useSG)
 }
 
 // Coefficient calculation :
-private static double[] ComputeGolayCoefficients(int windowSize, int polyOrder)
+private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
 {
     // ... (matrix construction and inversion)
 }
@@ -486,7 +491,7 @@ slblCalibratedType.Text = useRect ? "Rectangular Average"
                      : useSG ? "Savitzky-Golay Filter"
                      : useGauss ? "Gaussian Filter"
                                 : "Unknown";
-slblKernelWidth.Text = w.ToString();
+slblKernelRadius.Text = w.ToString();
 ```
 
 ### 8. Pascal's Triangle (Binomial Coefficient Calculation)
