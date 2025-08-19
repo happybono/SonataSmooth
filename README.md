@@ -130,9 +130,13 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Include an ARM64-native variant of the executable.
 
 ### v4.2.7.0
-#### August 22, 2025
+#### August 15, 2025
 > Updated UI labels by replacing "Kernel Width" with the more precise "Kernel Radius".<br><br>
 > Refactored variable names and code references to use "Kernel Radius (r)" instead of "Kernel Width (w)".<br><br>
+> Minor bugs fixed.
+
+### v4.2.7.1
+#### August 19, 2025
 > Minor bugs fixed.
 </details>
 
