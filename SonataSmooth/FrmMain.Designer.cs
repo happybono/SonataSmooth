@@ -64,10 +64,10 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblKernelRadius = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblPolynomialOrder = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -523,10 +523,10 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.slblCalibratedType,
-            this.toolStripStatusLabel2,
+            this.toolStripSeparator1,
             this.toolStripStatusLabel3,
             this.slblKernelRadius,
-            this.toolStripStatusLabel6,
+            this.toolStripSeparator2,
             this.toolStripStatusLabel5,
             this.slblPolynomialOrder});
             this.statusStrip1.Location = new System.Drawing.Point(0, 837);
@@ -552,13 +552,13 @@
             this.slblCalibratedType.Size = new System.Drawing.Size(17, 19);
             this.slblCalibratedType.Text = "--";
             // 
-            // toolStripStatusLabel2
+            // toolStripSeparator1
             // 
-            this.toolStripStatusLabel2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripStatusLabel2.ForeColor = System.Drawing.Color.White;
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(19, 19);
-            this.toolStripStatusLabel2.Text = "｜";
+            this.toolStripSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripSeparator1.ForeColor = System.Drawing.Color.White;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(19, 19);
+            this.toolStripSeparator1.Text = "｜";
             // 
             // toolStripStatusLabel3
             // 
@@ -576,14 +576,14 @@
             this.slblKernelRadius.Size = new System.Drawing.Size(17, 19);
             this.slblKernelRadius.Text = "--";
             // 
-            // toolStripStatusLabel6
+            // toolStripSeparator2
             // 
-            this.toolStripStatusLabel6.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripStatusLabel6.ForeColor = System.Drawing.Color.White;
-            this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
-            this.toolStripStatusLabel6.Size = new System.Drawing.Size(19, 19);
-            this.toolStripStatusLabel6.Text = "｜";
-            this.toolStripStatusLabel6.Visible = false;
+            this.toolStripSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripSeparator2.ForeColor = System.Drawing.Color.White;
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(19, 19);
+            this.toolStripSeparator2.Text = "｜";
+            this.toolStripSeparator2.Visible = false;
             // 
             // toolStripStatusLabel5
             // 
@@ -760,10 +760,10 @@
         private System.Windows.Forms.Label lblPolyOrder;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripSeparator1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripSeparator2;
         private System.Windows.Forms.Label lblCnt2;
         private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
         private System.Windows.Forms.ToolStripStatusLabel slblKernelRadius;

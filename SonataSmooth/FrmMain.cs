@@ -15,9 +15,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.WebRequestMethods;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using Excel = Microsoft.Office.Interop.Excel;
+using File = System.IO.File;
 
 namespace SonataSmooth
 {
@@ -58,7 +60,7 @@ namespace SonataSmooth
             UpdateListBox1BtnsState(null, EventArgs.Empty);
             UpdateListBox2BtnsState(null, EventArgs.Empty);
             settingsForm = new FrmExportSettings(this);
-            aboutForm = null; 
+            aboutForm = null;
         }
 
         private async void btnCalibrate_Click(object sender, EventArgs e)
@@ -255,7 +257,7 @@ namespace SonataSmooth
                 {
                     MessageBox.Show(
                         $"An error occurred during parallel computation : {aex.Flatten().InnerException?.Message}",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error                        
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error
                     );
                     UpdateListBox2BtnsState(null, EventArgs.Empty);
                     return;
@@ -287,7 +289,7 @@ namespace SonataSmooth
 
                     bool showPoly = useSG;
                     toolStripStatusLabel5.Visible =
-                    toolStripStatusLabel6.Visible =
+                    toolStripSeparator2.Visible =
                     slblPolynomialOrder.Visible = showPoly;
                     if (showPoly) slblPolynomialOrder.Text = polyOrder.ToString();
                 }
@@ -302,8 +304,76 @@ namespace SonataSmooth
                 UpdateListBox1BtnsState(null, EventArgs.Empty);
                 UpdateListBox2BtnsState(null, EventArgs.Empty);
             }
-                progressBar1.Value = 0;
+            progressBar1.Value = 0;
         }
+
+
+        private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
+            ApplySmoothing(double[] input, int r, int polyOrder, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
+        {
+            int n = input.Length;
+            int[] binom = CalcBinomialCoefficients(2 * r + 1);
+            double sigma = (2.0 * r + 1) / 6.0;
+
+            // 필터 계수 한 번만 계산
+            double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(2 * r + 1, sigma) : null;
+            double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder) : null;
+
+            var rect = new double[n];
+            var binomAvg = new double[n];
+            var median = new double[n];
+            var gauss = new double[n];
+            var sg = new double[n];
+
+            int Mirror(int idx) => idx < 0 ? -idx - 1 : idx >= n ? 2 * n - idx - 1 : idx;
+
+            Parallel.For(0, n, i => {
+                double sum; int cnt;
+
+                if (doRect)
+                {
+                    sum = 0; cnt = 0;
+                    for (int k = -r; k <= r; k++)
+                    {
+                        int idx = i + k;
+                        if (idx >= 0 && idx < n) { sum += input[idx]; cnt++; }
+                    }
+                    rect[i] = cnt > 0 ? sum / cnt : 0.0;
+                }
+
+                if (doAvg)
+                {
+                    sum = 0; cnt = 0;
+                    for (int k = -r; k <= r; k++)
+                    {
+                        int idx = i + k;
+                        if (idx >= 0 && idx < n) { sum += input[idx] * binom[k + r]; cnt += binom[k + r]; }
+                    }
+                    binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
+                }
+
+                if (doMed) median[i] = WeightedMedianAt(input, i, r, binom);
+
+                if (doGauss && gaussCoeffs != null)
+                {
+                    sum = 0;
+                    for (int k = -r; k <= r; k++)
+                        sum += gaussCoeffs[k + r] * input[Mirror(i + k)];
+                    gauss[i] = sum;
+                }
+
+                if (doSG && sgCoeffs != null)
+                {
+                    sum = 0;
+                    for (int k = -r; k <= r; k++)
+                        sum += sgCoeffs[k + r] * input[Mirror(i + k)];
+                    sg[i] = sum;
+                }
+            });
+
+            return (rect, binomAvg, median, gauss, sg);
+        }
+
 
 
         private static double[] ComputeGaussianCoefficients(int length, double sigma)
@@ -364,7 +434,7 @@ namespace SonataSmooth
                 {
                     return pairs[i].Value;
                 }
-                 
+
                 // 누적 가중치 == 절반인 순간 : 다음 값과 평균 처리
                 if (isEvenTotal && accum == half)
                 {
@@ -637,6 +707,13 @@ namespace SonataSmooth
             UpdateListBox1BtnsState(null, EventArgs.Empty);
             UpdateListBox2BtnsState(null, EventArgs.Empty);
 
+            slblCalibratedType.Text = "--";
+            slblKernelRadius.Text = "--";
+            toolStripSeparator2.Visible = false;
+            toolStripStatusLabel5.Visible = false;
+            slblPolynomialOrder.Visible = false;
+            slblPolynomialOrder.Text = "--";
+
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
             txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
             txtDatasetTitle.ForeColor = Color.Gray;
@@ -865,56 +942,42 @@ namespace SonataSmooth
             UpdateListBox2BtnsState(null, EventArgs.Empty);
         }
 
-        private async Task DeleteSelectedItemsPreserveSelection(ListBox lb, System.Windows.Forms.ProgressBar progressBar, Label lblCount)
+        private async Task DeleteSelectedItemsPreserveSelection(
+            ListBox listBox,
+            System.Windows.Forms.ProgressBar progressBar,
+            Label countLabel)
         {
-            var indices = lb.SelectedIndices.Cast<int>().OrderByDescending(i => i).ToArray();
-            int total = indices.Length;
-            if (total == 0) return;
+            var indicesToRemove = listBox
+                .SelectedIndices
+                .Cast<int>()
+                .OrderByDescending(i => i)
+                .ToList();
+
+            int total = indicesToRemove.Count;
 
             progressBar.Minimum = 0;
             progressBar.Maximum = total;
             progressBar.Value = 0;
+            progressBar.Style = ProgressBarStyle.Continuous;
 
-            var newSelections = new List<int>();
-            var shiftMap = new Dictionary<int, bool>();
-
-            foreach (var idx in indices)
+            listBox.BeginUpdate();
+            try
             {
-                shiftMap[idx] = true;
-                if (idx < lb.Items.Count - 1)
+                for (int i = 0; i < total; i++)
                 {
-                    newSelections.Add(idx);
-                }
-            }
+                    int idx = indicesToRemove[i];
+                    listBox.Items.RemoveAt(idx);
 
-            lb.SuspendLayout();
-            lb.BeginUpdate();
-
-            // 삭제
-            int updateInterval = Math.Max(1, total / 100);
-            for (int i = 0; i < total; i++)
-            {
-                lb.Items.RemoveAt(indices[i]);
-                if (((i + 1) % updateInterval == 0) || i == total - 1)
-                {
                     progressBar.Value = i + 1;
-                    Application.DoEvents();
+
+                    // UI 반영 시간 확보
+                    await Task.Delay(30);
                 }
             }
-
-            lb.EndUpdate();
-            lb.ResumeLayout();
-
-            lb.SelectedIndices.Clear();
-            foreach (var idx in newSelections)
+            finally
             {
-                if (idx < lb.Items.Count)
-                    lb.SelectedIndices.Add(idx);
+                listBox.EndUpdate();
             }
-
-            lblCount.Text = $"Count : {lb.Items.Count}";
-            await Task.Delay(200);
-            progressBar.Value = 0;
         }
 
         private async void btnDelete_Click(object sender, EventArgs e)
@@ -925,38 +988,40 @@ namespace SonataSmooth
                 ? $"You are about to delete all {selectedCount} items from the list.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?"
                 : $"You are about to delete {selectedCount} selected item{(selectedCount > 1 ? "s" : "")} from the list.\n\nAre you sure you want to proceed?";
 
-            var result = MessageBox.Show(message,
-                                         "Delete Confirmation",
-                                         MessageBoxButtons.YesNo,
-                                         MessageBoxIcon.Warning);
+            var result = MessageBox.Show(
+                message,
+                "Delete Confirmation",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
 
             if (result == DialogResult.No)
-            {
                 return;
-            }
 
-
+            // 전체 삭제 시
             if (selectedCount == listBox1.Items.Count)
             {
                 listBox1.Items.Clear();
                 listBox2.Items.Clear();
                 lblCnt1.Text = $"Count : {listBox1.Items.Count}";
                 lblCnt2.Text = $"Count : {listBox2.Items.Count}";
-                listBox1.Select();
                 progressBar1.Value = 0;
+                listBox1.Select();
 
                 txtDatasetTitle.Text = ExcelTitlePlaceholder;
                 txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
                 txtDatasetTitle.ForeColor = Color.Gray;
+
                 UpdateListBox1BtnsState(null, EventArgs.Empty);
                 txtVariable.Select();
                 return;
             }
 
+            // 선택 항목 삭제
             await DeleteSelectedItemsPreserveSelection(listBox1, progressBar1, lblCnt1);
+
+            // 삭제 완료 후 남은 항목 개수, 포커스, 버튼 상태 갱신
             lblCnt1.Text = $"Count : {listBox1.Items.Count}";
             listBox1.Select();
-
             UpdateListBox1BtnsState(null, EventArgs.Empty);
             UpdateListBox2BtnsState(null, EventArgs.Empty);
         }
@@ -1060,7 +1125,7 @@ namespace SonataSmooth
             lblCnt2.Text = "Count : " + listBox2.Items.Count;
             slblCalibratedType.Text = "--";
             slblKernelRadius.Text = "--";
-            toolStripStatusLabel6.Visible = false;
+            toolStripSeparator2.Visible = false;
             toolStripStatusLabel5.Visible = false;
             slblPolynomialOrder.Visible = false;
             slblPolynomialOrder.Text = "--";
@@ -1345,33 +1410,51 @@ namespace SonataSmooth
 
         private async Task ExportCsvAsync()
         {
+            // UI 초기화
+            if (progressBar1.InvokeRequired)
+            {
+                progressBar1.Invoke(new Action(() =>
+                {
+                    progressBar1.Style = ProgressBarStyle.Continuous;
+                    progressBar1.Minimum = 0;
+                    progressBar1.Maximum = 100;
+                    progressBar1.Value = 0;
+                }));
+            }
+            else
+            {
+                progressBar1.Style = ProgressBarStyle.Continuous;
+                progressBar1.Minimum = 0;
+                progressBar1.Maximum = 100;
+                progressBar1.Value = 0;
+            }
+
             int r = 2, polyOrder = 2, n = 0;
             bool doRect = false, doAvg = false, doMed = false, doGauss = false, doSG = false;
             string excelTitle = "";
             double[] initialData = null;
 
+            // UI 에서 설정 값 및 데이터 읽기
             if (InvokeRequired)
             {
                 Invoke(new Action(() =>
                 {
                     r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                     polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
                     doMed = settingsForm.chbMed.Checked;
                     doGauss = settingsForm.chbGauss.Checked;
                     doSG = settingsForm.chbSG.Checked;
+
                     excelTitle = txtDatasetTitle.Text;
+
                     initialData = listBox1.Items
                         .Cast<object>()
-                        .Select(x => double.TryParse(
-                                 x?.ToString(),
-                                 NumberStyles.Any,
-                                 CultureInfo.InvariantCulture,
-                                 out var d)
-                               ? d
-                               : 0.0)
+                        .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0.0)
                         .ToArray();
+
                     n = initialData.Length;
                 }));
             }
@@ -1379,35 +1462,28 @@ namespace SonataSmooth
             {
                 r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                 polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+
                 doRect = settingsForm.chbRect.Checked;
                 doAvg = settingsForm.chbAvg.Checked;
                 doMed = settingsForm.chbMed.Checked;
                 doGauss = settingsForm.chbGauss.Checked;
                 doSG = settingsForm.chbSG.Checked;
+
                 excelTitle = txtDatasetTitle.Text;
+
                 initialData = listBox1.Items
                     .Cast<object>()
-                    .Select(x => double.TryParse(
-                             x?.ToString(),
-                             NumberStyles.Any,
-                             CultureInfo.InvariantCulture,
-                             out var d)
-                           ? d
-                           : 0.0)
+                    .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0.0)
                     .ToArray();
+
                 n = initialData.Length;
             }
 
-            if (!ValidateSmoothingParameters(n, r, polyOrder))
-                return;
+            if (!ValidateSmoothingParameters(n, r, polyOrder)) return;
 
             if (n == 0)
             {
-                MessageBox.Show(
-                    "No data to export.",
-                    "Export CSV",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                MessageBox.Show("No data to export.", "Export CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -1420,59 +1496,23 @@ namespace SonataSmooth
             var gaussFilt = new double[n];
             var sgFilt = new double[n];
 
+            // 데이터 계산
             await Task.Run(() =>
             {
-                Parallel.For(0, n, i =>
-                {
-                    // Rectangular Average
-                    double sum = 0; int cnt = 0;
-                    for (int k = -r; k <= r; k++)
-                    {
-                        int idx = i + k;
-                        if (idx >= 0 && idx < n)
-                        {
-                            sum += initialData[idx];
-                            cnt++;
-                        }
-                    }
-                    rectAvg[i] = cnt > 0 ? sum / cnt : 0.0;
+                // 변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
+                var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
+                    ApplySmoothing(initialData, r, polyOrder, doRect, doAvg, doMed, doGauss, doSG);
 
-                    // Binomial Average
-                    sum = 0; cnt = 0;
-                    for (int k = -r; k <= r; k++)
-                    {
-                        int idx = i + k;
-                        if (idx >= 0 && idx < n)
-                        {
-                            sum += initialData[idx] * binom[k + r];
-                            cnt += binom[k + r];
-                        }
-                    }
-                    binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
-
-                    // Weighted Median
-                    binomMed[i] = WeightedMedianAt(initialData, i, r, binom);
-
-                    // Gaussian Filter (Mirror)
-                    var gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
-                    sum = 0;
-                    int Mirror(int idx) =>
-                        idx < 0 ? -idx - 1 :
-                        idx >= n ? 2 * n - idx - 1 :
-                        idx;
-                    for (int k = -r; k <= r; k++)
-                        sum += gaussCoeffs[k + r] * initialData[Mirror(i + k)];
-                    gaussFilt[i] = sum;
-
-                    // Savitzky–Golay
-                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
-                    sum = 0;
-                    for (int k = -r; k <= r; k++)
-                        sum += sgCoeffs[k + r] * initialData[Mirror(i + k)];
-                    sgFilt[i] = sum;
-                });
+                // 결과를 내보내기 위해 배열에 값을 할당합니다.
+                if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
+                if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
+                if (doMed) Array.Copy(medianResult, binomMed, n);
+                if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
+                if (doSG) Array.Copy(sgResult, sgFilt, n);
             });
 
+
+            // 저장 경로 Dialog
             string basePath = null;
             if (InvokeRequired)
             {
@@ -1483,9 +1523,7 @@ namespace SonataSmooth
                         dlg.Filter = "CSV files (*.csv)|*.csv";
                         dlg.DefaultExt = "csv";
                         dlg.AddExtension = true;
-
-                        if (dlg.ShowDialog(this) == DialogResult.OK)
-                            basePath = dlg.FileName;
+                        if (dlg.ShowDialog(this) == DialogResult.OK) basePath = dlg.FileName;
                     }
                 }));
             }
@@ -1496,15 +1534,15 @@ namespace SonataSmooth
                     dlg.Filter = "CSV files (*.csv)|*.csv";
                     dlg.DefaultExt = "csv";
                     dlg.AddExtension = true;
-
-                    if (dlg.ShowDialog(this) == DialogResult.OK)
-                        basePath = dlg.FileName;
+                    if (dlg.ShowDialog(this) == DialogResult.OK) basePath = dlg.FileName;
                 }
             }
-            if (string.IsNullOrEmpty(basePath))
-                return;
 
-            var columns = new List<(string Header, double[] Data)> {
+            if (string.IsNullOrEmpty(basePath)) return;
+
+            // 내보낼 Column 구성
+            var columns = new List<(string Header, double[] Data)>
+    {
         ("Initial Dataset", initialData)
     };
             if (doRect) columns.Add(("Rectangular Averaging", rectAvg));
@@ -1515,113 +1553,115 @@ namespace SonataSmooth
 
             const int ExcelMaxRows = 1_048_576;
             int headerLines =
-                1   // 제목
-              + 1   // 전체 중 'n' 번째 부분 (분할 저장 시)
-              + 1   // 빈 줄
-              + 1   // Smoothing Parameters
-              + 1   // Kernel Radius
-              + 1   // Kernel Width
-              + (doSG ? 1 : 0) // 다항식의 차수
-              + 1   // 빈 줄
-              + 1   // Generated : 생성 일시
-              + 1   // 빈 줄
-              + 1;  // 행 Header
+                1 + // Title
+                1 + // Part info (when splitting)
+                1 + // blank
+                1 + // "Smoothing Parameters"
+                1 + // Kernel Radius
+                1 + // Kernel Width
+                (doSG ? 1 : 0) + // Polynomial Order
+                1 + // blank
+                1 + // Generated
+                1 + // blank
+                1;  // header row
 
             int maxDataRows = ExcelMaxRows - headerLines;
             int partCount = (n + maxDataRows - 1) / maxDataRows;
             int kernelWidth = 2 * r + 1;
 
+            // 완료 플래그 : 완료 후 늦게 도착하는 Report 를 무시
+            bool completed = false;
+
+            // 진행률 리포터 : 완료 후 도착 Callback 무시 + 값 클램프
             IProgress<int> progress = new Progress<int>(percent =>
             {
-                if (progressBar1.InvokeRequired)
-                    progressBar1.Invoke(new Action(() => progressBar1.Value = percent));
-                else
-                    progressBar1.Value = percent;
+                if (completed) return;
+                int v = Math.Max(0, Math.Min(100, percent));
+                progressBar1.Value = v;
             });
 
             string dir = Path.GetDirectoryName(basePath);
             string nameOnly = Path.GetFileNameWithoutExtension(basePath);
             string ext = Path.GetExtension(basePath);
 
-            for (int part = 0; part < partCount; part++)
+            try
             {
-                int startRow = part * maxDataRows;
-                int rowCount = Math.Min(maxDataRows, n - startRow);
-
-                string path = partCount == 1
-                    ? basePath
-                    : Path.Combine(dir, $"{nameOnly}_Part{part + 1}{ext}");
-
-                const int bufSize = 81920;
-                var encoding = Encoding.UTF8;
-
-                using (var fs = new FileStream(
-                           path,
-                           FileMode.Create,
-                           FileAccess.Write,
-                           FileShare.None,
-                           bufSize,
-                           useAsync: true))
-                using (var sw = new StreamWriter(fs, encoding, bufSize))
+                for (int part = 0; part < partCount; part++)
                 {
-                    await sw.WriteLineAsync(excelTitle);
-                    await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
-                    await sw.WriteLineAsync(string.Empty);
-                    await sw.WriteLineAsync("Smoothing Parameters");
-                    await sw.WriteLineAsync($"Kernel Radius : {r}");
-                    await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
-                    if (doSG)
-                        await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
-                    await sw.WriteLineAsync(string.Empty);
-                    await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
-                    await sw.WriteLineAsync(string.Empty);
+                    int startRow = part * maxDataRows;
+                    int rowCount = Math.Min(maxDataRows, n - startRow);
+                    string path = partCount == 1 ? basePath : Path.Combine(dir, $"{nameOnly}_Part{part + 1}{ext}");
 
-                    // 행 Header 쓰기
-                    await sw.WriteLineAsync(string.Join(
-                        ",", columns.Select(c => c.Header)));
+                    const int bufSize = 81920;
+                    var encoding = Encoding.UTF8;
 
-                    // 데이터 쓰기
-                    for (int i = startRow; i < startRow + rowCount; i++)
+                    using (var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufSize, useAsync: true))
+                    using (var sw = new StreamWriter(fs, encoding, bufSize))
                     {
-                        string line = string.Join(
-                            ",",
-                            columns.Select(c =>
-                                c.Data[i].ToString(
-                                    CultureInfo.InvariantCulture)));
-                        await sw.WriteLineAsync(line);
+                        // Header
+                        await sw.WriteLineAsync(excelTitle);
+                        await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
+                        await sw.WriteLineAsync(string.Empty);
+                        await sw.WriteLineAsync("Smoothing Parameters");
+                        await sw.WriteLineAsync($"Kernel Radius : {r}");
+                        await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
+                        if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+                        await sw.WriteLineAsync(string.Empty);
+                        await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
+                        await sw.WriteLineAsync(string.Empty);
 
-                        // Progress
-                        int percent = (int)(((double)(i + 1) / n) * 100);
-                        progress.Report(percent);
+                        // Column headers
+                        await sw.WriteLineAsync(string.Join(",", columns.Select(c => c.Header)));
+
+                        // Data
+                        int lastReported = -1;
+                        for (int i = startRow; i < startRow + rowCount; i++)
+                        {
+                            string line = string.Join(",", columns.Select(c => c.Data[i].ToString(CultureInfo.InvariantCulture)));
+                            await sw.WriteLineAsync(line);
+
+                            int percent = (int)(((double)(i + 1) / n) * 100);
+                            if (percent != lastReported)
+                            {
+                                lastReported = percent;
+                                progress.Report(percent);
+                            }
+                        }
                     }
                 }
             }
+            finally
+            {
+                // 완료 표시: 이후 들어오는 Report 무시
+                completed = true;
 
-            if (progressBar1.InvokeRequired)
-                progressBar1.Invoke(new Action(() => progressBar1.Value = 0));
-            else
-                progressBar1.Value = 0;
+                if (progressBar1.InvokeRequired)
+                    progressBar1.Invoke(new Action(() =>
+                    {
+                        progressBar1.Value = 0;
+                        progressBar1.Refresh();
+                    }));
+                else
+                {
+                    progressBar1.Value = 0;
+                    progressBar1.Refresh();
+                }
+            }
 
+            // 완료 알림
             if (InvokeRequired)
             {
                 Invoke(new Action(() =>
                 {
-                    MessageBox.Show(
-                        "CSV export completed.",
-                        "Export CSV",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                    MessageBox.Show("CSV export completed.", "Export CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }));
             }
             else
             {
-                MessageBox.Show(
-                    "CSV export completed.",
-                    "Export CSV",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                MessageBox.Show("CSV export completed.", "Export CSV", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
+            // 자동 열기
             bool openFile = false;
             if (InvokeRequired)
             {
@@ -1641,10 +1681,7 @@ namespace SonataSmooth
                 {
                     for (int part = 0; part < partCount; part++)
                     {
-                        string openPath = partCount == 1
-                            ? basePath
-                            : Path.Combine(dir, $"{nameOnly}_Part{part + 1}{ext}");
-
+                        string openPath = partCount == 1 ? basePath : Path.Combine(dir, $"{nameOnly}_Part{part + 1}{ext}");
                         if (File.Exists(openPath))
                         {
                             try
@@ -1653,10 +1690,7 @@ namespace SonataSmooth
                             }
                             catch (System.ComponentModel.Win32Exception)
                             {
-                                Process.Start(new ProcessStartInfo("rundll32.exe", $"shell32.dll,OpenAs_RunDLL \"{openPath}\"")
-                                {
-                                    UseShellExecute = true
-                                });
+                                Process.Start(new ProcessStartInfo("rundll32.exe", $"shell32.dll,OpenAs_RunDLL \"{openPath}\"") { UseShellExecute = true });
                             }
                         }
                     }
@@ -1757,6 +1791,22 @@ namespace SonataSmooth
 
         private async void ExportExcelAsync()
         {
+            // COM 해제 유틸 (로컬 함수) 
+            void FinalRelease(object com)
+            {
+                try
+                {
+                    if (com != null && System.Runtime.InteropServices.Marshal.IsComObject(com))
+                        System.Runtime.InteropServices.Marshal.FinalReleaseComObject(com);
+                }
+                catch { /* 필요 시 Logging 기능 추가 */ }
+            }
+
+            void ReleaseAll(Stack<object> stack)
+            {
+                while (stack.Count > 0) FinalRelease(stack.Pop());
+            }
+
             int r = int.TryParse(settingsForm.cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
             int polyOrder = int.TryParse(settingsForm.cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
 
@@ -1771,14 +1821,12 @@ namespace SonataSmooth
             progressBar1.Maximum = 100;
             progressBar1.Value = 0;
 
-
             var initialData = listBox1.Items
                 .Cast<object>()
                 .Select(item => double.TryParse(item?.ToString(), out var d) ? d : 0.0)
                 .ToArray();
 
             int n = initialData.Length;
-
 
             if (!ValidateSmoothingParameters(n, r, polyOrder))
                 return;
@@ -1805,170 +1853,256 @@ namespace SonataSmooth
 
             await Task.Run(() =>
             {
-                Parallel.For(0, n, i =>
-                {
-                    // Rectangular
-                    double sum = 0; int cnt = 0;
-                    for (int k = -r; k <= r; k++)
-                    {
-                        int idx = i + k;
-                        if (idx >= 0 && idx < n) { sum += initialData[idx]; cnt++; }
-                    }
-                    rectAvg[i] = cnt > 0 ? sum / cnt : 0.0;
+                //  변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
+                var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
+                    ApplySmoothing(initialData, r, polyOrder, doRect, doAvg, doMed, doGauss, doSG);
 
-                    // Binomial average
-                    sum = 0; cnt = 0;
-                    for (int k = -r; k <= r; k++)
-                    {
-                        int idx = i + k;
-                        if (idx >= 0 && idx < n)
-                        {
-                            sum += initialData[idx] * binom[k + r];
-                            cnt += binom[k + r];
-                        }
-                    }
-                    binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
-
-                    // Weighted median
-                    binomMed[i] = WeightedMedianAt(initialData, i, r, binom);
-
-                    // Gaussian filter (mirror)
-                    var gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
-                    sum = 0;
-                    int Mirror(int idx) =>
-                        idx < 0 ? -idx - 1 : (idx >= n ? 2 * n - idx - 1 : idx);
-                    for (int k = -r; k <= r; k++)
-                        sum += gaussCoeffs[k + r] * initialData[Mirror(i + k)];
-                    gaussFilt[i] = sum;
-
-                    // Savitzky–Golay filter
-                    var sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
-                    sum = 0;
-                    for (int k = -r; k <= r; k++)
-                        sum += sgCoeffs[k + r] * initialData[Mirror(i + k)];
-                    sgFilt[i] = sum;
-                });
+                // 결과를 내보내기 위해 배열에 값을 할당합니다.
+                if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
+                if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
+                if (doMed) Array.Copy(medianResult, binomMed, n);
+                if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
+                if (doSG) Array.Copy(sgResult, sgFilt, n);
             });
 
-            var excel = new Excel.Application();
-            var wb = excel.Workbooks.Add();
-            var ws = (Excel.Worksheet)wb.Worksheets[1];
-            //excel.Visible = true;
+            // COM 객체 추적 Stack
+            var coms = new Stack<object>();
 
-            ws.Cells[1, 1] = txtDatasetTitle.Text;
-            ws.Cells[3, 1] = "Smoothing Parameters";
-            ws.Cells[4, 1] = $"Kernel Radius : {r}";
-            ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
-            ws.Cells[6, 1] = doSG
-                ? $"Polynomial Order : {polyOrder}"
-                : "Polynomial Order : N/A";
+            Excel.Application excel = null;
+            Excel.Workbooks workbooks = null;
+            Excel.Workbook wb = null;
+            Excel.Sheets sheets = null;
+            Excel.Worksheet ws = null;
 
-            async Task<int> FillData(double[] data, int startCol)
+            Excel.ChartObjects chartObjects = null;
+            Excel.ChartObject chartObj = null;
+            Excel.Chart chart = null;
+            Excel.SeriesCollection seriesCollection = null;
+
+            try
             {
-                int total = data.Length;
-                int curCol = startCol;
-                int idx = 0;
+                excel = new Excel.Application();
+                coms.Push(excel);
 
-                while (idx < total)
+                workbooks = excel.Workbooks;
+                coms.Push(workbooks);
+
+                wb = workbooks.Add();
+                coms.Push(wb);
+
+                sheets = wb.Worksheets;
+                coms.Push(sheets);
+
+                ws = (Excel.Worksheet)sheets[1];
+                coms.Push(ws);
+
+                //excel.Visible = true;
+
+                ws.Cells[1, 1] = txtDatasetTitle.Text;
+                ws.Cells[3, 1] = "Smoothing Parameters";
+                ws.Cells[4, 1] = $"Kernel Radius : {r}";
+                ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
+                ws.Cells[6, 1] = doSG
+                    ? $"Polynomial Order : {polyOrder}"
+                    : "Polynomial Order : N/A";
+
+                async Task<int> FillData(double[] data, int startCol)
                 {
-                    int chunk = Math.Min(maxRows, total - idx);
-                    var arr = new double[chunk, 1];
+                    int total = data.Length;
+                    int curCol = startCol;
+                    int idx = 0;
 
-                    for (int row = 0; row < chunk; row++, idx++) 
-                        arr[row, 0] = data[idx];
+                    while (idx < total)
+                    {
+                        int chunk = Math.Min(maxRows, total - idx);
+                        var arr = new double[chunk, 1];
 
-                    var range = ws.Range[
-                        ws.Cells[4, curCol],
-                        ws.Cells[4 + chunk - 1, curCol]
-                    ];
-                    range.Value2 = arr;
+                        for (int row = 0; row < chunk; row++, idx++)
+                            arr[row, 0] = data[idx];
 
-                    progressBar1.Value = Math.Min(100, (int)(100.0 * idx / total));
-                    await Task.Yield();
+                        Excel.Range topCell = null, bottomCell = null, range = null;
+                        try
+                        {
+                            topCell = (Excel.Range)ws.Cells[4, curCol];
+                            bottomCell = (Excel.Range)ws.Cells[4 + chunk - 1, curCol];
+                            range = ws.Range[topCell, bottomCell];
+                            range.Value2 = arr;
+                        }
+                        finally
+                        {
+                            FinalRelease(range);
+                            FinalRelease(bottomCell);
+                            FinalRelease(topCell);
+                        }
 
-                    curCol++;
+                        progressBar1.Value = Math.Min(100, (int)(100.0 * idx / total));
+                        await Task.Yield();
+
+                        curCol++;
+                    }
+
+                    progressBar1.Value = 100;
+                    return curCol - 1;
                 }
 
-                progressBar1.Value = 100;
-                return curCol - 1;
-            }
-
-            async Task<int> FillSection(string title, double[] data, int startCol)
-            {
-                ws.Cells[3, startCol] = title;
-                int lastCol = await FillData(data, startCol);
-                return lastCol + 2;
-            }
-
-            var sections = new List<(string Title, int StartCol, int EndCol)>();
-            int col = 3;
-
-            async Task AddSection(string title, double[] data, bool enabled)
-            {
-                if (!enabled) return;
-                int start = col;
-                col = await FillSection(title, data, col);
-                sections.Add((title, start, col - 2));
-            }
-
-            await AddSection("Initial Dataset", initialData, true);
-            await AddSection("Rectangular Averaging", rectAvg, doRect);
-            await AddSection("Binomial Averaging", binomAvg, doAvg);
-            await AddSection("Binomial Median Filtering", binomMed, doMed);
-            await AddSection("Gaussian Filtering", gaussFilt, doGauss);
-            await AddSection("Savitzky-Golay Filtering", sgFilt, doSG);
-
-            int lastSectionEnd = sections.Last().EndCol;
-            int chartColBase = lastSectionEnd + 4;
-            int chartRowBase = 4;
-
-            var chartObjects = (Excel.ChartObjects)ws.ChartObjects();
-            var chartLeft = ws.Cells[chartRowBase, chartColBase].Left;
-            var chartTop = ws.Cells[chartRowBase, chartColBase].Top;
-            var chartObj = chartObjects.Add(chartLeft, chartTop, 900, 600);
-            var chart = chartObj.Chart;
-
-            chart.ChartType = Excel.XlChartType.xlLine;
-            chart.HasTitle = true;
-            chart.ChartTitle.Text = txtDatasetTitle.Text;
-            //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
-
-            chart.HasLegend = true;
-            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
-
-            chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
-            chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
-            chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
-            chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
-
-            foreach (var (Title, StartCol, EndCol) in sections)
-            {
-                Excel.Range unionRange = null;
-
-                for (int c = StartCol; c <= EndCol; c++)
+                async Task<int> FillSection(string title, double[] data, int startCol)
                 {
-                    int fullCols = n / maxRows;
-                    int rowsInCol = (c - StartCol < fullCols)
-                        ? maxRows
-                        : n - fullCols * maxRows;
-                    if (rowsInCol <= 0) break;
-
-                    var dataRange = ws.Range[
-                        ws.Cells[4, c],
-                        ws.Cells[4 + rowsInCol - 1, c]
-                    ];
-                    unionRange = unionRange == null
-                        ? dataRange
-                        : excel.Application.Union(unionRange, dataRange);
+                    ws.Cells[3, startCol] = title;
+                    int lastCol = await FillData(data, startCol);
+                    return lastCol + 2;
                 }
 
-                var series = chart.SeriesCollection().NewSeries();
-                series.Name = Title;
-                series.Values = unionRange;
+                var sections = new List<(string Title, int StartCol, int EndCol)>();
+                int col = 3;
+
+                async Task AddSection(string title, double[] data, bool enabled)
+                {
+                    if (!enabled) return;
+                    int start = col;
+                    col = await FillSection(title, data, col);
+                    sections.Add((title, start, col - 2));
+                }
+
+                await AddSection("Initial Dataset", initialData, true);
+                await AddSection("Rectangular Averaging", rectAvg, doRect);
+                await AddSection("Binomial Averaging", binomAvg, doAvg);
+                await AddSection("Binomial Median Filtering", binomMed, doMed);
+                await AddSection("Gaussian Filtering", gaussFilt, doGauss);
+                await AddSection("Savitzky-Golay Filtering", sgFilt, doSG);
+
+                int lastSectionEnd = sections.Last().EndCol;
+                int chartColBase = lastSectionEnd + 4;
+                int chartRowBase = 4;
+
+                chartObjects = (Excel.ChartObjects)ws.ChartObjects();
+                coms.Push(chartObjects);
+
+                double chartLeft, chartTop;
+                Excel.Range anchorCell = null;
+                try
+                {
+                    anchorCell = (Excel.Range)ws.Cells[chartRowBase, chartColBase];
+                    chartLeft = anchorCell.Left;
+                    chartTop = anchorCell.Top;
+                }
+                finally
+                {
+                    FinalRelease(anchorCell);
+                }
+
+                chartObj = chartObjects.Add(chartLeft, chartTop, 900, 600);
+                coms.Push(chartObj);
+
+                chart = chartObj.Chart;
+                coms.Push(chart);
+
+                chart.ChartType = Excel.XlChartType.xlLine;
+                chart.HasTitle = true;
+                chart.ChartTitle.Text = txtDatasetTitle.Text;
+                //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
+
+                chart.HasLegend = true;
+                chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+
+                chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
+                chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
+                chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
+                chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
+
+                seriesCollection = chart.SeriesCollection();
+                coms.Push(seriesCollection);
+
+                foreach (var (Title, StartCol, EndCol) in sections)
+                {
+                    Excel.Range unionRange = null;
+                    try
+                    {
+                        for (int c = StartCol; c <= EndCol; c++)
+                        {
+                            int fullCols = n / maxRows;
+                            int rowsInCol = (c - StartCol < fullCols)
+                                ? maxRows
+                                : n - fullCols * maxRows;
+                            if (rowsInCol <= 0) break;
+
+                            Excel.Range top = null, bottom = null, dataRange = null;
+                            try
+                            {
+                                top = (Excel.Range)ws.Cells[4, c];
+                                bottom = (Excel.Range)ws.Cells[4 + rowsInCol - 1, c];
+                                dataRange = ws.Range[top, bottom];
+
+                                if (unionRange == null)
+                                    unionRange = dataRange;
+                                else
+                                {
+                                    // Union 이 새로운 Range 를 반환하므로 이전 unionRange 는 그대로 두고 누적
+                                    Excel.Range merged = null;
+                                    try
+                                    {
+                                        merged = excel.Union(unionRange, dataRange);
+                                    }
+                                    finally
+                                    {
+                                        // 기존 unionRange 와 dataRange 의 RCW 를 해제,
+                                        // merged 를 새로운 unionRange 로 교체
+                                        FinalRelease(unionRange);
+                                        FinalRelease(dataRange);
+                                    }
+                                    unionRange = merged;
+                                    // merged 는 unionRange 로 승격되었으므로 여기서 해제하지 않음
+                                    top = null; bottom = null; dataRange = null;
+                                }
+                            }
+                            finally
+                            {
+                                FinalRelease(bottom);
+                                FinalRelease(top);
+                                // dataRange 는 위에서 merged 교체 시 해제됨.
+                                // (첫 블록일 경우 unionRange 가 참조)
+                            }
+                        }
+
+                        var series = seriesCollection.NewSeries();
+                        try
+                        {
+                            series.Name = Title;
+                            series.Values = unionRange;
+                        }
+                        finally
+                        {
+                            FinalRelease(series);
+                        }
+
+                        excel.Visible = true;
+                    }
+                    finally
+                    {
+                        FinalRelease(unionRange);
+                    }
+                }
+
+                progressBar1.Value = 0;
+
+                // 창 유지 : 사용자에게 권한 이관
+                wb.Saved = false; // 닫기 시 저장 대화상자 표시
                 excel.Visible = true;
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Excel export failed: " + ex.Message, "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // 생성된 COM 참조 모두 해제 (Excel 창은 그대로 살아있음)
+                ReleaseAll(coms);
 
-            progressBar1.Value = 0;
+                // RCW Finalizer 보장을 위해 2 회 GC
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
         }
 
         private void cbxKernelRadius_SelectedIndexChanged(object sender, EventArgs e)
@@ -2018,7 +2152,7 @@ namespace SonataSmooth
 
         private void txtExcelTitle_TextChanged(object sender, EventArgs e)
         {
-           UpdateExportExcelButtonState();
+            UpdateExportExcelButtonState();
 
             // 텍스트가 placeholder 가 아니고 비어있지 않으면 우측 정렬
             if (txtDatasetTitle.Text != ExcelTitlePlaceholder)
