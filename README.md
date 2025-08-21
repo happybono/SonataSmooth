@@ -138,6 +138,16 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ### v4.2.7.1
 #### August 19, 2025
 > Minor bugs fixed.
+
+### v4.3.0.0
+#### August 20, 2025
+> Implemented explicit COM object cleanup (`Application`, `Workbook`, `Worksheet`) with `Marshal.ReleaseComObject` and forced GC to prevent memory leaks and lingering background Excel processes.
+> Minor bugs fixed.
+
+### v4.3.1.0
+#### August 21, 2025
+> Unified “filter calculation” logic into a shared method used by both `ExportCsvAsync` and `ExportExcelAsync`.<br><br>
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
