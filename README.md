@@ -141,7 +141,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.3.0.0
 #### August 20, 2025
-> Implemented explicit COM object cleanup (`Application`, `Workbook`, `Worksheet`) with `Marshal.ReleaseComObject` and forced GC to prevent memory leaks and lingering background Excel processes.
+> Implemented explicit COM object cleanup (`Application`, `Workbook`, `Worksheet`) with `Marshal.ReleaseComObject` and forced GC to prevent memory leaks and lingering background Excel processes.<br><br>
 > Minor bugs fixed.
 
 ### v4.3.1.0
