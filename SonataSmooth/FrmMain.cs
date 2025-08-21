@@ -63,6 +63,47 @@ namespace SonataSmooth
             aboutForm = null;
         }
 
+        private bool TryParseInputData(out double[] input, out int n)
+        {
+            n = listBox1.Items.Count;
+            input = new double[n];
+            for (int i = 0; i < n; i++)
+            {
+                var item = listBox1.Items[i];
+                if (item == null)
+                {
+                    MessageBox.Show($"The item at index {i} is null.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+                string s = item.ToString();
+                if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
+                {
+                    MessageBox.Show($"Failed to convert item at index {i} : \"{s}\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool TryParseParameters(out int r, out int polyOrder, out double sigma)
+        {
+            r = 0;
+            polyOrder = 0;
+            sigma = 0;
+            if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
+            {
+                MessageBox.Show($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
+            {
+                MessageBox.Show($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            sigma = (2.0 * r + 1) / 6.0;
+            return true;
+        }
+
         private async void btnCalibrate_Click(object sender, EventArgs e)
         {
             settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
@@ -79,44 +120,11 @@ namespace SonataSmooth
             {
                 btnCalibrate.Enabled = false;
 
-                double[] input;
-                int n;
-                try
-                {
-                    n = listBox1.Items.Count;
-                    input = new double[n];
-                    for (int i = 0; i < n; i++)
-                    {
-                        var item = listBox1.Items[i];
-                        if (item == null)
-                            throw new InvalidOperationException($"The item at index {i} is null.");
-                        string s = item.ToString();
-                        if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
-                            throw new FormatException($"Failed to convert item at index {i} : \"{s}\"");
-                    }
-                }
-                catch (Exception ex) when (ex is FormatException || ex is OverflowException || ex is InvalidOperationException)
-                {
-                    MessageBox.Show($"Data input error : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!TryParseInputData(out double[] input, out int n))
                     return;
-                }
 
-                int r, polyOrder;
-                double sigma;
-                try
-                {
-                    if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
-                        throw new FormatException($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".");
-                    if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
-                        throw new FormatException($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
-                    // sigma 변수를 comboBox 나 textBox 에서 받아도 되지만, 여기서는 width 에 기반해 기본값 계산
-                    sigma = (2.0 * r + 1) / 6.0;
-                }
-                catch (Exception ex) when (ex is FormatException || ex is OverflowException)
-                {
-                    MessageBox.Show($"Parameter error : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!TryParseParameters(out int r, out int polyOrder, out double sigma))
                     return;
-                }
 
                 if (!ValidateSmoothingParameters(listBox1.Items.Count, r, polyOrder))
                     return;
@@ -1712,64 +1720,64 @@ namespace SonataSmooth
             }
         }
 
-        private Task WriteCsvOptimizedAsync(
-            string path,
-            string title,
-            int kernelRadius,
-            int? polyOrder,
-            List<(string Header, double[] Data)> columns,
-            int totalRows,
-            IProgress<int> progress)
-        {
-            return Task.Run(async () =>
-            {
-                var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
-                const int bufSize = 1 << 20;
-                using (var fs = new FileStream(
-                           path,
-                           FileMode.Create,
-                           FileAccess.Write,
-                           FileShare.None,
-                           bufSize,
-                           useAsync: true))
-                using (var sw = new StreamWriter(fs, encoding, bufSize))
-                {
-                    await sw.WriteLineAsync(title);
-                    await sw.WriteLineAsync();
-                    await sw.WriteLineAsync("Smoothing Parameters");
-                    await sw.WriteLineAsync($"Kernel Radius,{kernelRadius}");
-                    await sw.WriteLineAsync($"Polynomial Order,{(polyOrder.HasValue ? polyOrder.Value.ToString() : "N/A")}");
-                    await sw.WriteLineAsync();
+        //private Task WriteCsvOptimizedAsync(
+        //    string path,
+        //    string title,
+        //    int kernelRadius,
+        //    int? polyOrder,
+        //    List<(string Header, double[] Data)> columns,
+        //    int totalRows,
+        //    IProgress<int> progress)
+        //{
+        //    return Task.Run(async () =>
+        //    {
+        //        var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+        //        const int bufSize = 1 << 20;
+        //        using (var fs = new FileStream(
+        //                   path,
+        //                   FileMode.Create,
+        //                   FileAccess.Write,
+        //                   FileShare.None,
+        //                   bufSize,
+        //                   useAsync: true))
+        //        using (var sw = new StreamWriter(fs, encoding, bufSize))
+        //        {
+        //            await sw.WriteLineAsync(title);
+        //            await sw.WriteLineAsync();
+        //            await sw.WriteLineAsync("Smoothing Parameters");
+        //            await sw.WriteLineAsync($"Kernel Radius,{kernelRadius}");
+        //            await sw.WriteLineAsync($"Polynomial Order,{(polyOrder.HasValue ? polyOrder.Value.ToString() : "N/A")}");
+        //            await sw.WriteLineAsync();
 
-                    var headerSb = new StringBuilder(256)
-                        .Append("Index");
-                    foreach (var col in columns)
-                        headerSb.Append(',').Append(col.Header);
-                    await sw.WriteLineAsync(headerSb.ToString());
-                    headerSb.Clear();
+        //            var headerSb = new StringBuilder(256)
+        //                .Append("Index");
+        //            foreach (var col in columns)
+        //                headerSb.Append(',').Append(col.Header);
+        //            await sw.WriteLineAsync(headerSb.ToString());
+        //            headerSb.Clear();
 
-                    var lineSb = new StringBuilder(512);
-                    int reportInterval = Math.Max(1, totalRows / 200);
-                    for (int i = 0; i < totalRows; i++)
-                    {
-                        lineSb.Append(i + 1);
-                        foreach (var col in columns)
-                        {
-                            lineSb.Append(',');
-                            lineSb.Append(col.Data[i].ToString("G17", CultureInfo.InvariantCulture));
-                        }
-                        await sw.WriteLineAsync(lineSb.ToString());
-                        lineSb.Clear();
+        //            var lineSb = new StringBuilder(512);
+        //            int reportInterval = Math.Max(1, totalRows / 200);
+        //            for (int i = 0; i < totalRows; i++)
+        //            {
+        //                lineSb.Append(i + 1);
+        //                foreach (var col in columns)
+        //                {
+        //                    lineSb.Append(',');
+        //                    lineSb.Append(col.Data[i].ToString("G17", CultureInfo.InvariantCulture));
+        //                }
+        //                await sw.WriteLineAsync(lineSb.ToString());
+        //                lineSb.Clear();
 
-                        if (i % reportInterval == 0)
-                            progress.Report((int)(100.0 * i / totalRows));
-                    }
-                    progress.Report(100);
+        //                if (i % reportInterval == 0)
+        //                    progress.Report((int)(100.0 * i / totalRows));
+        //            }
+        //            progress.Report(100);
 
-                    await sw.FlushAsync();
-                }
-            });
-        }
+        //            await sw.FlushAsync();
+        //        }
+        //    });
+        //}
 
         private async void btnExport_Click(object sender, EventArgs e)
         {
