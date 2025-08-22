@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SonataSmooth")]
-[assembly: AssemblyDescription("SonataSmooth applies advanced filtering algorithms such as Savitzky–Golay, Gaussian, and weighted median to smooth noisy numerical data, featuring real-time preview, batch editing, and versatile data import methods.")]
+[assembly: AssemblyDescription("SonataSmooth applies advanced filtering algorithms such as Savitzky-Golay, Gaussian, and weighted median to smooth noisy numerical data, featuring real-time preview, batch editing, and versatile data import methods.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Codies")]
 [assembly: AssemblyProduct("SonataSmooth")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("4.3.1.0")]
-[assembly: AssemblyFileVersion("4.3.1.0")]
+[assembly: AssemblyVersion("4.6.0.0")]
+[assembly: AssemblyFileVersion("4.6.0.0")]
