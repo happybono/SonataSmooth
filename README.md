@@ -152,7 +152,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ### v4.6.0.0
 #### August 22, 2025
 > Refactored UI controls and variable names across the application, applying clear naming conventions (e.g., `lblVersion` → `lblAppVersion`, `listBox1` → `lbInitData`, `ProgressBar1` → `pbModify`).<br><br> 
-> Added mouse Hover/Leave event handlers to multiple forms (e.g., `FrmExportSettings`, `FrmModify`) to provide real-time tooltip descriptions for each option and button.<br><br>
+> Added mouse Hover / Leave event handlers to multiple forms (e.g., `FrmExportSettings`, `FrmModify`) to provide real-time tooltip descriptions for each option and button.<br><br>
 > Improved DPI scaling support : dynamically adjusted ProgressBar and StatusLabel sizes in `FrmModify` using `Graphics.DpiX / Graphics.DpiY`.<br><br>
 > Enhanced status display during multi-item modifications : status bar messages now update dynamically based on the number of selected items.<br><br>
 > Optimized data modification logic : sorted selected item indices and improved UI update performance.<br><br>
