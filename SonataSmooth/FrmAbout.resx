@@ -117,19 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="StatusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="sstripAbout.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="TextBox1.Text" xml:space="preserve">
+  <data name="txtLicenseTerms.Text" xml:space="preserve">
     <value>본 쏘나타스무스 (SonataSmooth) 소프트웨어는 저작권 법과 국제 협약의 보호를 받습니다. 이 프로그램의 전체 또는 일부를 무단으로 복제, 배포하는 행위는 민사 및 형사 법에 의하여 엄격히 규제되어 있으며 기소 사유가 되므로 주의하여 주시기 바랍니다.
 
 This computer program is protected by copyright law and international treaties. Unauthorized reproduction or distribution of this program, or any portion of it, may result in civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="pictureBox1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="picboxAppLogo.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAA1gAAANYCAYAAADZn0yoAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        wQAADsEBuJFr7QAA/7JJREFUeF7s/Qm4bttV1wknNIGSqtISbu65VX5VCgIJTVogJDTSShQtEUURG7BK
+        wAAADsABataJCQAA/7JJREFUeF7s/Qm4bttV1wknNIGSqtISbu65VX5VCgIJTVogJDTSShQtEUURG7BK
         /UQtS0vLQhFJ6EMIBEhCr4h09opWlYIYQggWpZ8hzW1O39x7+rP3OWef3Z2997vm9/z/6/8b73jfxLZK
         pXnf51lZa81mjDHnWid3/PaYc6xnPWvz2/w2v81v89v8Nr/Nb/Pb/Da/zW/z2/w2v81v89v8Nr/Nb/Pb
         /Da/zW/z2/w2v81v89v8Nr/Nb/Pb/Da/zW/z2/w2v81v89v8fun+HnvssWddu3bt2evlm9/mt/ltfpvf

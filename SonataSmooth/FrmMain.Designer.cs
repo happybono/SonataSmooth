@@ -30,91 +30,96 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
-            this.listBox1 = new System.Windows.Forms.ListBox();
-            this.listBox2 = new System.Windows.Forms.ListBox();
+            this.lbInitData = new System.Windows.Forms.ListBox();
+            this.lbRefinedData = new System.Windows.Forms.ListBox();
             this.rbtnAvg = new System.Windows.Forms.RadioButton();
             this.rbtnMed = new System.Windows.Forms.RadioButton();
             this.btnCalibrate = new System.Windows.Forms.Button();
-            this.btnAdd = new System.Windows.Forms.Button();
-            this.txtVariable = new System.Windows.Forms.TextBox();
+            this.btnInitAdd = new System.Windows.Forms.Button();
+            this.txtInitAdd = new System.Windows.Forms.TextBox();
             this.rbtnRect = new System.Windows.Forms.RadioButton();
-            this.btnClear = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnCopy = new System.Windows.Forms.Button();
-            this.btnPaste = new System.Windows.Forms.Button();
-            this.btnSelectAll = new System.Windows.Forms.Button();
-            this.btnSelClear = new System.Windows.Forms.Button();
+            this.btnInitClear = new System.Windows.Forms.Button();
+            this.btnInitDelete = new System.Windows.Forms.Button();
+            this.btnInitCopy = new System.Windows.Forms.Button();
+            this.btnInitPaste = new System.Windows.Forms.Button();
+            this.btnInitSelectAll = new System.Windows.Forms.Button();
+            this.btnInitSelClear = new System.Windows.Forms.Button();
             this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btnSelClear2 = new System.Windows.Forms.Button();
-            this.btnSelectAll2 = new System.Windows.Forms.Button();
-            this.btnCopy2 = new System.Windows.Forms.Button();
-            this.btnClear2 = new System.Windows.Forms.Button();
+            this.lblKernelRadius = new System.Windows.Forms.Label();
+            this.btnRefSelectClr = new System.Windows.Forms.Button();
+            this.btnRefSelectAll = new System.Windows.Forms.Button();
+            this.btnRefCopy = new System.Windows.Forms.Button();
+            this.btnRefClear = new System.Windows.Forms.Button();
             this.lblPolyOrder = new System.Windows.Forms.Label();
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.rbtnSG = new System.Windows.Forms.RadioButton();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnSync1 = new System.Windows.Forms.Button();
-            this.btnEdit = new System.Windows.Forms.Button();
-            this.lblCnt1 = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.btnSync2 = new System.Windows.Forms.Button();
-            this.lblCnt2 = new System.Windows.Forms.Label();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.gbInitData = new System.Windows.Forms.GroupBox();
+            this.btnInitSelectSync = new System.Windows.Forms.Button();
+            this.btnInitEdit = new System.Windows.Forms.Button();
+            this.lblInitCnt = new System.Windows.Forms.Label();
+            this.pbMain = new System.Windows.Forms.ProgressBar();
+            this.gbRefinedData = new System.Windows.Forms.GroupBox();
+            this.btnRefSelectSync = new System.Windows.Forms.Button();
+            this.lblRefCnt = new System.Windows.Forms.Label();
+            this.statStripMain = new System.Windows.Forms.StatusStrip();
+            this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblSeparator1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblKernelRadius = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblKernelRadius = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.slblPolynomialOrder = new System.Windows.Forms.ToolStripStatusLabel();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.tlblSeparator2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblPolyOrder = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblPolyOrder = new System.Windows.Forms.ToolStripStatusLabel();
+            this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
             this.rbtnGauss = new System.Windows.Forms.RadioButton();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.gbSmoothParams = new System.Windows.Forms.GroupBox();
+            this.ttipMain = new System.Windows.Forms.ToolTip(this.components);
             this.btnExportSettings = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.btnInfo = new System.Windows.Forms.Button();
             this.txtDatasetTitle = new System.Windows.Forms.TextBox();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
-            this.groupBox4.SuspendLayout();
-            this.groupBox5.SuspendLayout();
+            this.gbInitData.SuspendLayout();
+            this.gbRefinedData.SuspendLayout();
+            this.statStripMain.SuspendLayout();
+            this.gbSmoothMtd.SuspendLayout();
+            this.gbSmoothParams.SuspendLayout();
             this.SuspendLayout();
             // 
-            // listBox1
+            // lbInitData
             // 
-            this.listBox1.AllowDrop = true;
-            this.listBox1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 17;
-            this.listBox1.Location = new System.Drawing.Point(8, 31);
-            this.listBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBox1.Size = new System.Drawing.Size(294, 514);
-            this.listBox1.TabIndex = 4;
-            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
-            this.listBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.listBox1_DragDrop);
-            this.listBox1.DragEnter += new System.Windows.Forms.DragEventHandler(this.listBox1_DragEnter);
-            this.listBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox1_KeyDown);
+            this.lbInitData.AllowDrop = true;
+            this.lbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbInitData.FormattingEnabled = true;
+            this.lbInitData.ItemHeight = 17;
+            this.lbInitData.Location = new System.Drawing.Point(8, 31);
+            this.lbInitData.Margin = new System.Windows.Forms.Padding(2);
+            this.lbInitData.Name = "lbInitData";
+            this.lbInitData.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbInitData.Size = new System.Drawing.Size(294, 514);
+            this.lbInitData.TabIndex = 4;
+            this.lbInitData.SelectedIndexChanged += new System.EventHandler(this.lbInitData_SelectedIndexChanged);
+            this.lbInitData.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragDrop);
+            this.lbInitData.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragEnter);
+            this.lbInitData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbInitData_KeyDown);
+            this.lbInitData.MouseLeave += new System.EventHandler(this.lbInitData_MouseLeave);
+            this.lbInitData.MouseHover += new System.EventHandler(this.lbInitData_MouseHover);
             // 
-            // listBox2
+            // lbRefinedData
             // 
-            this.listBox2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBox2.FormattingEnabled = true;
-            this.listBox2.ItemHeight = 17;
-            this.listBox2.Location = new System.Drawing.Point(8, 31);
-            this.listBox2.Margin = new System.Windows.Forms.Padding(2);
-            this.listBox2.Name = "listBox2";
-            this.listBox2.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBox2.Size = new System.Drawing.Size(294, 514);
-            this.listBox2.TabIndex = 24;
-            this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
-            this.listBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBox2_KeyDown);
+            this.lbRefinedData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbRefinedData.FormattingEnabled = true;
+            this.lbRefinedData.ItemHeight = 17;
+            this.lbRefinedData.Location = new System.Drawing.Point(8, 31);
+            this.lbRefinedData.Margin = new System.Windows.Forms.Padding(2);
+            this.lbRefinedData.Name = "lbRefinedData";
+            this.lbRefinedData.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbRefinedData.Size = new System.Drawing.Size(294, 514);
+            this.lbRefinedData.TabIndex = 24;
+            this.lbRefinedData.SelectedIndexChanged += new System.EventHandler(this.lbRefinedData_SelectedIndexChanged);
+            this.lbRefinedData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbRefinedData_KeyDown);
+            this.lbRefinedData.MouseLeave += new System.EventHandler(this.lbRefinedData_MouseLeave);
+            this.lbRefinedData.MouseHover += new System.EventHandler(this.lbRefinedData_MouseHover);
             // 
             // rbtnAvg
             // 
@@ -128,6 +133,8 @@
             this.rbtnAvg.Text = "Binomial Averaging";
             this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnAvg.UseVisualStyleBackColor = true;
+            this.rbtnAvg.MouseLeave += new System.EventHandler(this.rbtnAvg_MouseLeave);
+            this.rbtnAvg.MouseHover += new System.EventHandler(this.rbtnAvg_MouseHover);
             // 
             // rbtnMed
             // 
@@ -141,6 +148,8 @@
             this.rbtnMed.Text = "Binomial Median Filtering";
             this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnMed.UseVisualStyleBackColor = true;
+            this.rbtnMed.MouseLeave += new System.EventHandler(this.rbtnMed_MouseLeave);
+            this.rbtnMed.MouseHover += new System.EventHandler(this.rbtnMed_MouseHover);
             // 
             // btnCalibrate
             // 
@@ -151,33 +160,39 @@
             this.btnCalibrate.Size = new System.Drawing.Size(466, 40);
             this.btnCalibrate.TabIndex = 22;
             this.btnCalibrate.Text = "";
-            this.toolTip1.SetToolTip(this.btnCalibrate, "Calibrate");
+            this.ttipMain.SetToolTip(this.btnCalibrate, "Calibrate");
             this.btnCalibrate.UseVisualStyleBackColor = true;
             this.btnCalibrate.Click += new System.EventHandler(this.btnCalibrate_Click);
+            this.btnCalibrate.MouseLeave += new System.EventHandler(this.btnCalibrate_MouseLeave);
+            this.btnCalibrate.MouseHover += new System.EventHandler(this.btnCalibrate_MouseHover);
             // 
-            // btnAdd
+            // btnInitAdd
             // 
-            this.btnAdd.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAdd.Location = new System.Drawing.Point(292, 12);
-            this.btnAdd.Margin = new System.Windows.Forms.Padding(2);
-            this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(67, 30);
-            this.btnAdd.TabIndex = 2;
-            this.btnAdd.Text = "";
-            this.toolTip1.SetToolTip(this.btnAdd, "Add");
-            this.btnAdd.UseVisualStyleBackColor = true;
-            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            this.btnInitAdd.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitAdd.Location = new System.Drawing.Point(292, 12);
+            this.btnInitAdd.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitAdd.Name = "btnInitAdd";
+            this.btnInitAdd.Size = new System.Drawing.Size(67, 30);
+            this.btnInitAdd.TabIndex = 2;
+            this.btnInitAdd.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitAdd, "Add");
+            this.btnInitAdd.UseVisualStyleBackColor = true;
+            this.btnInitAdd.Click += new System.EventHandler(this.btnInitAdd_Click);
+            this.btnInitAdd.MouseLeave += new System.EventHandler(this.btnInitAdd_MouseLeave);
+            this.btnInitAdd.MouseHover += new System.EventHandler(this.btnInitAdd_MouseHover);
             // 
-            // txtVariable
+            // txtInitAdd
             // 
-            this.txtVariable.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtVariable.Location = new System.Drawing.Point(26, 14);
-            this.txtVariable.Margin = new System.Windows.Forms.Padding(2);
-            this.txtVariable.Name = "txtVariable";
-            this.txtVariable.Size = new System.Drawing.Size(262, 25);
-            this.txtVariable.TabIndex = 1;
-            this.txtVariable.TextChanged += new System.EventHandler(this.txtVariable_TextChanged);
-            this.txtVariable.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtVariable_KeyDown);
+            this.txtInitAdd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtInitAdd.Location = new System.Drawing.Point(26, 14);
+            this.txtInitAdd.Margin = new System.Windows.Forms.Padding(2);
+            this.txtInitAdd.Name = "txtInitAdd";
+            this.txtInitAdd.Size = new System.Drawing.Size(262, 25);
+            this.txtInitAdd.TabIndex = 1;
+            this.txtInitAdd.TextChanged += new System.EventHandler(this.txtInitAdd_TextChanged);
+            this.txtInitAdd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtInitAdd_KeyDown);
+            this.txtInitAdd.MouseLeave += new System.EventHandler(this.txtInitAdd_MouseLeave);
+            this.txtInitAdd.MouseHover += new System.EventHandler(this.txtInitAdd_MouseHover);
             // 
             // rbtnRect
             // 
@@ -193,84 +208,98 @@
             this.rbtnRect.Text = "Rectangular Averaging";
             this.rbtnRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnRect.UseVisualStyleBackColor = true;
+            this.rbtnRect.MouseLeave += new System.EventHandler(this.rbtnRect_MouseLeave);
+            this.rbtnRect.MouseHover += new System.EventHandler(this.rbtnRect_MouseHover);
             // 
-            // btnClear
+            // btnInitClear
             // 
-            this.btnClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClear.Location = new System.Drawing.Point(306, 31);
-            this.btnClear.Margin = new System.Windows.Forms.Padding(2);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(30, 30);
-            this.btnClear.TabIndex = 5;
-            this.btnClear.Text = "";
-            this.toolTip1.SetToolTip(this.btnClear, "Clear");
-            this.btnClear.UseVisualStyleBackColor = true;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            this.btnInitClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitClear.Location = new System.Drawing.Point(306, 31);
+            this.btnInitClear.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitClear.Name = "btnInitClear";
+            this.btnInitClear.Size = new System.Drawing.Size(30, 30);
+            this.btnInitClear.TabIndex = 5;
+            this.btnInitClear.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitClear, "Clear");
+            this.btnInitClear.UseVisualStyleBackColor = true;
+            this.btnInitClear.Click += new System.EventHandler(this.btnInitClear_Click);
+            this.btnInitClear.MouseLeave += new System.EventHandler(this.btnInitClear_MouseLeave);
+            this.btnInitClear.MouseHover += new System.EventHandler(this.btnInitClear_MouseHover);
             // 
-            // btnDelete
+            // btnInitDelete
             // 
-            this.btnDelete.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDelete.Location = new System.Drawing.Point(306, 167);
-            this.btnDelete.Margin = new System.Windows.Forms.Padding(2);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(30, 30);
-            this.btnDelete.TabIndex = 9;
-            this.btnDelete.Text = "";
-            this.toolTip1.SetToolTip(this.btnDelete, "Delete");
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            this.btnInitDelete.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitDelete.Location = new System.Drawing.Point(306, 167);
+            this.btnInitDelete.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitDelete.Name = "btnInitDelete";
+            this.btnInitDelete.Size = new System.Drawing.Size(30, 30);
+            this.btnInitDelete.TabIndex = 9;
+            this.btnInitDelete.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitDelete, "Delete");
+            this.btnInitDelete.UseVisualStyleBackColor = true;
+            this.btnInitDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            this.btnInitDelete.MouseLeave += new System.EventHandler(this.btnInitDelete_MouseLeave);
+            this.btnInitDelete.MouseHover += new System.EventHandler(this.btnInitDelete_MouseHover);
             // 
-            // btnCopy
+            // btnInitCopy
             // 
-            this.btnCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopy.Location = new System.Drawing.Point(306, 65);
-            this.btnCopy.Margin = new System.Windows.Forms.Padding(2);
-            this.btnCopy.Name = "btnCopy";
-            this.btnCopy.Size = new System.Drawing.Size(30, 30);
-            this.btnCopy.TabIndex = 6;
-            this.btnCopy.Text = "";
-            this.toolTip1.SetToolTip(this.btnCopy, "Copy");
-            this.btnCopy.UseVisualStyleBackColor = true;
-            this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
+            this.btnInitCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitCopy.Location = new System.Drawing.Point(306, 65);
+            this.btnInitCopy.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitCopy.Name = "btnInitCopy";
+            this.btnInitCopy.Size = new System.Drawing.Size(30, 30);
+            this.btnInitCopy.TabIndex = 6;
+            this.btnInitCopy.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitCopy, "Copy");
+            this.btnInitCopy.UseVisualStyleBackColor = true;
+            this.btnInitCopy.Click += new System.EventHandler(this.btnInitCopy_Click);
+            this.btnInitCopy.MouseLeave += new System.EventHandler(this.btnInitCopy_MouseLeave);
+            this.btnInitCopy.MouseHover += new System.EventHandler(this.btnInitCopy_MouseHover);
             // 
-            // btnPaste
+            // btnInitPaste
             // 
-            this.btnPaste.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPaste.Location = new System.Drawing.Point(306, 99);
-            this.btnPaste.Margin = new System.Windows.Forms.Padding(2);
-            this.btnPaste.Name = "btnPaste";
-            this.btnPaste.Size = new System.Drawing.Size(30, 30);
-            this.btnPaste.TabIndex = 7;
-            this.btnPaste.Text = "";
-            this.toolTip1.SetToolTip(this.btnPaste, "Paste");
-            this.btnPaste.UseVisualStyleBackColor = true;
-            this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
+            this.btnInitPaste.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitPaste.Location = new System.Drawing.Point(306, 99);
+            this.btnInitPaste.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitPaste.Name = "btnInitPaste";
+            this.btnInitPaste.Size = new System.Drawing.Size(30, 30);
+            this.btnInitPaste.TabIndex = 7;
+            this.btnInitPaste.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitPaste, "Paste");
+            this.btnInitPaste.UseVisualStyleBackColor = true;
+            this.btnInitPaste.Click += new System.EventHandler(this.btnInitPaste_Click);
+            this.btnInitPaste.MouseLeave += new System.EventHandler(this.btnInitPaste_MouseLeave);
+            this.btnInitPaste.MouseHover += new System.EventHandler(this.btnInitPaste_MouseHover);
             // 
-            // btnSelectAll
+            // btnInitSelectAll
             // 
-            this.btnSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectAll.Location = new System.Drawing.Point(306, 201);
-            this.btnSelectAll.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSelectAll.Name = "btnSelectAll";
-            this.btnSelectAll.Size = new System.Drawing.Size(30, 30);
-            this.btnSelectAll.TabIndex = 10;
-            this.btnSelectAll.Text = "";
-            this.toolTip1.SetToolTip(this.btnSelectAll, "Select All");
-            this.btnSelectAll.UseVisualStyleBackColor = true;
-            this.btnSelectAll.Click += new System.EventHandler(this.btnSelectAll_Click);
+            this.btnInitSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitSelectAll.Location = new System.Drawing.Point(306, 201);
+            this.btnInitSelectAll.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitSelectAll.Name = "btnInitSelectAll";
+            this.btnInitSelectAll.Size = new System.Drawing.Size(30, 30);
+            this.btnInitSelectAll.TabIndex = 10;
+            this.btnInitSelectAll.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitSelectAll, "Select All");
+            this.btnInitSelectAll.UseVisualStyleBackColor = true;
+            this.btnInitSelectAll.Click += new System.EventHandler(this.btnInitSelectAll_Click);
+            this.btnInitSelectAll.MouseLeave += new System.EventHandler(this.btnInitSelectAll_MouseLeave);
+            this.btnInitSelectAll.MouseHover += new System.EventHandler(this.btnInitSelectAll_MouseHover);
             // 
-            // btnSelClear
+            // btnInitSelClear
             // 
-            this.btnSelClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelClear.Location = new System.Drawing.Point(306, 235);
-            this.btnSelClear.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSelClear.Name = "btnSelClear";
-            this.btnSelClear.Size = new System.Drawing.Size(30, 30);
-            this.btnSelClear.TabIndex = 11;
-            this.btnSelClear.Text = "";
-            this.toolTip1.SetToolTip(this.btnSelClear, "Deselect All");
-            this.btnSelClear.UseVisualStyleBackColor = true;
-            this.btnSelClear.Click += new System.EventHandler(this.btnSelClear_Click);
+            this.btnInitSelClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitSelClear.Location = new System.Drawing.Point(306, 235);
+            this.btnInitSelClear.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitSelClear.Name = "btnInitSelClear";
+            this.btnInitSelClear.Size = new System.Drawing.Size(30, 30);
+            this.btnInitSelClear.TabIndex = 11;
+            this.btnInitSelClear.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitSelClear, "Deselect All");
+            this.btnInitSelClear.UseVisualStyleBackColor = true;
+            this.btnInitSelClear.Click += new System.EventHandler(this.btnInitSelClear_Click);
+            this.btnInitSelClear.MouseLeave += new System.EventHandler(this.btnInitSelClear_MouseLeave);
+            this.btnInitSelClear.MouseHover += new System.EventHandler(this.btnInitSelClear_MouseHover);
             // 
             // cbxKernelRadius
             // 
@@ -300,69 +329,81 @@
             this.cbxKernelRadius.Size = new System.Drawing.Size(80, 25);
             this.cbxKernelRadius.TabIndex = 20;
             this.cbxKernelRadius.SelectedIndexChanged += new System.EventHandler(this.cbxKernelRadius_SelectedIndexChanged);
+            this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
+            this.cbxKernelRadius.MouseHover += new System.EventHandler(this.cbxKernelRadius_MouseHover);
             // 
-            // label1
+            // lblKernelRadius
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(28, 45);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(201, 19);
-            this.label1.TabIndex = 17;
-            this.label1.Text = "Noise Reduction Kernel Radius : ";
+            this.lblKernelRadius.AutoSize = true;
+            this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKernelRadius.Location = new System.Drawing.Point(28, 45);
+            this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblKernelRadius.Name = "lblKernelRadius";
+            this.lblKernelRadius.Size = new System.Drawing.Size(201, 19);
+            this.lblKernelRadius.TabIndex = 17;
+            this.lblKernelRadius.Text = "Noise Reduction Kernel Radius : ";
+            this.lblKernelRadius.MouseLeave += new System.EventHandler(this.lblKernelRadius_MouseLeave);
+            this.lblKernelRadius.MouseHover += new System.EventHandler(this.lblKernelRadius_MouseHover);
             // 
-            // btnSelClear2
+            // btnRefSelectClr
             // 
-            this.btnSelClear2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelClear2.Location = new System.Drawing.Point(306, 133);
-            this.btnSelClear2.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSelClear2.Name = "btnSelClear2";
-            this.btnSelClear2.Size = new System.Drawing.Size(30, 30);
-            this.btnSelClear2.TabIndex = 28;
-            this.btnSelClear2.Text = "";
-            this.toolTip1.SetToolTip(this.btnSelClear2, "Deselect All");
-            this.btnSelClear2.UseVisualStyleBackColor = true;
-            this.btnSelClear2.Click += new System.EventHandler(this.btnSelectClear2_Click);
+            this.btnRefSelectClr.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRefSelectClr.Location = new System.Drawing.Point(306, 133);
+            this.btnRefSelectClr.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRefSelectClr.Name = "btnRefSelectClr";
+            this.btnRefSelectClr.Size = new System.Drawing.Size(30, 30);
+            this.btnRefSelectClr.TabIndex = 28;
+            this.btnRefSelectClr.Text = "";
+            this.ttipMain.SetToolTip(this.btnRefSelectClr, "Deselect All");
+            this.btnRefSelectClr.UseVisualStyleBackColor = true;
+            this.btnRefSelectClr.Click += new System.EventHandler(this.btnRefSelectClr_Click);
+            this.btnRefSelectClr.MouseLeave += new System.EventHandler(this.btnRefSelectClr_MouseLeave);
+            this.btnRefSelectClr.MouseHover += new System.EventHandler(this.btnRefSelectClr_MouseHover);
             // 
-            // btnSelectAll2
+            // btnRefSelectAll
             // 
-            this.btnSelectAll2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectAll2.Location = new System.Drawing.Point(306, 99);
-            this.btnSelectAll2.Margin = new System.Windows.Forms.Padding(2);
-            this.btnSelectAll2.Name = "btnSelectAll2";
-            this.btnSelectAll2.Size = new System.Drawing.Size(30, 30);
-            this.btnSelectAll2.TabIndex = 27;
-            this.btnSelectAll2.Text = "";
-            this.toolTip1.SetToolTip(this.btnSelectAll2, "Select All");
-            this.btnSelectAll2.UseVisualStyleBackColor = true;
-            this.btnSelectAll2.Click += new System.EventHandler(this.btnSelectAll2_Click);
+            this.btnRefSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRefSelectAll.Location = new System.Drawing.Point(306, 99);
+            this.btnRefSelectAll.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRefSelectAll.Name = "btnRefSelectAll";
+            this.btnRefSelectAll.Size = new System.Drawing.Size(30, 30);
+            this.btnRefSelectAll.TabIndex = 27;
+            this.btnRefSelectAll.Text = "";
+            this.ttipMain.SetToolTip(this.btnRefSelectAll, "Select All");
+            this.btnRefSelectAll.UseVisualStyleBackColor = true;
+            this.btnRefSelectAll.Click += new System.EventHandler(this.btnRefSelectAll_Click);
+            this.btnRefSelectAll.MouseLeave += new System.EventHandler(this.btnRefSelectAll_MouseLeave);
+            this.btnRefSelectAll.MouseHover += new System.EventHandler(this.btnRefSelectAll_MouseHover);
             // 
-            // btnCopy2
+            // btnRefCopy
             // 
-            this.btnCopy2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopy2.Location = new System.Drawing.Point(306, 65);
-            this.btnCopy2.Margin = new System.Windows.Forms.Padding(2);
-            this.btnCopy2.Name = "btnCopy2";
-            this.btnCopy2.Size = new System.Drawing.Size(30, 30);
-            this.btnCopy2.TabIndex = 26;
-            this.btnCopy2.Text = "";
-            this.toolTip1.SetToolTip(this.btnCopy2, "Copy");
-            this.btnCopy2.UseVisualStyleBackColor = true;
-            this.btnCopy2.Click += new System.EventHandler(this.btnCopy2_Click);
+            this.btnRefCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRefCopy.Location = new System.Drawing.Point(306, 65);
+            this.btnRefCopy.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRefCopy.Name = "btnRefCopy";
+            this.btnRefCopy.Size = new System.Drawing.Size(30, 30);
+            this.btnRefCopy.TabIndex = 26;
+            this.btnRefCopy.Text = "";
+            this.ttipMain.SetToolTip(this.btnRefCopy, "Copy");
+            this.btnRefCopy.UseVisualStyleBackColor = true;
+            this.btnRefCopy.Click += new System.EventHandler(this.btnRefCopy_Click);
+            this.btnRefCopy.MouseLeave += new System.EventHandler(this.btnRefCopy_MouseLeave);
+            this.btnRefCopy.MouseHover += new System.EventHandler(this.btnRefCopy_MouseHover);
             // 
-            // btnClear2
+            // btnRefClear
             // 
-            this.btnClear2.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClear2.Location = new System.Drawing.Point(306, 31);
-            this.btnClear2.Margin = new System.Windows.Forms.Padding(2);
-            this.btnClear2.Name = "btnClear2";
-            this.btnClear2.Size = new System.Drawing.Size(30, 30);
-            this.btnClear2.TabIndex = 25;
-            this.btnClear2.Text = "";
-            this.toolTip1.SetToolTip(this.btnClear2, "Clear");
-            this.btnClear2.UseVisualStyleBackColor = true;
-            this.btnClear2.Click += new System.EventHandler(this.btnClear2_Click);
+            this.btnRefClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRefClear.Location = new System.Drawing.Point(306, 31);
+            this.btnRefClear.Margin = new System.Windows.Forms.Padding(2);
+            this.btnRefClear.Name = "btnRefClear";
+            this.btnRefClear.Size = new System.Drawing.Size(30, 30);
+            this.btnRefClear.TabIndex = 25;
+            this.btnRefClear.Text = "";
+            this.ttipMain.SetToolTip(this.btnRefClear, "Clear");
+            this.btnRefClear.UseVisualStyleBackColor = true;
+            this.btnRefClear.Click += new System.EventHandler(this.btnRefClear_Click);
+            this.btnRefClear.MouseLeave += new System.EventHandler(this.btnRefClear_MouseLeave);
+            this.btnRefClear.MouseHover += new System.EventHandler(this.btnRefClear_MouseHover);
             // 
             // lblPolyOrder
             // 
@@ -374,6 +415,8 @@
             this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
             this.lblPolyOrder.TabIndex = 20;
             this.lblPolyOrder.Text = "Polynomial Order :";
+            this.lblPolyOrder.MouseLeave += new System.EventHandler(this.lblPolyOrder_MouseLeave);
+            this.lblPolyOrder.MouseHover += new System.EventHandler(this.lblPolyOrder_MouseHover);
             // 
             // cbxPolyOrder
             // 
@@ -396,6 +439,8 @@
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 21;
             this.cbxPolyOrder.SelectedIndexChanged += new System.EventHandler(this.cbxPolyOrder_SelectedIndexChanged);
+            this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
+            this.cbxPolyOrder.MouseHover += new System.EventHandler(this.cbxPolyOrder_MouseHover);
             // 
             // rbtnSG
             // 
@@ -410,213 +455,233 @@
             this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnSG.UseVisualStyleBackColor = true;
             this.rbtnSG.CheckedChanged += new System.EventHandler(this.rbtnSG_CheckedChanged);
+            this.rbtnSG.MouseLeave += new System.EventHandler(this.rbtnSG_MouseLeave);
+            this.rbtnSG.MouseHover += new System.EventHandler(this.rbtnSG_MouseHover);
             // 
-            // groupBox2
+            // gbInitData
             // 
-            this.groupBox2.Controls.Add(this.btnSync1);
-            this.groupBox2.Controls.Add(this.btnEdit);
-            this.groupBox2.Controls.Add(this.listBox1);
-            this.groupBox2.Controls.Add(this.lblCnt1);
-            this.groupBox2.Controls.Add(this.btnClear);
-            this.groupBox2.Controls.Add(this.btnDelete);
-            this.groupBox2.Controls.Add(this.btnCopy);
-            this.groupBox2.Controls.Add(this.btnPaste);
-            this.groupBox2.Controls.Add(this.btnSelClear);
-            this.groupBox2.Controls.Add(this.btnSelectAll);
-            this.groupBox2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(15, 52);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(344, 586);
-            this.groupBox2.TabIndex = 3;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Initial Dataset";
+            this.gbInitData.Controls.Add(this.btnInitSelectSync);
+            this.gbInitData.Controls.Add(this.btnInitEdit);
+            this.gbInitData.Controls.Add(this.lbInitData);
+            this.gbInitData.Controls.Add(this.lblInitCnt);
+            this.gbInitData.Controls.Add(this.btnInitClear);
+            this.gbInitData.Controls.Add(this.btnInitDelete);
+            this.gbInitData.Controls.Add(this.btnInitCopy);
+            this.gbInitData.Controls.Add(this.btnInitPaste);
+            this.gbInitData.Controls.Add(this.btnInitSelClear);
+            this.gbInitData.Controls.Add(this.btnInitSelectAll);
+            this.gbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbInitData.Location = new System.Drawing.Point(15, 52);
+            this.gbInitData.Name = "gbInitData";
+            this.gbInitData.Size = new System.Drawing.Size(344, 586);
+            this.gbInitData.TabIndex = 3;
+            this.gbInitData.TabStop = false;
+            this.gbInitData.Text = "Initial Dataset";
             // 
-            // btnSync1
+            // btnInitSelectSync
             // 
-            this.btnSync1.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
-            this.btnSync1.Location = new System.Drawing.Point(306, 269);
-            this.btnSync1.Name = "btnSync1";
-            this.btnSync1.Size = new System.Drawing.Size(30, 30);
-            this.btnSync1.TabIndex = 12;
-            this.btnSync1.Text = "";
-            this.toolTip1.SetToolTip(this.btnSync1, "Match Selection\r\n( ▶ Refined Dataset )");
-            this.btnSync1.UseVisualStyleBackColor = true;
-            this.btnSync1.Click += new System.EventHandler(this.btnSync1_Click);
+            this.btnInitSelectSync.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
+            this.btnInitSelectSync.Location = new System.Drawing.Point(306, 269);
+            this.btnInitSelectSync.Name = "btnInitSelectSync";
+            this.btnInitSelectSync.Size = new System.Drawing.Size(30, 30);
+            this.btnInitSelectSync.TabIndex = 12;
+            this.btnInitSelectSync.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitSelectSync, "Match Selection\r\n( ▶ Refined Dataset )");
+            this.btnInitSelectSync.UseVisualStyleBackColor = true;
+            this.btnInitSelectSync.Click += new System.EventHandler(this.btnInitSelectSync_Click);
+            this.btnInitSelectSync.MouseLeave += new System.EventHandler(this.btnInitSelectSync_MouseLeave);
+            this.btnInitSelectSync.MouseHover += new System.EventHandler(this.btnInitSelectSync_MouseHover);
             // 
-            // btnEdit
+            // btnInitEdit
             // 
-            this.btnEdit.Enabled = false;
-            this.btnEdit.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEdit.Location = new System.Drawing.Point(306, 133);
-            this.btnEdit.Margin = new System.Windows.Forms.Padding(2);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(30, 30);
-            this.btnEdit.TabIndex = 8;
-            this.btnEdit.Text = "";
-            this.toolTip1.SetToolTip(this.btnEdit, "Edit");
-            this.btnEdit.UseVisualStyleBackColor = true;
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnInitEdit.Enabled = false;
+            this.btnInitEdit.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitEdit.Location = new System.Drawing.Point(306, 133);
+            this.btnInitEdit.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitEdit.Name = "btnInitEdit";
+            this.btnInitEdit.Size = new System.Drawing.Size(30, 30);
+            this.btnInitEdit.TabIndex = 8;
+            this.btnInitEdit.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitEdit, "Edit");
+            this.btnInitEdit.UseVisualStyleBackColor = true;
+            this.btnInitEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnInitEdit.MouseLeave += new System.EventHandler(this.btnInitEdit_MouseLeave);
+            this.btnInitEdit.MouseHover += new System.EventHandler(this.btnInitEdit_MouseHover);
             // 
-            // lblCnt1
+            // lblInitCnt
             // 
-            this.lblCnt1.AutoSize = true;
-            this.lblCnt1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblCnt1.Location = new System.Drawing.Point(7, 555);
-            this.lblCnt1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblCnt1.Name = "lblCnt1";
-            this.lblCnt1.Size = new System.Drawing.Size(65, 19);
-            this.lblCnt1.TabIndex = 7;
-            this.lblCnt1.Text = "Count : 0";
+            this.lblInitCnt.AutoSize = true;
+            this.lblInitCnt.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.lblInitCnt.Location = new System.Drawing.Point(7, 555);
+            this.lblInitCnt.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblInitCnt.Name = "lblInitCnt";
+            this.lblInitCnt.Size = new System.Drawing.Size(65, 19);
+            this.lblInitCnt.TabIndex = 7;
+            this.lblInitCnt.Text = "Count : 0";
             // 
-            // progressBar1
+            // pbMain
             // 
-            this.progressBar1.Location = new System.Drawing.Point(0, 832);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(734, 5);
-            this.progressBar1.TabIndex = 16;
+            this.pbMain.Location = new System.Drawing.Point(0, 832);
+            this.pbMain.Name = "pbMain";
+            this.pbMain.Size = new System.Drawing.Size(734, 5);
+            this.pbMain.TabIndex = 16;
             // 
-            // groupBox3
+            // gbRefinedData
             // 
-            this.groupBox3.Controls.Add(this.btnSync2);
-            this.groupBox3.Controls.Add(this.listBox2);
-            this.groupBox3.Controls.Add(this.lblCnt2);
-            this.groupBox3.Controls.Add(this.btnClear2);
-            this.groupBox3.Controls.Add(this.btnSelClear2);
-            this.groupBox3.Controls.Add(this.btnCopy2);
-            this.groupBox3.Controls.Add(this.btnSelectAll2);
-            this.groupBox3.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(376, 52);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(344, 586);
-            this.groupBox3.TabIndex = 23;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Refined Dataset";
+            this.gbRefinedData.Controls.Add(this.btnRefSelectSync);
+            this.gbRefinedData.Controls.Add(this.lbRefinedData);
+            this.gbRefinedData.Controls.Add(this.lblRefCnt);
+            this.gbRefinedData.Controls.Add(this.btnRefClear);
+            this.gbRefinedData.Controls.Add(this.btnRefSelectClr);
+            this.gbRefinedData.Controls.Add(this.btnRefCopy);
+            this.gbRefinedData.Controls.Add(this.btnRefSelectAll);
+            this.gbRefinedData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbRefinedData.Location = new System.Drawing.Point(376, 52);
+            this.gbRefinedData.Name = "gbRefinedData";
+            this.gbRefinedData.Size = new System.Drawing.Size(344, 586);
+            this.gbRefinedData.TabIndex = 23;
+            this.gbRefinedData.TabStop = false;
+            this.gbRefinedData.Text = "Refined Dataset";
             // 
-            // btnSync2
+            // btnRefSelectSync
             // 
-            this.btnSync2.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
-            this.btnSync2.Location = new System.Drawing.Point(306, 167);
-            this.btnSync2.Name = "btnSync2";
-            this.btnSync2.Size = new System.Drawing.Size(30, 30);
-            this.btnSync2.TabIndex = 29;
-            this.btnSync2.Text = "";
-            this.toolTip1.SetToolTip(this.btnSync2, "Match Selection \r\n( ◀ Initial Dataset )");
-            this.btnSync2.UseVisualStyleBackColor = true;
-            this.btnSync2.Click += new System.EventHandler(this.btnSync2_Click);
+            this.btnRefSelectSync.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
+            this.btnRefSelectSync.Location = new System.Drawing.Point(306, 167);
+            this.btnRefSelectSync.Name = "btnRefSelectSync";
+            this.btnRefSelectSync.Size = new System.Drawing.Size(30, 30);
+            this.btnRefSelectSync.TabIndex = 29;
+            this.btnRefSelectSync.Text = "";
+            this.ttipMain.SetToolTip(this.btnRefSelectSync, "Match Selection \r\n( ◀ Initial Dataset )");
+            this.btnRefSelectSync.UseVisualStyleBackColor = true;
+            this.btnRefSelectSync.Click += new System.EventHandler(this.btnRefSelectSync_Click);
+            this.btnRefSelectSync.MouseLeave += new System.EventHandler(this.btnRefSelectSync_MouseLeave);
+            this.btnRefSelectSync.MouseHover += new System.EventHandler(this.btnRefSelectSync_MouseHover);
             // 
-            // lblCnt2
+            // lblRefCnt
             // 
-            this.lblCnt2.AutoSize = true;
-            this.lblCnt2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblCnt2.Location = new System.Drawing.Point(7, 555);
-            this.lblCnt2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblCnt2.Name = "lblCnt2";
-            this.lblCnt2.Size = new System.Drawing.Size(65, 19);
-            this.lblCnt2.TabIndex = 8;
-            this.lblCnt2.Text = "Count : 0";
+            this.lblRefCnt.AutoSize = true;
+            this.lblRefCnt.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.lblRefCnt.Location = new System.Drawing.Point(7, 555);
+            this.lblRefCnt.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblRefCnt.Name = "lblRefCnt";
+            this.lblRefCnt.Size = new System.Drawing.Size(65, 19);
+            this.lblRefCnt.TabIndex = 8;
+            this.lblRefCnt.Text = "Count : 0";
             // 
-            // statusStrip1
+            // statStripMain
             // 
-            this.statusStrip1.AutoSize = false;
-            this.statusStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(32, 32);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
+            this.statStripMain.AutoSize = false;
+            this.statStripMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
+            this.statStripMain.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.statStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.slblDesc,
+            this.tlblCalibratedType,
             this.slblCalibratedType,
-            this.toolStripSeparator1,
-            this.toolStripStatusLabel3,
+            this.tlblSeparator1,
+            this.tlblKernelRadius,
             this.slblKernelRadius,
-            this.toolStripSeparator2,
-            this.toolStripStatusLabel5,
-            this.slblPolynomialOrder});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 837);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(734, 24);
-            this.statusStrip1.SizingGrip = false;
-            this.statusStrip1.TabIndex = 27;
-            this.statusStrip1.Text = "statusStrip1";
+            this.tlblSeparator2,
+            this.tlblPolyOrder,
+            this.slblPolyOrder});
+            this.statStripMain.Location = new System.Drawing.Point(0, 837);
+            this.statStripMain.Name = "statStripMain";
+            this.statStripMain.Size = new System.Drawing.Size(734, 24);
+            this.statStripMain.SizingGrip = false;
+            this.statStripMain.TabIndex = 27;
+            this.statStripMain.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // slblDesc
             // 
-            this.toolStripStatusLabel1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripStatusLabel1.ForeColor = System.Drawing.Color.White;
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(114, 19);
-            this.toolStripStatusLabel1.Text = "Applied Calibration :";
+            this.slblDesc.AutoSize = false;
+            this.slblDesc.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblDesc.ForeColor = System.Drawing.Color.White;
+            this.slblDesc.Name = "slblDesc";
+            this.slblDesc.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
+            this.slblDesc.Size = new System.Drawing.Size(731, 19);
+            this.slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method , set " +
+    "Smoothing Parameters.";
+            // 
+            // tlblCalibratedType
+            // 
+            this.tlblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblCalibratedType.ForeColor = System.Drawing.Color.White;
+            this.tlblCalibratedType.Name = "tlblCalibratedType";
+            this.tlblCalibratedType.Size = new System.Drawing.Size(114, 19);
+            this.tlblCalibratedType.Text = "Applied Calibration :";
             // 
             // slblCalibratedType
             // 
             this.slblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblCalibratedType.ForeColor = System.Drawing.Color.White;
             this.slblCalibratedType.Name = "slblCalibratedType";
-            this.slblCalibratedType.Size = new System.Drawing.Size(17, 19);
+            this.slblCalibratedType.Size = new System.Drawing.Size(17, 16);
             this.slblCalibratedType.Text = "--";
             // 
-            // toolStripSeparator1
+            // tlblSeparator1
             // 
-            this.toolStripSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripSeparator1.ForeColor = System.Drawing.Color.White;
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(19, 19);
-            this.toolStripSeparator1.Text = "｜";
+            this.tlblSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator1.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator1.Name = "tlblSeparator1";
+            this.tlblSeparator1.Size = new System.Drawing.Size(19, 16);
+            this.tlblSeparator1.Text = "｜";
             // 
-            // toolStripStatusLabel3
+            // tlblKernelRadius
             // 
-            this.toolStripStatusLabel3.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripStatusLabel3.ForeColor = System.Drawing.Color.White;
-            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(176, 19);
-            this.toolStripStatusLabel3.Text = "Noise Reduction Kernel Radius : ";
+            this.tlblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblKernelRadius.ForeColor = System.Drawing.Color.White;
+            this.tlblKernelRadius.Name = "tlblKernelRadius";
+            this.tlblKernelRadius.Size = new System.Drawing.Size(176, 16);
+            this.tlblKernelRadius.Text = "Noise Reduction Kernel Radius : ";
             // 
             // slblKernelRadius
             // 
             this.slblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblKernelRadius.ForeColor = System.Drawing.Color.White;
             this.slblKernelRadius.Name = "slblKernelRadius";
-            this.slblKernelRadius.Size = new System.Drawing.Size(17, 19);
+            this.slblKernelRadius.Size = new System.Drawing.Size(17, 16);
             this.slblKernelRadius.Text = "--";
             // 
-            // toolStripSeparator2
+            // tlblSeparator2
             // 
-            this.toolStripSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripSeparator2.ForeColor = System.Drawing.Color.White;
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(19, 19);
-            this.toolStripSeparator2.Text = "｜";
-            this.toolStripSeparator2.Visible = false;
+            this.tlblSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator2.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator2.Name = "tlblSeparator2";
+            this.tlblSeparator2.Size = new System.Drawing.Size(19, 16);
+            this.tlblSeparator2.Text = "｜";
+            this.tlblSeparator2.Visible = false;
             // 
-            // toolStripStatusLabel5
+            // tlblPolyOrder
             // 
-            this.toolStripStatusLabel5.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.toolStripStatusLabel5.ForeColor = System.Drawing.Color.White;
-            this.toolStripStatusLabel5.Name = "toolStripStatusLabel5";
-            this.toolStripStatusLabel5.Size = new System.Drawing.Size(107, 19);
-            this.toolStripStatusLabel5.Text = "Polynomial Order : ";
-            this.toolStripStatusLabel5.Visible = false;
+            this.tlblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblPolyOrder.ForeColor = System.Drawing.Color.White;
+            this.tlblPolyOrder.Name = "tlblPolyOrder";
+            this.tlblPolyOrder.Size = new System.Drawing.Size(107, 16);
+            this.tlblPolyOrder.Text = "Polynomial Order : ";
+            this.tlblPolyOrder.Visible = false;
             // 
-            // slblPolynomialOrder
+            // slblPolyOrder
             // 
-            this.slblPolynomialOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblPolynomialOrder.ForeColor = System.Drawing.Color.White;
-            this.slblPolynomialOrder.Name = "slblPolynomialOrder";
-            this.slblPolynomialOrder.Size = new System.Drawing.Size(17, 19);
-            this.slblPolynomialOrder.Text = "--";
-            this.slblPolynomialOrder.Visible = false;
+            this.slblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblPolyOrder.ForeColor = System.Drawing.Color.White;
+            this.slblPolyOrder.Name = "slblPolyOrder";
+            this.slblPolyOrder.Size = new System.Drawing.Size(17, 16);
+            this.slblPolyOrder.Text = "--";
+            this.slblPolyOrder.Visible = false;
             // 
-            // groupBox4
+            // gbSmoothMtd
             // 
-            this.groupBox4.Controls.Add(this.rbtnGauss);
-            this.groupBox4.Controls.Add(this.rbtnSG);
-            this.groupBox4.Controls.Add(this.rbtnRect);
-            this.groupBox4.Controls.Add(this.rbtnAvg);
-            this.groupBox4.Controls.Add(this.rbtnMed);
-            this.groupBox4.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
-            this.groupBox4.Location = new System.Drawing.Point(15, 644);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(344, 130);
-            this.groupBox4.TabIndex = 13;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Calibration Method";
+            this.gbSmoothMtd.Controls.Add(this.rbtnGauss);
+            this.gbSmoothMtd.Controls.Add(this.rbtnSG);
+            this.gbSmoothMtd.Controls.Add(this.rbtnRect);
+            this.gbSmoothMtd.Controls.Add(this.rbtnAvg);
+            this.gbSmoothMtd.Controls.Add(this.rbtnMed);
+            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbSmoothMtd.Location = new System.Drawing.Point(15, 644);
+            this.gbSmoothMtd.Name = "gbSmoothMtd";
+            this.gbSmoothMtd.Size = new System.Drawing.Size(344, 130);
+            this.gbSmoothMtd.TabIndex = 13;
+            this.gbSmoothMtd.TabStop = false;
+            this.gbSmoothMtd.Text = "Smoothing Method";
             // 
             // rbtnGauss
             // 
@@ -630,20 +695,22 @@
             this.rbtnGauss.Text = "Gaussian Filtering";
             this.rbtnGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnGauss.UseVisualStyleBackColor = true;
+            this.rbtnGauss.MouseLeave += new System.EventHandler(this.rbtnGauss_MouseLeave);
+            this.rbtnGauss.MouseHover += new System.EventHandler(this.rbtnGauss_MouseHover);
             // 
-            // groupBox5
+            // gbSmoothParams
             // 
-            this.groupBox5.Controls.Add(this.lblPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxKernelRadius);
-            this.groupBox5.Controls.Add(this.label1);
-            this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox5.Location = new System.Drawing.Point(376, 644);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(344, 130);
-            this.groupBox5.TabIndex = 19;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Signal Smoothing Parameters";
+            this.gbSmoothParams.Controls.Add(this.lblPolyOrder);
+            this.gbSmoothParams.Controls.Add(this.cbxPolyOrder);
+            this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
+            this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
+            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbSmoothParams.Location = new System.Drawing.Point(376, 644);
+            this.gbSmoothParams.Name = "gbSmoothParams";
+            this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
+            this.gbSmoothParams.TabIndex = 19;
+            this.gbSmoothParams.TabStop = false;
+            this.gbSmoothParams.Text = "Signal Smoothing Parameters";
             // 
             // btnExportSettings
             // 
@@ -654,7 +721,7 @@
             this.btnExportSettings.Size = new System.Drawing.Size(30, 30);
             this.btnExportSettings.TabIndex = 31;
             this.btnExportSettings.Text = "";
-            this.toolTip1.SetToolTip(this.btnExportSettings, "Export Settings");
+            this.ttipMain.SetToolTip(this.btnExportSettings, "Export Settings");
             this.btnExportSettings.UseVisualStyleBackColor = true;
             this.btnExportSettings.Click += new System.EventHandler(this.btnExportSettings_Click);
             // 
@@ -666,9 +733,11 @@
             this.btnExport.Size = new System.Drawing.Size(234, 40);
             this.btnExport.TabIndex = 32;
             this.btnExport.Text = "";
-            this.toolTip1.SetToolTip(this.btnExport, "Export");
+            this.ttipMain.SetToolTip(this.btnExport, "Export");
             this.btnExport.UseVisualStyleBackColor = true;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.btnExport.MouseLeave += new System.EventHandler(this.btnExport_MouseLeave);
+            this.btnExport.MouseHover += new System.EventHandler(this.btnExport_MouseHover);
             // 
             // btnInfo
             // 
@@ -680,9 +749,11 @@
             this.btnInfo.Size = new System.Drawing.Size(30, 30);
             this.btnInfo.TabIndex = 33;
             this.btnInfo.Text = "";
-            this.toolTip1.SetToolTip(this.btnInfo, "About");
+            this.ttipMain.SetToolTip(this.btnInfo, "About");
             this.btnInfo.UseVisualStyleBackColor = true;
             this.btnInfo.Click += new System.EventHandler(this.btnInfo_Click);
+            this.btnInfo.MouseLeave += new System.EventHandler(this.btnInfo_MouseLeave);
+            this.btnInfo.MouseHover += new System.EventHandler(this.btnInfo_MouseHover);
             // 
             // txtDatasetTitle
             // 
@@ -693,6 +764,8 @@
             this.txtDatasetTitle.TabIndex = 30;
             this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtExcelTitle_TextChanged);
+            this.txtDatasetTitle.MouseLeave += new System.EventHandler(this.txtDatasetTitle_MouseLeave);
+            this.txtDatasetTitle.MouseHover += new System.EventHandler(this.txtDatasetTitle_MouseHover);
             // 
             // FrmMain
             // 
@@ -704,14 +777,14 @@
             this.Controls.Add(this.btnExportSettings);
             this.Controls.Add(this.txtDatasetTitle);
             this.Controls.Add(this.btnExport);
-            this.Controls.Add(this.groupBox5);
-            this.Controls.Add(this.progressBar1);
-            this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.txtVariable);
-            this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.gbSmoothParams);
+            this.Controls.Add(this.pbMain);
+            this.Controls.Add(this.gbSmoothMtd);
+            this.Controls.Add(this.statStripMain);
+            this.Controls.Add(this.gbRefinedData);
+            this.Controls.Add(this.gbInitData);
+            this.Controls.Add(this.txtInitAdd);
+            this.Controls.Add(this.btnInitAdd);
             this.Controls.Add(this.btnCalibrate);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -721,15 +794,16 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SonataSmooth";
             this.Load += new System.EventHandler(this.frmMain_Load);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
+            this.MouseHover += new System.EventHandler(this.FrmMain_MouseHover);
+            this.gbInitData.ResumeLayout(false);
+            this.gbInitData.PerformLayout();
+            this.gbRefinedData.ResumeLayout(false);
+            this.gbRefinedData.PerformLayout();
+            this.statStripMain.ResumeLayout(false);
+            this.statStripMain.PerformLayout();
+            this.gbSmoothMtd.ResumeLayout(false);
+            this.gbSmoothParams.ResumeLayout(false);
+            this.gbSmoothParams.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -739,51 +813,52 @@
         private System.Windows.Forms.RadioButton rbtnAvg;
         private System.Windows.Forms.RadioButton rbtnMed;
         private System.Windows.Forms.Button btnCalibrate;
-        private System.Windows.Forms.Button btnAdd;
-        private System.Windows.Forms.TextBox txtVariable;
+        private System.Windows.Forms.Button btnInitAdd;
+        private System.Windows.Forms.TextBox txtInitAdd;
         private System.Windows.Forms.RadioButton rbtnRect;
-        private System.Windows.Forms.Button btnClear;
-        private System.Windows.Forms.Button btnDelete;
-        private System.Windows.Forms.Button btnCopy;
-        private System.Windows.Forms.Button btnPaste;
-        private System.Windows.Forms.Button btnSelectAll;
-        private System.Windows.Forms.Button btnSelClear;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btnSelClear2;
-        private System.Windows.Forms.Button btnSelectAll2;
-        private System.Windows.Forms.Button btnCopy2;
-        private System.Windows.Forms.Button btnClear2;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button btnInitClear;
+        private System.Windows.Forms.Button btnInitDelete;
+        private System.Windows.Forms.Button btnInitCopy;
+        private System.Windows.Forms.Button btnInitPaste;
+        private System.Windows.Forms.Button btnInitSelectAll;
+        private System.Windows.Forms.Button btnInitSelClear;
+        private System.Windows.Forms.Label lblKernelRadius;
+        private System.Windows.Forms.Button btnRefSelectClr;
+        private System.Windows.Forms.Button btnRefSelectAll;
+        private System.Windows.Forms.Button btnRefCopy;
+        private System.Windows.Forms.Button btnRefClear;
+        private System.Windows.Forms.GroupBox gbInitData;
+        private System.Windows.Forms.GroupBox gbRefinedData;
+        private System.Windows.Forms.ProgressBar pbMain;
         private System.Windows.Forms.RadioButton rbtnSG;
         private System.Windows.Forms.Label lblPolyOrder;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripSeparator1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripSeparator2;
-        private System.Windows.Forms.Label lblCnt2;
+        private System.Windows.Forms.StatusStrip statStripMain;
+        private System.Windows.Forms.ToolStripStatusLabel tlblCalibratedType;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator1;
+        private System.Windows.Forms.ToolStripStatusLabel tlblKernelRadius;
+        private System.Windows.Forms.ToolStripStatusLabel tlblPolyOrder;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator2;
+        private System.Windows.Forms.Label lblRefCnt;
         private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
         private System.Windows.Forms.ToolStripStatusLabel slblKernelRadius;
-        private System.Windows.Forms.ToolStripStatusLabel slblPolynomialOrder;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.ToolStripStatusLabel slblPolyOrder;
+        private System.Windows.Forms.GroupBox gbSmoothMtd;
+        private System.Windows.Forms.GroupBox gbSmoothParams;
         private System.Windows.Forms.RadioButton rbtnGauss;
-        private System.Windows.Forms.ToolTip toolTip1;
-        public System.Windows.Forms.ListBox listBox1;
-        public System.Windows.Forms.ListBox listBox2;
-        private System.Windows.Forms.Button btnEdit;
-        public System.Windows.Forms.Label lblCnt1;
+        private System.Windows.Forms.ToolTip ttipMain;
+        public System.Windows.Forms.ListBox lbInitData;
+        public System.Windows.Forms.ListBox lbRefinedData;
+        private System.Windows.Forms.Button btnInitEdit;
+        public System.Windows.Forms.Label lblInitCnt;
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.TextBox txtDatasetTitle;
         private System.Windows.Forms.Button btnExportSettings;
         public System.Windows.Forms.ComboBox cbxKernelRadius;
         private System.Windows.Forms.ComboBox cbxPolyOrder;
         private System.Windows.Forms.Button btnInfo;
-        private System.Windows.Forms.Button btnSync1;
-        private System.Windows.Forms.Button btnSync2;
+        private System.Windows.Forms.Button btnInitSelectSync;
+        private System.Windows.Forms.Button btnRefSelectSync;
+        private System.Windows.Forms.ToolStripStatusLabel slblDesc;
     }
 }
 

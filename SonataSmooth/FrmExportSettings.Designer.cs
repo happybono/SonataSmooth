@@ -34,22 +34,26 @@
             this.chbMed = new System.Windows.Forms.CheckBox();
             this.chbGauss = new System.Windows.Forms.CheckBox();
             this.chbSG = new System.Windows.Forms.CheckBox();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.gbSmoothParams = new System.Windows.Forms.GroupBox();
             this.lblPolyOrder = new System.Windows.Forms.Label();
             this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
             this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.lblKernelRadius = new System.Windows.Forms.Label();
+            this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lblExportConfigTtl = new System.Windows.Forms.Label();
+            this.gbExportOpts = new System.Windows.Forms.GroupBox();
             this.chbOpenFile = new System.Windows.Forms.CheckBox();
             this.rbtnCSV = new System.Windows.Forms.RadioButton();
             this.rbtnXLSX = new System.Windows.Forms.RadioButton();
-            this.groupBox5.SuspendLayout();
-            this.groupBox4.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.lblExportConfigSubttl = new System.Windows.Forms.Label();
+            this.statStripExportConfig = new System.Windows.Forms.StatusStrip();
+            this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
+            this.gbSmoothParams.SuspendLayout();
+            this.gbSmoothMtd.SuspendLayout();
+            this.gbExportOpts.SuspendLayout();
+            this.statStripExportConfig.SuspendLayout();
             this.SuspendLayout();
             // 
             // chbRect
@@ -65,6 +69,8 @@
             this.chbRect.Text = "Rectangular Averaging";
             this.chbRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbRect.UseVisualStyleBackColor = true;
+            this.chbRect.MouseLeave += new System.EventHandler(this.chbRect_MouseLeave);
+            this.chbRect.MouseHover += new System.EventHandler(this.chbRect_MouseHover);
             // 
             // chbAvg
             // 
@@ -79,6 +85,8 @@
             this.chbAvg.Text = "Binomial Averaging";
             this.chbAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbAvg.UseVisualStyleBackColor = true;
+            this.chbAvg.MouseLeave += new System.EventHandler(this.chbAvg_MouseLeave);
+            this.chbAvg.MouseHover += new System.EventHandler(this.chbAvg_MouseHover);
             // 
             // chbMed
             // 
@@ -93,6 +101,8 @@
             this.chbMed.Text = "Binomial Median Filtering";
             this.chbMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbMed.UseVisualStyleBackColor = true;
+            this.chbMed.MouseLeave += new System.EventHandler(this.chbMed_MouseLeave);
+            this.chbMed.MouseHover += new System.EventHandler(this.chbMed_MouseHover);
             // 
             // chbGauss
             // 
@@ -107,6 +117,8 @@
             this.chbGauss.Text = "Gaussian Filtering";
             this.chbGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbGauss.UseVisualStyleBackColor = true;
+            this.chbGauss.MouseLeave += new System.EventHandler(this.chbGauss_MouseLeave);
+            this.chbGauss.MouseHover += new System.EventHandler(this.chbGauss_MouseHover);
             // 
             // chbSG
             // 
@@ -122,20 +134,22 @@
             this.chbSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbSG.UseVisualStyleBackColor = true;
             this.chbSG.CheckedChanged += new System.EventHandler(this.chbSG_CheckedChanged);
+            this.chbSG.MouseLeave += new System.EventHandler(this.chbSG_MouseLeave);
+            this.chbSG.MouseHover += new System.EventHandler(this.chbSG_MouseHover);
             // 
-            // groupBox5
+            // gbSmoothParams
             // 
-            this.groupBox5.Controls.Add(this.lblPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxPolyOrder);
-            this.groupBox5.Controls.Add(this.cbxKernelRadius);
-            this.groupBox5.Controls.Add(this.label1);
-            this.groupBox5.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox5.Location = new System.Drawing.Point(372, 45);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(344, 130);
-            this.groupBox5.TabIndex = 23;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Signal Smoothing Parameters";
+            this.gbSmoothParams.Controls.Add(this.lblPolyOrder);
+            this.gbSmoothParams.Controls.Add(this.cbxPolyOrder);
+            this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
+            this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
+            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbSmoothParams.Location = new System.Drawing.Point(372, 73);
+            this.gbSmoothParams.Name = "gbSmoothParams";
+            this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
+            this.gbSmoothParams.TabIndex = 23;
+            this.gbSmoothParams.TabStop = false;
+            this.gbSmoothParams.Text = "Signal Smoothing Parameters";
             // 
             // lblPolyOrder
             // 
@@ -147,6 +161,8 @@
             this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
             this.lblPolyOrder.TabIndex = 20;
             this.lblPolyOrder.Text = "Polynomial Order :";
+            this.lblPolyOrder.MouseLeave += new System.EventHandler(this.lblPolyOrder_MouseLeave);
+            this.lblPolyOrder.MouseHover += new System.EventHandler(this.lblPolyOrder_MouseHover);
             // 
             // cbxPolyOrder
             // 
@@ -167,6 +183,8 @@
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
             this.cbxPolyOrder.TabIndex = 7;
+            this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
+            this.cbxPolyOrder.MouseHover += new System.EventHandler(this.cbxPolyOrder_MouseHover);
             // 
             // cbxKernelRadius
             // 
@@ -195,77 +213,85 @@
             this.cbxKernelRadius.Name = "cbxKernelRadius";
             this.cbxKernelRadius.Size = new System.Drawing.Size(80, 25);
             this.cbxKernelRadius.TabIndex = 6;
+            this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
+            this.cbxKernelRadius.MouseHover += new System.EventHandler(this.cbxKernelRadius_MouseHover);
             // 
-            // label1
+            // lblKernelRadius
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(28, 45);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(201, 19);
-            this.label1.TabIndex = 17;
-            this.label1.Text = "Noise Reduction Kernel Radius : ";
+            this.lblKernelRadius.AutoSize = true;
+            this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKernelRadius.Location = new System.Drawing.Point(28, 45);
+            this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblKernelRadius.Name = "lblKernelRadius";
+            this.lblKernelRadius.Size = new System.Drawing.Size(201, 19);
+            this.lblKernelRadius.TabIndex = 17;
+            this.lblKernelRadius.Text = "Noise Reduction Kernel Radius : ";
+            this.lblKernelRadius.MouseLeave += new System.EventHandler(this.lblKernelRadius_MouseLeave);
+            this.lblKernelRadius.MouseHover += new System.EventHandler(this.lblKernelRadius_MouseHover);
             // 
-            // groupBox4
+            // gbSmoothMtd
             // 
-            this.groupBox4.Controls.Add(this.chbRect);
-            this.groupBox4.Controls.Add(this.chbAvg);
-            this.groupBox4.Controls.Add(this.chbSG);
-            this.groupBox4.Controls.Add(this.chbMed);
-            this.groupBox4.Controls.Add(this.chbGauss);
-            this.groupBox4.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
-            this.groupBox4.Location = new System.Drawing.Point(11, 45);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(344, 130);
-            this.groupBox4.TabIndex = 24;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Calibration Method";
+            this.gbSmoothMtd.Controls.Add(this.chbRect);
+            this.gbSmoothMtd.Controls.Add(this.chbAvg);
+            this.gbSmoothMtd.Controls.Add(this.chbSG);
+            this.gbSmoothMtd.Controls.Add(this.chbMed);
+            this.gbSmoothMtd.Controls.Add(this.chbGauss);
+            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbSmoothMtd.Location = new System.Drawing.Point(11, 73);
+            this.gbSmoothMtd.Name = "gbSmoothMtd";
+            this.gbSmoothMtd.Size = new System.Drawing.Size(344, 130);
+            this.gbSmoothMtd.TabIndex = 24;
+            this.gbSmoothMtd.TabStop = false;
+            this.gbSmoothMtd.Text = "Calibration Method";
             // 
             // btnCancel
             // 
             this.btnCancel.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(654, 272);
+            this.btnCancel.Location = new System.Drawing.Point(654, 300);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 24);
             this.btnCancel.TabIndex = 12;
             this.btnCancel.Text = "";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.MouseLeave += new System.EventHandler(this.btnCancel_MouseLeave);
+            this.btnCancel.MouseHover += new System.EventHandler(this.btnCancel_MouseHover);
             // 
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(563, 272);
+            this.btnSave.Location = new System.Drawing.Point(563, 300);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(85, 24);
             this.btnSave.TabIndex = 11;
             this.btnSave.Text = "";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.MouseLeave += new System.EventHandler(this.btnSave_MouseLeave);
+            this.btnSave.MouseHover += new System.EventHandler(this.btnSave_MouseHover);
             // 
-            // label2
+            // lblExportConfigTtl
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(6, 7);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(508, 26);
-            this.label2.TabIndex = 31;
-            this.label2.Text = "Export Configuration : Calibration and Smoothing Settings";
+            this.lblExportConfigTtl.AutoSize = true;
+            this.lblExportConfigTtl.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblExportConfigTtl.Location = new System.Drawing.Point(8, 10);
+            this.lblExportConfigTtl.Name = "lblExportConfigTtl";
+            this.lblExportConfigTtl.Size = new System.Drawing.Size(191, 26);
+            this.lblExportConfigTtl.TabIndex = 31;
+            this.lblExportConfigTtl.Text = "Export Configuration";
             // 
-            // groupBox1
+            // gbExportOpts
             // 
-            this.groupBox1.Controls.Add(this.chbOpenFile);
-            this.groupBox1.Controls.Add(this.rbtnCSV);
-            this.groupBox1.Controls.Add(this.rbtnXLSX);
-            this.groupBox1.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
-            this.groupBox1.Location = new System.Drawing.Point(11, 181);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(705, 85);
-            this.groupBox1.TabIndex = 32;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Data Export Options";
+            this.gbExportOpts.Controls.Add(this.chbOpenFile);
+            this.gbExportOpts.Controls.Add(this.rbtnCSV);
+            this.gbExportOpts.Controls.Add(this.rbtnXLSX);
+            this.gbExportOpts.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbExportOpts.Location = new System.Drawing.Point(11, 209);
+            this.gbExportOpts.Name = "gbExportOpts";
+            this.gbExportOpts.Size = new System.Drawing.Size(705, 85);
+            this.gbExportOpts.TabIndex = 32;
+            this.gbExportOpts.TabStop = false;
+            this.gbExportOpts.Text = "Data Export Options";
             // 
             // chbOpenFile
             // 
@@ -280,6 +306,8 @@
             this.chbOpenFile.Text = "Open the saved file automatically after saving.";
             this.chbOpenFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbOpenFile.UseVisualStyleBackColor = true;
+            this.chbOpenFile.MouseLeave += new System.EventHandler(this.chbOpenFile_MouseLeave);
+            this.chbOpenFile.MouseHover += new System.EventHandler(this.chbOpenFile_MouseHover);
             // 
             // rbtnCSV
             // 
@@ -292,6 +320,8 @@
             this.rbtnCSV.Text = "Export as CSV";
             this.rbtnCSV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnCSV.UseVisualStyleBackColor = true;
+            this.rbtnCSV.MouseLeave += new System.EventHandler(this.rbtnCSV_MouseLeave);
+            this.rbtnCSV.MouseHover += new System.EventHandler(this.rbtnCSV_MouseHover);
             // 
             // rbtnXLSX
             // 
@@ -306,19 +336,56 @@
             this.rbtnXLSX.Text = "Open in Excel";
             this.rbtnXLSX.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnXLSX.UseVisualStyleBackColor = true;
+            this.rbtnXLSX.MouseLeave += new System.EventHandler(this.rbtnXLSX_MouseLeave);
+            this.rbtnXLSX.MouseHover += new System.EventHandler(this.rbtnXLSX_MouseHover);
+            // 
+            // lblExportConfigSubttl
+            // 
+            this.lblExportConfigSubttl.AutoSize = true;
+            this.lblExportConfigSubttl.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 12F);
+            this.lblExportConfigSubttl.Location = new System.Drawing.Point(10, 42);
+            this.lblExportConfigSubttl.Name = "lblExportConfigSubttl";
+            this.lblExportConfigSubttl.Size = new System.Drawing.Size(270, 21);
+            this.lblExportConfigSubttl.TabIndex = 33;
+            this.lblExportConfigSubttl.Text = "Calibration and Smoothing Settings";
+            // 
+            // statStripExportConfig
+            // 
+            this.statStripExportConfig.AutoSize = false;
+            this.statStripExportConfig.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
+            this.statStripExportConfig.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.slblDesc});
+            this.statStripExportConfig.Location = new System.Drawing.Point(0, 332);
+            this.statStripExportConfig.Name = "statStripExportConfig";
+            this.statStripExportConfig.Size = new System.Drawing.Size(726, 24);
+            this.statStripExportConfig.SizingGrip = false;
+            this.statStripExportConfig.TabIndex = 34;
+            this.statStripExportConfig.Text = "statusStrip1";
+            // 
+            // slblDesc
+            // 
+            this.slblDesc.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblDesc.ForeColor = System.Drawing.Color.White;
+            this.slblDesc.Name = "slblDesc";
+            this.slblDesc.Size = new System.Drawing.Size(711, 19);
+            this.slblDesc.Spring = true;
+            this.slblDesc.Text = "To save the settings, please select the desired options and click the \'Save\' butt" +
+    "on.";
             // 
             // FrmExportSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(726, 309);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label2);
+            this.ClientSize = new System.Drawing.Size(726, 356);
+            this.Controls.Add(this.statStripExportConfig);
+            this.Controls.Add(this.lblExportConfigSubttl);
+            this.Controls.Add(this.gbExportOpts);
+            this.Controls.Add(this.lblExportConfigTtl);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.groupBox4);
-            this.Controls.Add(this.groupBox5);
+            this.Controls.Add(this.gbSmoothMtd);
+            this.Controls.Add(this.gbSmoothParams);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -327,24 +394,27 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Export Configuration";
             this.Load += new System.EventHandler(this.FrmExportSettings_Load);
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.MouseHover += new System.EventHandler(this.FrmExportSettings_MouseHover);
+            this.gbSmoothParams.ResumeLayout(false);
+            this.gbSmoothParams.PerformLayout();
+            this.gbSmoothMtd.ResumeLayout(false);
+            this.gbExportOpts.ResumeLayout(false);
+            this.gbExportOpts.PerformLayout();
+            this.statStripExportConfig.ResumeLayout(false);
+            this.statStripExportConfig.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.GroupBox gbSmoothParams;
         private System.Windows.Forms.Label lblPolyOrder;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label lblKernelRadius;
+        private System.Windows.Forms.GroupBox gbSmoothMtd;
         internal System.Windows.Forms.Button btnCancel;
         internal System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblExportConfigTtl;
         public System.Windows.Forms.ComboBox cbxPolyOrder;
         public System.Windows.Forms.ComboBox cbxKernelRadius;
         public System.Windows.Forms.CheckBox chbRect;
@@ -352,9 +422,12 @@
         public System.Windows.Forms.CheckBox chbMed;
         public System.Windows.Forms.CheckBox chbGauss;
         public System.Windows.Forms.CheckBox chbSG;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbExportOpts;
         public System.Windows.Forms.RadioButton rbtnCSV;
         public System.Windows.Forms.RadioButton rbtnXLSX;
         public System.Windows.Forms.CheckBox chbOpenFile;
+        private System.Windows.Forms.Label lblExportConfigSubttl;
+        private System.Windows.Forms.StatusStrip statStripExportConfig;
+        private System.Windows.Forms.ToolStripStatusLabel slblDesc;
     }
 }

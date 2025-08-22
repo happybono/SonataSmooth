@@ -15,7 +15,7 @@ namespace SonataSmooth
         public FrmAbout()
         {
             InitializeComponent();
-            lblVersion.Text = $"v.{Application.ProductVersion}";
+            lblAppVersion.Text = $"v.{Application.ProductVersion}";
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -25,7 +25,7 @@ namespace SonataSmooth
 
         private void FrmAbout_Load(object sender, EventArgs e)
         {
-            lblVersion.Select();
+            lblAppVersion.Select();
         }
 
         private void btnDonation_Click(object sender, EventArgs e)

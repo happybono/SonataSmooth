@@ -42,8 +42,8 @@ namespace SonataSmooth
             RegexOptions.Compiled | RegexOptions.CultureInvariant
             );
 
-        private CancellationTokenSource _ctsSelectAll1;
-        private CancellationTokenSource _ctsSelectAll2;
+        private CancellationTokenSource _ctsInitSelectAll;
+        private CancellationTokenSource _ctsRefSelectAll;
 
         private readonly FrmExportSettings settingsForm;
         private FrmAbout aboutForm;
@@ -51,25 +51,28 @@ namespace SonataSmooth
         private int r;
         private int polyOrder;
 
+        private double dpiX;
+        private double dpiY;
+
         public FrmMain()
         {
             InitializeComponent();
 
             this.KeyPreview = true;
 
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
             settingsForm = new FrmExportSettings(this);
             aboutForm = null;
         }
 
         private bool TryParseInputData(out double[] input, out int n)
         {
-            n = listBox1.Items.Count;
+            n = lbInitData.Items.Count;
             input = new double[n];
             for (int i = 0; i < n; i++)
             {
-                var item = listBox1.Items[i];
+                var item = lbInitData.Items[i];
                 if (item == null)
                 {
                     MessageBox.Show($"The item at index {i} is null.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -108,12 +111,12 @@ namespace SonataSmooth
         {
             settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            if (listBox1.Items.Count == 0)
+            if (lbInitData.Items.Count == 0)
                 return;
 
             try
@@ -126,7 +129,7 @@ namespace SonataSmooth
                 if (!TryParseParameters(out int r, out int polyOrder, out double sigma))
                     return;
 
-                if (!ValidateSmoothingParameters(listBox1.Items.Count, r, polyOrder))
+                if (!ValidateSmoothingParameters(lbInitData.Items.Count, r, polyOrder))
                     return;
 
                 bool useRect = rbtnRect.Checked;
@@ -162,7 +165,7 @@ namespace SonataSmooth
 
                 var progressReporter = new Progress<int>(pct =>
                 {
-                    progressBar1.Value = Math.Max(progressBar1.Minimum, Math.Min(progressBar1.Maximum, pct));
+                    pbMain.Value = Math.Max(pbMain.Minimum, Math.Min(pbMain.Maximum, pct));
                 });
 
                 double[] results;
@@ -253,8 +256,10 @@ namespace SonataSmooth
 
                                     return 0.0;
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
+                                    // 예외 발생 시 해당 Index 에 대해 0.0 반환하고 로그 출력
+                                    Debug.WriteLine($"[Parallel Select] Index {i} error: {ex}");
                                     return 0.0;
                                 }
                             })
@@ -267,24 +272,24 @@ namespace SonataSmooth
                         $"An error occurred during parallel computation : {aex.Flatten().InnerException?.Message}",
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error
                     );
-                    UpdateListBox2BtnsState(null, EventArgs.Empty);
+                    UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
                     return;
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"An unexpected error occurred during computation : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    UpdateListBox2BtnsState(null, EventArgs.Empty);
+                    UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
                     return;
                 }
 
                 try
                 {
-                    listBox2.BeginUpdate();
-                    listBox2.Items.Clear();
+                    lbRefinedData.BeginUpdate();
+                    lbRefinedData.Items.Clear();
 
-                    await AddItemsInBatches(listBox2, results, progressReporter, 60);
-                    listBox2.EndUpdate();
-                    lblCnt2.Text = $"Count : {listBox2.Items.Count}";
+                    await AddItemsInBatches(lbRefinedData, results, progressReporter, 60);
+                    lbRefinedData.EndUpdate();
+                    lblRefCnt.Text = $"Count : {lbRefinedData.Items.Count}";
 
                     slblCalibratedType.Text = useRect ? "Rectangular Average"
                                          : useMed ? "Weighted Median"
@@ -296,10 +301,10 @@ namespace SonataSmooth
                     slblKernelRadius.Text = r.ToString();
 
                     bool showPoly = useSG;
-                    toolStripStatusLabel5.Visible =
-                    toolStripSeparator2.Visible =
-                    slblPolynomialOrder.Visible = showPoly;
-                    if (showPoly) slblPolynomialOrder.Text = polyOrder.ToString();
+                    tlblPolyOrder.Visible = showPoly;
+                    tlblSeparator2.Visible = showPoly;
+                    slblPolyOrder.Visible = showPoly;
+                    if (showPoly) slblPolyOrder.Text = polyOrder.ToString();
                 }
                 catch (Exception ex)
                 {
@@ -308,11 +313,12 @@ namespace SonataSmooth
             }
             finally
             {
+                slblDesc.Visible = false;
                 btnCalibrate.Enabled = true;
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
-                UpdateListBox2BtnsState(null, EventArgs.Empty);
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+                UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
             }
-            progressBar1.Value = 0;
+            pbMain.Value = 0;
         }
 
 
@@ -454,7 +460,7 @@ namespace SonataSmooth
                 }
             }
 
-            // 모든 가중치 합산 후에도 못 찾았다면 최대값 반환
+            // 모든 가중치 합산 후에도 못 찾았다면 최대 값 반환
             return pairs[pairs.Count - 1].Value;
         }
 
@@ -579,23 +585,23 @@ namespace SonataSmooth
             return true;
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void btnInitAdd_Click(object sender, EventArgs e)
         {
-            if (double.TryParse(txtVariable.Text, out double value))
+            if (double.TryParse(txtInitAdd.Text, out double value))
             {
-                listBox1.Items.Add(value);
-                lblCnt1.Text = "Count : " + listBox1.Items.Count;
+                lbInitData.Items.Add(value);
+                lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
             }
             else
             {
-                txtVariable.Focus();
-                txtVariable.SelectAll();
+                txtInitAdd.Focus();
+                txtInitAdd.SelectAll();
             }
 
-            if (listBox1.Items.Count > 0)
+            if (lbInitData.Items.Count > 0)
             {
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
-                UpdateListBox2BtnsState(null, EventArgs.Empty);
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+                UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
             }
             else
             {
@@ -603,42 +609,42 @@ namespace SonataSmooth
             }
         }
 
-        private void txtVariable_KeyDown(object sender, KeyEventArgs e)
+        private void txtInitAdd_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Enter && btnAdd.Enabled)
+            if (e.KeyData == Keys.Enter && btnInitAdd.Enabled)
             {
-                btnAdd.PerformClick();
-                txtVariable.Text = String.Empty;
+                btnInitAdd.PerformClick();
+                txtInitAdd.Text = String.Empty;
                 e.SuppressKeyPress = true;
             }
         }
 
-        private async void btnSelectAll_Click(object sender, EventArgs e)
+        private async void btnInitSelectAll_Click(object sender, EventArgs e)
         {
-            _ctsSelectAll1?.Cancel(); // 이전에 진행 중인 작업 중단
-            _ctsSelectAll1 = new CancellationTokenSource();
-            var token = _ctsSelectAll1.Token;
+            _ctsInitSelectAll?.Cancel(); // 이전에 진행 중인 작업 중단
+            _ctsInitSelectAll = new CancellationTokenSource();
+            var token = _ctsInitSelectAll.Token;
 
-            int n = listBox1.Items.Count;
+            int n = lbInitData.Items.Count;
             if (n == 0) return;
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox1.BeginUpdate();
-            listBox1.ClearSelected();
+            lbInitData.BeginUpdate();
+            lbInitData.ClearSelected();
 
             if (n == 1)
             {
-                listBox1.SetSelected(0, true);
-                progressBar1.Value = 100;
-                listBox1.EndUpdate();
-                listBox1.Focus();
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                lbInitData.SetSelected(0, true);
+                pbMain.Value = 100;
+                lbInitData.EndUpdate();
+                lbInitData.Focus();
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
                 await Task.Delay(200);
-                progressBar1.Value = 0;
+                pbMain.Value = 0;
                 return;
             }
 
@@ -651,13 +657,13 @@ namespace SonataSmooth
                 {
                     if (token.IsCancellationRequested) break;
 
-                    listBox1.SetSelected(i, true);
+                    lbInitData.SetSelected(i, true);
 
                     if (i % reportInterval == 0)
                     {
                         double ratio = (i + 1) / (double)n;
                         int pct = (int)Math.Round(ratio * 100.0);
-                        progressBar1.Value = Math.Min(100, Math.Max(0, pct));
+                        pbMain.Value = Math.Min(100, Math.Max(0, pct));
                     }
 
                     if (i % yieldInterval == 0)
@@ -666,19 +672,19 @@ namespace SonataSmooth
             }
             finally
             {
-                listBox1.EndUpdate();
+                lbInitData.EndUpdate();
             }
 
-            progressBar1.Value = 100;
-            listBox1.Focus();
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            pbMain.Value = 100;
+            lbInitData.Focus();
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
             await Task.Delay(200);
-            progressBar1.Value = 0;
+            pbMain.Value = 0;
         }
 
-        private async void btnClear_Click(object sender, EventArgs e)
+        private async void btnInitClear_Click(object sender, EventArgs e)
         {
-            int itemCount = listBox1.Items.Count;
+            int itemCount = lbInitData.Items.Count;
 
             var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Initial Dataset listbox.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?",
                                          "Delete Confirmation",
@@ -690,43 +696,46 @@ namespace SonataSmooth
                 return;
             }
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox1.BeginUpdate();
-            listBox1.ClearSelected();
-            listBox1.Items.Clear();
-            listBox2.Items.Clear();
-            listBox1.EndUpdate();
-
-            await Task.Yield();
-
-            lblCnt1.Text = $"Count : {listBox1.Items.Count}";
-            lblCnt2.Text = $"Count : {listBox1.Items.Count}";
-
-            progressBar1.Value = 100;
-            progressBar1.Refresh();
+            lbInitData.BeginUpdate();
+            lbInitData.ClearSelected();
+            lbInitData.Items.Clear();
+            lbRefinedData.Items.Clear();
+            lbInitData.EndUpdate();
 
             await Task.Yield();
-            progressBar1.Value = 0;
 
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
+            lblRefCnt.Text = $"Count : {lbInitData.Items.Count}";
+
+            pbMain.Value = 100;
+            pbMain.Refresh();
+
+            await Task.Yield();
+            pbMain.Value = 0;
+
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
 
             slblCalibratedType.Text = "--";
             slblKernelRadius.Text = "--";
-            toolStripSeparator2.Visible = false;
-            toolStripStatusLabel5.Visible = false;
-            slblPolynomialOrder.Visible = false;
-            slblPolynomialOrder.Text = "--";
+            tlblSeparator2.Visible = false;
+            tlblPolyOrder.Visible = false;
+            slblPolyOrder.Visible = false;
+            slblPolyOrder.Text = "--";
+
+            slblDesc.Visible = true;
+            slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
 
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
             txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
             txtDatasetTitle.ForeColor = Color.Gray;
-            txtVariable.Text = string.Empty;
-            txtVariable.Select();
+            txtInitAdd.Text = string.Empty;
+            txtInitAdd.Select();
         }
 
         public void SetComboValues(string kernelRadius, string polyOrder)
@@ -736,24 +745,24 @@ namespace SonataSmooth
         }
 
 
-        private async void btnPaste_Click(object sender, EventArgs e)
+        private async void btnInitPaste_Click(object sender, EventArgs e)
         {
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
             btnCalibrate.Enabled = false;
 
             try
             {
                 string text = Clipboard.GetText();
-                progressBar1.Value = 10;
+                pbMain.Value = 10;
 
                 var matches = clipboardRegex.Matches(text)
                                     .Cast<Match>()
                                     .Where(m => !string.IsNullOrEmpty(m.Value))
                                     .ToArray();
-                progressBar1.Value = 30;
+                pbMain.Value = 30;
 
                 double[] values = await Task.Run(() =>
                     matches
@@ -766,31 +775,31 @@ namespace SonataSmooth
                         ))
                         .ToArray()
                 );
-                progressBar1.Value = 70;
+                pbMain.Value = 70;
 
                 if (values.Length == 0)
                     return;
 
-                listBox1.BeginUpdate();
-                listBox1.Items.AddRange(values.Cast<object>().ToArray());
-                listBox1.EndUpdate();
-                listBox1.TopIndex = listBox1.Items.Count - 1;
+                lbInitData.BeginUpdate();
+                lbInitData.Items.AddRange(values.Cast<object>().ToArray());
+                lbInitData.EndUpdate();
+                lbInitData.TopIndex = lbInitData.Items.Count - 1;
 
-                progressBar1.Value = 100;
-                lblCnt1.Text = $"Count : {listBox1.Items.Count}";
+                pbMain.Value = 100;
+                lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
                 await Task.Delay(200);
             }
             finally
             {
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
-                UpdateListBox2BtnsState(null, EventArgs.Empty);
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+                UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
 
-                progressBar1.Value = 0;
+                pbMain.Value = 0;
                 btnCalibrate.Enabled = true;
             }
         }
 
-        private void listBox1_DragEnter(object sender, DragEventArgs e)
+        private void lbInitData_DragEnter(object sender, DragEventArgs e)
         {
             string[] availableFormats = e.Data.GetFormats();
 
@@ -804,18 +813,18 @@ namespace SonataSmooth
             }
         }
 
-        private async void listBox1_DragDrop(object sender, DragEventArgs e)
+        private async void lbInitData_DragDrop(object sender, DragEventArgs e)
         {
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
             try
             {
                 string raw = getDropText(e);
-                progressBar1.Value = 10;
+                pbMain.Value = 10;
 
                 if (string.IsNullOrWhiteSpace(raw))
                     return;
@@ -825,7 +834,7 @@ namespace SonataSmooth
                     raw = await Task.Run(() =>
                         htmlTagRegex.Replace(raw, " ")
                     );
-                    progressBar1.Value = 25;
+                    pbMain.Value = 25;
 
                     if (string.IsNullOrWhiteSpace(raw))
                         return;
@@ -849,7 +858,7 @@ namespace SonataSmooth
                         .Where(d => !double.IsNaN(d))
                         .ToArray();
                 });
-                progressBar1.Value = 60;
+                pbMain.Value = 60;
 
                 if (parsed.Length == 0)
                     return;
@@ -859,24 +868,24 @@ namespace SonataSmooth
                 var progressReporter = new Progress<int>(pct =>
                 {
                     int adjustedPct = Math.Max(baseProgress, Math.Min(100, pct));
-                    progressBar1.Value = adjustedPct;
-                    progressBar1.Refresh();
+                    pbMain.Value = adjustedPct;
+                    pbMain.Refresh();
                 });
 
-                await AddItemsInBatches(listBox1, parsed, progressReporter, baseProgress);
+                await AddItemsInBatches(lbInitData, parsed, progressReporter, baseProgress);
 
-                progressBar1.Value = 100;
-                lblCnt1.Text = "Count : " + listBox1.Items.Count;
+                pbMain.Value = 100;
+                lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
                 await Task.Delay(200);
             }
             finally
             {
-                bool hasItems = listBox1.Items.Count > 0;
-                btnCopy.Enabled = hasItems;
-                btnDelete.Enabled = hasItems;
+                bool hasItems = lbInitData.Items.Count > 0;
+                btnInitCopy.Enabled = hasItems;
+                btnInitDelete.Enabled = hasItems;
 
-                progressBar1.Value = 0;
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
+                pbMain.Value = 0;
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
             }
         }
 
@@ -932,22 +941,22 @@ namespace SonataSmooth
             return null;
         }
 
-        private void btnSelClear_Click(object sender, EventArgs e)
+        private void btnInitSelClear_Click(object sender, EventArgs e)
         {
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox1.BeginUpdate();
-            listBox1.ClearSelected();
-            listBox1.EndUpdate();
+            lbInitData.BeginUpdate();
+            lbInitData.ClearSelected();
+            lbInitData.EndUpdate();
 
-            progressBar1.Value = 100;
-            listBox1.Focus();
-            lblCnt1.Text = "Count : " + listBox1.Items.Count;
+            pbMain.Value = 100;
+            lbInitData.Focus();
+            lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
 
-            Task.Delay(200).ContinueWith(_ => progressBar1.Value = 0, TaskScheduler.FromCurrentSynchronizationContext());
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            Task.Delay(200).ContinueWith(_ => pbMain.Value = 0, TaskScheduler.FromCurrentSynchronizationContext());
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
         }
 
         private async Task DeleteSelectedItemsPreserveSelection(
@@ -984,15 +993,16 @@ namespace SonataSmooth
             }
             finally
             {
+                progressBar.Value = 0;
                 listBox.EndUpdate();
             }
         }
 
         private async void btnDelete_Click(object sender, EventArgs e)
         {
-            int selectedCount = listBox1.SelectedIndices.Count;
+            int selectedCount = lbInitData.SelectedIndices.Count;
 
-            string message = selectedCount == listBox1.Items.Count
+            string message = selectedCount == lbInitData.Items.Count
                 ? $"You are about to delete all {selectedCount} items from the list.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?"
                 : $"You are about to delete {selectedCount} selected item{(selectedCount > 1 ? "s" : "")} from the list.\n\nAre you sure you want to proceed?";
 
@@ -1006,104 +1016,104 @@ namespace SonataSmooth
                 return;
 
             // 전체 삭제 시
-            if (selectedCount == listBox1.Items.Count)
+            if (selectedCount == lbInitData.Items.Count)
             {
-                listBox1.Items.Clear();
-                listBox2.Items.Clear();
-                lblCnt1.Text = $"Count : {listBox1.Items.Count}";
-                lblCnt2.Text = $"Count : {listBox2.Items.Count}";
-                progressBar1.Value = 0;
-                listBox1.Select();
+                lbInitData.Items.Clear();
+                lbRefinedData.Items.Clear();
+                lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
+                lblRefCnt.Text = $"Count : {lbRefinedData.Items.Count}";
+                pbMain.Value = 0;
+                lbInitData.Select();
 
                 txtDatasetTitle.Text = ExcelTitlePlaceholder;
                 txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
                 txtDatasetTitle.ForeColor = Color.Gray;
 
-                UpdateListBox1BtnsState(null, EventArgs.Empty);
-                txtVariable.Select();
+                UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+                txtInitAdd.Select();
                 return;
             }
 
             // 선택 항목 삭제
-            await DeleteSelectedItemsPreserveSelection(listBox1, progressBar1, lblCnt1);
+            await DeleteSelectedItemsPreserveSelection(lbInitData, pbMain, lblInitCnt);
 
             // 삭제 완료 후 남은 항목 개수, 포커스, 버튼 상태 갱신
-            lblCnt1.Text = $"Count : {listBox1.Items.Count}";
-            listBox1.Select();
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
+            lbInitData.Select();
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
         }
 
-        private void UpdateListBox1BtnsState(object s, EventArgs e)
+        private void UpdatelbInitDataBtnsState(object s, EventArgs e)
         {
-            bool hasItems = listBox1.Items.Count > 0;
-            bool hasSelection = listBox1.SelectedItems.Count > 0;
-            bool canSync = hasSelection && listBox1.Items.Count == listBox2.Items.Count && listBox1.Items.Count > 0;
+            bool hasItems = lbInitData.Items.Count > 0;
+            bool hasSelection = lbInitData.SelectedItems.Count > 0;
+            bool canSync = hasSelection && lbInitData.Items.Count == lbRefinedData.Items.Count && lbInitData.Items.Count > 0;
 
-            btnAdd.Enabled = txtVariable.Text.Length > 0 && double.TryParse(txtVariable.Text, out _);
-            btnCopy.Enabled = hasItems;
-            btnEdit.Enabled = hasSelection;
+            btnInitAdd.Enabled = txtInitAdd.Text.Length > 0 && double.TryParse(txtInitAdd.Text, out _);
+            btnInitCopy.Enabled = hasItems;
+            btnInitEdit.Enabled = hasSelection;
             btnCalibrate.Enabled = hasItems;
             btnExport.Enabled = hasItems
                 && !string.IsNullOrWhiteSpace(txtDatasetTitle.Text)
                 && txtDatasetTitle.Text != ExcelTitlePlaceholder;
-            btnDelete.Enabled = hasSelection;
-            btnClear.Enabled = hasItems;
-            btnSelClear.Enabled = hasSelection;
-            btnSelectAll.Enabled = hasItems;
-            btnSync1.Enabled = canSync;
+            btnInitDelete.Enabled = hasSelection;
+            btnInitClear.Enabled = hasItems;
+            btnInitSelClear.Enabled = hasSelection;
+            btnInitSelectAll.Enabled = hasItems;
+            btnInitSelectSync.Enabled = canSync;
 
             if (!hasItems)
             {
                 btnCalibrate.Enabled = false;
-                btnDelete.Enabled = false;
-                btnClear.Enabled = false;
-                btnSelClear.Enabled = false;
-                btnSync1.Enabled = false;
-                listBox1.ClearSelected();
+                btnInitDelete.Enabled = false;
+                btnInitClear.Enabled = false;
+                btnInitSelClear.Enabled = false;
+                btnInitSelectSync.Enabled = false;
+                lbInitData.ClearSelected();
             }
             else
             {
                 btnCalibrate.Enabled = true;
-                btnDelete.Enabled = hasSelection;
-                btnClear.Enabled = hasItems;
-                btnSelClear.Enabled = hasSelection;
-                btnSync1.Enabled = canSync;
+                btnInitDelete.Enabled = hasSelection;
+                btnInitClear.Enabled = hasItems;
+                btnInitSelClear.Enabled = hasSelection;
+                btnInitSelectSync.Enabled = canSync;
             }
         }
 
-        private void UpdateListBox2BtnsState(object s, EventArgs e)
+        private void UpdatelbRefinedDataBtnsState(object s, EventArgs e)
         {
-            bool hasItems = listBox2.Items.Count > 0;
-            bool hasSelection = listBox2.SelectedItems.Count > 0;
-            bool canSync = hasSelection && listBox2.Items.Count == listBox1.Items.Count && listBox2.Items.Count > 0;
+            bool hasItems = lbRefinedData.Items.Count > 0;
+            bool hasSelection = lbRefinedData.SelectedItems.Count > 0;
+            bool canSync = hasSelection && lbRefinedData.Items.Count == lbInitData.Items.Count && lbRefinedData.Items.Count > 0;
 
-            btnCopy2.Enabled = hasItems;
-            btnClear2.Enabled = hasItems;
-            btnSelClear2.Enabled = hasSelection;
-            btnSelectAll2.Enabled = hasItems;
-            btnSync2.Enabled = canSync;
+            btnRefCopy.Enabled = hasItems;
+            btnRefClear.Enabled = hasItems;
+            btnRefSelectClr.Enabled = hasSelection;
+            btnRefSelectAll.Enabled = hasItems;
+            btnRefSelectSync.Enabled = canSync;
 
             if (!hasItems)
             {
-                btnCopy2.Enabled = false;
-                btnClear2.Enabled = false;
-                btnSelClear2.Enabled = false;
-                btnSync2.Enabled = false;
-                listBox2.ClearSelected();
+                btnRefCopy.Enabled = false;
+                btnRefClear.Enabled = false;
+                btnRefSelectClr.Enabled = false;
+                btnRefSelectSync.Enabled = false;
+                lbRefinedData.ClearSelected();
             }
             else
             {
-                btnCopy2.Enabled = true;
-                btnClear2.Enabled = true;
-                btnSelClear2.Enabled = hasSelection;
-                btnSync2.Enabled = canSync;
+                btnRefCopy.Enabled = true;
+                btnRefClear.Enabled = true;
+                btnRefSelectClr.Enabled = hasSelection;
+                btnRefSelectSync.Enabled = canSync;
             }
         }
 
-        private async void btnClear2_Click(object sender, EventArgs e)
+        private async void btnRefClear_Click(object sender, EventArgs e)
         {
-            int itemCount = listBox2.Items.Count;
+            int itemCount = lbRefinedData.Items.Count;
 
             var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Refined Dataset listbox.\n\nAre you sure you want to proceed?",
                                          "Delete Confirmation",
@@ -1115,55 +1125,55 @@ namespace SonataSmooth
                 return;
             }
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox2.BeginUpdate();
-            listBox2.Items.Clear();
-            listBox2.ClearSelected();
-            listBox2.EndUpdate();
+            lbRefinedData.BeginUpdate();
+            lbRefinedData.Items.Clear();
+            lbRefinedData.ClearSelected();
+            lbRefinedData.EndUpdate();
 
             await Task.Yield();
 
-            progressBar1.Value = 100;
-            progressBar1.Refresh();
+            pbMain.Value = 100;
+            pbMain.Refresh();
 
-            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            lblRefCnt.Text = "Count : " + lbRefinedData.Items.Count;
             slblCalibratedType.Text = "--";
             slblKernelRadius.Text = "--";
-            toolStripSeparator2.Visible = false;
-            toolStripStatusLabel5.Visible = false;
-            slblPolynomialOrder.Visible = false;
-            slblPolynomialOrder.Text = "--";
+            tlblSeparator2.Visible = false;
+            tlblPolyOrder.Visible = false;
+            slblPolyOrder.Visible = false;
+            slblPolyOrder.Text = "--";
 
             await Task.Yield();
-            progressBar1.Value = 0;
+            pbMain.Value = 0;
 
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
 
-            listBox2.Focus();
+            lbRefinedData.Focus();
         }
 
-        private async void btnSelectAll2_Click(object sender, EventArgs e)
+        private async void btnRefSelectAll_Click(object sender, EventArgs e)
         {
-            _ctsSelectAll2?.Cancel();
-            _ctsSelectAll2 = new CancellationTokenSource();
-            var token = _ctsSelectAll2.Token;
+            _ctsRefSelectAll?.Cancel();
+            _ctsRefSelectAll = new CancellationTokenSource();
+            var token = _ctsRefSelectAll.Token;
 
-            int n2 = listBox2.Items.Count;
+            int n2 = lbRefinedData.Items.Count;
             if (n2 == 0)
                 return;
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox2.BeginUpdate();
-            listBox2.ClearSelected();
+            lbRefinedData.BeginUpdate();
+            lbRefinedData.ClearSelected();
 
             int reportInterval = Math.Max(1, n2 / 100);
             int yieldInterval = Math.Max(1, n2 / 1000);
@@ -1175,13 +1185,13 @@ namespace SonataSmooth
                     if (token.IsCancellationRequested)
                         break;
 
-                    listBox2.SetSelected(i, true);
+                    lbRefinedData.SetSelected(i, true);
 
                     if (i % reportInterval == 0)
                     {
                         double ratio = (i + 1) / (double)n2;
                         int pct = (int)Math.Round(ratio * 100.0);
-                        progressBar1.Value = Math.Min(100, Math.Max(0, pct));
+                        pbMain.Value = Math.Min(100, Math.Max(0, pct));
                     }
 
                     if (i % yieldInterval == 0)
@@ -1190,129 +1200,128 @@ namespace SonataSmooth
             }
             finally
             {
-                listBox2.EndUpdate();
+                lbRefinedData.EndUpdate();
             }
 
-            progressBar1.Value = 100;
+            pbMain.Value = 100;
             await Task.Delay(200).ContinueWith(_ => { });
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
-            progressBar1.Value = 0;
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
+            pbMain.Value = 0;
         }
 
-        private async void btnSelectClear2_Click(object sender, EventArgs e)
+        private async void btnRefSelectClr_Click(object sender, EventArgs e)
         {
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            listBox2.BeginUpdate();
-            listBox2.ClearSelected();
-            listBox2.EndUpdate();
+            lbRefinedData.BeginUpdate();
+            lbRefinedData.ClearSelected();
+            lbRefinedData.EndUpdate();
 
-            listBox2.Focus();
-            lblCnt2.Text = "Count : " + listBox2.Items.Count;
+            lbRefinedData.Focus();
+            lblRefCnt.Text = "Count : " + lbRefinedData.Items.Count;
 
-            progressBar1.Value = 100;
+            pbMain.Value = 100;
             await Task.Delay(200);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
-            progressBar1.Value = 0;
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
+            pbMain.Value = 0;
         }
 
-
-        private void txtVariable_TextChanged(object sender, EventArgs e)
+        private void txtInitAdd_TextChanged(object sender, EventArgs e)
         {
-            btnAdd.Enabled = txtVariable.Text.Length > 0 && double.TryParse(txtVariable.Text, out _);
+            btnInitAdd.Enabled = txtInitAdd.Text.Length > 0 && double.TryParse(txtInitAdd.Text, out _);
         }
 
-        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
+        private void lbRefinedData_SelectedIndexChanged(object sender, EventArgs e)
         {
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
         }
 
-        private void listBox1_KeyDown(object sender, KeyEventArgs e)
+        private void lbInitData_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Delete)
             {
-                btnDelete.PerformClick();
+                btnInitDelete.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.Delete))
             {
-                btnClear.PerformClick();
+                btnInitClear.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == Keys.F2)
             {
-                btnEdit.PerformClick();
+                btnInitEdit.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.C))
             {
-                btnCopy.PerformClick();
+                btnInitCopy.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.V))
             {
-                btnPaste.PerformClick();
+                btnInitPaste.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == (Keys.Control | Keys.A))
             {
-                btnSelectAll.PerformClick();
+                btnInitSelectAll.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
             if (e.KeyData == Keys.Escape)
             {
-                btnSelClear.PerformClick();
+                btnInitSelClear.PerformClick();
                 e.SuppressKeyPress = true;
             }
 
-            lblCnt1.Text = "Count : " + listBox1.Items.Count;
+            lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
         }
 
-        private void listBox2_KeyDown(object sender, KeyEventArgs e)
+        private void lbRefinedData_KeyDown(object sender, KeyEventArgs e)
         {
             {
                 if (e.KeyData == (Keys.Control | Keys.Delete))
                 {
-                    btnClear2.PerformClick();
+                    btnRefClear.PerformClick();
                     e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == (Keys.Control | Keys.C))
                 {
-                    btnCopy2.PerformClick();
+                    btnRefCopy.PerformClick();
                     e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == (Keys.Control | Keys.A))
                 {
-                    btnSelectAll2.PerformClick();
+                    btnRefSelectAll.PerformClick();
                     e.SuppressKeyPress = true;
                 }
 
                 if (e.KeyData == Keys.Escape)
                 {
-                    btnSelClear2.PerformClick();
+                    btnRefSelectClr.PerformClick();
                     e.SuppressKeyPress = true;
                 }
 
-                lblCnt2.Text = "Count : " + listBox2.Items.Count;
+                lblRefCnt.Text = "Count : " + lbRefinedData.Items.Count;
             }
         }
 
 
-        private void btnCopy_Click(object sender, EventArgs e)
+        private void btnInitCopy_Click(object sender, EventArgs e)
         {
-            IEnumerable<object> source = listBox1.SelectedItems.Count > 0
-                ? listBox1.SelectedItems.Cast<object>()
-                : listBox1.Items.Cast<object>();
+            IEnumerable<object> source = lbInitData.SelectedItems.Count > 0
+                ? lbInitData.SelectedItems.Cast<object>()
+                : lbInitData.Items.Cast<object>();
 
             var doubles = source
                 .Select(item =>
@@ -1329,11 +1338,11 @@ namespace SonataSmooth
             Clipboard.SetText(string.Join(Environment.NewLine, doubles));
         }
 
-        private void btnCopy2_Click(object sender, EventArgs e)
+        private void btnRefCopy_Click(object sender, EventArgs e)
         {
-            IEnumerable<object> source = listBox2.SelectedItems.Count > 0
-                ? listBox2.SelectedItems.Cast<object>()
-                : listBox2.Items.Cast<object>();
+            IEnumerable<object> source = lbRefinedData.SelectedItems.Count > 0
+                ? lbRefinedData.SelectedItems.Cast<object>()
+                : lbRefinedData.Items.Cast<object>();
 
             var doubles = source
                 .Select(item =>
@@ -1370,6 +1379,22 @@ namespace SonataSmooth
             cbxKernelRadius.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
 
+            using (Graphics g = this.CreateGraphics())
+            {
+                dpiX = g.DpiX;
+                dpiY = g.DpiY;
+            }
+
+            pbMain.Size = new Size(
+                (int)(734 * dpiX / 96),
+                (int)(5 * dpiY / 96)
+            );
+
+            slblDesc.Size = new Size(
+                (int)(731 * dpiX / 96),
+                (int)(19 * dpiY / 96)
+            );
+
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
             txtDatasetTitle.ForeColor = Color.Gray;
             txtDatasetTitle.Enter += txtExcelTitle_Enter;
@@ -1390,10 +1415,10 @@ namespace SonataSmooth
             settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
             settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
 
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
-            UpdateListBox2BtnsState(null, EventArgs.Empty);
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
 
-            dataCount = listBox1.Items.Count;
+            dataCount = lbInitData.Items.Count;
 
             // ComboBox 값으로부터 파싱
             int.TryParse(cbxKernelRadius.Text, out r);
@@ -1402,9 +1427,9 @@ namespace SonataSmooth
             this.KeyPreview = true;
         }
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void lbInitData_SelectedIndexChanged(object sender, EventArgs e)
         {
-            UpdateListBox1BtnsState(null, EventArgs.Empty);
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
@@ -1412,29 +1437,29 @@ namespace SonataSmooth
             var frm = new FrmModify();
             frm.ShowDialog();
 
-            frm.textBox1.Select();
+            frm.txtInitEdit.Select();
         }
 
 
         private async Task ExportCsvAsync()
         {
             // UI 초기화
-            if (progressBar1.InvokeRequired)
+            if (pbMain.InvokeRequired)
             {
-                progressBar1.Invoke(new Action(() =>
+                pbMain.Invoke(new Action(() =>
                 {
-                    progressBar1.Style = ProgressBarStyle.Continuous;
-                    progressBar1.Minimum = 0;
-                    progressBar1.Maximum = 100;
-                    progressBar1.Value = 0;
+                    pbMain.Style = ProgressBarStyle.Continuous;
+                    pbMain.Minimum = 0;
+                    pbMain.Maximum = 100;
+                    pbMain.Value = 0;
                 }));
             }
             else
             {
-                progressBar1.Style = ProgressBarStyle.Continuous;
-                progressBar1.Minimum = 0;
-                progressBar1.Maximum = 100;
-                progressBar1.Value = 0;
+                pbMain.Style = ProgressBarStyle.Continuous;
+                pbMain.Minimum = 0;
+                pbMain.Maximum = 100;
+                pbMain.Value = 0;
             }
 
             int r = 2, polyOrder = 2, n = 0;
@@ -1458,7 +1483,7 @@ namespace SonataSmooth
 
                     excelTitle = txtDatasetTitle.Text;
 
-                    initialData = listBox1.Items
+                    initialData = lbInitData.Items
                         .Cast<object>()
                         .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0.0)
                         .ToArray();
@@ -1479,7 +1504,7 @@ namespace SonataSmooth
 
                 excelTitle = txtDatasetTitle.Text;
 
-                initialData = listBox1.Items
+                initialData = lbInitData.Items
                     .Cast<object>()
                     .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0.0)
                     .ToArray();
@@ -1528,6 +1553,7 @@ namespace SonataSmooth
                 {
                     using (var dlg = new SaveFileDialog())
                     {
+                        dlg.FileName = $"{excelTitle}.csv";
                         dlg.Filter = "CSV files (*.csv)|*.csv";
                         dlg.DefaultExt = "csv";
                         dlg.AddExtension = true;
@@ -1539,6 +1565,7 @@ namespace SonataSmooth
             {
                 using (var dlg = new SaveFileDialog())
                 {
+                    dlg.FileName = $"{excelTitle}.csv";
                     dlg.Filter = "CSV files (*.csv)|*.csv";
                     dlg.DefaultExt = "csv";
                     dlg.AddExtension = true;
@@ -1585,7 +1612,7 @@ namespace SonataSmooth
             {
                 if (completed) return;
                 int v = Math.Max(0, Math.Min(100, percent));
-                progressBar1.Value = v;
+                pbMain.Value = v;
             });
 
             string dir = Path.GetDirectoryName(basePath);
@@ -1643,16 +1670,16 @@ namespace SonataSmooth
                 // 완료 표시: 이후 들어오는 Report 무시
                 completed = true;
 
-                if (progressBar1.InvokeRequired)
-                    progressBar1.Invoke(new Action(() =>
+                if (pbMain.InvokeRequired)
+                    pbMain.Invoke(new Action(() =>
                     {
-                        progressBar1.Value = 0;
-                        progressBar1.Refresh();
+                        pbMain.Value = 0;
+                        pbMain.Refresh();
                     }));
                 else
                 {
-                    progressBar1.Value = 0;
-                    progressBar1.Refresh();
+                    pbMain.Value = 0;
+                    pbMain.Refresh();
                 }
             }
 
@@ -1807,7 +1834,10 @@ namespace SonataSmooth
                     if (com != null && System.Runtime.InteropServices.Marshal.IsComObject(com))
                         System.Runtime.InteropServices.Marshal.FinalReleaseComObject(com);
                 }
-                catch { /* 필요 시 Logging 기능 추가 */ }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[FinalRelease] COM object release failed: {ex}");
+                }
             }
 
             void ReleaseAll(Stack<object> stack)
@@ -1824,12 +1854,12 @@ namespace SonataSmooth
             bool doGauss = settingsForm.chbGauss.Checked;
             bool doSG = settingsForm.chbSG.Checked;
 
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100;
-            progressBar1.Value = 0;
+            pbMain.Style = ProgressBarStyle.Continuous;
+            pbMain.Minimum = 0;
+            pbMain.Maximum = 100;
+            pbMain.Value = 0;
 
-            var initialData = listBox1.Items
+            var initialData = lbInitData.Items
                 .Cast<object>()
                 .Select(item => double.TryParse(item?.ToString(), out var d) ? d : 0.0)
                 .ToArray();
@@ -1898,6 +1928,133 @@ namespace SonataSmooth
                 wb = workbooks.Add();
                 coms.Push(wb);
 
+                try
+                {
+                    var smoothingMethods = new List<string>();
+                    if (doRect) smoothingMethods.Add("Rectangular");
+                    if (doAvg) smoothingMethods.Add("Binomial");
+                    if (doMed) smoothingMethods.Add("Median");
+                    if (doGauss) smoothingMethods.Add("Gaussian");
+                    if (doSG) smoothingMethods.Add("Savitzky-Golay");
+
+                    //  Excel 파일의 Built-in 속성에 기록.
+                    //  wb.BuiltinDocumentProperties["Title"].Value = txtDatasetTitle.Text;
+                    //  wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Export";
+                    //  wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
+                    //  wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Export";
+                    //  string subject = smoothingMethods.Count > 0
+                    //     ? string.Join(", ", smoothingMethods) + " smoothing applied"
+                    //     : "No smoothing applied";
+
+                    //  wb.BuiltinDocumentProperties["Subject"].Value = subject;
+                    //  wb.BuiltinDocumentProperties["Comments"].Value = "Exported from SonataSmooth application";
+
+                    wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {txtDatasetTitle.Text}";
+                    wb.BuiltinDocumentProperties["Category"].Value  = "SonataSmooth Movement Score";
+                    wb.BuiltinDocumentProperties["Author"].Value = "Maestro SonataSmooth";
+                    wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
+                    wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Movements, Harmony, Export";
+
+                    string subject = smoothingMethods.Count > 0
+                        ? $"Concerto of {string.Join(" & ", smoothingMethods)} smoothing movements"
+                        : "Cadenza of Silence : No smoothing applied";
+
+                    wb.BuiltinDocumentProperties["Subject"].Value = subject;
+
+                    string[] musicalPhrases = new[]
+                    {
+                        "Adagio in Data Minor",
+                        "Presto Noise Reduction",
+                        "Allegro of Algorithms",
+                        "Nocturne for Numeric Streams",
+                        "Fugue of Filters",
+                        "Symphony of Smoothness",
+                        "Etude in Error Suppression",
+                        "Rhapsody of Regression",
+                        "Minuet of Median Magic",
+                        "Cantata of Clean Curves"
+                    };
+
+                    Random rnd = new Random();
+                    string randomPhrase = musicalPhrases[rnd.Next(musicalPhrases.Length)];
+
+                    string comments = $"Encore performed by the SonataSmooth Orchestra - \"{randomPhrase}\"";
+
+                    if (smoothingMethods.Count == 4)
+                    {
+                        comments += Environment.NewLine + "Hidden Movement Unlocked : The Quartet of Filters has performed in perfect harmony.";
+                    }
+
+                    wb.BuiltinDocumentProperties["Comments"].Value = comments;
+                }
+                catch (Exception ex)
+                {
+                    // Excel Interop 에서 발생할 수 있는 주요 예외를 구분하여 처리
+                    if (ex is System.Runtime.InteropServices.COMException comEx)
+                    {
+                        // COM 예외 : Excel 이 설치되어 있지 않거나, 권한 문제, 속성 이름 오탈자 등
+                        MessageBox.Show(
+                            "Failed to set Excel document properties (COM error).\n\n" +
+                            "Excel may not be installed, the property name may be incorrect, or there may be a permissions issue.\n\n" +
+                            $"Details : {comEx.Message}",
+                            "Excel Property Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                        // 필요 시 로그 : Debug.WriteLine(comEx);
+                    }
+                    else if (ex is ArgumentException argEx)
+                    {
+                        // 잘못된 속성 이름 등
+                        MessageBox.Show(
+                            "Failed to set Excel document properties (Argument error).\n\n" +
+                            "The built-in property name is incorrect, or an unsupported value has been assigned.\n\n" +
+                            $"Details : {argEx.Message}",
+                            "Excel Property Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                    }
+                    else if (ex is InvalidCastException castEx)
+                    {
+                        // 잘못된 타입으로 값 할당 시
+                        MessageBox.Show(
+                            "Failed to set Excel document properties (Type error).\n\n" +
+                            "The type of value assigned to the property is invalid.\n\n" +
+                            $"Details : {castEx.Message}",
+                            "Excel Property Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                    }
+                    else if (ex is System.UnauthorizedAccessException unauthEx)
+                    {
+                        // 파일 또는 속성에 대한 권한 부족
+                        MessageBox.Show(
+                            "Failed to set Excel document properties (Access denied).\n\n" +
+                            "You do not have sufficient permissions for the Excel file or its properties.\n\n" +
+                            $"Details : {unauthEx.Message}",
+                            "Excel Property Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                    }
+                    else
+                    {
+                        // 기타 예외 처리
+                        MessageBox.Show(
+                            "An unexpected error occurred while setting Excel document properties.\n\n" +
+                            $"Details : {ex.Message}",
+                            "Excel Property Error",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning
+                        );
+                    }
+
+                    // 필요 시 상세 로그 표시
+                    // System.Diagnostics.Debug.WriteLine(ex.ToString());
+                }
+
                 sheets = wb.Worksheets;
                 coms.Push(sheets);
 
@@ -1943,13 +2100,13 @@ namespace SonataSmooth
                             FinalRelease(topCell);
                         }
 
-                        progressBar1.Value = Math.Min(100, (int)(100.0 * idx / total));
+                        pbMain.Value = Math.Min(100, (int)(100.0 * idx / total));
                         await Task.Yield();
 
                         curCol++;
                     }
 
-                    progressBar1.Value = 100;
+                    pbMain.Value = 100;
                     return curCol - 1;
                 }
 
@@ -2090,15 +2247,77 @@ namespace SonataSmooth
                     }
                 }
 
-                progressBar1.Value = 0;
+                pbMain.Value = 0;
 
                 // 창 유지 : 사용자에게 권한 이관
                 wb.Saved = false; // 닫기 시 저장 대화상자 표시
                 excel.Visible = true;
             }
+
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                string msg = "Excel interop error: " + ex.Message + Environment.NewLine + Environment.NewLine +
+                    "Microsoft Excel does not appear to be installed, or there was a problem starting Excel." + Environment.NewLine +
+                    "If Excel is not installed, you may visit the Microsoft Office website to purchase or install Office." + Environment.NewLine + Environment.NewLine +
+                    "Would you like to open the Microsoft Office download page now?";
+
+                var result = MessageBox.Show(
+                    msg,
+                    "Export Error", 
+                    MessageBoxButtons.YesNo, 
+                    MessageBoxIcon.Error, 
+                    MessageBoxDefaultButton.Button2
+                    );
+
+                if (result == DialogResult.Yes)
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo("https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products") { UseShellExecute = true });
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                }
+            }
+            catch (AggregateException ex)
+            {
+                var allMessages = string.Join(Environment.NewLine, ex.InnerExceptions.Select(inner => inner.Message));
+                MessageBox.Show(
+                    "One or more errors occurred during export : " + Environment.NewLine + allMessages,
+                    "Export Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            catch (System.IO.PathTooLongException)
+            {
+                MessageBox.Show("The file path is too long. Please choose a shorter path.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (System.IO.DirectoryNotFoundException)
+            {
+                MessageBox.Show("The specified directory was not found. Please check the save location.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (System.IO.IOException)
+            {
+                MessageBox.Show("An I/O error occurred while saving the file. Please check disk space and permissions.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (System.OutOfMemoryException)
+            {
+                MessageBox.Show("Not enough memory to complete the export. Try closing other applications.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (System.BadImageFormatException)
+            {
+                MessageBox.Show("Excel (Office) bitness (32-bit / 64-bit) or Interop DLL mismatch. Please check your Office installation.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch(System.UnauthorizedAccessException)
+            {
+                MessageBox.Show("You do not have permission to save to this location. Please choose a different path.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             catch (Exception ex)
             {
-                MessageBox.Show("Excel export failed: " + ex.Message, "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An unexpected error occurred: " + ex.Message, "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
@@ -2176,64 +2395,524 @@ namespace SonataSmooth
 
         private void UpdateExportExcelButtonState()
         {
-            bool hasItems = listBox1.Items.Count > 0;
+            bool hasItems = lbInitData.Items.Count > 0;
             bool isValid = hasItems
                 && !string.IsNullOrWhiteSpace(txtDatasetTitle.Text)
                 && txtDatasetTitle.Text != ExcelTitlePlaceholder;
             btnExport.Enabled = isValid;
         }
 
-        private void btnSync1_Click(object sender, EventArgs e)
+        private void btnInitSelectSync_Click(object sender, EventArgs e)
         {
-            int count = listBox1.Items.Count;
-            if (count != listBox2.Items.Count || listBox1.SelectedIndices.Count == 0)
+            int count = lbInitData.Items.Count;
+            if (count != lbRefinedData.Items.Count || lbInitData.SelectedIndices.Count == 0)
                 return;
 
-            listBox2.BeginUpdate();
+            lbRefinedData.BeginUpdate();
             try
             {
-                listBox2.ClearSelected();
+                lbRefinedData.ClearSelected();
 
-                var indices = new int[listBox1.SelectedIndices.Count];
-                listBox1.SelectedIndices.CopyTo(indices, 0);
+                var indices = new int[lbInitData.SelectedIndices.Count];
+                lbInitData.SelectedIndices.CopyTo(indices, 0);
 
                 for (int i = 0; i < indices.Length; i++)
-                    listBox2.SetSelected(indices[i], true);
+                    lbRefinedData.SetSelected(indices[i], true);
 
                 // 스크롤 위치 동기화
-                listBox2.TopIndex = listBox1.TopIndex;
+                lbRefinedData.TopIndex = lbInitData.TopIndex;
             }
             finally
             {
-                listBox2.EndUpdate();
+                lbRefinedData.EndUpdate();
             }
         }
 
-        private void btnSync2_Click(object sender, EventArgs e)
+        private void btnRefSelectSync_Click(object sender, EventArgs e)
         {
-            int count = listBox2.Items.Count;
-            if (count != listBox1.Items.Count || listBox2.SelectedIndices.Count == 0)
+            int count = lbRefinedData.Items.Count;
+            if (count != lbInitData.Items.Count || lbRefinedData.SelectedIndices.Count == 0)
                 return;
 
-            listBox1.BeginUpdate();
+            lbInitData.BeginUpdate();
             try
             {
-                listBox1.ClearSelected();
+                lbInitData.ClearSelected();
 
-                var indices = new int[listBox2.SelectedIndices.Count];
-                listBox2.SelectedIndices.CopyTo(indices, 0);
+                var indices = new int[lbRefinedData.SelectedIndices.Count];
+                lbRefinedData.SelectedIndices.CopyTo(indices, 0);
 
                 for (int i = 0; i < indices.Length; i++)
-                    listBox1.SetSelected(indices[i], true);
+                    lbInitData.SetSelected(indices[i], true);
 
                 // 스크롤 위치 동기화
-                listBox1.TopIndex = listBox2.TopIndex;
+                lbInitData.TopIndex = lbRefinedData.TopIndex;
             }
             finally
             {
-                listBox1.EndUpdate();
+                lbInitData.EndUpdate();
             }
+        }
+
+        #region Mouse Hover and Leave Events
+        private void MouseLeaveHandler(object sender, EventArgs e)
+        {
+            if (lbRefinedData.Items.Count == 0)
+            {
+                slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+            }
+            else
+            {
+                slblDesc.Visible = false;
+            }
+        }
+
+        private void cbxKernelRadius_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+        }
+
+
+        private void cbxKernelRadius_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+
+        private void lblPolyOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+        }
+
+        private void lblPolyOrder_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxPolyOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+        }
+        private void cbxPolyOrder_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblKernelRadius_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+        }
+
+        private void lblKernelRadius_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void FrmMain_MouseHover(object sender, EventArgs e)
+        {
+            if (lbRefinedData.Items.Count == 0)
+            {
+                slblDesc.Visible = true;
+                slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+            }
+            else
+            {
+                slblDesc.Visible = false;
+            }
+        }
+
+        private void txtInitAdd_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Enter a numeric value to add to the Initial Dataset. Press [ Enter ] or click the [ Add ] button to submit.";
+        }
+
+        private void txtInitAdd_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitAdd_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Add the entered value to the Initial Dataset.";
+        }
+
+        private void btnInitAdd_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void rbtnRect_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Applies a simple moving average using equal weights within the kernel window.";
+        }
+
+        private void rbtnRect_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void rbtnAvg_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Smooths data using binomial coefficients for weighted averaging within the kernel window.";
+        }
+
+        private void rbtnAvg_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void rbtnMed_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Reduces noise by computing the weighted median using binomial coefficients within the kernel window.";
+        }
+
+        private void rbtnMed_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void rbtnGauss_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Smooths data using a Gaussian kernel for weighted averaging, emphasizing central values.";
+        }
+
+        private void rbtnGauss_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void rbtnSG_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Fits a polynomial to the data within the kernel window for advanced smoothing and trend preservation.";
+        }
+
+        private void rbtnSG_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+
+        private void btnInitClear_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            int itemCount = lbInitData.Items.Count;
+
+            if (itemCount == 1)
+                slblDesc.Text = "Remove the only item from the Initial Dataset listbox. This will also clear the Refined Dataset listbox.";
+            else
+                slblDesc.Text = $"Remove all {itemCount} items from the Initial Dataset listbox. This will also clear the Refined Dataset listbox.";
+        }
+
+
+        private void btnInitClear_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitCopy_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            int selCount = lbInitData.SelectedItems.Count;
+
+            if (selCount == 0)
+                slblDesc.Text = "Copy all items from the Initial Dataset listbox to the clipboard.";
+            else if (selCount == 1)
+                slblDesc.Text = "Copy the selected item from the Initial Dataset listbox to the clipboard.";
+            else
+                slblDesc.Text = $"Copy {selCount} selected items from the Initial Dataset listbox to the clipboard.";
+        }
+
+        private void btnInitCopy_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitPaste_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Paste numeric values from the clipboard into the Initial Dataset listbox.";
+        }
+
+        private void btnInitPaste_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitEdit_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbInitData.SelectedItems.Count;
+            slblDesc.Visible = true;
+
+            if (selCount == 1)
+                slblDesc.Text = "Edit the selected item in the Initial Dataset listbox.";
+            else
+                slblDesc.Text = $"Edit {selCount} selected items in the Initial Dataset listbox.";
+        }
+
+        private void btnInitEdit_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitDelete_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbInitData.SelectedItems.Count;
+            slblDesc.Visible = true;
+
+            if (selCount == 1)
+            {
+                slblDesc.Text = "Delete the selected item from the Initial Dataset listbox.";
+            }
+            else
+            {
+                slblDesc.Text = $"Delete {selCount} selected items from the Initial Dataset listbox.";
+            }
+        }
+
+        private void btnInitDelete_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitSelectAll_MouseHover(object sender, EventArgs e)
+        {
+            int itemCount = lbInitData.Items.Count;
+            slblDesc.Visible = true;
+
+            if (itemCount == 1)
+                slblDesc.Text = "Select the only item in the Initial Dataset listbox.";
+            else
+                slblDesc.Text = $"Select all {itemCount} items in the Initial Dataset listbox.";
+        }
+
+        private void btnInitSelectAll_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitSelClear_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbInitData.SelectedItems.Count;
+            slblDesc.Visible = true;
+
+            if (selCount == 1)
+                slblDesc.Text = "Deselect the selected item in the Initial Dataset listbox.";
+            else
+                slblDesc.Text = $"Deselect all {selCount} selected items in the Initial Dataset listbox.";
+        }
+
+        private void btnInitSelClear_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInitSelectSync_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbInitData.SelectedItems.Count;
+            slblDesc.Visible = true;
+
+            if (selCount == 1)
+                slblDesc.Text = "Synchronize selection : Select the corresponding item in the Refined Dataset listbox.";
+            else
+                slblDesc.Text = $"Synchronize selection : Select {selCount} corresponding items in the Refined Dataset listbox.";
+        }
+
+        private void btnInitSelectSync_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnRefClear_MouseHover(object sender, EventArgs e)
+        {
+            int itemCount = lbRefinedData.Items.Count;
+            slblDesc.Visible = true;
+
+            if (itemCount == 1)
+                slblDesc.Text = "Remove the only item from the Refined Dataset listbox.";
+            else
+                slblDesc.Text = $"Remove all {itemCount} items from the Refined Dataset listbox.";
+        }
+
+        private void btnRefClear_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnRefCopy_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbRefinedData.SelectedItems.Count;
+
+            if (selCount == 0)
+                slblDesc.Text = "Copy all items from the Refined Dataset listbox to the clipboard.";
+            else if (selCount == 1)
+                slblDesc.Text = "Copy the selected item from the Refined Dataset listbox to the clipboard.";
+            else
+                slblDesc.Text = $"Copy {selCount} selected items from the Refined Dataset listbox to the clipboard.";
+        }
+
+        private void btnRefCopy_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnRefSelectAll_MouseHover(object sender, EventArgs e)
+        {
+            int itemCount = lbRefinedData.Items.Count;
+            slblDesc.Visible = true;
+
+            if (itemCount == 1)
+                slblDesc.Text = "Select the only item in the Refined Dataset listbox.";
+            else
+                slblDesc.Text = $"Select all {itemCount} items in the Refined Dataset listbox.";
+        }
+
+        private void btnRefSelectAll_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnRefSelectClr_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbRefinedData.SelectedItems.Count;
+            slblDesc.Visible = true;
+
+            if (selCount == 1)
+                slblDesc.Text = "Deselect the selected item in the Refined Dataset listbox.";
+            else
+                slblDesc.Text = $"Deselect all {selCount} selected items in the Refined Dataset listbox.";
+        }
+
+        private void btnRefSelectClr_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnRefSelectSync_MouseHover(object sender, EventArgs e)
+        {
+            int selCount = lbRefinedData.SelectedItems.Count;
+
+            slblDesc.Visible = true;
+            if (selCount == 1)
+                slblDesc.Text = "Synchronize selection : Select the corresponding item in the Initial Dataset listbox.";
+            else
+                slblDesc.Text = $"Synchronize selection : Select {selCount} corresponding items in the Initial Dataset listbox.";
+        }
+
+        private void btnRefSelectSync_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void txtDatasetTitle_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            if (txtDatasetTitle.Text == ExcelTitlePlaceholder)
+            {
+                slblDesc.Text = "Enter a title for the Excel document. This will be used as the main title in the first cell.";
+            }
+            else
+            {
+                slblDesc.Text = "Edit the title for the Excel document. This will be used as the main title in the first cell.";
+            }
+        }
+
+        private void txtDatasetTitle_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnInfo_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Click to view Avocado Smoothie application information and version details.";
+        }
+
+        private void btnInfo_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnCalibrate_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            int itemCount = lbInitData.Items.Count;
+            if (itemCount == 0)
+                slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+            else
+                slblDesc.Text = "Click to start the calibration process using the selected smoothing method and parameters.";
+
+        }
+
+        private void btnCalibrate_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnExport_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            if (lbRefinedData.Items.Count == 0)
+            {
+                slblDesc.Text = "To export, first calibrate the data using the [ Calibrate ] button.";
+            }
+            else
+            {
+                slblDesc.Text = "Click to export the refined dataset to an Excel file with the specified title and settings.";
+            }
+        }
+
+        private void btnExport_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lbInitData_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            if (lbInitData.Items.Count == 0)
+            {
+                slblDesc.Text = "The Initial Dataset is empty. Add data to start calibrating.";
+            }
+            else
+            {
+                slblDesc.Text = "This is the Initial Dataset listbox. You can add, edit, delete, and calibrate data here.";
+            }
+        }
+
+        private void lbInitData_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lbRefinedData_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            if (lbRefinedData.Items.Count == 0)
+            {
+                slblDesc.Text = "The Refined Dataset is empty. Calibrate the Initial Dataset to generate refined data.";
+            }
+            else
+            {
+                slblDesc.Text = "This is the Refined Dataset listbox. It contains the calibrated data from the Initial Dataset.";
+            }
+        }
+
+        private void lbRefinedData_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
         }
     }
+    #endregion
 }
 
