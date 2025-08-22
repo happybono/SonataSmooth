@@ -146,8 +146,27 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.3.1.0
 #### August 21, 2025
-> Unified “filter calculation” logic into a shared method used by both `ExportCsvAsync` and `ExportExcelAsync`.<br><br>
+> Unified "filter calculation" logic into a shared method used by both `ExportCsvAsync` and `ExportExcelAsync`.<br><br>
 > Minor bugs fixed.
+
+### v4.6.0.0
+#### August 22, 2025
+> Refactored UI controls and variable names across the application, applying clear naming conventions (e.g., `lblVersion` → `lblAppVersion`, `listBox1` → `lbInitData`, `ProgressBar1` → `pbModify`).<br><br> 
+> Added mouse Hover/Leave event handlers to multiple forms (e.g., `FrmExportSettings`, `FrmModify`) to provide real-time tooltip descriptions for each option and button.<br><br>
+> Improved DPI scaling support : dynamically adjusted ProgressBar and StatusLabel sizes in `FrmModify` using `Graphics.DpiX / Graphics.DpiY`.<br><br>
+> Enhanced status display during multi-item modifications: status bar messages now update dynamically based on the number of selected items.<br><br>
+> Optimized data modification logic : sorted selected item indices and improved UI update performance.<br><br>
+> Fixed a bug where `PolyOrder` was incorrectly initialized with the `kernelRadius` value.<br><br>
+> Cleaned up control metadata and resource key names in `.resx` files.<br><br>
+> Added musical-themed metadata to Excel exports : document properties now include dynamic titles, categories, and keywords inspired by classical composition (e.g., "SonataSmooth Overture", "Concerto of smoothing movements").<br><br>
+> Embedded randomized musical phrases in the Comments field (e.g., "Adagio in Data Minor", "Fugue of Filters") to enrich exported files with playful orchestral flair<br><br>
+> Introduced hidden Easter egg : when exactly four smoothing methods are applied, a special comment is added - "Hidden Movement Unlocked : The Quartet of Filters has performed in perfect harmony."<br><br>
+> Expanded error handling for Excel interop and file export issues, including user-friendly messages and fallback guidance (e.g., Office download prompt on COMException).<br><br>
+> Minor bug fixes and code cleanup.  
+
+### v4.6.1.0
+#### August 23, 2025
+> Minor bugs fixed.  
 </details>
 
 ## Required Components & Setup
@@ -448,7 +467,7 @@ else if (useAvg)
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
 At each position:
 
-1. Out‑of‑bounds indices are “mirrored” back into the valid range to handle boundaries smoothly.
+1. Out‑of‑bounds indices are "mirrored" back into the valid range to handle boundaries smoothly.
 2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
 
 This method preserves important features such as peaks and edges better than simple moving averages.
