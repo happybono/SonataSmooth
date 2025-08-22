@@ -71,7 +71,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v3.5.0.0
 #### July 19, 2025
-> Added functionality to edit selected items in the Initial Dataset/ (supports both single and multiple item edits)<br>
+> Added functionality to edit selected items in the Initial Dataset. (supports both single and multiple item edits)<br>
   (The number of selected items for editing is now displayed in the StatusBar.)<br><br>
 > Updated copy behavior : even when items aren't fully selected, pressing the copy button or using the shortcut (Ctrl + C) will copy all entries.<br>
   (If only some items in the listbox are selected, only those selected items will be copied.)<br><br>
@@ -182,7 +182,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
 
 ### Filter Comparison Table
-| Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Filtering | Savitzky–Golay Filtering |
+| Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Filtering | Savitzky‑Golay Filtering |
 |:--------------------------------------------------------|:---------------------:|:------------------:|:------------------------:|:------------------:|:------------------------:|
 | Occasional random noise                                 | OK                    | Good               | Very Good                 | Good               | Very Good                |
 | Frequent random noise                                   | Poor                  | Fair               | **Excellent**                 | Fair               | Fair                     |
@@ -201,7 +201,7 @@ This guide explains how different noise filters work with different types of sig
 - **Binomial Averaging** is a good middle ground : especially for periodic signals with moderate noise.
 - **Binomial Median Filtering** is a powerhouse for handling spikes, frequent noise, and step changes : great for robustness.
 - **Gaussian Filtering** offers smooth results but may not handle abrupt changes well.
-- **Savitzky–Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
+- **Savitzky‑Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
 
 ## What Is Pascal's Triangle?
 Pascal’s Triangle is a triangle of numbers built like this :
@@ -232,7 +232,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
 - **Gaussian Filtering**<br>
   Uses a bell-shaped curve for weights. Very smooth, but may let sharp jumps stay.
 
-- **Savitzky–Golay Filtering**<br>
+- **Savitzky‑Golay Filtering**<br>
   Fits tiny curves to chunks of data. Keeps wave shapes and slow changes almost perfectly, but not as strong for sudden spikes.
 
 ### Example of Using Pascal's Triangle in Filtering
@@ -443,18 +443,18 @@ else if (useAvg)
 }
 ```
 
-### 6. Savitzky–Golay Filter
+### 6. Savitzky‑Golay Filter
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
 At each position:
 
 1. Out‑of‑bounds indices are “mirrored” back into the valid range to handle boundaries smoothly.
-2. Each sample in the window is multiplied by its **precomputed Savitzky–Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
+2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
 
 This method preserves important features such as peaks and edges better than simple moving averages.
 
 #### Principle
-Savitzky–Golay filtering performs a **least‑squares fit** of a low‑degree polynomial to the samples in the window, then evaluates the polynomial at the center.  
+Savitzky‑Golay filtering performs a **least‑squares fit** of a low‑degree polynomial to the samples in the window, then evaluates the polynomial at the center.  
 Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curve, but are determined analytically to minimize the mean‑squared error for the chosen polynomial degree.
 
 - **Polynomial Fitting**: Fits a polynomial of specified degree within the window.
@@ -489,7 +489,7 @@ Batch updates and progress reporting keep the UI responsive. A finally block ens
 
 -	**Batch UI Update** : Efficiently updates the list box.
 -	**Progress Feedback** : Shows operation progress to the user.
--	**Status Reporting** : Updates labels and enables/disables controls.
+-	**Status Reporting** : Updates labels and enables / disables controls.
 
 #### Code Implementation
 ```csharp
