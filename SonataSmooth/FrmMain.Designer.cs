@@ -237,7 +237,7 @@
             this.btnInitDelete.Text = "";
             this.ttipMain.SetToolTip(this.btnInitDelete, "Delete");
             this.btnInitDelete.UseVisualStyleBackColor = true;
-            this.btnInitDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            this.btnInitDelete.Click += new System.EventHandler(this.btnInitDelete_Click);
             this.btnInitDelete.MouseLeave += new System.EventHandler(this.btnInitDelete_MouseLeave);
             this.btnInitDelete.MouseHover += new System.EventHandler(this.btnInitDelete_MouseHover);
             // 
@@ -504,7 +504,7 @@
             this.btnInitEdit.Text = "";
             this.ttipMain.SetToolTip(this.btnInitEdit, "Edit");
             this.btnInitEdit.UseVisualStyleBackColor = true;
-            this.btnInitEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnInitEdit.Click += new System.EventHandler(this.btnInitEdit_Click);
             this.btnInitEdit.MouseLeave += new System.EventHandler(this.btnInitEdit_MouseLeave);
             this.btnInitEdit.MouseHover += new System.EventHandler(this.btnInitEdit_MouseHover);
             // 
@@ -763,7 +763,9 @@
             this.txtDatasetTitle.Size = new System.Drawing.Size(265, 25);
             this.txtDatasetTitle.TabIndex = 30;
             this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtExcelTitle_TextChanged);
+            this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtDatasetTitle_TextChanged);
+            this.txtDatasetTitle.Enter += new System.EventHandler(this.txtDatasetTitle_Enter);
+            this.txtDatasetTitle.Leave += new System.EventHandler(this.txtDatasetTitle_Leave);
             this.txtDatasetTitle.MouseLeave += new System.EventHandler(this.txtDatasetTitle_MouseLeave);
             this.txtDatasetTitle.MouseHover += new System.EventHandler(this.txtDatasetTitle_MouseHover);
             // 
@@ -793,7 +795,7 @@
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SonataSmooth";
-            this.Load += new System.EventHandler(this.frmMain_Load);
+            this.Load += new System.EventHandler(this.FrmMain_Load);
             this.MouseHover += new System.EventHandler(this.FrmMain_MouseHover);
             this.gbInitData.ResumeLayout(false);
             this.gbInitData.PerformLayout();

@@ -998,7 +998,7 @@ namespace SonataSmooth
             }
         }
 
-        private async void btnDelete_Click(object sender, EventArgs e)
+        private async void btnInitDelete_Click(object sender, EventArgs e)
         {
             int selectedCount = lbInitData.SelectedIndices.Count;
 
@@ -1373,8 +1373,7 @@ namespace SonataSmooth
             }
         }
 
-
-        private void frmMain_Load(object sender, EventArgs e)
+        private void FrmMain_Load(object sender, EventArgs e)
         {
             cbxKernelRadius.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
@@ -1397,9 +1396,9 @@ namespace SonataSmooth
 
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
             txtDatasetTitle.ForeColor = Color.Gray;
-            txtDatasetTitle.Enter += txtExcelTitle_Enter;
-            txtDatasetTitle.Leave += txtExcelTitle_Leave;
-            txtDatasetTitle.TextChanged += txtExcelTitle_TextChanged;
+            txtDatasetTitle.Enter += txtDatasetTitle_Enter;
+            txtDatasetTitle.Leave += txtDatasetTitle_Leave;
+            txtDatasetTitle.TextChanged += txtDatasetTitle_TextChanged;
             UpdateExportExcelButtonState();
 
             settingsForm.chbRect.Checked = true;
@@ -1432,7 +1431,7 @@ namespace SonataSmooth
             UpdatelbInitDataBtnsState(null, EventArgs.Empty);
         }
 
-        private void btnEdit_Click(object sender, EventArgs e)
+        private void btnInitEdit_Click(object sender, EventArgs e)
         {
             var frm = new FrmModify();
             frm.ShowDialog();
@@ -2357,7 +2356,7 @@ namespace SonataSmooth
             aboutForm.ShowDialog(this);
         }
 
-        private void txtExcelTitle_Enter(object sender, EventArgs e)
+        private void txtDatasetTitle_Enter(object sender, EventArgs e)
         {
             if (txtDatasetTitle.Text == ExcelTitlePlaceholder)
             {
@@ -2367,7 +2366,7 @@ namespace SonataSmooth
             txtDatasetTitle.TextAlign = HorizontalAlignment.Left;
         }
 
-        private void txtExcelTitle_Leave(object sender, EventArgs e)
+        private void txtDatasetTitle_Leave(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtDatasetTitle.Text))
             {
@@ -2377,7 +2376,7 @@ namespace SonataSmooth
             }
         }
 
-        private void txtExcelTitle_TextChanged(object sender, EventArgs e)
+        private void txtDatasetTitle_TextChanged(object sender, EventArgs e)
         {
             UpdateExportExcelButtonState();
 
