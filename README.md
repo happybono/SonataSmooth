@@ -154,12 +154,12 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Refactored UI controls and variable names across the application, applying clear naming conventions (e.g., `lblVersion` → `lblAppVersion`, `listBox1` → `lbInitData`, `ProgressBar1` → `pbModify`).<br><br> 
 > Added mouse Hover/Leave event handlers to multiple forms (e.g., `FrmExportSettings`, `FrmModify`) to provide real-time tooltip descriptions for each option and button.<br><br>
 > Improved DPI scaling support : dynamically adjusted ProgressBar and StatusLabel sizes in `FrmModify` using `Graphics.DpiX / Graphics.DpiY`.<br><br>
-> Enhanced status display during multi-item modifications: status bar messages now update dynamically based on the number of selected items.<br><br>
+> Enhanced status display during multi-item modifications : status bar messages now update dynamically based on the number of selected items.<br><br>
 > Optimized data modification logic : sorted selected item indices and improved UI update performance.<br><br>
 > Fixed a bug where `PolyOrder` was incorrectly initialized with the `kernelRadius` value.<br><br>
 > Cleaned up control metadata and resource key names in `.resx` files.<br><br>
 > Added musical-themed metadata to Excel exports : document properties now include dynamic titles, categories, and keywords inspired by classical composition (e.g., "SonataSmooth Overture", "Concerto of smoothing movements").<br><br>
-> Embedded randomized musical phrases in the Comments field (e.g., "Adagio in Data Minor", "Fugue of Filters") to enrich exported files with playful orchestral flair<br><br>
+> Embedded randomized musical phrases in the Comments field (e.g., "Adagio in Data Minor", "Fugue of Filters") to enrich exported files with playful orchestral flair.<br><br>
 > Introduced hidden Easter egg : when exactly four smoothing methods are applied, a special comment is added - "Hidden Movement Unlocked : The Quartet of Filters has performed in perfect harmony."<br><br>
 > Expanded error handling for Excel interop and file export issues, including user-friendly messages and fallback guidance (e.g., Office download prompt on COMException).<br><br>
 > Minor bug fixes and code cleanup.  
