@@ -166,6 +166,10 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.6.1.0
 #### August 23, 2025
+> Minor bugs fixed.
+
+### v4.6.2.5
+#### August 23, 2025
 > Minor bugs fixed.  
 </details>
 
