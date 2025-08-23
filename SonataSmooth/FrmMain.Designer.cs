@@ -43,7 +43,7 @@
             this.btnInitCopy = new System.Windows.Forms.Button();
             this.btnInitPaste = new System.Windows.Forms.Button();
             this.btnInitSelectAll = new System.Windows.Forms.Button();
-            this.btnInitSelClear = new System.Windows.Forms.Button();
+            this.btnInitSelectClr = new System.Windows.Forms.Button();
             this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
             this.lblKernelRadius = new System.Windows.Forms.Label();
             this.btnRefSelectClr = new System.Windows.Forms.Button();
@@ -102,8 +102,6 @@
             this.lbInitData.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragDrop);
             this.lbInitData.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragEnter);
             this.lbInitData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbInitData_KeyDown);
-            this.lbInitData.MouseLeave += new System.EventHandler(this.lbInitData_MouseLeave);
-            this.lbInitData.MouseHover += new System.EventHandler(this.lbInitData_MouseHover);
             // 
             // lbRefinedData
             // 
@@ -118,8 +116,6 @@
             this.lbRefinedData.TabIndex = 24;
             this.lbRefinedData.SelectedIndexChanged += new System.EventHandler(this.lbRefinedData_SelectedIndexChanged);
             this.lbRefinedData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbRefinedData_KeyDown);
-            this.lbRefinedData.MouseLeave += new System.EventHandler(this.lbRefinedData_MouseLeave);
-            this.lbRefinedData.MouseHover += new System.EventHandler(this.lbRefinedData_MouseHover);
             // 
             // rbtnAvg
             // 
@@ -286,20 +282,19 @@
             this.btnInitSelectAll.MouseLeave += new System.EventHandler(this.btnInitSelectAll_MouseLeave);
             this.btnInitSelectAll.MouseHover += new System.EventHandler(this.btnInitSelectAll_MouseHover);
             // 
-            // btnInitSelClear
+            // btnInitSelectClr
             // 
-            this.btnInitSelClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitSelClear.Location = new System.Drawing.Point(306, 235);
-            this.btnInitSelClear.Margin = new System.Windows.Forms.Padding(2);
-            this.btnInitSelClear.Name = "btnInitSelClear";
-            this.btnInitSelClear.Size = new System.Drawing.Size(30, 30);
-            this.btnInitSelClear.TabIndex = 11;
-            this.btnInitSelClear.Text = "";
-            this.ttipMain.SetToolTip(this.btnInitSelClear, "Deselect All");
-            this.btnInitSelClear.UseVisualStyleBackColor = true;
-            this.btnInitSelClear.Click += new System.EventHandler(this.btnInitSelClear_Click);
-            this.btnInitSelClear.MouseLeave += new System.EventHandler(this.btnInitSelClear_MouseLeave);
-            this.btnInitSelClear.MouseHover += new System.EventHandler(this.btnInitSelClear_MouseHover);
+            this.btnInitSelectClr.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnInitSelectClr.Location = new System.Drawing.Point(306, 235);
+            this.btnInitSelectClr.Margin = new System.Windows.Forms.Padding(2);
+            this.btnInitSelectClr.Name = "btnInitSelectClr";
+            this.btnInitSelectClr.Size = new System.Drawing.Size(30, 30);
+            this.btnInitSelectClr.TabIndex = 11;
+            this.btnInitSelectClr.Text = "";
+            this.ttipMain.SetToolTip(this.btnInitSelectClr, "Deselect All");
+            this.btnInitSelectClr.UseVisualStyleBackColor = true;
+            this.btnInitSelectClr.Click += new System.EventHandler(this.btnInitSelectClr_Click);
+            this.btnInitSelectClr.MouseHover += new System.EventHandler(this.btnInitSelectClr_MouseHover);
             // 
             // cbxKernelRadius
             // 
@@ -357,7 +352,6 @@
             this.ttipMain.SetToolTip(this.btnRefSelectClr, "Deselect All");
             this.btnRefSelectClr.UseVisualStyleBackColor = true;
             this.btnRefSelectClr.Click += new System.EventHandler(this.btnRefSelectClr_Click);
-            this.btnRefSelectClr.MouseLeave += new System.EventHandler(this.btnRefSelectClr_MouseLeave);
             this.btnRefSelectClr.MouseHover += new System.EventHandler(this.btnRefSelectClr_MouseHover);
             // 
             // btnRefSelectAll
@@ -468,7 +462,7 @@
             this.gbInitData.Controls.Add(this.btnInitDelete);
             this.gbInitData.Controls.Add(this.btnInitCopy);
             this.gbInitData.Controls.Add(this.btnInitPaste);
-            this.gbInitData.Controls.Add(this.btnInitSelClear);
+            this.gbInitData.Controls.Add(this.btnInitSelectClr);
             this.gbInitData.Controls.Add(this.btnInitSelectAll);
             this.gbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gbInitData.Location = new System.Drawing.Point(15, 52);
@@ -489,7 +483,6 @@
             this.ttipMain.SetToolTip(this.btnInitSelectSync, "Match Selection\r\n( ▶ Refined Dataset )");
             this.btnInitSelectSync.UseVisualStyleBackColor = true;
             this.btnInitSelectSync.Click += new System.EventHandler(this.btnInitSelectSync_Click);
-            this.btnInitSelectSync.MouseLeave += new System.EventHandler(this.btnInitSelectSync_MouseLeave);
             this.btnInitSelectSync.MouseHover += new System.EventHandler(this.btnInitSelectSync_MouseHover);
             // 
             // btnInitEdit
@@ -554,7 +547,6 @@
             this.ttipMain.SetToolTip(this.btnRefSelectSync, "Match Selection \r\n( ◀ Initial Dataset )");
             this.btnRefSelectSync.UseVisualStyleBackColor = true;
             this.btnRefSelectSync.Click += new System.EventHandler(this.btnRefSelectSync_Click);
-            this.btnRefSelectSync.MouseLeave += new System.EventHandler(this.btnRefSelectSync_MouseLeave);
             this.btnRefSelectSync.MouseHover += new System.EventHandler(this.btnRefSelectSync_MouseHover);
             // 
             // lblRefCnt
@@ -736,7 +728,6 @@
             this.ttipMain.SetToolTip(this.btnExport, "Export");
             this.btnExport.UseVisualStyleBackColor = true;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
-            this.btnExport.MouseLeave += new System.EventHandler(this.btnExport_MouseLeave);
             this.btnExport.MouseHover += new System.EventHandler(this.btnExport_MouseHover);
             // 
             // btnInfo
@@ -796,7 +787,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SonataSmooth";
             this.Load += new System.EventHandler(this.FrmMain_Load);
-            this.MouseHover += new System.EventHandler(this.FrmMain_MouseHover);
             this.gbInitData.ResumeLayout(false);
             this.gbInitData.PerformLayout();
             this.gbRefinedData.ResumeLayout(false);
@@ -823,7 +813,7 @@
         private System.Windows.Forms.Button btnInitCopy;
         private System.Windows.Forms.Button btnInitPaste;
         private System.Windows.Forms.Button btnInitSelectAll;
-        private System.Windows.Forms.Button btnInitSelClear;
+        private System.Windows.Forms.Button btnInitSelectClr;
         private System.Windows.Forms.Label lblKernelRadius;
         private System.Windows.Forms.Button btnRefSelectClr;
         private System.Windows.Forms.Button btnRefSelectAll;
