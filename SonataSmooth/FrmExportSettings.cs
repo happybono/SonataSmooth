@@ -247,7 +247,7 @@ namespace SonataSmooth
 
         private void btnSave_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Click to save the selected settings and apply them.";
+            slblDesc.Text = "Enable to automatically open the exported file after saving.";
         }
 
         private void btnSave_MouseLeave(object sender, EventArgs e)

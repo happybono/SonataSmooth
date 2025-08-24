@@ -149,11 +149,11 @@
             // 
             // btnCalibrate
             // 
-            this.btnCalibrate.Font = new System.Drawing.Font("Segoe Fluent Icons", 15.75F);
-            this.btnCalibrate.Location = new System.Drawing.Point(14, 782);
+            this.btnCalibrate.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCalibrate.Location = new System.Drawing.Point(14, 783);
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
-            this.btnCalibrate.Size = new System.Drawing.Size(466, 40);
+            this.btnCalibrate.Size = new System.Drawing.Size(466, 30);
             this.btnCalibrate.TabIndex = 22;
             this.btnCalibrate.Text = "";
             this.ttipMain.SetToolTip(this.btnCalibrate, "Calibrate");
@@ -165,7 +165,7 @@
             // btnInitAdd
             // 
             this.btnInitAdd.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitAdd.Location = new System.Drawing.Point(292, 12);
+            this.btnInitAdd.Location = new System.Drawing.Point(292, 14);
             this.btnInitAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitAdd.Name = "btnInitAdd";
             this.btnInitAdd.Size = new System.Drawing.Size(67, 30);
@@ -180,7 +180,7 @@
             // txtInitAdd
             // 
             this.txtInitAdd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtInitAdd.Location = new System.Drawing.Point(26, 14);
+            this.txtInitAdd.Location = new System.Drawing.Point(26, 16);
             this.txtInitAdd.Margin = new System.Windows.Forms.Padding(2);
             this.txtInitAdd.Name = "txtInitAdd";
             this.txtInitAdd.Size = new System.Drawing.Size(262, 25);
@@ -301,6 +301,7 @@
             this.cbxKernelRadius.DropDownHeight = 150;
             this.cbxKernelRadius.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxKernelRadius.ForeColor = System.Drawing.Color.Black;
             this.cbxKernelRadius.FormattingEnabled = true;
             this.cbxKernelRadius.IntegralHeight = false;
             this.cbxKernelRadius.ItemHeight = 17;
@@ -514,7 +515,7 @@
             // 
             // pbMain
             // 
-            this.pbMain.Location = new System.Drawing.Point(0, 832);
+            this.pbMain.Location = new System.Drawing.Point(0, 826);
             this.pbMain.Name = "pbMain";
             this.pbMain.Size = new System.Drawing.Size(734, 5);
             this.pbMain.TabIndex = 16;
@@ -575,7 +576,7 @@
             this.tlblSeparator2,
             this.tlblPolyOrder,
             this.slblPolyOrder});
-            this.statStripMain.Location = new System.Drawing.Point(0, 837);
+            this.statStripMain.Location = new System.Drawing.Point(0, 831);
             this.statStripMain.Name = "statStripMain";
             this.statStripMain.Size = new System.Drawing.Size(734, 24);
             this.statStripMain.SizingGrip = false;
@@ -707,7 +708,7 @@
             // btnExportSettings
             // 
             this.btnExportSettings.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExportSettings.Location = new System.Drawing.Point(655, 12);
+            this.btnExportSettings.Location = new System.Drawing.Point(655, 14);
             this.btnExportSettings.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportSettings.Name = "btnExportSettings";
             this.btnExportSettings.Size = new System.Drawing.Size(30, 30);
@@ -716,13 +717,15 @@
             this.ttipMain.SetToolTip(this.btnExportSettings, "Export Settings");
             this.btnExportSettings.UseVisualStyleBackColor = true;
             this.btnExportSettings.Click += new System.EventHandler(this.btnExportSettings_Click);
+            this.btnExportSettings.MouseLeave += new System.EventHandler(this.btnExportSettings_MouseLeave);
+            this.btnExportSettings.MouseHover += new System.EventHandler(this.btnExportSettings_MouseHover);
             // 
             // btnExport
             // 
-            this.btnExport.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.75F);
-            this.btnExport.Location = new System.Drawing.Point(486, 782);
+            this.btnExport.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnExport.Location = new System.Drawing.Point(486, 783);
             this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(234, 40);
+            this.btnExport.Size = new System.Drawing.Size(234, 30);
             this.btnExport.TabIndex = 32;
             this.btnExport.Text = "";
             this.ttipMain.SetToolTip(this.btnExport, "Export");
@@ -734,7 +737,7 @@
             // 
             this.btnInfo.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnInfo.ForeColor = System.Drawing.Color.MediumSlateBlue;
-            this.btnInfo.Location = new System.Drawing.Point(689, 12);
+            this.btnInfo.Location = new System.Drawing.Point(689, 14);
             this.btnInfo.Margin = new System.Windows.Forms.Padding(2);
             this.btnInfo.Name = "btnInfo";
             this.btnInfo.Size = new System.Drawing.Size(30, 30);
@@ -749,7 +752,7 @@
             // txtDatasetTitle
             // 
             this.txtDatasetTitle.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.txtDatasetTitle.Location = new System.Drawing.Point(385, 14);
+            this.txtDatasetTitle.Location = new System.Drawing.Point(385, 16);
             this.txtDatasetTitle.Name = "txtDatasetTitle";
             this.txtDatasetTitle.Size = new System.Drawing.Size(265, 25);
             this.txtDatasetTitle.TabIndex = 30;
@@ -765,7 +768,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(734, 861);
+            this.ClientSize = new System.Drawing.Size(734, 855);
             this.Controls.Add(this.btnInfo);
             this.Controls.Add(this.btnExportSettings);
             this.Controls.Add(this.txtDatasetTitle);

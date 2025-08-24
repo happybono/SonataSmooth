@@ -120,7 +120,7 @@ namespace SonataSmooth
                     lb.EndUpdate();
                     mainForm.lbInitData.Focus();
                     pbModify.Value = 0;
-                    mainForm.ShowStatusMessage($"Modified {total} item{(total > 1 ? "s" : "")} in Initial Dataset.");
+                    mainForm.ShowStatusMessage($"Modified {total} item{(total > 1 ? "s" : "")} to '{newValue}' in Initial Dataset.");
                     this.Close();
                 }));
             }
@@ -135,7 +135,7 @@ namespace SonataSmooth
                 lb.EndUpdate();
                 mainForm.lbInitData.Focus();
                 pbModify.Value = 0;
-                mainForm.ShowStatusMessage($"Modified {total} item{(total > 1 ? "s" : "")} in Initial Dataset.");
+                mainForm.ShowStatusMessage($"Modified {total} item{(total > 1 ? "s" : "")} to '{newValue}' in Initial Dataset.");
                 this.Close();
             }
         }

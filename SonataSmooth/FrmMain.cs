@@ -25,6 +25,9 @@ namespace SonataSmooth
 {
     public partial class FrmMain : Form
     {
+        // 보정 진행 중인 상태인지 여부에 대한 플래그
+        private bool isRefinedLoading = false;
+
         private const string ExcelTitlePlaceholder = "Click here to enter a title for your dataset.";
 
         private static readonly Regex numberRegex = new Regex(
@@ -53,6 +56,11 @@ namespace SonataSmooth
 
         private double dpiX;
         private double dpiY;
+
+        private const int RecommendedMinRadius = 3;
+        private const int RecommendedMaxRadius = 7;
+        private const int RecommendedMinPolyOrder = 2;
+        private const int RecommendedMaxPolyOrder = 6;
 
         public FrmMain()
         {
@@ -121,8 +129,6 @@ namespace SonataSmooth
 
             try
             {
-                btnCalibrate.Enabled = false;
-
                 if (!TryParseInputData(out double[] input, out int n))
                     return;
 
@@ -287,7 +293,22 @@ namespace SonataSmooth
                     lbRefinedData.BeginUpdate();
                     lbRefinedData.Items.Clear();
 
+                    btnCalibrate.Enabled = false;
+                    btnInitClear.Enabled = false;
+                    btnInitEdit.Enabled = false;
+                    btnInitPaste.Enabled = false;
+                    btnInitDelete.Enabled = false;
+                    btnInitSelectAll.Enabled = false;
+                    btnInitSelectSync.Enabled = false;
+                    btnRefClear.Enabled = false;
+                    btnRefSelectSync.Enabled = false;
+                    btnRefSelectAll.Enabled = false;
+                    btnExport.Enabled = false;
+
+                    isRefinedLoading = true; // 로딩 시작
                     await AddItemsInBatches(lbRefinedData, results, progressReporter, 60);
+                    isRefinedLoading = false; // 로딩 종료
+
                     lbRefinedData.EndUpdate();
                     lblRefCnt.Text = $"Count : {lbRefinedData.Items.Count}";
 
@@ -309,12 +330,23 @@ namespace SonataSmooth
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error binding results : {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    isRefinedLoading = false;
                 }
             }
             finally
             {
                 slblDesc.Visible = false;
                 btnCalibrate.Enabled = true;
+                btnInitClear.Enabled = true;
+                btnInitEdit.Enabled = true;
+                btnInitSelectAll.Enabled = true;
+                btnInitDelete.Enabled = true;
+                btnInitSelectSync.Enabled = true;
+                btnRefClear.Enabled = true;
+                btnRefSelectAll.Enabled = true;
+                btnRefSelectSync.Enabled = true;
+                btnExport.Enabled = true;
+
                 UpdatelbInitDataBtnsState(null, EventArgs.Empty);
                 UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
             }
@@ -388,8 +420,6 @@ namespace SonataSmooth
             return (rect, binomAvg, median, gauss, sg);
         }
 
-
-
         private static double[] ComputeGaussianCoefficients(int length, double sigma)
         {
             if (length < 1)
@@ -417,7 +447,6 @@ namespace SonataSmooth
 
             return coeffs;
         }
-
 
         private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
         {
@@ -463,8 +492,6 @@ namespace SonataSmooth
             // 모든 가중치 합산 후에도 못 찾았다면 최대 값 반환
             return pairs[pairs.Count - 1].Value;
         }
-
-
 
         private static int[] CalcBinomialCoefficients(int length)
         {
@@ -588,8 +615,23 @@ namespace SonataSmooth
         private void UpdateStatusLabel(int beforeCount)
         {
             int added = lbInitData.Items.Count - beforeCount;
-            slblDesc.Text = $"{added} item{(added > 1 ? "s have" : " has")} been added.";
+
+            if (added == 0)
+            {
+                slblDesc.Text = "No items have been added.";
+            }
+            else if (added == 1)
+            {
+                slblDesc.Text = "1 item has been added.";
+            }
+            else
+            {
+                slblDesc.Text = $"{added} items have been added.";
+            }
+
+            slblDesc.Visible = true;
         }
+
 
 
         private void btnInitAdd_Click(object sender, EventArgs e)
@@ -598,7 +640,8 @@ namespace SonataSmooth
             {
                 lbInitData.Items.Add(value);
                 lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
-                slblDesc.Text = $"Item ({value}) has been added.";
+                slblDesc.Visible = true;
+                slblDesc.Text = $"Value '{value}' has been added to initial listbox.";
             }
             else
             {
@@ -615,6 +658,8 @@ namespace SonataSmooth
             {
                 return;
             }
+
+            txtInitAdd.Text = String.Empty;
         }
 
         private void txtInitAdd_KeyDown(object sender, KeyEventArgs e)
@@ -696,11 +741,11 @@ namespace SonataSmooth
             int refDataCount = lbRefinedData.Items.Count;
 
             string refText = refDataCount == 0
-                ? "No items will be deleted from the Refined Dataset listbox."
-                : $"This will also delete all {refDataCount} item{(refDataCount != 1 ? "s" : "")} from the Refined Dataset listbox.";
+                ? "No items will be deleted from the Refined Dataset."
+                : $"This will also delete all {refDataCount} item{(refDataCount != 1 ? "s" : "")} from the Refined Dataset.";
 
             var result = MessageBox.Show(
-                $"This will delete all {initDataCount} item{(initDataCount != 1 ? "s" : "")} from the Initial Dataset listbox.\n" +
+                $"This will delete all {initDataCount} item{(initDataCount != 1 ? "s" : "")} from the Initial Dataset.\n" +
                 $"{refText}\n\n" +
                 "Are you sure you want to proceed?",
                 "Delete Confirmation",
@@ -745,7 +790,6 @@ namespace SonataSmooth
             slblPolyOrder.Text = "--";
 
             slblDesc.Visible = true;
-            slblDesc.Visible = true;
 
             refText = refDataCount == 0
                 ? "no items were deleted from Refined Dataset"
@@ -776,15 +820,19 @@ namespace SonataSmooth
             pbMain.Value = 0;
             btnCalibrate.Enabled = false;
 
+            int beforeCount = lbInitData.Items.Count; // 붙여넣기 전 개수
+            int addedCount = 0; // 추가된 개수 저장
+
             try
             {
                 string text = Clipboard.GetText();
                 pbMain.Value = 10;
 
                 var matches = clipboardRegex.Matches(text)
-                                    .Cast<Match>()
-                                    .Where(m => !string.IsNullOrEmpty(m.Value))
-                                    .ToArray();
+                    .Cast<Match>()
+                    .Where(m => !string.IsNullOrEmpty(m.Value))
+                    .ToArray();
+
                 pbMain.Value = 30;
 
                 double[] values = await Task.Run(() =>
@@ -794,14 +842,15 @@ namespace SonataSmooth
                         .Select(m => double.Parse(
                             m.Value,
                             NumberStyles.Any,
-                            CultureInfo.InvariantCulture
-                        ))
+                            CultureInfo.InvariantCulture))
                         .ToArray()
                 );
+
                 pbMain.Value = 70;
 
-                if (values.Length == 0)
-                    return;
+                if (values.Length == 0) return;
+
+                addedCount = values.Length; // 여기서 추가 개수 확정
 
                 lbInitData.BeginUpdate();
                 lbInitData.Items.AddRange(values.Cast<object>().ToArray());
@@ -810,17 +859,19 @@ namespace SonataSmooth
 
                 pbMain.Value = 100;
                 lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
+
                 await Task.Delay(200);
             }
             finally
             {
                 UpdatelbInitDataBtnsState(null, EventArgs.Empty);
                 UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
-
                 pbMain.Value = 0;
                 btnCalibrate.Enabled = true;
 
-                UpdateStatusLabel(lbInitData.Items.Count - (Clipboard.GetText().Length > 0 ? clipboardRegex.Matches(Clipboard.GetText()).Count : 0) );
+                UpdateStatusLabel(beforeCount);
+                // 또는 개선된 버전 사용 :
+                // ShowItemsAdded(addedCount);
             }
         }
 
@@ -850,7 +901,7 @@ namespace SonataSmooth
 
             try
             {
-                string raw = getDropText(e);
+                string raw = GetDropText(e);
                 pbMain.Value = 10;
 
                 if (string.IsNullOrWhiteSpace(raw))
@@ -950,7 +1001,7 @@ namespace SonataSmooth
             box.TopIndex = box.Items.Count - 1;
         }
 
-        private string getDropText(DragEventArgs e)
+        private string GetDropText(DragEventArgs e)
         {
             var fmts = e.Data.GetFormats().Cast<string>();
             if (fmts.Contains(DataFormats.UnicodeText))
@@ -972,27 +1023,13 @@ namespace SonataSmooth
 
         private async void btnInitSelectClr_Click(object sender, EventArgs e)
         {
-            pbMain.Minimum = 0;
-            pbMain.Maximum = 100;
-            pbMain.Value = 0;
-
             int deselectedCount = lbInitData.SelectedIndices.Count;
+            await ClearSelectionWithProgress(lbInitData, pbMain, lblInitCnt);
 
             slblDesc.Text = $"Deselected {deselectedCount} selected item{(deselectedCount != 1 ? "s" : "")} from Initial Dataset.";
             slblDesc.Visible = true;
 
-            lbInitData.BeginUpdate();
-            lbInitData.ClearSelected();
-            lbInitData.EndUpdate();
-
-            pbMain.Value = 100;
-            lbInitData.Focus();
-            lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
-
-            await Task.Delay(200);
-
-            pbMain.Value = 0;
-            UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
+            UpdatelbInitDataBtnsState(null, EventArgs.Empty);
         }
 
         private async Task DeleteSelectedItemsPreserveSelection(
@@ -1039,7 +1076,7 @@ namespace SonataSmooth
             int selectedCount = lbInitData.SelectedIndices.Count;
 
             string message = selectedCount == lbInitData.Items.Count
-                ? $"You are about to delete all {selectedCount} items from the list.\nThis will also delete all items from the Refined Dataset listbox.\n\nAre you sure you want to proceed?"
+                ? $"You are about to delete all {selectedCount} items from the list.\nThis will also delete all items from the Refined Dataset.\n\nAre you sure you want to proceed?"
                 : $"You are about to delete {selectedCount} selected item{(selectedCount > 1 ? "s" : "")} from the list.\n\nAre you sure you want to proceed?";
 
             var result = MessageBox.Show(
@@ -1162,7 +1199,7 @@ namespace SonataSmooth
         {
             int itemCount = lbRefinedData.Items.Count;
 
-            var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Refined Dataset listbox.\n\nAre you sure you want to proceed?",
+            var result = MessageBox.Show($"This will delete all {itemCount} item{(itemCount != 1 ? "s" : "")} from the Refined Dataset.\n\nAre you sure you want to proceed?",
                                          "Delete Confirmation",
                                          MessageBoxButtons.YesNo,
                                          MessageBoxIcon.Warning);
@@ -1261,27 +1298,42 @@ namespace SonataSmooth
 
         private async void btnRefSelectClr_Click(object sender, EventArgs e)
         {
-            pbMain.Minimum = 0;
-            pbMain.Maximum = 100;
-            pbMain.Value = 0;
-
             int deselectedCount = lbRefinedData.SelectedIndices.Count;
+            await ClearSelectionWithProgress(lbRefinedData, pbMain, lblInitCnt);
 
             slblDesc.Text = $"Deselected {deselectedCount} selected item{(deselectedCount != 1 ? "s" : "")} from Refined Dataset.";
             slblDesc.Visible = true;
 
-            lbRefinedData.BeginUpdate();
-            lbRefinedData.ClearSelected();
-            lbRefinedData.EndUpdate();
-
-            lbRefinedData.Focus();
-            lblRefCnt.Text = "Count : " + lbRefinedData.Items.Count;
-
-            pbMain.Value = 100;
-            await Task.Delay(200);
-
             UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
-            pbMain.Value = 0;
+        }
+
+        private async Task ClearSelectionWithProgress(ListBox lb, System.Windows.Forms.ProgressBar progressBar, Label lblCount)
+        {
+            int selectedCount = lb.SelectedIndices.Count;
+            if (selectedCount == 0)
+                return;
+
+            progressBar.Minimum = 0;
+            progressBar.Maximum = selectedCount;
+            progressBar.Value = 0;
+            progressBar.Style = ProgressBarStyle.Continuous;
+
+            lb.BeginUpdate();
+            try
+            {
+                while (lb.SelectedIndices.Count > 0)
+                {
+                    int index = lb.SelectedIndices[0];
+                    lb.SetSelected(index, false);
+                    progressBar.Value++;
+                    await Task.Delay(10); // UI 반영 시간 확보
+                }
+            }
+            finally
+            {
+                progressBar.Value = 0;
+                lb.EndUpdate();
+            }
         }
 
         private void txtInitAdd_TextChanged(object sender, EventArgs e)
@@ -1293,18 +1345,14 @@ namespace SonataSmooth
         {
             UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
 
-            if (lbRefinedData.SelectedItems.Count > 1)
-            {
-                slblDesc.Text = $"{lbRefinedData.SelectedItems.Count} items have been selected.";
-            }
-            else if (lbInitData.SelectedItems.Count == 0)
-            {
+
+            int count = lbRefinedData.SelectedItems.Count;
+
+            if (count == 0)
                 return;
-            }
-            else
-            {
-                slblDesc.Text = $"{lbRefinedData.SelectedItems.Count} item has been selected.";
-            }
+
+            slblDesc.Visible = true;
+            slblDesc.Text = $"{count} {(count == 1 ? "item has" : "items have")} been selected in Refined Dataset.";
         }
 
         private void lbInitData_KeyDown(object sender, KeyEventArgs e)
@@ -1500,19 +1548,13 @@ namespace SonataSmooth
             UpdatelbInitDataBtnsState(null, EventArgs.Empty);
 
 
-            if (lbInitData.SelectedItems.Count > 1)
-            {
-                slblDesc.Text = $"{lbInitData.SelectedItems.Count} items have been selected.";
-            }
-            else if (lbInitData.SelectedItems.Count == 0)
-            {
-                return;
-            }
-            else
-            {
-                slblDesc.Text = $"{lbInitData.SelectedItems.Count} item has been selected.";
-            }
+            int count = lbInitData.SelectedItems.Count;
 
+            if (count == 0)
+                return;
+
+            slblDesc.Visible = true;
+            slblDesc.Text = $"{count} {(count == 1 ? "item has" : "items have")} been selected in Initial Dataset.";
         }
 
         private void btnInitEdit_Click(object sender, EventArgs e)
@@ -2342,7 +2384,7 @@ namespace SonataSmooth
             {
                 string msg = "Excel interop error: " + ex.Message + Environment.NewLine + Environment.NewLine +
                     "Microsoft Excel does not appear to be installed, or there was a problem starting Excel." + Environment.NewLine +
-                    "If Excel is not installed, you may visit the Microsoft Office website to purchase or install Office." + Environment.NewLine + Environment.NewLine +
+                    "If Excel is not installed, you can visit the Microsoft Office website to purchase or install Office." + Environment.NewLine + Environment.NewLine +
                     "Would you like to open the Microsoft Office download page now?";
 
                 var result = MessageBox.Show(
@@ -2418,14 +2460,20 @@ namespace SonataSmooth
 
         private void cbxKernelRadius_SelectedIndexChanged(object sender, EventArgs e)
         {
-            settingsForm.kernelRadius = int.TryParse(cbxKernelRadius.Text, out var w) ? w : settingsForm.kernelRadius;
-            settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
+            if (int.TryParse(cbxKernelRadius.Text, out var w))
+            {
+                settingsForm.kernelRadius = w;
+                settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
+            }
         }
 
         private void cbxPolyOrder_SelectedIndexChanged(object sender, EventArgs e)
         {
-            settingsForm.polyOrder = int.TryParse(cbxPolyOrder.Text, out var p) ? p : settingsForm.polyOrder;
-            settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
+            if (int.TryParse(cbxPolyOrder.Text, out var p))
+            {
+                settingsForm.polyOrder = p;
+                settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
+            }
         }
 
         private void btnExportSettings_Click(object sender, EventArgs e)
@@ -2554,9 +2602,10 @@ namespace SonataSmooth
         #region Mouse Hover and Leave Events
         private void MouseLeaveHandler(object sender, EventArgs e)
         {
-            if (lblRefCnt.Text == "Count : 0")
+            if (isRefinedLoading || lbRefinedData.Items.Count == 0)
             {
                 slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+                slblDesc.Visible = true;
             }
             else
             {
@@ -2564,10 +2613,11 @@ namespace SonataSmooth
             }
         }
 
+
         private void cbxKernelRadius_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+            slblDesc.Text = $"Defines how many data points on each side of the target point are included in the smoothing window. (Recommended : {RecommendedMinRadius} - {RecommendedMaxRadius})";
         }
 
 
@@ -2580,7 +2630,7 @@ namespace SonataSmooth
         private void lblPolyOrder_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder}).";
         }
 
         private void lblPolyOrder_MouseLeave(object sender, EventArgs e)
@@ -2591,7 +2641,7 @@ namespace SonataSmooth
         private void cbxPolyOrder_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder}).";
         }
         private void cbxPolyOrder_MouseLeave(object sender, EventArgs e)
         {
@@ -2601,7 +2651,7 @@ namespace SonataSmooth
         private void lblKernelRadius_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+            slblDesc.Text = $"Defines how many data points on each side of the target point are included in the smoothing window. (Recommended : {RecommendedMinRadius} - {RecommendedMaxRadius})";
         }
 
         private void lblKernelRadius_MouseLeave(object sender, EventArgs e)
@@ -2690,12 +2740,26 @@ namespace SonataSmooth
         private void btnInitClear_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            int itemCount = lbInitData.Items.Count;
 
-            if (itemCount == 1)
-                slblDesc.Text = "Remove the only item from the Initial Dataset listbox. This will also clear the Refined Dataset listbox.";
+            int initItemCount = lbInitData.Items.Count;
+            int refItemCount = lbRefinedData.Items.Count;
+
+            if (initItemCount == 1 && refItemCount == 1)
+            {
+                slblDesc.Text = "Remove the only item from the Initial Dataset. This will also remove the only item from the Refined Dataset.";
+            }
+            else if (initItemCount == 1)
+            {
+                slblDesc.Text = $"Remove the only item from the Initial Dataset. This will also remove all {refItemCount} items from the Refined Dataset.";
+            }
+            else if (refItemCount == 1)
+            {
+                slblDesc.Text = $"Remove all {initItemCount} items from the Initial Dataset. This will also remove the only item from the Refined Dataset.";
+            }
             else
-                slblDesc.Text = $"Remove all {itemCount} items from the Initial Dataset listbox. This will also clear the Refined Dataset listbox.";
+            {
+                slblDesc.Text = $"Remove all {initItemCount} items from the Initial Dataset. This will also remove all {refItemCount} items from the Refined Dataset.";
+            }
         }
 
 
@@ -2706,15 +2770,17 @@ namespace SonataSmooth
 
         private void btnInitCopy_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Visible = true;
             int selCount = lbInitData.SelectedItems.Count;
+            int totalCount = lbInitData.Items.Count;
+            slblDesc.Visible = true;
 
-            slblDesc.Text = selCount == lbInitData.Items.Count
-                ? "Copy all items from the Initial Dataset listbox to the clipboard."
+            slblDesc.Text = (selCount == 0 || selCount == lbInitData.Items.Count)
+                ? $"Copy all {totalCount} items from the Refined Dataset to the clipboard."
                 : selCount == 1
-                ? "Copy the selected item from the Initial Dataset listbox to the clipboard."
-                : $"Copy {selCount} selected items from the Initial Dataset listbox to the clipboard.";
+                    ? "Copy the selected item from the Refined Dataset to the clipboard."
+                    : $"Copy {selCount} selected items from the Refined Dataset to the clipboard.";
         }
+
 
         private void btnInitCopy_MouseLeave(object sender, EventArgs e)
         {
@@ -2724,7 +2790,7 @@ namespace SonataSmooth
         private void btnInitPaste_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Paste numeric values from the clipboard into the Initial Dataset listbox.";
+            slblDesc.Text = "Paste numeric values from the clipboard into the Initial Dataset.";
         }
 
         private void btnInitPaste_MouseLeave(object sender, EventArgs e)
@@ -2738,9 +2804,9 @@ namespace SonataSmooth
             slblDesc.Visible = true;
 
             if (selCount == 1)
-                slblDesc.Text = "Edit the selected item in the Initial Dataset listbox.";
+                slblDesc.Text = "Edit the selected item in the Initial Dataset.";
             else
-                slblDesc.Text = $"Edit {selCount} selected items in the Initial Dataset listbox.";
+                slblDesc.Text = $"Edit {selCount} selected items in the Initial Dataset.";
         }
 
         private void btnInitEdit_MouseLeave(object sender, EventArgs e)
@@ -2755,11 +2821,11 @@ namespace SonataSmooth
 
             if (selCount == 1)
             {
-                slblDesc.Text = "Delete the selected item from the Initial Dataset listbox.";
+                slblDesc.Text = "Delete the selected item from the Initial Dataset.";
             }
             else
             {
-                slblDesc.Text = $"Delete {selCount} selected items from the Initial Dataset listbox.";
+                slblDesc.Text = $"Delete {selCount} selected items from the Initial Dataset.";
             }
         }
 
@@ -2767,12 +2833,20 @@ namespace SonataSmooth
         {
             MouseLeaveHandler(sender, e);
         }
-
+        
         private void btnInitSelectAll_MouseHover(object sender, EventArgs e)
         {
             int itemCount = lbInitData.Items.Count;
             slblDesc.Visible = true;
-            slblDesc.Text = $"Select all items in the Initial Dataset listbox.";
+
+            if (itemCount == 1)
+            {
+                slblDesc.Text = "Select the item in the Initial Dataset.";
+            }
+            else if (itemCount > 1)
+            {
+                slblDesc.Text = "Select all items in the Initial Dataset.";
+            }
         }
 
         private void btnInitSelectAll_MouseLeave(object sender, EventArgs e)
@@ -2784,7 +2858,15 @@ namespace SonataSmooth
         {
             int selCount = lbInitData.SelectedItems.Count;
             slblDesc.Visible = true;
-            slblDesc.Text = $"Deselect all selected items in the Initial Dataset listbox.";
+            
+            if (selCount == 1)
+            {
+                slblDesc.Text = "Deselect the selected item in the Initial Dataset.";
+            }
+            else
+            {
+                slblDesc.Text = $"Deselect all {selCount} selected items in the Initial Dataset.";
+            }
         }
 
         private void btnInitSelectSync_MouseHover(object sender, EventArgs e)
@@ -2793,9 +2875,9 @@ namespace SonataSmooth
             slblDesc.Visible = true;
 
             if (selCount == 1)
-                slblDesc.Text = "Select the corresponding item in the Refined Dataset listbox.";
+                slblDesc.Text = "Select the corresponding item in the Refined Dataset.";
             else
-                slblDesc.Text = $"Select {selCount} corresponding items in the Refined Dataset listbox.";
+                slblDesc.Text = $"Select {selCount} corresponding items in the Refined Dataset.";
         }
 
         private void btnRefClear_MouseHover(object sender, EventArgs e)
@@ -2804,9 +2886,9 @@ namespace SonataSmooth
             slblDesc.Visible = true;
 
             if (itemCount == 1)
-                slblDesc.Text = "Remove the only item from the Refined Dataset listbox.";
+                slblDesc.Text = "Remove the only item from the Refined Dataset.";
             else
-                slblDesc.Text = $"Remove all {itemCount} items from the Refined Dataset listbox.";
+                slblDesc.Text = $"Remove all {itemCount} items from the Refined Dataset.";
         }
 
         private void btnRefClear_MouseLeave(object sender, EventArgs e)
@@ -2816,15 +2898,17 @@ namespace SonataSmooth
 
         private void btnRefCopy_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Visible = true;
             int selCount = lbRefinedData.SelectedItems.Count;
+            int totalCount = lbRefinedData.Items.Count;
+            slblDesc.Visible = true;
 
-            slblDesc.Text = selCount == lbRefinedData.Items.Count
-                ? "Copy all items from the Refined Dataset listbox to the clipboard."
+            slblDesc.Text = (selCount == 0 || selCount == lbRefinedData.Items.Count)
+                ? $"Copy all {totalCount} items from the Refined Dataset to the clipboard."
                 : selCount == 1
-                ? "Copy the selected item from the Refined Dataset listbox to the clipboard."
-                : $"Copy {selCount} selected items from the Refined Dataset listbox to the clipboard.";
+                    ? "Copy the selected item from the Refined Dataset to the clipboard."
+                    : $"Copy {selCount} selected items from the Refined Dataset to the clipboard.";
         }
+
 
         private void btnRefCopy_MouseLeave(object sender, EventArgs e)
         {
@@ -2835,8 +2919,17 @@ namespace SonataSmooth
         {
             int itemCount = lbRefinedData.Items.Count;
             slblDesc.Visible = true;
-            slblDesc.Text = $"Select all items in the Refined Dataset listbox.";
+
+            if (itemCount == 1)
+            {
+                slblDesc.Text = "Select the item in the Refined Dataset.";
+            }
+            else if (itemCount > 1)
+            {
+                slblDesc.Text = "Select all items in the Refined Dataset.";
+            }
         }
+
 
         private void btnRefSelectAll_MouseLeave(object sender, EventArgs e)
         {
@@ -2849,9 +2942,9 @@ namespace SonataSmooth
             slblDesc.Visible = true;
 
             if (selCount == 1)
-                slblDesc.Text = "Deselect the selected item in the Refined Dataset listbox.";
+                slblDesc.Text = "Deselect the selected item in the Refined Dataset.";
             else
-                slblDesc.Text = $"Deselect all {selCount} selected items in the Refined Dataset listbox.";
+                slblDesc.Text = $"Deselect all {selCount} selected items in the Refined Dataset.";
         }
 
         private void btnRefSelectSync_MouseHover(object sender, EventArgs e)
@@ -2860,9 +2953,9 @@ namespace SonataSmooth
 
             slblDesc.Visible = true;
             if (selCount == 1)
-                slblDesc.Text = "Select the corresponding item in the Initial Dataset listbox.";
+                slblDesc.Text = "Select the corresponding item in the Initial Dataset.";
             else
-                slblDesc.Text = $"Select {selCount} corresponding items in the Initial Dataset listbox.";
+                slblDesc.Text = $"Select {selCount} corresponding items in the Initial Dataset.";
         }
 
         private void txtDatasetTitle_MouseHover(object sender, EventArgs e)
@@ -2921,6 +3014,17 @@ namespace SonataSmooth
             {
                 slblDesc.Text = "Click to export the refined dataset to an Excel file with the specified title and settings.";
             }
+        }
+
+        private void btnExportSettings_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Click to open the Export Settings, to configure smoothing options and file format preferences for exporting data.";
+        }
+
+        private void btnExportSettings_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
         }
     }
     #endregion
