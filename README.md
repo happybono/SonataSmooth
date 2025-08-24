@@ -131,7 +131,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.2.7.0
 #### August 15, 2025
-> Updated UI labels by replacing "Kernel Width" with the more precise "Kernel Radius".<br><br>
+> Renamed “kernel width” to “kernel radius” throughout the UI and code, while still computing the actual width internally as `2 × {radius} + 1.`.<br><br>
 > Refactored variable names and code references to use "Kernel Radius (r)" instead of "Kernel Width (w)".<br><br>
 > Minor bugs fixed.
 
@@ -170,7 +170,15 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.6.2.5
 #### August 23, 2025
-> Minor bugs fixed.  
+> Minor bugs fixed.
+
+### v4.6.3.8
+#### August 24, 2025
+> Introduced an isRefinedLoading flag and bulk-disable logic in btnCalibrate_Click to lock out all data and export controls during asynchronous loading of the refined dataset, preventing flicker and invalid user actions<br><br>
+> Defined RecommendedMinRadius / RecommendedMaxRadius and RecommendedMinPolyOrder / RecommendedMaxPolyOrder constants and displayed them in dynamic status-bar tooltips when hovering over radius and polynomial-order selectors.<br><br>
+> Added a ShowStatusMessage(string) helper to simplify and unify status-bar updates from anywhere in the form.<br><br>
+> Centralized all filter computations in a new `ApplySmoothing` method that produces rectangular, binomial, median, Gaussian, and Savitzky-Golay outputs in one pass, then refactored CSV export to reuse it and eliminate duplicate loops.<br><br>
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
