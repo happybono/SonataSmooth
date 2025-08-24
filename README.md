@@ -174,9 +174,9 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.6.3.8
 #### August 24, 2025
-> Introduced an isRefinedLoading flag and bulk-disable logic in btnCalibrate_Click to lock out all data and export controls during asynchronous loading of the refined dataset, preventing flicker and invalid user actions<br><br>
-> Defined RecommendedMinRadius / RecommendedMaxRadius and RecommendedMinPolyOrder / RecommendedMaxPolyOrder constants and displayed them in dynamic status-bar tooltips when hovering over radius and polynomial-order selectors.<br><br>
-> Added a ShowStatusMessage(string) helper to simplify and unify status-bar updates from anywhere in the form.<br><br>
+> Introduced an `isRefinedLoading` flag and bulk-disable logic in `btnCalibrate_Click` to lock out all data and export controls during asynchronous loading of the refined dataset, preventing flicker and invalid user actions<br><br>
+> Defined `RecommendedMinRadius` / `RecommendedMaxRadius` and `RecommendedMinPolyOrder` / `RecommendedMaxPolyOrder` constants and displayed them in dynamic status-bar tooltips when hovering over radius and polynomial-order selectors.<br><br>
+> Added a `ShowStatusMessage(string)` helper to simplify and unify status-bar updates from anywhere in the form.<br><br>
 > Centralized all filter computations in a new `ApplySmoothing` method that produces rectangular, binomial, median, Gaussian, and Savitzky-Golay outputs in one pass, then refactored CSV export to reuse it and eliminate duplicate loops.<br><br>
 > Minor bugs fixed.
 </details>
