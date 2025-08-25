@@ -477,7 +477,8 @@ else if (useAvg)
 ### 6. Savitzky‑Golay Filter
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
-At each position:
+
+At each position :
 
 1. Out‑of‑bounds indices are "mirrored" back into the valid range to handle boundaries smoothly.
 2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
