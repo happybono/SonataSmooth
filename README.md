@@ -545,7 +545,7 @@ slblKernelRadius.Text = w.ToString();
 Calculates binomial coefficients for a given window size, which are used as weights in the binomial average and weighted median filters.
 
 #### Principle
--	**Pascal's Triangle** : Each coefficient is the sum of the two above it, or mathematically, C(n, k) = n! / (k! (n-k)!).
+-	**Pascal's Triangle** : Each coefficient is the sum of the two above it, or mathematically, C(n, k) = n! / (k! (n - k)!).
 -	**Symmetry** : The coefficients are symmetric and always sum to a power of two.
 
 #### Code Implementation
