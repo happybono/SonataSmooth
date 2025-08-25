@@ -737,20 +737,30 @@ namespace SonataSmooth
 
         private async void btnInitClear_Click(object sender, EventArgs e)
         {
-            int initDataCount = lbInitData.Items.Count;
-            int refDataCount = lbRefinedData.Items.Count;
+            int itemCount = lbInitData.Items.Count;
+            int refItemCount = lbRefinedData.Items.Count;
 
-            string refText = refDataCount == 0
-                ? "No items will be deleted from the Refined Dataset."
-                : $"This will also delete all {refDataCount} item{(refDataCount != 1 ? "s" : "")} from the Refined Dataset.";
+            string itemText = itemCount == 1 ? "item" : "items";
+            string refItemText = refItemCount == 1 ? "item" : "items";
 
-            var result = MessageBox.Show(
-                $"This will delete all {initDataCount} item{(initDataCount != 1 ? "s" : "")} from the Initial Dataset.\n" +
-                $"{refText}\n\n" +
+            string refMessage;
+            if (refItemCount == 0)
+            {
+                refMessage = "This will also clear the Refined Dataset listbox.";
+            }
+            else
+            {
+                refMessage = $"This will also delete all {refItemCount} {refItemText} from the Refined Dataset listbox.";
+            }
+
+            DialogResult result = MessageBox.Show(
+                $"This will delete all {itemCount} {itemText} from the Initial Dataset listbox.{Environment.NewLine}" +
+                $"{refMessage}{Environment.NewLine}{Environment.NewLine}" +
                 "Are you sure you want to proceed?",
                 "Delete Confirmation",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning);
+                MessageBoxIcon.Warning
+            );
 
             if (result == DialogResult.No)
             {
@@ -791,11 +801,11 @@ namespace SonataSmooth
 
             slblDesc.Visible = true;
 
-            refText = refDataCount == 0
+            refItemText = refItemCount == 0
                 ? "no items were deleted from Refined Dataset"
-                : $"Deleted {refDataCount} item{(refDataCount != 1 ? "s" : "")} from Refined Dataset";
+                : $"Deleted {refItemCount} item{(refItemCount != 1 ? "s" : "")} from Refined Dataset";
 
-            slblDesc.Text = $"Deleted {initDataCount} item{(initDataCount != 1 ? "s" : "")} from Initial Dataset and {refText}.";
+            slblDesc.Text = $"Deleted {itemCount} item{(itemCount != 1 ? "s" : "")} from Initial Dataset and {refItemText}.";
 
             slblDesc.Visible = true;
             txtDatasetTitle.Text = ExcelTitlePlaceholder;
@@ -2744,13 +2754,15 @@ namespace SonataSmooth
             int initItemCount = lbInitData.Items.Count;
             int refItemCount = lbRefinedData.Items.Count;
 
+            string refCountText = refItemCount == 0 ? "no Items" : $"{refItemCount} items";
+
             if (initItemCount == 1 && refItemCount == 1)
             {
                 slblDesc.Text = "Remove the only item from the Initial Dataset. This will also remove the only item from the Refined Dataset.";
             }
             else if (initItemCount == 1)
             {
-                slblDesc.Text = $"Remove the only item from the Initial Dataset. This will also remove all {refItemCount} items from the Refined Dataset.";
+                slblDesc.Text = $"Remove the only item from the Initial Dataset. This will also remove all {refCountText} from the Refined Dataset.";
             }
             else if (refItemCount == 1)
             {
@@ -2758,7 +2770,7 @@ namespace SonataSmooth
             }
             else
             {
-                slblDesc.Text = $"Remove all {initItemCount} items from the Initial Dataset. This will also remove all {refItemCount} items from the Refined Dataset.";
+                slblDesc.Text = $"Remove all {initItemCount} items from the Initial Dataset. This will also remove all {refCountText} from the Refined Dataset.";
             }
         }
 
@@ -2817,11 +2829,20 @@ namespace SonataSmooth
         private void btnInitDelete_MouseHover(object sender, EventArgs e)
         {
             int selCount = lbInitData.SelectedItems.Count;
+            int totalCount = lbInitData.Items.Count;
+            int refCount = lbRefinedData.Items.Count;
             slblDesc.Visible = true;
 
             if (selCount == 1)
             {
                 slblDesc.Text = "Delete the selected item from the Initial Dataset.";
+            }
+            else if (selCount == totalCount && totalCount > 0)
+            {
+                string refMsg = refCount == 0
+                    ? "No items will be deleted from the Refined Dataset."
+                    : $"This will also delete all {refCount} item{(refCount != 1 ? "s" : "")} from the Refined Dataset.";
+                slblDesc.Text = $"Delete all {selCount} items from the Initial Dataset. {refMsg}";
             }
             else
             {
