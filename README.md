@@ -620,7 +620,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 
 ### 10. CSV Export Functionality
 #### How it works
-When the user selects the CSV export option and clicks Export, the application:
+When the user selects the CSV export option and clicks Export, the application :
 
 - Reads the initial dataset and selected smoothing parameters.
 - Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay).
@@ -661,7 +661,7 @@ for (int i = startRow; i < startRow + rowCount; i++)
 
 ### 11. Excel Export Functionality
 #### How it works
-When the user selects the Excel export option and clicks Export, the application:
+When the user selects the Excel export option and clicks Export, the application :
 
 - Applies all selected filters to the dataset.
 - Writes each filter result to a separate column in an Excel worksheet.
