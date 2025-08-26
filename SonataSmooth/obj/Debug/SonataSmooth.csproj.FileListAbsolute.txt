@@ -79,3 +79,17 @@ C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmoot
 C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
 C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.exe
 C:\Users\happybono\Downloads\SonataSmooth-main (1)\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.pdb
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\bin\Debug\SonataSmooth.exe
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\bin\Debug\SonataSmooth.pdb
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.exe.config
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.exe
+D:\SonataSmooth-main-latest\SonataSmooth-main\SonataSmooth\obj\Debug\SonataSmooth.pdb
