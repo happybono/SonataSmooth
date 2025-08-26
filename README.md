@@ -181,6 +181,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Minor bugs fixed.
 
 ### v4.6.3.9
+#### August 26, 2025
 > Refreshed the graphical user interface with subtle enhancements.
 > Improved status label messaging logic : Added dynamic singular / plural phrasing and corrected punctuation for clearer user feedback.
 > Minor bugs fixed.
