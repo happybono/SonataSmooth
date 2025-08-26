@@ -179,6 +179,11 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Added a `ShowStatusMessage(string)` helper to simplify and unify status-bar updates from anywhere in the form.<br><br>
 > Centralized all filter computations in a new `ApplySmoothing` method that produces rectangular, binomial, median, Gaussian, and Savitzky-Golay outputs in one pass, then refactored CSV export to reuse it and eliminate duplicate loops.<br><br>
 > Minor bugs fixed.
+
+### v4.6.3.9
+> Refreshed the graphical user interface with subtle enhancements.
+> Improved status label messaging logic : Added dynamic singular / plural phrasing and corrected punctuation for clearer user feedback.
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
