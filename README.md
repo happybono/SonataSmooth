@@ -185,6 +185,15 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Refreshed the graphical user interface with subtle enhancements.<br><br>
 > Improved status label messaging logic : Added dynamic singular / plural phrasing and corrected punctuation for clearer user feedback.<br><br>
 > Minor bugs fixed.
+
+### v4.7.0.0
+#### August 27, 2025
+> Enhanced `InvertMatrix` by adding partial pivoting and a dynamic, scale-based tolerance to safeguard Gauss–Jordan inversion against division-by-zero and severe rounding errors.<br><br>
+> Refined singular-matrix handling to detect sub-threshold pivots (using `maxRow × 1e - 12` vs. `Double.Epsilon`) and emit a controlled zero matrix or exception instead of propagating NaN / ∞.<br><br>
+> Retained mirror-padding in Savitzky-Golay filtering, ensuring exact central coefficients and smooth, distortion-free continuity at both ends.<br><br>
+> Refactored inversion routine for clarity : consolidated row-swap, pivot selection, scale calculation, and error handling into a single coherent block, removing hard-coded thresholds.<br><br>
+> Performed minor code cleanups to improve readability and enforce consistent formatting.<br><br>
+> Minor bugs fixed.
 </details>
 
 ## Required Components & Setup
