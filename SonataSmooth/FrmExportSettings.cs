@@ -14,6 +14,12 @@ namespace SonataSmooth
     {
         public int kernelRadius { get; set; } = 4;
         public int polyOrder { get; set; } = 3;
+
+        private const int RecommendedMinRadius = 3;
+        private const int RecommendedMaxRadius = 7;
+        private const int RecommendedMinPolyOrder = 2;
+        private const int RecommendedMaxPolyOrder = 6;
+
         private FrmMain _mainForm;
 
         public bool DoRectAvg { get; set; } = true;
@@ -177,7 +183,7 @@ namespace SonataSmooth
 
         private void lblKernelRadius_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+            slblDesc.Text = $"Defines how many data points on each side of the target point are included in the smoothing window. (Recommended : {RecommendedMinRadius} - {RecommendedMaxRadius})";
         }
 
         private void lblKernelRadius_MouseLeave(object sender, EventArgs e)
@@ -187,7 +193,7 @@ namespace SonataSmooth
 
         private void cbxKernelRadius_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Defines the number of data points on each side of the target point used for smoothing.";
+            slblDesc.Text = $"Defines how many data points on each side of the target point are included in the smoothing window. (Recommended : {RecommendedMinRadius} - {RecommendedMaxRadius})";
         }
 
         private void cbxKernelRadius_MouseLeave(object sender, EventArgs e)
@@ -197,7 +203,7 @@ namespace SonataSmooth
 
         private void lblPolyOrder_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder})."; 
         }
 
         private void lblPolyOrder_MouseLeave(object sender, EventArgs e)
@@ -207,7 +213,7 @@ namespace SonataSmooth
 
         private void cbxPolyOrder_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Specifies the degree of the polynomial used to fit the data within each smoothing window.";
+            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder}).";
         }
 
         private void cbxPolyOrder_MouseLeave(object sender, EventArgs e)
@@ -237,7 +243,7 @@ namespace SonataSmooth
 
         private void chbOpenFile_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Automatically opens the exported file after saving.";
+            slblDesc.Text = "Enable to automatically open the exported file after saving.";
         }
 
         private void chbOpenFile_MouseLeave(object sender, EventArgs e)
@@ -247,7 +253,7 @@ namespace SonataSmooth
 
         private void btnSave_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Enable to automatically open the exported file after saving.";
+            slblDesc.Text = "Click to save the current settings and apply them.";
         }
 
         private void btnSave_MouseLeave(object sender, EventArgs e)
