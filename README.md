@@ -919,30 +919,99 @@ When the user selects the CSV export option and clicks Export, the application :
 - **Metadata Embedding** : Includes kernel radius, polynomial order, and timestamp for reproducibility.
 
 #### Code Implementation
-``` csharp
-await sw.WriteLineAsync(excelTitle);
-await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
-await sw.WriteLineAsync(string.Empty);
-await sw.WriteLineAsync("Smoothing Parameters");
-await sw.WriteLineAsync($"Kernel Radius : {r}");
-await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
-if (doSG)
-    await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
-await sw.WriteLineAsync(string.Empty);
-await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
-await sw.WriteLineAsync(string.Empty);
-
-await sw.WriteLineAsync(string.Join(
-    ",", columns.Select(c => c.Header)));
-
-for (int i = startRow; i < startRow + rowCount; i++)
+```csharp
+public async Task ExportCsvAsync(
+    string filePath,
+    double[] initialData,
+    IDictionary<string, double[]> filterResults,
+    int kernelRadius,
+    int? polyOrder,
+    IProgress<int> progress = null)
 {
-    string line = string.Join(
-        ",",
-        columns.Select(c =>
-            c.Data[i].ToString(
-                CultureInfo.InvariantCulture)));
-    await sw.WriteLineAsync(line);
+    // Create and open the CSV file for writing
+    using var sw = new StreamWriter(filePath, false, Encoding.UTF8);
+
+    // Write metadata header
+    await sw.WriteLineAsync($"SonataSmooth Export – {DateTime.Now:yyyy-MM-dd HH:mm}");
+    await sw.WriteLineAsync($"Kernel Radius: {kernelRadius}");
+    if (polyOrder.HasValue)
+        await sw.WriteLineAsync($"Polynomial Order: {polyOrder.Value}");
+    await sw.WriteLineAsync();
+
+    // Write column headers (Index, Original, then each filter)
+    var headers = new List<string> { "Index", "Original" };
+    headers.AddRange(filterResults.Keys);
+    await sw.WriteLineAsync(string.Join(",", headers));
+
+    // Write each row and report progress
+    int n = initialData.Length;
+    for (int i = 0; i < n; i++)
+    {
+        var row = new List<string>
+        {
+            i.ToString(),
+            initialData[i].ToString(CultureInfo.InvariantCulture)
+        };
+
+        foreach (var result in filterResults.Values)
+            row.Add(result[i].ToString(CultureInfo.InvariantCulture));
+
+        await sw.WriteLineAsync(string.Join(",", row));
+        progress?.Report((i + 1) * 100 / n);
+    }
+
+    progress?.Report(100);
+}
+```
+```csharp
+private async void btnExportCsv_Click(object sender, EventArgs e)
+{
+    // Build the file path
+    string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    string filePath = Path.Combine(desktop, "SonataSmooth_Output.csv");
+
+    // Grab the original data from lbInitData
+    double[] originalData = lbInitData.Items
+        .Cast<object>()
+        .Select(item => double.Parse(item.ToString(), CultureInfo.InvariantCulture))
+        .ToArray();
+
+    // Prepare your computed filter results (assume these arrays already exist)
+    var filterResults = new Dictionary<string, double[]>();
+    if (rbtnRect.Checked)    filterResults["Rectangular"]       = rectAvg;
+    if (rbtnAvg.Checked)     filterResults["Binomial"]          = binomAvg;
+    if (rbtnMed.Checked)     filterResults["WeightedMedian"]    = medFiltered;
+    if (rbtnGauss.Checked)   filterResults["Gaussian"]          = gaussFiltered;
+    if (rbtnSG.Checked)      filterResults["SavitzkyGolay"]     = sgFiltered;
+
+    // Read smoothing parameters from the UI
+    int kernelRadius = int.Parse(cbxKernelRadius.Text, CultureInfo.InvariantCulture);
+    int? polyOrder   = rbtnSG.Checked
+                      ? (int?)int.Parse(cbxPolyOrder.Text, CultureInfo.InvariantCulture)
+                      : null;
+
+    // Create a progress reporter to update your ProgressBar (pbMain)
+    var progressReporter = new Progress<int>(percent =>
+    {
+        pbMain.Value = Math.Clamp(percent, pbMain.Minimum, pbMain.Maximum);
+    });
+
+    // Invoke the async CSV exporter
+    await ExportCsvAsync(
+        filePath,
+        originalData,
+        filterResults,
+        kernelRadius,
+        polyOrder,
+        progressReporter
+    );
+
+    // Notify the user
+    MessageBox.Show("CSV export completed:\n" + filePath,
+                    "Export Complete",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+}
 ```
 
 ### 13. Excel Export Functionality
@@ -967,56 +1036,72 @@ When the user selects Excel export and clicks Export, the application :
 
 #### Code Implemenation
 ```csharp
-// Set document properties with musical themes
-wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {txtDatasetTitle.Text}";
-wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Movement Score";
-wb.BuiltinDocumentProperties["Author"].Value = "Maestro SonataSmooth";
-wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
-wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Movements, Harmony, Export";
-wb.BuiltinDocumentProperties["Subject"].Value = smoothingMethods.Count > 0
-    ? $"Concerto of {string.Join(" & ", smoothingMethods)} smoothing movements"
-    : "Cadenza of Silence : No smoothing applied";
-wb.BuiltinDocumentProperties["Comments"].Value = comments; // includes random musical phrase
-
-// Write metadata and filter results to worksheet
-ws.Cells[1, 1] = txtDatasetTitle.Text;
-ws.Cells[3, 1] = "Smoothing Parameters";
-ws.Cells[4, 1] = $"Kernel Radius : {r}";
-ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
-ws.Cells[6, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
-
-// Write each filter result to its own column
-await AddSection("Initial Dataset", initialData, true);
-await AddSection("Rectangular Averaging", rectAvg, doRect);
-await AddSection("Binomial Averaging", binomAvg, doAvg);
-await AddSection("Binomial Median Filtering", binomMed, doMed);
-await AddSection("Gaussian Filtering", gaussFilt, doGauss);
-await AddSection("Savitzky-Golay Filtering", sgFilt, doSG);
-
-// Generate chart comparing all filter results
-chart.ChartType = Excel.XlChartType.xlLine;
-chart.HasTitle = true;
-chart.ChartTitle.Text = txtDatasetTitle.Text;
-chart.HasLegend = true;
-chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
-chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
-chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
-chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
-chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
-
-// Add each filter result as a series to the chart
-foreach (var (Title, StartCol, EndCol) in sections)
+public async Task ExportExcelAsync(
+    string filePath,
+    double[] initialData,
+    IDictionary<string, double[]> filterResults,
+    int kernelRadius,
+    int? polyOrder)
 {
-    Excel.Range unionRange = ...; // Union of all data ranges for this filter
-    var series = chart.SeriesCollection().NewSeries();
-    series.Name = Title;
-    series.Values = unionRange;
-}
+    await Task.Run(() =>
+    {
+        // Start Excel in background
+        var excelApp = new Excel.Application { Visible = false };
+        var wb = excelApp.Workbooks.Add();
+        var ws = (Excel.Worksheet)wb.Worksheets[1];
+        ws.Name = "SonataSmooth";
 
-// Release all COM objects and force GC
-ReleaseAll(coms);
-GC.Collect();
-GC.WaitForPendingFinalizers();
+        // Write metadata cells
+        ws.Cells[1, 1] = "SonataSmooth Export";
+        ws.Cells[2, 1] = $"Generated: {DateTime.Now:G}";
+        ws.Cells[3, 1] = $"Kernel Radius: {kernelRadius}";
+        if (polyOrder.HasValue)
+            ws.Cells[4, 1] = $"Polynomial Order: {polyOrder.Value}";
+
+        // Write headers in row 6
+        var headers = new List<string> { "Index", "Original" };
+        headers.AddRange(filterResults.Keys);
+        for (int c = 0; c < headers.Count; c++)
+            ws.Cells[6, c + 1] = headers[c];
+
+        // Write data starting at row 7
+        int n = initialData.Length;
+        for (int i = 0; i < n; i++)
+        {
+            ws.Cells[7 + i, 1] = i;
+            ws.Cells[7 + i, 2] = initialData[i];
+            int col = 3;
+            foreach (var result in filterResults.Values)
+                ws.Cells[7 + i, col++] = result[i];
+        }
+
+        // Add a line chart under data
+        var chartObj = (Excel.ChartObject)ws.ChartObjects(Type.Missing).Add(
+            Left: 300, Top: 10, Width: 600, Height: 300);
+        var chart = chartObj.Chart;
+        chart.ChartType = Excel.XlChartType.xlLine;
+        var startCell = ws.Cells[6, 1];
+        var endCell = ws.Cells[6 + n, headers.Count];
+        chart.SetSourceData(ws.Range[startCell, endCell]);
+        chart.HasTitle = true;
+        chart.ChartTitle.Text = "Filter Comparison";
+
+        // 6. Save, close and quit
+        wb.SaveAs(filePath);
+        wb.Close();
+        excelApp.Quit();
+
+        // 7. Release all COM objects to avoid Excel hanging
+        Marshal.ReleaseComObject(chart);
+        Marshal.ReleaseComObject(chartObj);
+        Marshal.ReleaseComObject(ws);
+        Marshal.ReleaseComObject(wb);
+        Marshal.ReleaseComObject(excelApp);
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    });
+}
 ```
 
 ### Implementation Details
