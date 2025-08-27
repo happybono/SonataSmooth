@@ -355,7 +355,7 @@ This means your median (or any other sliding-window) filter will span 5 consecut
 -	**Regex-based Parsing** : Uses compiled regular expressions to efficiently extract numbers from any text source.
 -	**Batch UI Updates** : ListBox modifications (add, delete, edit) are performed in batches to prevent flicker and maintain responsiveness.
 -	**Progress Feedback** : ProgressBar and status labels provide immediate feedback during bulk operations.
--	**rror Handling** : All parsing and input errors are caught and reported to the user, preventing silent failures.
+-	**Error Handling** : All parsing and input errors are caught and reported to the user, preventing silent failures.
 -	**Parameter Validation** : Kernel radius and polynomial order are validated before any smoothing operation.
 
 #### Code Implementation
