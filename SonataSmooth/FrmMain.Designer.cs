@@ -759,6 +759,7 @@
             this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtDatasetTitle_TextChanged);
             this.txtDatasetTitle.Enter += new System.EventHandler(this.txtDatasetTitle_Enter);
+            this.txtDatasetTitle.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtDatasetTitle_KeyDown);
             this.txtDatasetTitle.Leave += new System.EventHandler(this.txtDatasetTitle_Leave);
             this.txtDatasetTitle.MouseLeave += new System.EventHandler(this.txtDatasetTitle_MouseLeave);
             this.txtDatasetTitle.MouseHover += new System.EventHandler(this.txtDatasetTitle_MouseHover);

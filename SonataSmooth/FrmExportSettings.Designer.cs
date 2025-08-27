@@ -388,12 +388,14 @@
             this.Controls.Add(this.gbSmoothParams);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmExportSettings";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Export Configuration";
             this.Load += new System.EventHandler(this.FrmExportSettings_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FrmExportSettings_KeyDown);
             this.MouseHover += new System.EventHandler(this.FrmExportSettings_MouseHover);
             this.gbSmoothParams.ResumeLayout(false);
             this.gbSmoothParams.PerformLayout();

@@ -66,6 +66,10 @@ namespace SonataSmooth
         private const int RecommendedMinPolyOrder = 2;
         private const int RecommendedMaxPolyOrder = 6;
 
+        // 클래스 필드 영역 (기존 필드들과 함께 배치)
+        private bool _isShowingTitleValidationMessage;
+        private string _lastInvalidTitle;
+
         public FrmMain()
         {
             InitializeComponent();
@@ -2699,26 +2703,90 @@ Are you sure you want to proceed?";
 
         private void txtDatasetTitle_Leave(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtDatasetTitle.Text))
+            string raw = txtDatasetTitle.Text;
+            string title = raw?.Trim() ?? string.Empty;
+
+            if (title == ExcelTitlePlaceholder || string.IsNullOrEmpty(raw))
             {
                 txtDatasetTitle.Text = ExcelTitlePlaceholder;
                 txtDatasetTitle.ForeColor = Color.Gray;
                 txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
+                return;
             }
+
+            const int MaxLength = 31;
+            string invalidChars = ":\\/?*[";
+            char[] winInvalidChars = System.IO.Path.GetInvalidFileNameChars();
+            string[] reservedNames = {
+        "CON","PRN","AUX","NUL",
+        "COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
+        "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9"
+    };
+            string titleUpper = title.ToUpperInvariant();
+
+            var errors = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(title))
+                errors.Add("The name cannot be blank.");
+
+            if (title.Length > MaxLength)
+                errors.Add($"The name must not exceed {MaxLength} characters.");
+
+            bool hasInvalidChar = title.IndexOfAny(invalidChars.ToCharArray()) >= 0 || title.Contains("]");
+            bool hasWinInvalidChar = title.IndexOfAny(winInvalidChars) >= 0;
+            if (hasInvalidChar || hasWinInvalidChar)
+            {
+                errors.Add(
+                    "The name cannot contain any of the following characters: : \\ / ? * [ ]\n" +
+                    "or any Windows file name invalid characters: " +
+                    string.Join(" ", winInvalidChars.Select(c => c == ' ' ? "<space>" : c.ToString()))
+                );
+            }
+
+            if (reservedNames.Any(rn => titleUpper.Equals(rn, StringComparison.OrdinalIgnoreCase)))
+                errors.Add("The name cannot be a reserved Windows file name (e.g., CON, PRN, AUX, NUL, COM1, LPT1, etc.).");
+
+            if (errors.Count > 0)
+            {
+                if (_isShowingTitleValidationMessage || string.Equals(_lastInvalidTitle, title, StringComparison.Ordinal))
+                {
+                    txtDatasetTitle.Text = ExcelTitlePlaceholder;
+                    txtDatasetTitle.ForeColor = Color.Gray;
+                    txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
+                    return;
+                }
+
+                _isShowingTitleValidationMessage = true;
+                _lastInvalidTitle = title;
+                try
+                {
+                    txtDatasetTitle.Text = ExcelTitlePlaceholder;
+                    txtDatasetTitle.ForeColor = Color.Gray;
+                    txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
+                    MessageBox.Show(string.Join("\n\n", errors), "Invalid Title", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                finally
+                {
+                    _isShowingTitleValidationMessage = false;
+                }
+                return;
+            }
+
+            _lastInvalidTitle = null;
+            txtDatasetTitle.ForeColor = SystemColors.WindowText;
+            txtDatasetTitle.TextAlign = HorizontalAlignment.Left;
         }
 
         private void txtDatasetTitle_TextChanged(object sender, EventArgs e)
         {
             UpdateExportExcelButtonState();
 
-            // 텍스트가 placeholder 가 아니고 비어있지 않으면 우측 정렬
             if (txtDatasetTitle.Text != ExcelTitlePlaceholder)
             {
                 txtDatasetTitle.TextAlign = HorizontalAlignment.Left;
             }
             else
             {
-                // placeholder 또는 빈 값일 때는 가운데 정렬
                 txtDatasetTitle.TextAlign = HorizontalAlignment.Center;
             }
         }
@@ -3240,6 +3308,23 @@ Are you sure you want to proceed?";
         {
             MouseLeaveHandler(sender, e);
         }
-    }
+
+        private void txtDatasetTitle_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                bool forward = (e.Modifiers & Keys.Shift) == 0;
+
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+
+                Control current = sender as Control ?? this.ActiveControl;
+                if (current != null)
+                {
+                    this.SelectNextControl(current, forward, true, true, true);
+                }
+            }
+        }
+    }    
     #endregion
 }
