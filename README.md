@@ -322,9 +322,9 @@ SonataSmooth provides a robust, user-friendly interface for entering and managin
 #### Smoothing Parameters
 ##### Kernel Radius (`r`)
 -	Defines how many data points on each side of the target point are included in the smoothing window.
--	The kernel width is calculated as (2 × radius) + 1.
+-	The kernel width is calculated as `(2 × radius) + 1`.
 -	Recommended range : 3 to 7.
--	If the kernel window is larger than the dataset, the app will show an error and prevent calibration/export.
+-	If the kernel window is larger than the dataset, the app will show an error and prevent calibration / export.
 
 Kernel radius specifies how many data points on each side of the center element are included in the filtering window. The total window length (kernel width) is calculated as `2 * r + 1`.
 
@@ -443,7 +443,7 @@ private bool ValidateSmoothingParameters(int dataCount, int radius, int polyOrde
 
 ### 2. Parallel Kernel Filtering
 #### How it works
-All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each position `i`, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
+All array indices [0 … n - 1] are processed in parallel using PLINQ. For each position `i`, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
 
 When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized for performance using PLINQ.
 
