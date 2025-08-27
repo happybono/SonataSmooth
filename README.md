@@ -85,9 +85,9 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v3.6.2.0
 #### July 22, 2025
->	Improved bulk deletion performance in ListBox by optimizing the deletion logic for full selection scenarios.<br><br>
->	Added a fast path to instantly clear all items and reset the progress bar when all entries are selected.<br><br>
->	Ensured the progress bar and UI remain responsive during partial deletions of large datasets.
+> Improved bulk deletion performance in ListBox by optimizing the deletion logic for full selection scenarios.<br><br>
+> Added a fast path to instantly clear all items and reset the progress bar when all entries are selected.<br><br>
+> Ensured the progress bar and UI remain responsive during partial deletions of large datasets.
 
 ### v3.6.5.0
 #### July 22, 2025
