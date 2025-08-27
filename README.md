@@ -219,10 +219,23 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ## Execution Instructions
 1. **Launch the Application** : Run the compiled `.exe` file or start the project from Visual Studio.
 2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text / HTML.
-3. **Select Filter** : Choose a smoothing algorithm and configure kernel radius and polynomial order.
-4. **Calibrate** : Click the 'Calibrate' button to apply the selected filter.
-5. **Review Results** : View the smoothed output in the second listbox.
-6. **Export** : Click Export to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization.
+3. **Select Filter** : Choose one or more smoothing algorithms using the checkboxes in the "Calibration Method" group (`chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`). Configure kernel radius and polynomial order using the combo boxes (`cbxKernelRadius`, `cbxPolyOrder`).
+4. **Calibrate** : Click the 'Calibrate' button (`btnCalibrate`) to apply the selected filter(s).
+5. **Review Results** : View the smoothed output in the "Refined Dataset" listbox (`lbRefinedData`).
+6. **Edit Data** : Use the "Modify Selected Entries" dialog (`btnInitEdit`) to batch-edit selected items in the initial dataset.
+7. **Export** : Click Export (`btnExport`) to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization. Configure export options in the "Export Configuration" dialog (`btnExportSettings`).
+
+## UI Controls & Naming Conventions
+- **Initial Dataset ListBox** : `lbInitData`
+- **Refined Dataset ListBox** : `lbRefinedData`
+- **Kernel Radius ComboBox** : `cbxKernelRadius`
+- **Polynomial Order ComboBox** : `cbxPolyOrder`
+- **Calibration Method CheckBoxes** : `chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`
+- **Export Buttons** : `btnExport`, `btnExportSettings`
+- **Edit Button** : `btnInitEdit`
+- **ProgressBar** : `pbMain`, `pbModify`
+- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `slblPolyOrder`, `slblDesc`
+- **Other Controls** : All controls use clear, descriptive names matching their function in the codebase.
 
 ## Noise Filter Comparison
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
@@ -297,13 +310,23 @@ That final value (`2.75`) becomes your new filtered point.
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
 #### How it works
-When the user clicks **Calibrate**, the handler reads all numeric items from `listBox1`, parses the kernel radius from a combo box, computes binomial weights, and sets up a progress reporter for the UI.
+SonataSmooth provides a robust, user-friendly interface for entering and managing numerical datasets :  
 
-#### Principle
-Prepare raw data and parameters before any heavy computation. Converting inputs to a simple `double[]`, determining the kernel "radius" **`w`**, and generating the binomial weight array ensures the parallel filtering step has everything it needs.
+-	**Manual Entry** : Users can type values directly into the input box and add them to the Initial Dataset with a button click or by pressing Enter.
+-	**Clipboard Paste** : Numeric values can be pasted from the clipboard; the app uses optimized regular expressions to extract numbers, even from mixed or formatted text.
+-	**Drag & Drop** : Supports dropping plain text, CSV, or HTML-formatted data; HTML tags are stripped and all valid numbers are parsed.
+-	**Batch Addition** : Large datasets are added in batches to the ListBox, with real-time progress feedback and smooth UI updates.
+-	**Validation** : All input is validated for numeric format; errors are reported with clear messages and invalid entries are rejected.
+-	**Selection & Editing** : Items can be selected, deselected, edited (single or multiple), deleted, or copied to the clipboard. Selection operations are optimized for large lists.
 
-#### Kernel Radius (`r`)
-Kernel radius specifies how many data points on each side of the center element are included in the filtering window.  In other words, if you set a radius of `r`, the filter will consider `r` values before and `r` values after the current point.
+#### Smoothing Parameters
+##### Kernel Radius (`r`)
+-	Defines how many data points on each side of the target point are included in the smoothing window.
+-	The kernel width is calculated as (2 × radius) + 1.
+-	Recommended range : 3 to 7.
+-	If the kernel window is larger than the dataset, the app will show an error and prevent calibration/export.
+
+Kernel radius specifies how many data points on each side of the center element are included in the filtering window. The total window length (kernel width) is calculated as `2 * r + 1`.
 
 The total window length (kernel width) is calculated as :
 
@@ -313,7 +336,7 @@ $$
 \]
 $$
 
-For example, if \(r = 2\):
+For example, if \(r = 2\) :
 
 $$
 \[
@@ -323,27 +346,99 @@ $$
 
 This means your median (or any other sliding-window) filter will span 5 consecutive samples at each position.
 
+##### Polynomial Order
+- Specifies the degree of the polynomial used to fit the data within each smoothing window (used only for Savitzky-Golay filtering).
+-	Recommended range : 2 to 6.
+-	Must be strictly less than the kernel window size; otherwise, an error is shown.
+
+#### Principle
+-	**Regex-based Parsing** : Uses compiled regular expressions to efficiently extract numbers from any text source.
+-	**Batch UI Updates** : ListBox modifications (add, delete, edit) are performed in batches to prevent flicker and maintain responsiveness.
+-	**Progress Feedback** : ProgressBar and status labels provide immediate feedback during bulk operations.
+-	**rror Handling** : All parsing and input errors are caught and reported to the user, preventing silent failures.
+-	**Parameter Validation** : Kernel radius and polynomial order are validated before any smoothing operation.
+
 #### Code Implementation
 ```csharp
-// Count input values
-int n = listBox1.Items.Count;
-
-// Copy and convert to double[]
-var input = new double[n];
-for (int i = 0; i < n; i++)
-    input[i] = Convert.ToDouble(listBox1.Items[i], CultureInfo.InvariantCulture);
-
-// Read kernel radius r (half-width)
-int r = int.Parse(cbxKernelRadius.Text, CultureInfo.InvariantCulture);
-
-// Generate binomial coefficients of length 2 × w + 1
-int[] binom = CalcBinomialCoefficients(2 * r + 1);
-
-// Set up a progress reporter for thread-safe UI updates
-var progressReporter = new Progress<int>(pct =>
+// Manual entry
+private void btnInitAdd_Click(object sender, EventArgs e)
 {
-     progressBar1.Value = Math.Max(0, Math.Min(100, pct));
-});
+    if (double.TryParse(txtInitAdd.Text, out double value))
+    {
+        lbInitData.Items.Add(value);
+        lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
+        slblDesc.Visible = true;
+        slblDesc.Text = $"Value '{value}' has been added to Initial Dataset.";
+    }
+    else
+    {
+        txtInitAdd.Focus();
+        txtInitAdd.SelectAll();
+    }
+    UpdatelbInitDataBtnsState(null, EventArgs.Empty);
+    UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
+    txtInitAdd.Text = String.Empty;
+}
+
+// Clipboard paste
+private async void btnInitPaste_Click(object sender, EventArgs e)
+{
+    string text = Clipboard.GetText();
+    var matches = clipboardRegex.Matches(text)
+        .Cast<Match>()
+        .Where(m => !string.IsNullOrEmpty(m.Value))
+        .ToArray();
+    double[] values = await Task.Run(() =>
+        matches.AsParallel()
+            .WithDegreeOfParallelism(Environment.ProcessorCount)
+            .Select(m => double.Parse(m.Value, NumberStyles.Any, CultureInfo.InvariantCulture))
+            .ToArray()
+    );
+    lbInitData.BeginUpdate();
+    lbInitData.Items.AddRange(values.Cast<object>().ToArray());
+    lbInitData.EndUpdate();
+    lblInitCnt.Text = $"Count : {lbInitData.Items.Count}";
+    UpdateStatusLabel(beforeCount);
+}
+
+// Drag & drop
+private async void lbInitData_DragDrop(object sender, DragEventArgs e)
+{
+    string raw = GetDropText(e);
+    if (string.IsNullOrWhiteSpace(raw)) return;
+    if (raw.IndexOf("<html", StringComparison.OrdinalIgnoreCase) >= 0)
+        raw = await Task.Run(() => htmlTagRegex.Replace(raw, " "));
+    double[] parsed = await Task.Run(() =>
+        numberRegex.Matches(raw)
+            .Cast<Match>()
+            .AsParallel()
+            .AsOrdered()
+            .WithDegreeOfParallelism(Environment.ProcessorCount)
+            .Select(m => double.TryParse(m.Value.Replace(",", "").Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double d) ? d : double.NaN)
+            .Where(d => !double.IsNaN(d))
+            .ToArray()
+    );
+    await AddItemsInBatches(lbInitData, parsed, progressReporter, 60);
+    lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
+    UpdateStatusLabel(beforeCount);
+}
+
+// Parameter validation
+private bool ValidateSmoothingParameters(int dataCount, int radius, int polyOrder)
+{
+    int windowSize = 2 * radius + 1;
+    if (windowSize > dataCount)
+    {
+        MessageBox.Show("Kernel radius is too large for the dataset.", "Parameter Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
+    }
+    if (rbtnSG.Checked && polyOrder >= windowSize)
+    {
+        MessageBox.Show("Polynomial order must be smaller than the window size.", "Parameter Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return false;
+    }
+    return true;
+}
 ```
 
 ### 2. Parallel Kernel Filtering
@@ -352,27 +447,87 @@ All array indices [0 ... n - 1] are processed in parallel using PLINQ. For each 
 
 When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized for performance using PLINQ.
 
+-	When the user calibrates or exports data, the selected filters are applied to each data point in parallel.
+-	Each filter uses its own kernel (window) and boundary handling (mirror-padding).
+-	All filter results are computed in a single pass, leveraging all available CPU cores.
+-	The UI remains responsive, and progress is reported in real time.
+
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.
+
+-	**Parallelization** : Uses Parallel.For and ParallelEnumerable to process large datasets efficiently.
+-	**Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
+-	**Boundary Handling** : Mirror-padding is used for Gaussian and Savitzky-Golay filters to ensure smooth results at the edges.
+-	**Thread-Safe UI** : Progress bars and status labels are updated safely from background threads.
 
 -	**Parallel Processing** : Uses all available CPU cores for fast computation.
 -	**Kernel Filtering** : Applies the selected filter to each data point using a moving window.
 
 #### Code Implementation
 ```csharp
-results = await Task.Run(() =>
+private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
+    ApplySmoothing(double[] input, int r, int polyOrder, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
 {
-    // ... (filter coefficient preparation)
-    return ParallelEnumerable
-        .Range(0, n)
-        .AsOrdered()
-        .WithDegreeOfParallelism(Environment.ProcessorCount)
-        .Select(i =>
+    int n = input.Length;
+    int[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double sigma = (2.0 * r + 1) / 6.0;
+    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(2 * r + 1, sigma) : null;
+    double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder) : null;
+
+    var rect = new double[n];
+    var binomAvg = new double[n];
+    var median = new double[n];
+    var gauss = new double[n];
+    var sg = new double[n];
+
+    int Mirror(int idx) => idx < 0 ? -idx - 1 : idx >= n ? 2 * n - idx - 1 : idx;
+
+    Parallel.For(0, n, i => {
+        double sum; int cnt;
+
+        if (doRect)
         {
-            // Filtering logic (see below)
-        })
-        .ToArray();
-});
+            sum = 0; cnt = 0;
+            for (int k = -r; k <= r; k++)
+            {
+                int idx = i + k;
+                if (idx >= 0 && idx < n) { sum += input[idx]; cnt++; }
+            }
+            rect[i] = cnt > 0 ? sum / cnt : 0.0;
+        }
+
+        if (doAvg)
+        {
+            sum = 0; cnt = 0;
+            for (int k = -r; k <= r; k++)
+            {
+                int idx = i + k;
+                if (idx >= 0 && idx < n) { sum += input[idx] * binom[k + r]; cnt += binom[k + r]; }
+            }
+            binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
+        }
+
+        if (doMed) median[i] = WeightedMedianAt(input, i, r, binom);
+
+        if (doGauss && gaussCoeffs != null)
+        {
+            sum = 0;
+            for (int k = -r; k <= r; k++)
+                sum += gaussCoeffs[k + r] * input[Mirror(i + k)];
+            gauss[i] = sum;
+        }
+
+        if (doSG && sgCoeffs != null)
+        {
+            sum = 0;
+            for (int k = -r; k <= r; k++)
+                sum += sgCoeffs[k + r] * input[Mirror(i + k)];
+            sg[i] = sum;
+        }
+    });
+
+    return (rect, binomAvg, median, gauss, sg);
+}
 ```
 
 ### 3. Rectangular (Uniform) Mean Filter
@@ -489,7 +644,31 @@ else if (useAvg)
 }
 ```
 
-### 6. Savitzky‑Golay Filter
+### 6. Gaussian Filter
+#### How it works
+Applies a normalized 1D Gaussian kernel to the data, using mirror-mode boundary handling.
+
+#### Principle
+Gaussian weights emphasize central values, producing smooth results.
+
+#### Code Implementation
+```csharp
+if (useGauss)
+{
+    double[] gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
+    double sum = 0;
+
+    for (int k = -r; k <= r; k++)
+    {
+        int mi = Mirror(i + k);
+        sum += gaussCoeffs[k + r] * input[mi];
+    }
+
+    return sum;
+}
+```
+
+### 7. Savitzky‑Golay Filter
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
 
@@ -504,8 +683,8 @@ This method preserves important features such as peaks and edges better than sim
 Savitzky‑Golay filtering performs a **least‑squares fit** of a low‑degree polynomial to the samples in the window, then evaluates the polynomial at the center.  
 Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curve, but are determined analytically to minimize the mean‑squared error for the chosen polynomial degree.
 
-- **Polynomial Fitting**: Fits a polynomial of specified degree within the window.
-- **Feature Preservation**: Retains higher‑order moments (e.g., slope, curvature) while reducing high‑frequency noise.
+- **Polynomial Fitting** : Fits a polynomial of specified degree within the window.
+- **Feature Preservation** : Retains higher‑order moments (e.g., slope, curvature) while reducing high‑frequency noise.
 
 #### Code Implementation
 ```csharp
@@ -527,9 +706,9 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 }
 ```
 
-### 7. Results Aggregation & UI Update
+### 8. Results Aggregation & UI Update
 #### How it works
-After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into listBox2 in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
+After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into lbRefinedData in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
 #### Principle
 Batch updates and progress reporting keep the UI responsive. A finally block ensures the progressbar always resets on completion or error.
@@ -540,11 +719,13 @@ Batch updates and progress reporting keep the UI responsive. A finally block ens
 
 #### Code Implementation
 ```csharp
-listBox2.BeginUpdate();
-listBox2.Items.Clear();
-await AddItemsInBatches(listBox2, results, progressReporter);
-listBox2.EndUpdate();
-lblCnt2.Text = $"Count : {listBox2.Items.Count}";
+lbRefinedData.BeginUpdate();
+lbRefinedData.Items.Clear();
+
+await AddItemsInBatches(lbRefinedData, results, progressReporter);
+
+lbRefinedData.EndUpdate();
+lblRefCnt.Text = $"Count : {lbRefinedData.Items.Count}";
 
 slblCalibratedType.Text = useRect ? "Rectangular Average"
                      : useMed ? "Weighted Median"
@@ -552,10 +733,11 @@ slblCalibratedType.Text = useRect ? "Rectangular Average"
                      : useSG ? "Savitzky-Golay Filter"
                      : useGauss ? "Gaussian Filter"
                                 : "Unknown";
-slblKernelRadius.Text = w.ToString();
+
+slblKernelRadius.Text = r.ToString();
 ```
 
-### 8. Pascal's Triangle (Binomial Coefficient Calculation)
+### 9. Pascal's Triangle (Binomial Coefficient Calculation)
 #### How it works
 Calculates binomial coefficients for a given window size, which are used as weights in the binomial average and weighted median filters.
 
@@ -579,7 +761,7 @@ private static int[] CalcBinomialCoefficients(int length)
 ```
 -	This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters.
 
-### 9. Savitzky-Golay Coefficients Computation
+### 10. Savitzky-Golay Coefficients Computation
 #### How it works
 Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
 
@@ -627,7 +809,102 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 }
 ```
 
-### 10. CSV Export Functionality
+### 11. Numerical Pivot Calculation (Matrix Inversion)
+#### How it Works
+SonataSmooth uses a robust numerical matrix inversion routine for Savitzky-Golay filter coefficient calculation.  
+This routine applies **Gauss-Jordan elimination with partial pivoting** and a **dynamic, scale-based tolerance** to ensure numerical stability and prevent division-by-zero or propagation of NaN/Infinity values.
+
+- For each column, the row with the largest absolute value is selected as the pivot and swapped to the top.
+- The pivot row is normalized, and all other rows are updated to eliminate the current column.
+- If the pivot is below a dynamic threshold (based on the row's scale and machine epsilon), the matrix is considered singular and a zero matrix is returned.
+
+#### Principle
+- **Partial Pivoting** : Improves numerical stability by always using the largest available pivot.
+- **Dynamic Tolerance** : Prevents catastrophic errors by comparing the pivot to a scaled threshold, not a fixed value.
+- **Singular Matrix Handling** : If the matrix cannot be inverted (pivot too small), a zero matrix is returned instead of propagating errors.
+
+This approach ensures that Savitzky-Golay and other matrix-based filters remain stable and reliable, even for ill-conditioned or nearly singular matrices.
+
+#### Code Implementation
+```csharp
+private static double[,] InvertMatrix(double[,] a)
+{
+    int n = a.GetLength(0);
+    var aug = new double[n, 2 * n];
+
+    // Initialize augmented matrix [A | I]
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+            aug[i, j] = a[i, j];
+        aug[i, n + i] = 1;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        // Partial pivoting : find row with largest absolute value in column i
+        int maxRow = i;
+        for (int k = i + 1; k < n; k++)
+            if (Math.Abs(aug[k, i]) > Math.Abs(aug[maxRow, i]))
+                maxRow = k;
+
+        // Swap rows if needed
+        if (maxRow != i)
+        {
+            for (int k = 0; k < 2 * n; k++)
+            {
+                double temp = aug[i, k];
+                aug[i, k] = aug[maxRow, k];
+                aug[maxRow, k] = temp;
+            }
+        }
+
+        double pivot = aug[i, i];
+        double rowScale = 0.0;
+        for (int j = i; j < n; j++)
+            rowScale = Math.Max(rowScale, Math.Abs(aug[i, j]));
+        double tol = Math.Max(rowScale * 1e-12, Double.Epsilon);
+
+        if (Math.Abs(pivot) < tol)
+        {
+            // Singular matrix : return zero matrix
+            return new double[n, n];
+        }
+
+        // Normalize pivot row
+        for (int j = 0; j < 2 * n; j++)
+            aug[i, j] /= pivot;
+
+        // Eliminate current column from other rows
+        for (int r = 0; r < n; r++)
+        {
+            if (r == i) continue;
+            double factor = aug[r, i];
+            for (int c = 0; c < 2 * n; c++)
+                aug[r, c] -= factor * aug[i, c];
+        }
+    }
+
+    // Extract inverse matrix
+    var inv = new double[n, n];
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            inv[i, j] = aug[i, j + n];
+
+    return inv;
+}
+```
+
+- This function is used internally for Savitzky-Golay coefficient calculation and any other matrix inversion needs in the application.
+- It is robust against singular and ill-conditioned matrices, ensuring reliable filter performance.
+
+#### Additional Notes
+- All UI controls and code elements use clear, descriptive names for maintainability.
+- All heavy computations and file operations are performed asynchronously and in parallel for maximum responsiveness.
+- All UI updates and COM object accesses are performed on the UI thread for safety.
+- Status messages and tooltips are dynamically updated to guide the user through each operation.
+
+### 12. CSV Export Functionality
 #### How it works
 When the user selects the CSV export option and clicks Export, the application :
 
@@ -668,50 +945,78 @@ for (int i = startRow; i < startRow + rowCount; i++)
     await sw.WriteLineAsync(line);
 ```
 
-### 11. Excel Export Functionality
+### 13. Excel Export Functionality
 #### How it works
-When the user selects the Excel export option and clicks Export, the application :
+When the user selects Excel export and clicks Export, the application :
 
-- Applies all selected filters to the dataset.
-- Writes each filter result to a separate column in an Excel worksheet.
-- Adds a line chart visualizing the smoothed data.
-- Embeds metadata and smoothing parameters at the top of the sheet.
+-	Reads the initial dataset and all selected smoothing parameters from the UI.
+-	Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay) in parallel.
+-	Writes each filter result to a separate column in a new Excel worksheet.
+-	Embeds metadata at the top of the sheet : dataset title, kernel radius, kernel width, polynomial order, and timestamp.
+-	Sets musical-themed document properties (Title, Category, Author, Keywords, Subject, Comments) for the exported file.
+-	Automatically generates a line chart visualizing all filter results.
+-	Handles large datasets by splitting across multiple columns if needed.
+-	Cleans up all COM objects and forces garbage collection to prevent lingering Excel processes.
 
 #### Principle
-- **Visual Feedback** : Automatically generates a chart comparing filter outputs.
-- **Structured Layout** : Each filter result is placed in its own section.
-- **Mirror Boundary Handling** : Ensures smooth filtering at data edges.
+-	**Parallel Filtering** : All smoothing algorithms are applied in parallel for speed and consistency.
+-	**Structured Output** : Each filter result is placed in its own column, with clear headers and parameter info.
+-	**Musical Metadata** : Excel document properties and comments are dynamically set with musical phrases and filter info for a unique, playful touch.
+-	**Chart Generation** : A line chart is automatically created to compare all filter outputs visually.
+-	**Robust COM Cleanup** : All Excel interop objects are released and garbage collected to avoid memory leaks.
 
 #### Code Implemenation
 ```csharp
+// Set document properties with musical themes
+wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {txtDatasetTitle.Text}";
+wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Movement Score";
+wb.BuiltinDocumentProperties["Author"].Value = "Maestro SonataSmooth";
+wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
+wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Movements, Harmony, Export";
+wb.BuiltinDocumentProperties["Subject"].Value = smoothingMethods.Count > 0
+    ? $"Concerto of {string.Join(" & ", smoothingMethods)} smoothing movements"
+    : "Cadenza of Silence : No smoothing applied";
+wb.BuiltinDocumentProperties["Comments"].Value = comments; // includes random musical phrase
+
+// Write metadata and filter results to worksheet
 ws.Cells[1, 1] = txtDatasetTitle.Text;
 ws.Cells[3, 1] = "Smoothing Parameters";
 ws.Cells[4, 1] = $"Kernel Radius : {r}";
 ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
-ws.Cells[6, 1] = doSG
-    ? $"Polynomial Order : {polyOrder}"
-    : "Polynomial Order : N/A";
+ws.Cells[6, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
 
-            chart.ChartType = Excel.XlChartType.xlLine;
-            chart.HasTitle = true;
-            chart.ChartTitle.Text = txtDatasetTitle.Text;
-            //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
+// Write each filter result to its own column
+await AddSection("Initial Dataset", initialData, true);
+await AddSection("Rectangular Averaging", rectAvg, doRect);
+await AddSection("Binomial Averaging", binomAvg, doAvg);
+await AddSection("Binomial Median Filtering", binomMed, doMed);
+await AddSection("Gaussian Filtering", gaussFilt, doGauss);
+await AddSection("Savitzky-Golay Filtering", sgFilt, doSG);
 
-            chart.HasLegend = true;
-            chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+// Generate chart comparing all filter results
+chart.ChartType = Excel.XlChartType.xlLine;
+chart.HasTitle = true;
+chart.ChartTitle.Text = txtDatasetTitle.Text;
+chart.HasLegend = true;
+chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
+chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
+chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
+chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
 
-            chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
-            chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
-            chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
-            chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
+// Add each filter result as a series to the chart
+foreach (var (Title, StartCol, EndCol) in sections)
+{
+    Excel.Range unionRange = ...; // Union of all data ranges for this filter
+    var series = chart.SeriesCollection().NewSeries();
+    series.Name = Title;
+    series.Values = unionRange;
+}
 
-            foreach (var (Title, StartCol, EndCol) in sections)
-            {
-                Excel.Range unionRange = ...; // Union of all data ranges
-                var series = chart.SeriesCollection().NewSeries();
-                series.Name = Title;
-                series.Values = unionRange;
-            }
+// Release all COM objects and force GC
+ReleaseAll(coms);
+GC.Collect();
+GC.WaitForPendingFinalizers();
 ```
 
 ### Implementation Details
