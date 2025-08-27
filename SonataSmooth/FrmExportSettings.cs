@@ -77,7 +77,7 @@ namespace SonataSmooth
             base.OnShown(e);
 
             cbxKernelRadius.Text = kernelRadius.ToString();
-            cbxPolyOrder.Text = cbxPolyOrder.ToString();
+            cbxPolyOrder.Text = polyOrder.ToString();
 
             chbRect.Checked = DoRectAvg;
             chbAvg.Checked = DoBinomAvg;
