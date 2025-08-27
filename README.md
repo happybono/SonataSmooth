@@ -816,7 +816,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int pol
 ### 11. Numerical Pivot Calculation (Matrix Inversion)
 #### How it Works
 SonataSmooth uses a robust numerical matrix inversion routine for Savitzky-Golay filter coefficient calculation.  
-This routine applies **Gauss-Jordan elimination with partial pivoting** and a **dynamic, scale-based tolerance** to ensure numerical stability and prevent division-by-zero or propagation of NaN/Infinity values.
+This routine applies **Gauss-Jordan elimination with partial pivoting** and a **dynamic, scale-based tolerance** to ensure numerical stability and prevent division-by-zero or propagation of NaN / Infinity values.
 
 - For each column, the row with the largest absolute value is selected as the pivot and swapped to the top.
 - The pivot row is normalized, and all other rows are updated to eliminate the current column.
