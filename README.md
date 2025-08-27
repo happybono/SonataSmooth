@@ -194,6 +194,10 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Refactored inversion routine for clarity : consolidated row-swap, pivot selection, scale calculation, and error handling into a single coherent block, removing hard-coded thresholds.<br><br>
 > Performed minor code cleanups to improve readability and enforce consistent formatting.<br><br>
 > Minor bugs fixed.
+
+### v4.7.0.1
+#### August 28, 2025
+> Minor bugs fixed
 </details>
 
 ## Required Components & Setup
@@ -1086,12 +1090,12 @@ public async Task ExportExcelAsync(
         chart.HasTitle = true;
         chart.ChartTitle.Text = "Filter Comparison";
 
-        // 6. Save, close and quit
+        // Save, close and quit
         wb.SaveAs(filePath);
         wb.Close();
         excelApp.Quit();
 
-        // 7. Release all COM objects to avoid Excel hanging
+        // Release all COM objects to avoid Excel hanging
         Marshal.ReleaseComObject(chart);
         Marshal.ReleaseComObject(chartObj);
         Marshal.ReleaseComObject(ws);
