@@ -101,7 +101,7 @@
             this.btnOk.TabIndex = 2;
             this.btnOk.Text = "";
             this.btnOk.UseVisualStyleBackColor = true;
-            this.btnOk.Click += new System.EventHandler(this.btnOK_Click);
+            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             this.btnOk.MouseLeave += new System.EventHandler(this.btnOk_MouseLeave);
             this.btnOk.MouseHover += new System.EventHandler(this.btnOk_MouseHover);
             // 

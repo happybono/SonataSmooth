@@ -26,7 +26,7 @@ namespace SonataSmooth
             InitializeComponent();
         }
 
-        private async void btnOK_Click(object sender, EventArgs e)
+        private async void btnOk_Click(object sender, EventArgs e)
         {
             if (mainForm == null)
             {
