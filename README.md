@@ -366,7 +366,7 @@ For example, if (`polyOrder` = 2) :
 
 This means the filter will fit a 2nd-degree polynomial (a parabola) across each window of data points.
 
-Tips for Choosing M
+#### Tips for Choosing `polyOrder`
 - M must be less than the window length (2 × r + 1) to ensure a well-posed fitting problem.
 - Increasing `polyOrder` improves flexibility but risks ringing artifacts at the boundaries.
 - Common practice is to start with `polyOrder` = 2 or 3 and adjust based on how well features are preserved versus noise reduction.
