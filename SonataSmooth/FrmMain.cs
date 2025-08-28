@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -81,17 +81,17 @@ namespace SonataSmooth
             aboutForm = null;
         }
 
-        private struct OperationResult
+        private struct SmoothingResult
         {
             public bool Success { get; }
             public string Error { get; }
-            private OperationResult(bool success, string error)
+            private SmoothingResult(bool success, string error)
             {
                 Success = success;
                 Error = error;
             }
-            public static OperationResult Ok() => new OperationResult(true, null);
-            public static OperationResult Fail(string error) => new OperationResult(false, error);
+            public static SmoothingResult Ok() => new SmoothingResult(true, null);
+            public static SmoothingResult Fail(string error) => new SmoothingResult(false, error);
         }
 
         private void ShowError(string title, string message)
@@ -103,7 +103,7 @@ namespace SonataSmooth
         /// lbInitData 의 모든 항목을 double 형식의 배열로 파싱합니다.
         /// 항목이 null 이거나 숫자 변환에 실패하면 MessageBox 로 오류를 표시하고 false 값을 반환합니다.
         /// </summary>
-        private OperationResult TryParseInputData(out double[] input, out int n)
+        private SmoothingResult TryParseInputData(out double[] input, out int n)
         {
             n = lbInitData.Items.Count;
             input = new double[n];
@@ -112,15 +112,15 @@ namespace SonataSmooth
                 var item = lbInitData.Items[i];
                 if (item == null)
                 {
-                    return OperationResult.Fail($"The item at index {i} is null.");
+                    return SmoothingResult.Fail($"The item at index {i} is null.");
                 }
                 string s = item.ToString();
                 if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
                 {
-                    return OperationResult.Fail($"Failed to convert item at index {i} : \"{s}\"");
+                    return SmoothingResult.Fail($"Failed to convert item at index {i} : \"{s}\"");
                 }
             }
-            return OperationResult.Ok();
+            return SmoothingResult.Ok();
         }
 
         /// <summary>
@@ -128,21 +128,21 @@ namespace SonataSmooth
         /// 파싱 실패 시 MessageBox 로 오류를 알리고 false 값을 반환합니다.
         /// Gaussian 보정 방식에 활용될 sigma 값도 계산합니다.
         /// </summary>
-        private OperationResult TryParseParameters(out int r, out int polyOrder, out double sigma)
+        private SmoothingResult TryParseParameters(out int r, out int polyOrder, out double sigma)
         {
             r = 0;
             polyOrder = 0;
             sigma = 0;
             if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
             {
-                return OperationResult.Fail($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".");
+                return SmoothingResult.Fail($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".");
             }
             if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
             {
-                return OperationResult.Fail($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
+                return SmoothingResult.Fail($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
             }
             sigma = (2.0 * r + 1) / 6.0;
-            return OperationResult.Ok();
+            return SmoothingResult.Ok();
         }
 
         /// <summary>
@@ -730,7 +730,7 @@ namespace SonataSmooth
         }
 
         // 입력된 파라미터의 유효성 검사 Method (윈도우 크기 및 다항식 차수)
-        private OperationResult ValidateSmoothingParameters(int dataCount, int w, int polyOrder)
+        private SmoothingResult ValidateSmoothingParameters(int dataCount, int w, int polyOrder)
         {
             int windowSize = 2 * w + 1;
             bool useSG = rbtnSG != null && rbtnSG.Checked;
@@ -744,7 +744,7 @@ namespace SonataSmooth
                     $"Current : (2 × {w}) + 1 = {windowSize}\n" +
                     $"Data count : {dataCount}\n\n" +
                     "Rule : windowSize ≤ dataCount";
-                return OperationResult.Fail(msg);
+                return SmoothingResult.Fail(msg);
             }
 
             // 다항식 차수가 윈도우 크기보다 크거나 같은 경우 오류 메시지 출력
@@ -756,10 +756,10 @@ namespace SonataSmooth
                     $"Current polyOrder : {polyOrder}\n" +
                     $"Window size      : {windowSize}\n\n" +
                     "Tip : windowSize = (2 × radius) + 1";
-                return OperationResult.Fail(msg);
+                return SmoothingResult.Fail(msg);
             }
 
-            return OperationResult.Ok(); // 모든 조건 만족 후 통과 시 Ok 반환
+            return SmoothingResult.Ok(); // 모든 조건 만족 후 통과 시 Ok 반환
         }
 
         private void UpdateStatusLabel(int beforeCount)
