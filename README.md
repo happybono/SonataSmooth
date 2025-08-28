@@ -338,7 +338,7 @@ The total window length (kernel width) is calculated as :
 
 $$
 \[
-\text{kernelWidth} = 2 \cdot r + 1
+\text{kernelWidth} = 2 \times r + 1
 \]
 $$
 
@@ -346,7 +346,7 @@ For example, if \(r = 2\) :
 
 $$
 \[
-\text{kernelWidth} = 2 \cdot 2 + 1 = 5
+\text{kernelWidth} = 2 \times 2 + 1 = 5
 \]
 $$
 
