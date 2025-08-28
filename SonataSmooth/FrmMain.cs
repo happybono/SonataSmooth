@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -81,11 +81,29 @@ namespace SonataSmooth
             aboutForm = null;
         }
 
+        private struct OperationResult
+        {
+            public bool Success { get; }
+            public string Error { get; }
+            private OperationResult(bool success, string error)
+            {
+                Success = success;
+                Error = error;
+            }
+            public static OperationResult Ok() => new OperationResult(true, null);
+            public static OperationResult Fail(string error) => new OperationResult(false, error);
+        }
+
+        private void ShowError(string title, string message)
+        {
+            MessageBox.Show(this, message, title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         /// <summary>
         /// lbInitData 의 모든 항목을 double 형식의 배열로 파싱합니다.
         /// 항목이 null 이거나 숫자 변환에 실패하면 MessageBox 로 오류를 표시하고 false 값을 반환합니다.
         /// </summary>
-        private bool TryParseInputData(out double[] input, out int n)
+        private OperationResult TryParseInputData(out double[] input, out int n)
         {
             n = lbInitData.Items.Count;
             input = new double[n];
@@ -94,17 +112,15 @@ namespace SonataSmooth
                 var item = lbInitData.Items[i];
                 if (item == null)
                 {
-                    MessageBox.Show($"The item at index {i} is null.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
+                    return OperationResult.Fail($"The item at index {i} is null.");
                 }
                 string s = item.ToString();
                 if (!double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out input[i]))
                 {
-                    MessageBox.Show($"Failed to convert item at index {i} : \"{s}\"", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return false;
+                    return OperationResult.Fail($"Failed to convert item at index {i} : \"{s}\"");
                 }
             }
-            return true;
+            return OperationResult.Ok();
         }
 
         /// <summary>
@@ -112,23 +128,21 @@ namespace SonataSmooth
         /// 파싱 실패 시 MessageBox 로 오류를 알리고 false 값을 반환합니다.
         /// Gaussian 보정 방식에 활용될 sigma 값도 계산합니다.
         /// </summary>
-        private bool TryParseParameters(out int r, out int polyOrder, out double sigma)
+        private OperationResult TryParseParameters(out int r, out int polyOrder, out double sigma)
         {
             r = 0;
             polyOrder = 0;
             sigma = 0;
             if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
             {
-                MessageBox.Show($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                return OperationResult.Fail($"Failed to parse kernel radius : \"{cbxKernelRadius.Text}\".");
             }
             if (!int.TryParse(cbxPolyOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out polyOrder))
             {
-                MessageBox.Show($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                return OperationResult.Fail($"Failed to parse polynomial order : \"{cbxPolyOrder.Text}\".");
             }
             sigma = (2.0 * r + 1) / 6.0;
-            return true;
+            return OperationResult.Ok();
         }
 
         /// <summary>
@@ -154,16 +168,28 @@ namespace SonataSmooth
             try
             {
                 //  ListBox의 데이터를 double[] 형식으로 파싱 (실패 시 반환)
-                if (!TryParseInputData(out double[] input, out int n))
+                var parseInputResult = TryParseInputData(out double[] input, out int n);
+                if (!parseInputResult.Success)
+                {
+                    ShowError("Input Parse Error", parseInputResult.Error);
                     return;
+                }
 
                 // 입력된 Parameters (커널 반경, 다항식 차수, Gaussian 표준편차) 파싱 (실패 시 반환)
-                if (!TryParseParameters(out int r, out int polyOrder, out double sigma))
+                var parseParamResult = TryParseParameters(out int r, out int polyOrder, out double sigma);
+                if (!parseParamResult.Success)
+                {
+                    ShowError("Parameter Parse Error", parseParamResult.Error);
                     return;
+                }
 
                 // Parameters 유효성 검사 (윈도우 크기 및 다항식 차수) (실패 시 반환)
-                if (!ValidateSmoothingParameters(lbInitData.Items.Count, r, polyOrder))
+                var validateResult = ValidateSmoothingParameters(lbInitData.Items.Count, r, polyOrder);
+                if (!validateResult.Success)
+                {
+                    ShowError("Parameter Validation Error", validateResult.Error);
                     return;
+                }
 
                 // UI 상태 갱신 및 진행률 표시 준비 (각각의 보정 방식 CheckBox 체크 여부 확인)
                 bool useRect = rbtnRect.Checked;
@@ -704,44 +730,36 @@ namespace SonataSmooth
         }
 
         // 입력된 파라미터의 유효성 검사 Method (윈도우 크기 및 다항식 차수)
-        private bool ValidateSmoothingParameters(int dataCount, int w, int polyOrder)
+        private OperationResult ValidateSmoothingParameters(int dataCount, int w, int polyOrder)
         {
-            int windowSize = 2 * w + 1;                         // 커널 윈도우 크기 계산    
-            bool useSG = rbtnSG != null && rbtnSG.Checked;      // Savitzky-Golay 보정 방식 사용 여부
-
+            int windowSize = 2 * w + 1;
+            bool useSG = rbtnSG != null && rbtnSG.Checked;
 
             // 윈도우 크기가 데이터 개수보다 큰 경우 오류 메시지 출력
             if (windowSize > dataCount)
             {
-                MessageBox.Show(
-                    $"Kernel radius is too large.\n\n" +
+                var msg =
+                    "Kernel radius is too large.\n\n" +
                     $"Window size formula : (2 × radius) + 1\n" +
                     $"Current : (2 × {w}) + 1 = {windowSize}\n" +
                     $"Data count : {dataCount}\n\n" +
-                    $"Rule : windowSize ≤ dataCount\n" +
-                    $"Result : {windowSize} ≤ {dataCount} → Violation",
-                    "Parameter Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-                return false;
+                    "Rule : windowSize ≤ dataCount";
+                return OperationResult.Fail(msg);
             }
 
             // 다항식 차수가 윈도우 크기보다 크거나 같은 경우 오류 메시지 출력
             if (useSG && polyOrder >= windowSize)
             {
-                MessageBox.Show(
-                    $"Polynomial order must be smaller than the window size.\n\n" +
+                var msg =
+                    "Polynomial order must be smaller than the window size.\n\n" +
                     $"Rule : polyOrder < windowSize\n" +
-                    $"Result : {polyOrder} ≤ {windowSize} → {(polyOrder < windowSize ? "OK" : "Violation")}\n\n" +
-                    $"Tip : windowSize = (2 × radius) + 1",
-                    "Parameter Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-                return false;
+                    $"Current polyOrder : {polyOrder}\n" +
+                    $"Window size      : {windowSize}\n\n" +
+                    "Tip : windowSize = (2 × radius) + 1";
+                return OperationResult.Fail(msg);
             }
-            return true; // 모든 조건 만족 후 통과 시 true 반환
+
+            return OperationResult.Ok(); // 모든 조건 만족 후 통과 시 Ok 반환
         }
 
         private void UpdateStatusLabel(int beforeCount)
@@ -1838,7 +1856,12 @@ Are you sure you want to proceed?";
                 n = initialData.Length;
             }
 
-            if (!ValidateSmoothingParameters(n, r, polyOrder)) return;
+            var validateCsvParams = ValidateSmoothingParameters(n, r, polyOrder);
+            if (!validateCsvParams.Success)
+            {
+                ShowError("Export Parameter Error", validateCsvParams.Error);
+                return;
+            }
 
             if (n == 0)
             {
@@ -2192,8 +2215,12 @@ Are you sure you want to proceed?";
 
             int n = initialData.Length;
 
-            if (!ValidateSmoothingParameters(n, r, polyOrder))
+            var validateXlsxParams = ValidateSmoothingParameters(n, r, polyOrder);
+            if (!validateXlsxParams.Success)
+            {
+                ShowError("Export Parameter Error", validateXlsxParams.Error);
                 return;
+            }
 
             const int maxRows = 1_048_573;
             double sigma = (2.0 * r + 1) / 6.0;
