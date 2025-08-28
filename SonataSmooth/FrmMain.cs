@@ -30,10 +30,6 @@ namespace SonataSmooth
 
         // 엑셀 제목 입력 TextBox의 기본 안내 문구 (Placeholder)
         private const string ExcelTitlePlaceholder = "Click here to enter a title for your dataset.";
-        
-        // 제목 입력 시 파일명 / 엑셀 Sheet 명 입력 불가능 문자 검증을 위한 변수 
-        private bool _isShowingTitleValidationMessage;
-        private string _lastInvalidTitle;
 
         // 숫자 추출용 정규식
         private static readonly Regex numberRegex = new Regex(
@@ -69,6 +65,9 @@ namespace SonataSmooth
         private const int RecommendedMaxRadius = 7;
         private const int RecommendedMinPolyOrder = 2;
         private const int RecommendedMaxPolyOrder = 6;
+
+        private bool _isShowingTitleValidationMessage;
+        private string _lastInvalidTitle;
 
         public FrmMain()
         {
@@ -3328,5 +3327,3 @@ Are you sure you want to proceed?";
     }    
     #endregion
 }
-
-
