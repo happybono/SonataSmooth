@@ -197,9 +197,8 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.7.1.1
 #### August 28, 2025
->	Added dataset title validation (length, invalid chars, reserved names) with placeholder behavior and export button gating.<br><br>
+>	Implemented dataset title validation : including checks for length, invalid characters, and reserved names. Alongside dynamic placeholder behavior and conditional enabling of the export button.<br><br>
 >	Added KeyDown handler (`FrmExportSettings_KeyDown`) to close dialog on ESC; KeyPreview set to `true` in Designer.<br><br>
-> Implement ESC and Enter key handling for quick cancellation and submission, ensuring the OK button stays disabled until the input is validated.<br><br>
 >	Minor bugs fixed.
 </details>
 
