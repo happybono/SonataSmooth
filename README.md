@@ -357,10 +357,10 @@ This means your median (or any other sliding-window) filter will span 5 consecut
 -	Recommended range : 2 to 6.
 -	Must be strictly less than the kernel window size; otherwise, an error is shown.
 
-Polynomial order **`polyOrder`** specifies the highest degree of the polynomial fitted to the data within each smoothing window. A higher order can capture more complex curvature but may also overfit noise.
+Polynomial order `polyOrder` specifies the highest degree of the polynomial fitted to the data within each smoothing window. A higher order can capture more complex curvature but may also overfit noise.
 The polynomial order is defined as :
 
-polyOrder = degree of the polynomial
+`polyOrder` = degree of the polynomial
 
 For example, if (`polyOrder` = 2) :
 
