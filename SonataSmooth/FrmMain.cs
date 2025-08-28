@@ -66,7 +66,6 @@ namespace SonataSmooth
         private const int RecommendedMinPolyOrder = 2;
         private const int RecommendedMaxPolyOrder = 6;
 
-        // 클래스 필드 영역 (기존 필드들과 함께 배치)
         private bool _isShowingTitleValidationMessage;
         private string _lastInvalidTitle;
 
@@ -3328,3 +3327,4 @@ Are you sure you want to proceed?";
     }    
     #endregion
 }
+
