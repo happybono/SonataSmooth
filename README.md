@@ -352,10 +352,25 @@ $$
 
 This means your median (or any other sliding-window) filter will span 5 consecutive samples at each position.
 
-##### Polynomial Order
+##### Polynomial Order (`polyOrder`)
 - Specifies the degree of the polynomial used to fit the data within each smoothing window (used only for Savitzky-Golay filtering).
 -	Recommended range : 2 to 6.
 -	Must be strictly less than the kernel window size; otherwise, an error is shown.
+
+Polynomial order **`polyOrder`** specifies the highest degree of the polynomial fitted to the data within each smoothing window. A higher order can capture more complex curvature but may also overfit noise.
+The polynomial order is defined as :
+
+polyOrder = degree of the polynomial
+
+For example, if (`polyOrder` = 2) :
+
+This means the filter will fit a 2nd-degree polynomial (a parabola) across each window of data points.
+
+Tips for Choosing M
+- M must be less than the window length (2 × r + 1) to ensure a well-posed fitting problem.
+- Increasing `polyOrder` improves flexibility but risks ringing artifacts at the boundaries.
+- Common practice is to start with `polyOrder` = 2 or 3 and adjust based on how well features are preserved versus noise reduction.
+- Always validate smoothing performance on representative signal segments before batch processing.
 
 #### Principle
 -	**Regex-based Parsing** : Uses compiled regular expressions to efficiently extract numbers from any text source.
