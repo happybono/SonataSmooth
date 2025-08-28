@@ -332,7 +332,7 @@ SonataSmooth provides a robust, user-friendly interface for entering and managin
 -	Recommended range : 3 to 7.
 -	If the kernel window is larger than the dataset, the app will show an error and prevent calibration / export.
 
-Kernel radius specifies how many data points on each side of the center element are included in the filtering window. The total window length (kernel width) is calculated as `2 * r + 1`.
+Kernel radius specifies how many data points on each side of the center element are included in the filtering window. The total window length (kernel width) is calculated as `2 × r + 1`.
 
 The total window length (kernel width) is calculated as :
 
