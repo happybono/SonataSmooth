@@ -1006,9 +1006,9 @@ private async void btnExportCsv_Click(object sender, EventArgs e)
     if (rbtnSG.Checked)      filterResults["SavitzkyGolay"]     = sgFiltered;
 
     // Read smoothing parameters from the UI
-    int kernelRadius = int.Parse(cbxKernelRadius.Text, CultureInfo.InvariantCulture);
+    int kernelRadius = int.Parse(slblKernelRadius.Text, CultureInfo.InvariantCulture);
     int? polyOrder   = rbtnSG.Checked
-                      ? (int?)int.Parse(cbxPolyOrder.Text, CultureInfo.InvariantCulture)
+                      ? (int?)int.Parse(slblPolyOrder.Text, CultureInfo.InvariantCulture)
                       : null;
 
     // Create a progress reporter to update your ProgressBar (pbMain)
