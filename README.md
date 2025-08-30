@@ -194,13 +194,18 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Refactored inversion routine for clarity : consolidated row-swap, pivot selection, scale calculation, and error handling into a single coherent block, removing hard-coded thresholds.<br><br>
 > Performed minor code cleanups to improve readability and enforce consistent formatting.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v4.7.1.1
 #### August 28, 2025
 >	Implemented dataset title validation : including checks for length, invalid characters, and reserved names. Alongside dynamic placeholder behavior and conditional enabling of the export button.<br><br>
 >	Added KeyDown handler (`FrmExportSettings_KeyDown`) to close dialog on ESC; `KeyPreview` set to `true` in Designer.<br><br>
 >	Minor bugs fixed.
+</details>
+
+### v4.7.1.5
+#### August 31, 2025
+>	Implemented unified parameter sourcing for export : `ExportCsvAsync` and `ExportExcelAsync` now read Kernel Radius / Polynomial Order from the applied status labels (`slblKernelRadius`, `slblPolyOrder`) instead of the settings dialog ComboBoxes : ensuring exports always reflect the last calibrated parameters, preventing use of stale or unsaved values, avoiding unintended field mutation, and tightening variable scope.
+> Minor bugs Fixed.
 
 ## Required Components & Setup
 ### Prerequisites
