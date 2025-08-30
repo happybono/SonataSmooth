@@ -14,6 +14,7 @@ namespace SonataSmooth
     {
         public int kernelRadius { get; set; } = 4;
         public int polyOrder { get; set; } = 3;
+        public int boundaryMethod { get; set; } = 1;
 
         private const int RecommendedMinRadius = 3;
         private const int RecommendedMaxRadius = 7;
@@ -55,6 +56,9 @@ namespace SonataSmooth
             if (int.TryParse(cbxPolyOrder.Text, out var p))
                 polyOrder = p;
 
+            if (int.TryParse(cbxBoundaryMethod.Text, out var b))
+                boundaryMethod = b;
+
             DoRectAvg = chbRect.Checked;
             DoBinomAvg = chbAvg.Checked;
             DoBinomMed = chbMed.Checked;
@@ -65,7 +69,7 @@ namespace SonataSmooth
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
-            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text);
+            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -78,6 +82,7 @@ namespace SonataSmooth
 
             cbxKernelRadius.Text = kernelRadius.ToString();
             cbxPolyOrder.Text = polyOrder.ToString();
+            cbxBoundaryMethod.Text = boundaryMethod.ToString();
 
             chbRect.Checked = DoRectAvg;
             chbAvg.Checked = DoBinomAvg;
@@ -95,15 +100,19 @@ namespace SonataSmooth
         {         
             lblPolyOrder.Enabled = chbSG.Checked;
             cbxPolyOrder.Enabled = chbSG.Checked;
+            lblBoundaryMethod.Enabled = chbSG.Checked;
+            cbxBoundaryMethod.Enabled = chbSG.Checked;
         }
 
-        public void ApplyParameters(string kernelRadius, string polyOrder)
+        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
+            cbxBoundaryMethod.Text = boundaryMethod;
 
             if (int.TryParse(kernelRadius, out var r)) this.kernelRadius = r;
             if (int.TryParse(polyOrder, out var p)) this.polyOrder = p;
+            if (int.TryParse(boundaryMethod, out var b)) this.boundaryMethod = b;
         }
 
         private void chbSG_CheckedChanged(object sender, EventArgs e)
@@ -278,6 +287,26 @@ namespace SonataSmooth
                 this.DialogResult = DialogResult.Cancel;
                 this.Close();
             }
+        }
+
+        private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+        }
+
+        private void lblBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxBoundaryMethod_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+        }
+
+        private void cbxBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
         }
     }
     #endregion

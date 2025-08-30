@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static SonataSmooth.FrmMain;
 using static System.Net.WebRequestMethods;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
@@ -49,6 +50,9 @@ namespace SonataSmooth
             RegexOptions.Compiled | RegexOptions.CultureInvariant
             );
 
+        // 경계 처리 방식 열거형
+        public enum BoundaryMode { Symmetric, Replicate, ZeroPad }
+
         private CancellationTokenSource _ctsInitSelectAll;
         private CancellationTokenSource _ctsRefSelectAll;
 
@@ -79,6 +83,42 @@ namespace SonataSmooth
             UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
             settingsForm = new FrmExportSettings(this);
             aboutForm = null;
+        }
+
+        // 경계 처리 방식에 따른 유효한 Index 계산 Method
+        private int GetIndex(int idx, int n, BoundaryMode mode)
+        {
+            switch (mode)                                    // BoundaryMode
+            {
+                case BoundaryMode.Symmetric:                 // Mirroring 
+                    return idx < 0 ? -idx - 1 : idx >= n ? 2 * n - idx - 1 : idx;
+                case BoundaryMode.Replicate:                 // Nearest
+                    return idx < 0 ? 0 : idx >= n ? n - 1 : idx;
+                case BoundaryMode.ZeroPad:                   // Zero Padding
+                    return (idx < 0 || idx >= n) ? -1 : idx; // -1 은 0 으로 처리
+                default:
+                    return idx;
+            }
+        }
+
+        // Smoothing Parameter 유효성 검증 Method
+        private BoundaryMode GetBoundaryMode()
+        {
+            // ComboBox 에서 선택된 경계 처리 방식을 BoundaryMode 열거형으로 변환
+            switch (cbxBoundaryMethod.SelectedItem?.ToString())
+            {
+                // 기본값은 Symmetric
+                case "Symmetric": return BoundaryMode.Symmetric;
+
+                // Replicate
+                case "Replicate": return BoundaryMode.Replicate;
+
+                // Zero Padding
+                case "Zero Padding": return BoundaryMode.ZeroPad;
+
+                // 그 외의 값은 기본값으로 처리
+                default: return BoundaryMode.Symmetric;
+            }
         }
 
         private struct OperationResult
@@ -152,8 +192,11 @@ namespace SonataSmooth
         /// </summary>
         private async void btnCalibrate_Click(object sender, EventArgs e)
         {
+            // 현재 선택된 경계 처리 방식 파싱
+            BoundaryMode boundaryMode = GetBoundaryMode();
+
             // Export 설정 폼에 현재 커널 반경 / 다항식 차수 값 동기화
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
 
             // ProgressBar 초기화
             pbMain.Style = ProgressBarStyle.Continuous;
@@ -312,8 +355,11 @@ namespace SonataSmooth
                                         double sum = 0;
                                         for (int k = -r; k <= r; k++)
                                         {
-                                            int mi = Mirror(i + k);
-                                            sum += sgCoeffs[k + r] * input[mi];
+                                            // 경계 처리 방식에 따른 유효 Index 계산
+                                            int gi = GetIndex(i + k, n, boundaryMode);
+                                            if (gi == -1)
+                                                continue; // ZeroPad : 0 으로 처리 (sum += 0)
+                                            sum += sgCoeffs[k + r] * input[gi];
                                         }
                                         return sum;
                                     }
@@ -404,6 +450,38 @@ namespace SonataSmooth
                     tlblSeparator2.Visible = showPoly;
                     slblPolyOrder.Visible = showPoly;
                     if (showPoly) slblPolyOrder.Text = polyOrder.ToString();
+
+                    tlblSeparator3.Visible = showPoly;
+                    tlblBoundaryHandling.Visible = showPoly;
+                    slblBoundaryMethod.Visible = showPoly;
+
+                    // 경계 처리 방식 표시 (Savitzky-Golay 보정 방식을 선택한 경우에만 해당)
+                    if (showPoly)
+                    {
+                        // boundaryMode 에 따라 표시 문자열 설정
+                        switch (boundaryMode)
+                        {
+                            // 대칭 반사
+                            case BoundaryMode.Symmetric:
+                                slblBoundaryMethod.Text = "Symmetric";
+                                break;
+
+                            // 가장자리 값 복제
+                            case BoundaryMode.Replicate:
+                                slblBoundaryMethod.Text = "Replicate";
+                                break;
+
+                            // 경계 밖 값을 0 으로 채우는 방식
+                            case BoundaryMode.ZeroPad:
+                                slblBoundaryMethod.Text = "Zero Padding";
+                                break;
+
+                            // 그 외의 값은 기본값으로 처리
+                            default:
+                                slblBoundaryMethod.Text = "Symmetric";
+                                break;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -436,7 +514,7 @@ namespace SonataSmooth
 
         // 입력된 데이터에 대해 다양한 보정 방식 (스무딩 필터) 을 적용하는 Method
         private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-            ApplySmoothing(double[] input, int r, int polyOrder, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
+            ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
         {
             int n = input.Length; // 데이터 개수
             int[] binom = CalcBinomialCoefficients(2 * r + 1);  // 이항 계수 계산
@@ -501,7 +579,13 @@ namespace SonataSmooth
                 {
                     sum = 0;
                     for (int k = -r; k <= r; k++)
-                        sum += sgCoeffs[k + r] * input[Mirror(i + k)];
+                    {
+                        // 경계 처리 방식에 따른 유효 Index 계산
+                        int gi = GetIndex(i + k, n, boundaryMode);
+                        if (gi == -1)
+                            continue; // ZeroPad: 0 으로 처리 (sum += 0)
+                        sum += sgCoeffs[k + r] * input[gi];
+                    }
                     sg[i] = sum;
                 }
             });
@@ -978,10 +1062,11 @@ Are you sure you want to proceed?";
             txtInitAdd.Select();
         }
 
-        public void SetComboValues(string kernelRadius, string polyOrder)
+        public void SetComboValues(string kernelRadius, string polyOrder, string boundaryMethod)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
+            cbxBoundaryMethod.Text = boundaryMethod;
         }
 
 
@@ -1701,11 +1786,15 @@ Are you sure you want to proceed?";
             {
                 lblPolyOrder.Enabled = true;
                 cbxPolyOrder.Enabled = true;
+                lblBoundaryMethod.Enabled = true;
+                cbxBoundaryMethod.Enabled = true;
             }
             else
             {
                 lblPolyOrder.Enabled = false;
                 cbxPolyOrder.Enabled = false;
+                lblBoundaryMethod.Enabled = false;
+                cbxBoundaryMethod.Enabled = false;
             }
         }
 
@@ -1713,6 +1802,7 @@ Are you sure you want to proceed?";
         {
             cbxKernelRadius.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
+            cbxBoundaryMethod.SelectedIndex = 0;
 
             using (Graphics g = this.CreateGraphics())
             {
@@ -1808,6 +1898,7 @@ Are you sure you want to proceed?";
 
             int r = 2, polyOrder = 2, n = 0;
             bool doRect = false, doAvg = false, doMed = false, doGauss = false, doSG = false;
+            var boundaryMode = GetBoundaryMode();
             string excelTitle = "";
             double[] initialData = null;
 
@@ -1818,7 +1909,6 @@ Are you sure you want to proceed?";
                 {
                     r = int.TryParse(slblKernelRadius.Text, out var tmpW) ? tmpW : 2;
                     polyOrder = int.TryParse(slblPolyOrder.Text, out var tmpP) ? tmpP : 2;
-
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
                     doMed = settingsForm.chbMed.Checked;
@@ -1839,7 +1929,6 @@ Are you sure you want to proceed?";
             {
                 r = int.TryParse(slblKernelRadius.Text, out var tmpW) ? tmpW : 2;
                 polyOrder = int.TryParse(slblPolyOrder.Text, out var tmpP) ? tmpP : 2;
-
                 doRect = settingsForm.chbRect.Checked;
                 doAvg = settingsForm.chbAvg.Checked;
                 doMed = settingsForm.chbMed.Checked;
@@ -1883,7 +1972,7 @@ Are you sure you want to proceed?";
             {
                 // 변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
                 var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                    ApplySmoothing(initialData, r, polyOrder, doRect, doAvg, doMed, doGauss, doSG);
+                    ApplySmoothing(initialData, r, polyOrder, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
 
                 // 결과를 내보내기 위해 배열에 값을 할당합니다.
                 if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
@@ -1944,6 +2033,7 @@ Are you sure you want to proceed?";
                 1 + // Kernel Radius
                 1 + // Kernel Width
                 (doSG ? 1 : 0) + // Polynomial Order
+                (doSG ? 1 : 0) + // Boundary Method
                 1 + // blank
                 1 + // Generated
                 1 + // blank
@@ -1990,6 +2080,8 @@ Are you sure you want to proceed?";
                         await sw.WriteLineAsync($"Kernel Radius : {r}");
                         await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
                         if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+                        if (doSG) await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
+
                         await sw.WriteLineAsync(string.Empty);
                         await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
                         await sw.WriteLineAsync(string.Empty);
@@ -2173,6 +2265,36 @@ Are you sure you want to proceed?";
             }
         }
 
+        // ComboBox 텍스트로부터 BoundaryMode 파싱
+        private string GetBoundaryMethodText(BoundaryMode mode)
+        {
+            // ComboBox 에 표시되는 텍스트로 변환
+            var raw = slblBoundaryMethod.Text;
+
+            // 빈 값 처리
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return string.Empty;
+            }
+
+            // 표준화된 텍스트로 매핑
+            switch (raw.Trim())
+            {
+                // 파일 내보내기 시 사용되는 텍스트
+                case "Symmetric":
+                    return "Symmetric (Mirror)";
+
+                case "Replicate":
+                    return "Replicate (Nearest)";
+
+                case "Zero Padding":
+                    return "Zero Padding";
+
+                default:
+                    return raw;
+            }
+        }
+
         private async void ExportExcelAsync()
         {
             // COM 해제 유틸 (로컬 함수) 
@@ -2196,6 +2318,7 @@ Are you sure you want to proceed?";
 
             int r = int.TryParse(slblKernelRadius.Text, out var tmpW) ? tmpW : 2;
             int polyOrder = int.TryParse(slblPolyOrder.Text, out var tmpP) ? tmpP : 2;
+            var boundaryMode = GetBoundaryMode();
 
             bool doRect = settingsForm.chbRect.Checked;
             bool doAvg = settingsForm.chbAvg.Checked;
@@ -2246,7 +2369,7 @@ Are you sure you want to proceed?";
             {
                 //  변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
                 var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                    ApplySmoothing(initialData, r, polyOrder, doRect, doAvg, doMed, doGauss, doSG);
+                    ApplySmoothing(initialData, r, polyOrder, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
 
                 // 결과를 내보내기 위해 배열에 값을 할당합니다.
                 if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
@@ -2274,10 +2397,10 @@ Are you sure you want to proceed?";
             {
                 excel = new Excel.Application();
                 coms.Push(excel);
-
+               
                 workbooks = excel.Workbooks;
                 coms.Push(workbooks);
-
+                
                 wb = workbooks.Add();
                 coms.Push(wb);
 
@@ -2424,6 +2547,9 @@ Are you sure you want to proceed?";
                 ws.Cells[6, 1] = doSG
                     ? $"Polynomial Order : {polyOrder}"
                     : "Polynomial Order : N/A";
+                ws.Cells[7, 1] = doSG
+                    ? $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}"
+                    : "Boundary Method : N/A";
 
                 async Task<int> FillData(double[] data, int startCol)
                 {
@@ -2704,9 +2830,18 @@ Are you sure you want to proceed?";
             }
         }
 
+        private void cbxBoundaryMethod_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(cbxBoundaryMethod.SelectedValue?.ToString(), out var b))
+            {
+                settingsForm.boundaryMethod = b;
+                settingsForm.cbxBoundaryMethod.Text = cbxBoundaryMethod.Text;
+            }
+        }
+
         private void btnExportSettings_Click(object sender, EventArgs e)
         {
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
             settingsForm.ShowDialog();
         }
 
@@ -2890,6 +3025,22 @@ Are you sure you want to proceed?";
             slblDesc.Visible = true;
         }
 
+        private void txtDatasetTitle_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                bool forward = (e.Modifiers & Keys.Shift) == 0;
+
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+
+                Control current = sender as Control ?? this.ActiveControl;
+                if (current != null)
+                {
+                    this.SelectNextControl(current, forward, true, true, true);
+                }
+            }
+        }
 
         #region Mouse Hover and Leave Events
         private void MouseLeaveHandler(object sender, EventArgs e)
@@ -3238,7 +3389,6 @@ Are you sure you want to proceed?";
             }
         }
 
-
         private void btnRefSelectAll_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
@@ -3335,21 +3485,26 @@ Are you sure you want to proceed?";
             MouseLeaveHandler(sender, e);
         }
 
-        private void txtDatasetTitle_KeyDown(object sender, KeyEventArgs e)
+        private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
-            {
-                bool forward = (e.Modifiers & Keys.Shift) == 0;
+            slblDesc.Visible = true;
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+        }
 
-                e.SuppressKeyPress = true;
-                e.Handled = true;
+        private void lblBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
 
-                Control current = sender as Control ?? this.ActiveControl;
-                if (current != null)
-                {
-                    this.SelectNextControl(current, forward, true, true, true);
-                }
-            }
+        private void cbxBoundaryMethod_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+        }
+
+        private void cbxBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
         }
     }
     #endregion

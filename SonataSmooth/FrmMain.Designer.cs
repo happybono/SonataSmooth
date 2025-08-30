@@ -61,7 +61,16 @@
             this.gbRefinedData = new System.Windows.Forms.GroupBox();
             this.btnRefSelectSync = new System.Windows.Forms.Button();
             this.lblRefCnt = new System.Windows.Forms.Label();
-            this.statStripMain = new System.Windows.Forms.StatusStrip();
+            this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
+            this.rbtnGauss = new System.Windows.Forms.RadioButton();
+            this.gbSmoothParams = new System.Windows.Forms.GroupBox();
+            this.ttipMain = new System.Windows.Forms.ToolTip(this.components);
+            this.btnExportSettings = new System.Windows.Forms.Button();
+            this.btnExport = new System.Windows.Forms.Button();
+            this.btnInfo = new System.Windows.Forms.Button();
+            this.txtDatasetTitle = new System.Windows.Forms.TextBox();
+            this.lblBoundaryMethod = new System.Windows.Forms.Label();
+            this.cbxBoundaryMethod = new System.Windows.Forms.ComboBox();
             this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
             this.tlblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblCalibratedType = new System.Windows.Forms.ToolStripStatusLabel();
@@ -71,19 +80,15 @@
             this.tlblSeparator2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tlblPolyOrder = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblPolyOrder = new System.Windows.Forms.ToolStripStatusLabel();
-            this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
-            this.rbtnGauss = new System.Windows.Forms.RadioButton();
-            this.gbSmoothParams = new System.Windows.Forms.GroupBox();
-            this.ttipMain = new System.Windows.Forms.ToolTip(this.components);
-            this.btnExportSettings = new System.Windows.Forms.Button();
-            this.btnExport = new System.Windows.Forms.Button();
-            this.btnInfo = new System.Windows.Forms.Button();
-            this.txtDatasetTitle = new System.Windows.Forms.TextBox();
+            this.tlblSeparator3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblBoundaryHandling = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statStripMain = new System.Windows.Forms.StatusStrip();
+            this.slblBoundaryMethod = new System.Windows.Forms.ToolStripStatusLabel();
             this.gbInitData.SuspendLayout();
             this.gbRefinedData.SuspendLayout();
-            this.statStripMain.SuspendLayout();
             this.gbSmoothMtd.SuspendLayout();
             this.gbSmoothParams.SuspendLayout();
+            this.statStripMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbInitData
@@ -319,10 +324,10 @@
             "11",
             "12",
             "13"});
-            this.cbxKernelRadius.Location = new System.Drawing.Point(232, 42);
+            this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
             this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelRadius.Name = "cbxKernelRadius";
-            this.cbxKernelRadius.Size = new System.Drawing.Size(80, 25);
+            this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
             this.cbxKernelRadius.TabIndex = 20;
             this.cbxKernelRadius.SelectedIndexChanged += new System.EventHandler(this.cbxKernelRadius_SelectedIndexChanged);
             this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
@@ -330,14 +335,14 @@
             // 
             // lblKernelRadius
             // 
-            this.lblKernelRadius.AutoSize = true;
             this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblKernelRadius.Location = new System.Drawing.Point(28, 45);
+            this.lblKernelRadius.Location = new System.Drawing.Point(18, 31);
             this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblKernelRadius.Name = "lblKernelRadius";
-            this.lblKernelRadius.Size = new System.Drawing.Size(201, 19);
+            this.lblKernelRadius.Size = new System.Drawing.Size(183, 19);
             this.lblKernelRadius.TabIndex = 17;
-            this.lblKernelRadius.Text = "Noise Reduction Kernel Radius : ";
+            this.lblKernelRadius.Text = "Kernel Radius : ";
+            this.lblKernelRadius.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblKernelRadius.MouseLeave += new System.EventHandler(this.lblKernelRadius_MouseLeave);
             this.lblKernelRadius.MouseHover += new System.EventHandler(this.lblKernelRadius_MouseHover);
             // 
@@ -402,14 +407,14 @@
             // 
             // lblPolyOrder
             // 
-            this.lblPolyOrder.AutoSize = true;
             this.lblPolyOrder.Enabled = false;
             this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(72, 83);
+            this.lblPolyOrder.Location = new System.Drawing.Point(18, 65);
             this.lblPolyOrder.Name = "lblPolyOrder";
-            this.lblPolyOrder.Size = new System.Drawing.Size(119, 19);
+            this.lblPolyOrder.Size = new System.Drawing.Size(183, 19);
             this.lblPolyOrder.TabIndex = 20;
             this.lblPolyOrder.Text = "Polynomial Order :";
+            this.lblPolyOrder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblPolyOrder.MouseLeave += new System.EventHandler(this.lblPolyOrder_MouseLeave);
             this.lblPolyOrder.MouseHover += new System.EventHandler(this.lblPolyOrder_MouseHover);
             // 
@@ -428,10 +433,13 @@
             "4",
             "5",
             "6",
-            "7"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(193, 80);
+            "7",
+            "8",
+            "9",
+            "10"});
+            this.cbxPolyOrder.Location = new System.Drawing.Point(223, 63);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
-            this.cbxPolyOrder.Size = new System.Drawing.Size(80, 25);
+            this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
             this.cbxPolyOrder.TabIndex = 21;
             this.cbxPolyOrder.SelectedIndexChanged += new System.EventHandler(this.cbxPolyOrder_SelectedIndexChanged);
             this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
@@ -561,106 +569,6 @@
             this.lblRefCnt.TabIndex = 8;
             this.lblRefCnt.Text = "Count : 0";
             // 
-            // statStripMain
-            // 
-            this.statStripMain.AutoSize = false;
-            this.statStripMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
-            this.statStripMain.ImageScalingSize = new System.Drawing.Size(32, 32);
-            this.statStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.slblDesc,
-            this.tlblCalibratedType,
-            this.slblCalibratedType,
-            this.tlblSeparator1,
-            this.tlblKernelRadius,
-            this.slblKernelRadius,
-            this.tlblSeparator2,
-            this.tlblPolyOrder,
-            this.slblPolyOrder});
-            this.statStripMain.Location = new System.Drawing.Point(0, 831);
-            this.statStripMain.Name = "statStripMain";
-            this.statStripMain.Size = new System.Drawing.Size(734, 24);
-            this.statStripMain.SizingGrip = false;
-            this.statStripMain.TabIndex = 27;
-            this.statStripMain.Text = "statusStrip1";
-            // 
-            // slblDesc
-            // 
-            this.slblDesc.AutoSize = false;
-            this.slblDesc.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblDesc.ForeColor = System.Drawing.Color.White;
-            this.slblDesc.Name = "slblDesc";
-            this.slblDesc.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.slblDesc.Size = new System.Drawing.Size(731, 19);
-            this.slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method , set " +
-    "Smoothing Parameters.";
-            // 
-            // tlblCalibratedType
-            // 
-            this.tlblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tlblCalibratedType.ForeColor = System.Drawing.Color.White;
-            this.tlblCalibratedType.Name = "tlblCalibratedType";
-            this.tlblCalibratedType.Size = new System.Drawing.Size(114, 19);
-            this.tlblCalibratedType.Text = "Applied Calibration :";
-            // 
-            // slblCalibratedType
-            // 
-            this.slblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblCalibratedType.ForeColor = System.Drawing.Color.White;
-            this.slblCalibratedType.Name = "slblCalibratedType";
-            this.slblCalibratedType.Size = new System.Drawing.Size(17, 16);
-            this.slblCalibratedType.Text = "--";
-            // 
-            // tlblSeparator1
-            // 
-            this.tlblSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tlblSeparator1.ForeColor = System.Drawing.Color.White;
-            this.tlblSeparator1.Name = "tlblSeparator1";
-            this.tlblSeparator1.Size = new System.Drawing.Size(19, 16);
-            this.tlblSeparator1.Text = "｜";
-            // 
-            // tlblKernelRadius
-            // 
-            this.tlblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tlblKernelRadius.ForeColor = System.Drawing.Color.White;
-            this.tlblKernelRadius.Name = "tlblKernelRadius";
-            this.tlblKernelRadius.Size = new System.Drawing.Size(176, 16);
-            this.tlblKernelRadius.Text = "Noise Reduction Kernel Radius : ";
-            // 
-            // slblKernelRadius
-            // 
-            this.slblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblKernelRadius.ForeColor = System.Drawing.Color.White;
-            this.slblKernelRadius.Name = "slblKernelRadius";
-            this.slblKernelRadius.Size = new System.Drawing.Size(17, 16);
-            this.slblKernelRadius.Text = "--";
-            // 
-            // tlblSeparator2
-            // 
-            this.tlblSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tlblSeparator2.ForeColor = System.Drawing.Color.White;
-            this.tlblSeparator2.Name = "tlblSeparator2";
-            this.tlblSeparator2.Size = new System.Drawing.Size(19, 16);
-            this.tlblSeparator2.Text = "｜";
-            this.tlblSeparator2.Visible = false;
-            // 
-            // tlblPolyOrder
-            // 
-            this.tlblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tlblPolyOrder.ForeColor = System.Drawing.Color.White;
-            this.tlblPolyOrder.Name = "tlblPolyOrder";
-            this.tlblPolyOrder.Size = new System.Drawing.Size(107, 16);
-            this.tlblPolyOrder.Text = "Polynomial Order : ";
-            this.tlblPolyOrder.Visible = false;
-            // 
-            // slblPolyOrder
-            // 
-            this.slblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.slblPolyOrder.ForeColor = System.Drawing.Color.White;
-            this.slblPolyOrder.Name = "slblPolyOrder";
-            this.slblPolyOrder.Size = new System.Drawing.Size(17, 16);
-            this.slblPolyOrder.Text = "--";
-            this.slblPolyOrder.Visible = false;
-            // 
             // gbSmoothMtd
             // 
             this.gbSmoothMtd.Controls.Add(this.rbtnGauss);
@@ -693,6 +601,8 @@
             // 
             // gbSmoothParams
             // 
+            this.gbSmoothParams.Controls.Add(this.cbxBoundaryMethod);
+            this.gbSmoothParams.Controls.Add(this.lblBoundaryMethod);
             this.gbSmoothParams.Controls.Add(this.lblPolyOrder);
             this.gbSmoothParams.Controls.Add(this.cbxPolyOrder);
             this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
@@ -764,6 +674,169 @@
             this.txtDatasetTitle.MouseLeave += new System.EventHandler(this.txtDatasetTitle_MouseLeave);
             this.txtDatasetTitle.MouseHover += new System.EventHandler(this.txtDatasetTitle_MouseHover);
             // 
+            // lblBoundaryMethod
+            // 
+            this.lblBoundaryMethod.Enabled = false;
+            this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 100);
+            this.lblBoundaryMethod.Name = "lblBoundaryMethod";
+            this.lblBoundaryMethod.Size = new System.Drawing.Size(183, 19);
+            this.lblBoundaryMethod.TabIndex = 22;
+            this.lblBoundaryMethod.Text = "Boundary Handling Method :";
+            this.lblBoundaryMethod.MouseLeave += new System.EventHandler(this.lblBoundaryMethod_MouseLeave);
+            this.lblBoundaryMethod.MouseHover += new System.EventHandler(this.lblBoundaryMethod_MouseHover);
+            // 
+            // cbxBoundaryMethod
+            // 
+            this.cbxBoundaryMethod.DropDownHeight = 150;
+            this.cbxBoundaryMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxBoundaryMethod.Enabled = false;
+            this.cbxBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxBoundaryMethod.FormattingEnabled = true;
+            this.cbxBoundaryMethod.IntegralHeight = false;
+            this.cbxBoundaryMethod.ItemHeight = 17;
+            this.cbxBoundaryMethod.Items.AddRange(new object[] {
+            "Symmetric",
+            "Replicate",
+            "Zero Padding"});
+            this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 97);
+            this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
+            this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
+            this.cbxBoundaryMethod.TabIndex = 23;
+            this.cbxBoundaryMethod.SelectedIndexChanged += new System.EventHandler(this.cbxBoundaryMethod_SelectedIndexChanged);
+            this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
+            this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
+            // 
+            // slblDesc
+            // 
+            this.slblDesc.AutoSize = false;
+            this.slblDesc.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblDesc.ForeColor = System.Drawing.Color.White;
+            this.slblDesc.Name = "slblDesc";
+            this.slblDesc.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
+            this.slblDesc.Size = new System.Drawing.Size(731, 19);
+            this.slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method , set " +
+    "Smoothing Parameters.";
+            // 
+            // tlblCalibratedType
+            // 
+            this.tlblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblCalibratedType.ForeColor = System.Drawing.Color.White;
+            this.tlblCalibratedType.Name = "tlblCalibratedType";
+            this.tlblCalibratedType.Size = new System.Drawing.Size(114, 19);
+            this.tlblCalibratedType.Text = "Applied Calibration :";
+            // 
+            // slblCalibratedType
+            // 
+            this.slblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblCalibratedType.ForeColor = System.Drawing.Color.White;
+            this.slblCalibratedType.Name = "slblCalibratedType";
+            this.slblCalibratedType.Size = new System.Drawing.Size(17, 19);
+            this.slblCalibratedType.Text = "--";
+            // 
+            // tlblSeparator1
+            // 
+            this.tlblSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator1.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator1.Name = "tlblSeparator1";
+            this.tlblSeparator1.Size = new System.Drawing.Size(19, 19);
+            this.tlblSeparator1.Text = "｜";
+            // 
+            // tlblKernelRadius
+            // 
+            this.tlblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblKernelRadius.ForeColor = System.Drawing.Color.White;
+            this.tlblKernelRadius.Name = "tlblKernelRadius";
+            this.tlblKernelRadius.Size = new System.Drawing.Size(86, 19);
+            this.tlblKernelRadius.Text = "Kernel Radius : ";
+            // 
+            // slblKernelRadius
+            // 
+            this.slblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblKernelRadius.ForeColor = System.Drawing.Color.White;
+            this.slblKernelRadius.Name = "slblKernelRadius";
+            this.slblKernelRadius.Size = new System.Drawing.Size(17, 19);
+            this.slblKernelRadius.Text = "--";
+            // 
+            // tlblSeparator2
+            // 
+            this.tlblSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator2.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator2.Name = "tlblSeparator2";
+            this.tlblSeparator2.Size = new System.Drawing.Size(19, 19);
+            this.tlblSeparator2.Text = "｜";
+            this.tlblSeparator2.Visible = false;
+            // 
+            // tlblPolyOrder
+            // 
+            this.tlblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblPolyOrder.ForeColor = System.Drawing.Color.White;
+            this.tlblPolyOrder.Name = "tlblPolyOrder";
+            this.tlblPolyOrder.Size = new System.Drawing.Size(107, 19);
+            this.tlblPolyOrder.Text = "Polynomial Order : ";
+            this.tlblPolyOrder.Visible = false;
+            // 
+            // slblPolyOrder
+            // 
+            this.slblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblPolyOrder.ForeColor = System.Drawing.Color.White;
+            this.slblPolyOrder.Name = "slblPolyOrder";
+            this.slblPolyOrder.Size = new System.Drawing.Size(17, 19);
+            this.slblPolyOrder.Text = "--";
+            this.slblPolyOrder.Visible = false;
+            // 
+            // tlblSeparator3
+            // 
+            this.tlblSeparator3.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator3.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator3.Name = "tlblSeparator3";
+            this.tlblSeparator3.Size = new System.Drawing.Size(19, 19);
+            this.tlblSeparator3.Text = "｜";
+            this.tlblSeparator3.Visible = false;
+            // 
+            // tlblBoundaryHandling
+            // 
+            this.tlblBoundaryHandling.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblBoundaryHandling.ForeColor = System.Drawing.Color.White;
+            this.tlblBoundaryHandling.Name = "tlblBoundaryHandling";
+            this.tlblBoundaryHandling.Size = new System.Drawing.Size(117, 19);
+            this.tlblBoundaryHandling.Text = "Boundary Handling : ";
+            this.tlblBoundaryHandling.Visible = false;
+            // 
+            // statStripMain
+            // 
+            this.statStripMain.AutoSize = false;
+            this.statStripMain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
+            this.statStripMain.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.statStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.slblDesc,
+            this.tlblCalibratedType,
+            this.slblCalibratedType,
+            this.tlblSeparator1,
+            this.tlblKernelRadius,
+            this.slblKernelRadius,
+            this.tlblSeparator2,
+            this.tlblPolyOrder,
+            this.slblPolyOrder,
+            this.tlblSeparator3,
+            this.tlblBoundaryHandling,
+            this.slblBoundaryMethod});
+            this.statStripMain.Location = new System.Drawing.Point(0, 831);
+            this.statStripMain.Name = "statStripMain";
+            this.statStripMain.Size = new System.Drawing.Size(734, 24);
+            this.statStripMain.SizingGrip = false;
+            this.statStripMain.TabIndex = 27;
+            this.statStripMain.Text = "statusStrip1";
+            // 
+            // slblBoundaryMethod
+            // 
+            this.slblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblBoundaryMethod.ForeColor = System.Drawing.Color.White;
+            this.slblBoundaryMethod.Name = "slblBoundaryMethod";
+            this.slblBoundaryMethod.Size = new System.Drawing.Size(17, 19);
+            this.slblBoundaryMethod.Text = "--";
+            this.slblBoundaryMethod.Visible = false;
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -795,11 +868,10 @@
             this.gbInitData.PerformLayout();
             this.gbRefinedData.ResumeLayout(false);
             this.gbRefinedData.PerformLayout();
-            this.statStripMain.ResumeLayout(false);
-            this.statStripMain.PerformLayout();
             this.gbSmoothMtd.ResumeLayout(false);
             this.gbSmoothParams.ResumeLayout(false);
-            this.gbSmoothParams.PerformLayout();
+            this.statStripMain.ResumeLayout(false);
+            this.statStripMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -828,16 +900,7 @@
         private System.Windows.Forms.ProgressBar pbMain;
         private System.Windows.Forms.RadioButton rbtnSG;
         private System.Windows.Forms.Label lblPolyOrder;
-        private System.Windows.Forms.StatusStrip statStripMain;
-        private System.Windows.Forms.ToolStripStatusLabel tlblCalibratedType;
-        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator1;
-        private System.Windows.Forms.ToolStripStatusLabel tlblKernelRadius;
-        private System.Windows.Forms.ToolStripStatusLabel tlblPolyOrder;
-        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator2;
         private System.Windows.Forms.Label lblRefCnt;
-        private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
-        private System.Windows.Forms.ToolStripStatusLabel slblKernelRadius;
-        private System.Windows.Forms.ToolStripStatusLabel slblPolyOrder;
         private System.Windows.Forms.GroupBox gbSmoothMtd;
         private System.Windows.Forms.GroupBox gbSmoothParams;
         private System.Windows.Forms.RadioButton rbtnGauss;
@@ -854,7 +917,21 @@
         private System.Windows.Forms.Button btnInfo;
         private System.Windows.Forms.Button btnInitSelectSync;
         private System.Windows.Forms.Button btnRefSelectSync;
+        private System.Windows.Forms.Label lblBoundaryMethod;
+        private System.Windows.Forms.ComboBox cbxBoundaryMethod;
         private System.Windows.Forms.ToolStripStatusLabel slblDesc;
+        private System.Windows.Forms.ToolStripStatusLabel tlblCalibratedType;
+        private System.Windows.Forms.ToolStripStatusLabel slblCalibratedType;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator1;
+        private System.Windows.Forms.ToolStripStatusLabel tlblKernelRadius;
+        private System.Windows.Forms.ToolStripStatusLabel slblKernelRadius;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator2;
+        private System.Windows.Forms.ToolStripStatusLabel tlblPolyOrder;
+        private System.Windows.Forms.ToolStripStatusLabel slblPolyOrder;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator3;
+        private System.Windows.Forms.ToolStripStatusLabel tlblBoundaryHandling;
+        private System.Windows.Forms.StatusStrip statStripMain;
+        private System.Windows.Forms.ToolStripStatusLabel slblBoundaryMethod;
     }
 }
 
