@@ -203,7 +203,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 </details>
 
 ### v4.7.1.5
-#### August 31, 2025
+#### August 30, 2025
 >	Implemented unified parameter sourcing for export : `ExportCsvAsync` and `ExportExcelAsync` now read Kernel Radius / Polynomial Order from the applied status labels (`slblKernelRadius`, `slblPolyOrder`) instead of the settings dialog ComboBoxes : ensuring exports always reflect the last calibrated parameters, preventing use of stale or unsaved values, avoiding unintended field mutation, and tightening variable scope.<br><br>
 > Minor bugs Fixed.
 
