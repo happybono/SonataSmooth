@@ -1922,8 +1922,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             {
                 Invoke(new Action(() =>
                 {
-                    r = int.TryParse(slblKernelRadius.Text, out var tmpW) ? tmpW : 2;
-                    polyOrder = int.TryParse(slblPolyOrder.Text, out var tmpP) ? tmpP : 2;
+                    r = int.TryParse(cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
+                    polyOrder = int.TryParse(cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
                     doMed = settingsForm.chbMed.Checked;
