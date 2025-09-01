@@ -163,7 +163,7 @@
             this.btnCalibrate.Size = new System.Drawing.Size(466, 30);
             this.btnCalibrate.TabIndex = 22;
             this.btnCalibrate.Text = "";
-            this.ttipMain.SetToolTip(this.btnCalibrate, "Calibrate");
+            this.ttipMain.SetToolTip(this.btnCalibrate, "Start Smoothing");
             this.btnCalibrate.UseVisualStyleBackColor = true;
             this.btnCalibrate.Click += new System.EventHandler(this.btnCalibrate_Click);
             this.btnCalibrate.MouseLeave += new System.EventHandler(this.btnCalibrate_MouseLeave);
@@ -717,16 +717,16 @@
             this.slblDesc.Name = "slblDesc";
             this.slblDesc.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.slblDesc.Size = new System.Drawing.Size(731, 19);
-            this.slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method , set " +
-    "Smoothing Parameters.";
+            this.slblDesc.Text = "To start smoothing, add data to the Initial Dataset, choose a Smoothing Method, a" +
+    "nd set Smoothing Parameters.";
             // 
             // tlblCalibratedType
             // 
             this.tlblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblCalibratedType.ForeColor = System.Drawing.Color.White;
             this.tlblCalibratedType.Name = "tlblCalibratedType";
-            this.tlblCalibratedType.Size = new System.Drawing.Size(114, 19);
-            this.tlblCalibratedType.Text = "Applied Calibration :";
+            this.tlblCalibratedType.Size = new System.Drawing.Size(116, 19);
+            this.tlblCalibratedType.Text = "Smoothing Method :";
             // 
             // slblCalibratedType
             // 

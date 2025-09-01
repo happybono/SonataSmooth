@@ -2982,7 +2982,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
         }
 
-
         private void SetBoundaryMethod(string target)
         {
             if (string.IsNullOrWhiteSpace(target) || cbxBoundaryMethod.Items.Count == 0)
@@ -3020,7 +3019,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 SetBoundaryMethod("Symmetric");
             }
         }
-
 
         private void rbtnMed_CheckedChanged(object sender, EventArgs e)
         {
@@ -3095,7 +3093,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         {
             if (isRefinedLoading || lbRefinedData.Items.Count == 0)
             {
-                slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+                slblDesc.Text = "To start smoothing, add data to the Initial Dataset, choose a Smoothing Method, and set Smoothing Parameters.";
                 slblDesc.Visible = true;
             }
             else
@@ -3498,9 +3496,9 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             slblDesc.Visible = true;
             int itemCount = lbInitData.Items.Count;
             if (itemCount == 0)
-                slblDesc.Text = "To calibrate, add data to the Initial Dataset, choose a Calibration Method, set Smoothing Parameters.";
+                slblDesc.Text = "To start smoothing, add data to the Initial Dataset, choose a Smoothing Method, and set Smoothing Parameters.";
             else
-                slblDesc.Text = "Click to start the calibration process using the selected smoothing method and parameters.";
+                slblDesc.Text = "Click to start the smoothing process with the selected method and parameters.";
 
         }
 
@@ -3514,7 +3512,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             slblDesc.Visible = true;
             if (lbRefinedData.Items.Count == 0)
             {
-                slblDesc.Text = "To export, first calibrate the data using the Calibrate button.";
+                slblDesc.Text = "To export, first smooth the data using the Start Smoothing button.";
             }
             else
             {
