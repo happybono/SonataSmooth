@@ -12,9 +12,9 @@ namespace SonataSmooth
 {
     public partial class FrmExportSettings : Form
     {
-        public int kernelRadius { get; set; } = 4;
-        public int polyOrder { get; set; } = 3;
-        public int boundaryMethod { get; set; } = 1;
+        public int KernelRadius { get; set; } = 4;
+        public int PolyOrder { get; set; } = 3;
+        public int BoundaryMethod { get; set; } = 1;
 
         private const int RecommendedMinRadius = 3;
         private const int RecommendedMaxRadius = 7;
@@ -51,13 +51,13 @@ namespace SonataSmooth
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (int.TryParse(cbxKernelRadius.Text, out var r))
-                kernelRadius = r;
+                KernelRadius = r;
 
             if (int.TryParse(cbxPolyOrder.Text, out var p))
-                polyOrder = p;
+                PolyOrder = p;
 
             if (int.TryParse(cbxBoundaryMethod.Text, out var b))
-                boundaryMethod = b;
+                BoundaryMethod = b;
 
             DoRectAvg = chbRect.Checked;
             DoBinomAvg = chbAvg.Checked;
@@ -80,9 +80,9 @@ namespace SonataSmooth
         {
             base.OnShown(e);
 
-            cbxKernelRadius.Text = kernelRadius.ToString();
-            cbxPolyOrder.Text = polyOrder.ToString();
-            cbxBoundaryMethod.Text = boundaryMethod.ToString();
+            cbxKernelRadius.Text = KernelRadius.ToString();
+            cbxPolyOrder.Text = PolyOrder.ToString();
+            cbxBoundaryMethod.Text = BoundaryMethod.ToString();
 
             chbRect.Checked = DoRectAvg;
             chbAvg.Checked = DoBinomAvg;
@@ -110,9 +110,9 @@ namespace SonataSmooth
             cbxPolyOrder.Text = polyOrder;
             cbxBoundaryMethod.Text = boundaryMethod;
 
-            if (int.TryParse(kernelRadius, out var r)) this.kernelRadius = r;
-            if (int.TryParse(polyOrder, out var p)) this.polyOrder = p;
-            if (int.TryParse(boundaryMethod, out var b)) this.boundaryMethod = b;
+            if (int.TryParse(kernelRadius, out var r)) this.KernelRadius = r;
+            if (int.TryParse(polyOrder, out var p)) this.PolyOrder = p;
+            if (int.TryParse(boundaryMethod, out var b)) this.BoundaryMethod = b;
         }
 
         private void chbSG_CheckedChanged(object sender, EventArgs e)
