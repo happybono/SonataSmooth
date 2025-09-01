@@ -550,7 +550,7 @@ Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserve
 
 -	**Parallelization** : Uses Parallel.For and ParallelEnumerable to process large datasets efficiently.
 -	**Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
--	**Boundary Handling** : Mirror-padding is used for Gaussian and Savitzky-Golay filters to ensure smooth results at the edges.
+-	**Boundary Handling**: Edge behavior is configurable (Symmetric / Replicate / Zero-Pad) for every smoothing method
 -	**Thread-Safe UI** : Progress bars and status labels are updated safely from background threads.
 
 -	**Parallel Processing** : Uses all available CPU cores for fast computation.
@@ -873,15 +873,33 @@ Calculates binomial coefficients for a given window size, which are used as weig
 
 #### Code Implementation
 ```csharp
-private static int[] CalcBinomialCoefficients(int length)
+private static long[] CalcBinomialCoefficients(int length)
 {
     if (length < 1)
         throw new ArgumentException("length must be ≥ 1", nameof(length));
 
-    var c = new int[length];
-    c[0] = 1;
-    for (int i = 1; i < length; i++)
-        c[i] = c[i - 1] * (length - i) / i;
+    // Limit 'length' to ensure the sum can be safely calculated within the 64-bit long range
+    // (Condition: 2 ^ (length - 1) ≤ 2 ^ 62)
+    if (length > 63)
+        throw new ArgumentOutOfRangeException(nameof(length),
+            "length must be ≤ 63 to avoid 64-bit weight sum overflow (2 ^ (length - 1) <= 2 ^ 62). Reduce kernel radius.");
+
+    var c = new long[length];
+    c[0] = 1; // The first coefficient is always 1
+
+    try
+    {
+        checked // Throw an exception if an overflow occurs
+        {
+            for (int i = 1; i < length; i++)
+                c[i] = c[i - 1] * (length - i) / i;
+        }
+    }
+    catch (OverflowException ex)
+    {
+        throw new InvalidOperationException(
+            $"Binomial coefficient overflow for length = {length}. Try a smaller kernel radius.", ex);
+    }
     return c;
 }
 ```
