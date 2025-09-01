@@ -252,11 +252,12 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 - **Refined Dataset ListBox** : `lbRefinedData`
 - **Kernel Radius ComboBox** : `cbxKernelRadius`
 - **Polynomial Order ComboBox** : `cbxPolyOrder`
+- **Boundary Method ComboBox** : `cbxBoundaryMethod`
 - **Calibration Method CheckBoxes** : `chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`
 - **Export Buttons** : `btnExport`, `btnExportSettings`
 - **Edit Button** : `btnInitEdit`
 - **ProgressBar** : `pbMain`, `pbModify`
-- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `slblPolyOrder`, `slblDesc`
+- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `slblPolyOrder`, `slblBoundaryMethod`, `slblDesc`
 - **Other Controls** : All controls use clear, descriptive names matching their function in the codebase.
 
 ## Noise Filter Comparison
@@ -328,6 +329,61 @@ Apply the weights :
 `2 × 0.0625 + 5 × 0.25 + 1 × 0.375 + 3 × 0.25 + 4 × 0.0625 = 2.75`
 
 That final value (`2.75`) becomes your new filtered point.
+
+## Boundary Handling Method
+Edge handling determines which values are used when the kernel window extends beyond the first or last element. Sonata
+
+### Available Modes (ComboBox: `cbxBoundaryMethod`)
+| Mode | Also Known As | Behavior | Formula / Mapping | Pros | Cons |
+|------|---------------|----------|-------------------|------|------|
+| Symmetric | Mirror / Reflect | Reflects indices across edge (excluding the edge duplicated) | `i<0 → -i-1`, `i≥n → 2n - i - 1` | Smooth continuity, preserves slope | May exaggerate boundary extrema if edge is extreme |
+| Replicate | Nearest / Clamp | Uses closest valid endpoint | `i<0 → 0`, `i≥n → n-1` | Simple, stable under plateaus | Can flatten curvature at edges |
+| Zero Padding | Constant 0 | Outside values treated as 0 | Outside → 0 | Highlights edge contrast, explicit decay | Artificial dips at ends; energy loss |
+
+### Core Enum & Accessor
+```csharp
+public enum BoundaryMode { Symmetric, Replicate, ZeroPad }
+
+private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
+{
+    int n = data.Length;
+    switch (mode)
+    {
+        case BoundaryMode.Symmetric:
+            // Symmetric : Mirror reflection based on the boundary point
+            if (idx < 0) idx = -idx - 1;
+            else if (idx >= n) idx = 2 * n - idx - 1;
+            if (idx < 0) return 0; 
+            return data[idx];
+
+        case BoundaryMode.Replicate:
+            // Replicate : Use the edge value when the index is out of range
+            if (idx < 0) idx = 0;
+            else if (idx >= n) idx = n - 1;
+            return data[idx];
+
+        case BoundaryMode.ZeroPad:
+            // Zero Padding : Return 0 when the index is out of range
+            if (idx < 0 || idx >= n) return 0.0;
+            return data[idx];
+
+        default:
+            // If the mode is unknown, handle it the same as mirror reflection
+            if (idx < 0) idx = -idx - 1;
+            else if (idx >= n) idx = 2 * n - idx - 1;
+            if (idx < 0) return 0;
+            return data[idx];
+    }
+}
+```
+
+### Integration
+All convolution / window operations now fetch samples through a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. The weighted median reuses the same accessor ensuring consistent semantics across filters and exports.
+
+### Choosing a Mode
+- Use **Symmetric** for smooth analytical signals (default).
+- Use **Replicate** for stepwise / plateau sensor data.
+- Use **ZeroPad** when emphasizing decay or isolating interior structure.
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
@@ -502,69 +558,97 @@ Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserve
 
 #### Code Implementation
 ```csharp
-private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-    ApplySmoothing(double[] input, int r, int polyOrder, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
-{
-    int n = input.Length;
-    int[] binom = CalcBinomialCoefficients(2 * r + 1);
-    double sigma = (2.0 * r + 1) / 6.0;
-    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(2 * r + 1, sigma) : null;
-    double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder) : null;
-
-    var rect = new double[n];
-    var binomAvg = new double[n];
-    var median = new double[n];
-    var gauss = new double[n];
-    var sg = new double[n];
-
-    int Mirror(int idx) => idx < 0 ? -idx - 1 : idx >= n ? 2 * n - idx - 1 : idx;
-
-    Parallel.For(0, n, i => {
-        double sum; int cnt;
-
-        if (doRect)
+        private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
+           ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode,
+                          bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
         {
-            sum = 0; cnt = 0;
-            for (int k = -r; k <= r; k++)
+            int n = input.Length;
+            int windowSize = 2 * r + 1;
+
+            long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
+            double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
+            double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder) : null;
+
+            var rect = new double[n];
+            var binomAvg = new double[n];
+            var median = new double[n];
+            var gauss = new double[n];
+            var sg = new double[n];
+
+           // Precompute division factor for Rectangular and sum of coefficients for Binomial Average
+            double invRectDiv = doRect ? 1.0 / windowSize : 0.0;
+            double binomSum = 0.0;
+            if (doAvg && binom != null)
             {
-                int idx = i + k;
-                if (idx >= 0 && idx < n) { sum += input[idx]; cnt++; }
+                for (int i = 0; i < binom.Length; i++) binomSum += binom[i];
             }
-            rect[i] = cnt > 0 ? sum / cnt : 0.0;
-        }
 
-        if (doAvg)
-        {
-            sum = 0; cnt = 0;
-            for (int k = -r; k <= r; k++)
+            double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+
+            // For small datasets, serial execution is faster due to parallel overhead
+            bool useParallel = n >= 2000;
+
+            Action<int> smoothingAction = i =>
             {
-                int idx = i + k;
-                if (idx >= 0 && idx < n) { sum += input[idx] * binom[k + r]; cnt += binom[k + r]; }
+                // Rectangular
+                if (doRect)
+                {
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += Sample(i + k);
+                    rect[i] = sum * invRectDiv;
+                }
+
+                // Binomial Average
+                if (doAvg && binom != null)
+                {
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += Sample(i + k) * binom[k + r];
+                    binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+                }
+
+                // Weighted Median
+                if (doMed && binom != null)
+                {
+                    median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+                }
+
+                // Gaussian
+                if (doGauss && gaussCoeffs != null)
+                {
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += gaussCoeffs[k + r] * Sample(i + k);
+                    gauss[i] = sum;
+                }
+
+                // Savitzky-Golay
+                if (doSG && sgCoeffs != null)
+                {
+                    // The `Sample` function correctly handles all boundary modes (including ZeroPad),
+                    // so no separate branching is needed here.
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += sgCoeffs[k + r] * Sample(i + k);
+                    sg[i] = sum;
+                }
+            };
+
+            if (useParallel)
+            {
+                Parallel.For(0, n, smoothingAction);
             }
-            binomAvg[i] = cnt > 0 ? sum / cnt : 0.0;
+            else
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    smoothingAction(i);
+                }
+            }
+
+            return (rect, binomAvg, median, gauss, sg);
         }
-
-        if (doMed) median[i] = WeightedMedianAt(input, i, r, binom);
-
-        if (doGauss && gaussCoeffs != null)
-        {
-            sum = 0;
-            for (int k = -r; k <= r; k++)
-                sum += gaussCoeffs[k + r] * input[Mirror(i + k)];
-            gauss[i] = sum;
-        }
-
-        if (doSG && sgCoeffs != null)
-        {
-            sum = 0;
-            for (int k = -r; k <= r; k++)
-                sum += sgCoeffs[k + r] * input[Mirror(i + k)];
-            sg[i] = sum;
-        }
-    });
-
-    return (rect, binomAvg, median, gauss, sg);
-}
 ```
 
 ### 3. Rectangular (Uniform) Mean Filter
@@ -614,44 +698,49 @@ else if (useMed)
 }
 
 // WeightedMedianAt implementation :
- private static double WeightedMedianAt(double[] data, int center, int w, int[] binom)
+private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode mode)
+{
+    // Collect (value, weight) pairs for the window centered at 'center'
+    var pairs = new List<(double Value, long Weight)>(2 * w + 1);
+    for (int k = -w; k <= w; k++)
+    {
+        double v = GetValueWithBoundary(data, center + k, mode);
+        pairs.Add((v, binom[k + w]));
+    }
+
+    // Sort pairs by value (ascending)
+    pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+
+    // Compute total weight
+    long total = 0;
+    foreach (var p in pairs) total += p.Weight;
+    if (total <= 0) return 0;
+
+    // Determine if total weight is even
+    bool even = (total & 1L) == 0;
+    long half = total / 2;
+
+    // Accumulate weights until reaching the median position
+    long acc = 0;
+    for (int i = 0; i < pairs.Count; i++)
+    {
+        acc += pairs[i].Weight;
+
+        // If we've passed the halfway point, this value is the median
+        if (acc > half) return pairs[i].Value;
+
+        // If total weight is even and we land exactly on the halfway point,
+        // the median is the average of this value and the next one
+        if (even && acc == half)
         {
-            var pairs = new List<(double Value, int Weight)>(2 * w + 1);
-            for (int k = -w; k <= w; k++)
-            {
-                int idx = center + k;
-                if (idx < 0 || idx >= data.Length) continue;
-                pairs.Add((data[idx], binom[k + w]));
-            }
-            if (pairs.Count == 0)
-                return 0;
-
-            pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
-
-            long totalWeight = pairs.Sum(p => p.Weight);
-            long half = totalWeight / 2;
-            bool isEvenTotal = (totalWeight % 2 == 0);
-
-            long accum = 0;
-            for (int i = 0; i < pairs.Count; i++)
-            {
-                accum += pairs[i].Weight;
-
-                if (accum > half)
-                {
-                    return pairs[i].Value;
-                }
-
-                if (isEvenTotal && accum == half)
-                {
-                    double nextVal = (i + 1 < pairs.Count)
-                                     ? pairs[i + 1].Value
-                                     : pairs[i].Value;
-                    return (pairs[i].Value + nextVal) / 2.0;
-                }
-            }
-            return pairs[pairs.Count - 1].Value;
+            double next = (i + 1 < pairs.Count) ? pairs[i + 1].Value : pairs[i].Value;
+            return (pairs[i].Value + next) / 2.0;
         }
+    }
+
+    // Fallback: return the largest value
+    return pairs[^1].Value;
+}
 ```
 
 ### 5. Binomial (Weighted) Average Filter
