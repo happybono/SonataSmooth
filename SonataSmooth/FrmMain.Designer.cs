@@ -617,7 +617,7 @@
             this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
             this.gbSmoothParams.TabIndex = 19;
             this.gbSmoothParams.TabStop = false;
-            this.gbSmoothParams.Text = "Signal Smoothing Parameters";
+            this.gbSmoothParams.Text = "Smoothing Parameters";
             // 
             // cbxBoundaryMethod
             // 
@@ -801,8 +801,8 @@
             this.tlblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblBoundaryMethod.ForeColor = System.Drawing.Color.White;
             this.tlblBoundaryMethod.Name = "tlblBoundaryMethod";
-            this.tlblBoundaryMethod.Size = new System.Drawing.Size(117, 16);
-            this.tlblBoundaryMethod.Text = "Boundary Handling : ";
+            this.tlblBoundaryMethod.Size = new System.Drawing.Size(111, 16);
+            this.tlblBoundaryMethod.Text = "Boundary Method : ";
             this.tlblBoundaryMethod.Visible = false;
             // 
             // statStripMain

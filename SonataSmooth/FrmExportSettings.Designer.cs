@@ -35,6 +35,12 @@
             this.chbGauss = new System.Windows.Forms.CheckBox();
             this.chbSG = new System.Windows.Forms.CheckBox();
             this.gbSmoothParams = new System.Windows.Forms.GroupBox();
+            this.cbxBoundaryMethod = new System.Windows.Forms.ComboBox();
+            this.lblBoundaryMethod = new System.Windows.Forms.Label();
+            this.lblPolyOrder = new System.Windows.Forms.Label();
+            this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
+            this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
+            this.lblKernelRadius = new System.Windows.Forms.Label();
             this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
@@ -46,12 +52,6 @@
             this.lblExportConfigSubttl = new System.Windows.Forms.Label();
             this.statStripExportConfig = new System.Windows.Forms.StatusStrip();
             this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
-            this.cbxBoundaryMethod = new System.Windows.Forms.ComboBox();
-            this.lblBoundaryMethod = new System.Windows.Forms.Label();
-            this.lblPolyOrder = new System.Windows.Forms.Label();
-            this.cbxPolyOrder = new System.Windows.Forms.ComboBox();
-            this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
-            this.lblKernelRadius = new System.Windows.Forms.Label();
             this.gbSmoothParams.SuspendLayout();
             this.gbSmoothMtd.SuspendLayout();
             this.gbExportOpts.SuspendLayout();
@@ -153,7 +153,112 @@
             this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
             this.gbSmoothParams.TabIndex = 23;
             this.gbSmoothParams.TabStop = false;
-            this.gbSmoothParams.Text = "Signal Smoothing Parameters";
+            this.gbSmoothParams.Text = "Smoothing Parameters";
+            // 
+            // cbxBoundaryMethod
+            // 
+            this.cbxBoundaryMethod.DropDownHeight = 150;
+            this.cbxBoundaryMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxBoundaryMethod.Enabled = false;
+            this.cbxBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxBoundaryMethod.FormattingEnabled = true;
+            this.cbxBoundaryMethod.IntegralHeight = false;
+            this.cbxBoundaryMethod.ItemHeight = 17;
+            this.cbxBoundaryMethod.Items.AddRange(new object[] {
+            "Symmetric",
+            "Replicate",
+            "Zero Padding"});
+            this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 97);
+            this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
+            this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
+            this.cbxBoundaryMethod.TabIndex = 29;
+            this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
+            this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
+            // 
+            // lblBoundaryMethod
+            // 
+            this.lblBoundaryMethod.Enabled = false;
+            this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 100);
+            this.lblBoundaryMethod.Name = "lblBoundaryMethod";
+            this.lblBoundaryMethod.Size = new System.Drawing.Size(183, 19);
+            this.lblBoundaryMethod.TabIndex = 28;
+            this.lblBoundaryMethod.Text = "Boundary Handling Method :";
+            this.lblBoundaryMethod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblBoundaryMethod.MouseLeave += new System.EventHandler(this.lblBoundaryMethod_MouseLeave);
+            this.lblBoundaryMethod.MouseHover += new System.EventHandler(this.lblBoundaryMethod_MouseHover);
+            // 
+            // lblPolyOrder
+            // 
+            this.lblPolyOrder.Enabled = false;
+            this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblPolyOrder.Location = new System.Drawing.Point(18, 65);
+            this.lblPolyOrder.Name = "lblPolyOrder";
+            this.lblPolyOrder.Size = new System.Drawing.Size(183, 19);
+            this.lblPolyOrder.TabIndex = 25;
+            this.lblPolyOrder.Text = "Polynomial Order :";
+            this.lblPolyOrder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // cbxPolyOrder
+            // 
+            this.cbxPolyOrder.DropDownHeight = 150;
+            this.cbxPolyOrder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxPolyOrder.Enabled = false;
+            this.cbxPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxPolyOrder.FormattingEnabled = true;
+            this.cbxPolyOrder.IntegralHeight = false;
+            this.cbxPolyOrder.ItemHeight = 17;
+            this.cbxPolyOrder.Items.AddRange(new object[] {
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7"});
+            this.cbxPolyOrder.Location = new System.Drawing.Point(223, 63);
+            this.cbxPolyOrder.Name = "cbxPolyOrder";
+            this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
+            this.cbxPolyOrder.TabIndex = 27;
+            // 
+            // cbxKernelRadius
+            // 
+            this.cbxKernelRadius.DropDownHeight = 150;
+            this.cbxKernelRadius.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.cbxKernelRadius.ForeColor = System.Drawing.Color.Black;
+            this.cbxKernelRadius.FormattingEnabled = true;
+            this.cbxKernelRadius.IntegralHeight = false;
+            this.cbxKernelRadius.ItemHeight = 17;
+            this.cbxKernelRadius.Items.AddRange(new object[] {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13"});
+            this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
+            this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
+            this.cbxKernelRadius.Name = "cbxKernelRadius";
+            this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
+            this.cbxKernelRadius.TabIndex = 26;
+            // 
+            // lblKernelRadius
+            // 
+            this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKernelRadius.Location = new System.Drawing.Point(18, 31);
+            this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.lblKernelRadius.Name = "lblKernelRadius";
+            this.lblKernelRadius.Size = new System.Drawing.Size(183, 19);
+            this.lblKernelRadius.TabIndex = 24;
+            this.lblKernelRadius.Text = "Kernel Radius : ";
+            this.lblKernelRadius.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // gbSmoothMtd
             // 
@@ -297,111 +402,6 @@
             this.slblDesc.Spring = true;
             this.slblDesc.Text = "To save the settings, please select the desired options and click the \'Save\' butt" +
     "on.";
-            // 
-            // cbxBoundaryMethod
-            // 
-            this.cbxBoundaryMethod.DropDownHeight = 150;
-            this.cbxBoundaryMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxBoundaryMethod.Enabled = false;
-            this.cbxBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.cbxBoundaryMethod.FormattingEnabled = true;
-            this.cbxBoundaryMethod.IntegralHeight = false;
-            this.cbxBoundaryMethod.ItemHeight = 17;
-            this.cbxBoundaryMethod.Items.AddRange(new object[] {
-            "Symmetric",
-            "Replicate",
-            "Zero Padding"});
-            this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 97);
-            this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
-            this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
-            this.cbxBoundaryMethod.TabIndex = 29;
-            this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
-            this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
-            // 
-            // lblBoundaryMethod
-            // 
-            this.lblBoundaryMethod.Enabled = false;
-            this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 100);
-            this.lblBoundaryMethod.Name = "lblBoundaryMethod";
-            this.lblBoundaryMethod.Size = new System.Drawing.Size(183, 19);
-            this.lblBoundaryMethod.TabIndex = 28;
-            this.lblBoundaryMethod.Text = "Boundary Handling Method :";
-            this.lblBoundaryMethod.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblBoundaryMethod.MouseLeave += new System.EventHandler(this.lblBoundaryMethod_MouseLeave);
-            this.lblBoundaryMethod.MouseHover += new System.EventHandler(this.lblBoundaryMethod_MouseHover);
-            // 
-            // lblPolyOrder
-            // 
-            this.lblPolyOrder.Enabled = false;
-            this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(18, 65);
-            this.lblPolyOrder.Name = "lblPolyOrder";
-            this.lblPolyOrder.Size = new System.Drawing.Size(183, 19);
-            this.lblPolyOrder.TabIndex = 25;
-            this.lblPolyOrder.Text = "Polynomial Order :";
-            this.lblPolyOrder.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // cbxPolyOrder
-            // 
-            this.cbxPolyOrder.DropDownHeight = 150;
-            this.cbxPolyOrder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxPolyOrder.Enabled = false;
-            this.cbxPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.cbxPolyOrder.FormattingEnabled = true;
-            this.cbxPolyOrder.IntegralHeight = false;
-            this.cbxPolyOrder.ItemHeight = 17;
-            this.cbxPolyOrder.Items.AddRange(new object[] {
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(223, 63);
-            this.cbxPolyOrder.Name = "cbxPolyOrder";
-            this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
-            this.cbxPolyOrder.TabIndex = 27;
-            // 
-            // cbxKernelRadius
-            // 
-            this.cbxKernelRadius.DropDownHeight = 150;
-            this.cbxKernelRadius.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cbxKernelRadius.ForeColor = System.Drawing.Color.Black;
-            this.cbxKernelRadius.FormattingEnabled = true;
-            this.cbxKernelRadius.IntegralHeight = false;
-            this.cbxKernelRadius.ItemHeight = 17;
-            this.cbxKernelRadius.Items.AddRange(new object[] {
-            "1",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "11",
-            "12",
-            "13"});
-            this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
-            this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
-            this.cbxKernelRadius.Name = "cbxKernelRadius";
-            this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
-            this.cbxKernelRadius.TabIndex = 26;
-            // 
-            // lblKernelRadius
-            // 
-            this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblKernelRadius.Location = new System.Drawing.Point(18, 31);
-            this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblKernelRadius.Name = "lblKernelRadius";
-            this.lblKernelRadius.Size = new System.Drawing.Size(183, 19);
-            this.lblKernelRadius.TabIndex = 24;
-            this.lblKernelRadius.Text = "Kernel Radius : ";
-            this.lblKernelRadius.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // FrmExportSettings
             // 
