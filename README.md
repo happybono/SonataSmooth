@@ -672,18 +672,18 @@ Every neighbor contributes equally (uniform weights).
 ```csharp
 if (useRect)
 {
-    double sum = 0;
-    int cnt = 0;
-    for (int k = -r; k <= r; k++)
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+    double invRectDiv = 1.0 / (2 * r + 1);
+    
+    for (int i = 0; i < input.Length; i++)
     {
-        int idx = i + k;
-        if (idx >= 0 && idx < n)
+        double sum = 0.0;
+        for (int k = -r; k <= r; k++)
         {
-            sum += input[idx];
-            cnt++;
+            sum += Sample(i + k);
         }
+        rectFiltered[i] = sum * invRectDiv;
     }
-    return cnt > 0 ? sum / cnt : 0;
 }
 ```
 
@@ -701,52 +701,39 @@ Median filtering is robust against outliers; binomial weights bias the median to
 ```csharp
 else if (useMed)
 {
-    return WeightedMedianAt(input, i, r, binom);
-}
-
-// WeightedMedianAt implementation :
-private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode mode)
-{
-    // Collect (value, weight) pairs for the window centered at 'center'
-    var pairs = new List<(double Value, long Weight)>(2 * w + 1);
-    for (int k = -w; k <= w; k++)
+    long[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+    
+    for (int i = 0; i < input.Length; i++)
     {
-        double v = GetValueWithBoundary(data, center + k, mode);
-        pairs.Add((v, binom[k + w]));
-    }
-
-    // Sort pairs by value (ascending)
-    pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
-
-    // Compute total weight
-    long total = 0;
-    foreach (var p in pairs) total += p.Weight;
-    if (total <= 0) return 0;
-
-    // Determine if total weight is even
-    bool even = (total & 1L) == 0;
-    long half = total / 2;
-
-    // Accumulate weights until reaching the median position
-    long acc = 0;
-    for (int i = 0; i < pairs.Count; i++)
-    {
-        acc += pairs[i].Weight;
-
-        // If we've passed the halfway point, this value is the median
-        if (acc > half) return pairs[i].Value;
-
-        // If total weight is even and we land exactly on the halfway point,
-        // the median is the average of this value and the next one
-        if (even && acc == half)
+        var pairs = new List<(double Value, long Weight)>();
+        for (int k = -r; k <= r; k++)
         {
-            double next = (i + 1 < pairs.Count) ? pairs[i + 1].Value : pairs[i].Value;
-            return (pairs[i].Value + next) / 2.0;
+            pairs.Add((Sample(i + k), binom[k + r]));
+        }
+    
+        pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+        long totalWeight = pairs.Sum(p => p.Weight);
+        long half = totalWeight / 2;
+        bool even = (totalWeight & 1) == 0;
+    
+        long acc = 0;
+        for (int j = 0; j < pairs.Count; j++)
+        {
+            acc += pairs[j].Weight;
+            if (acc > half)
+            {
+                medianFiltered[i] = pairs[j].Value;
+                break;
+            }
+            if (even && acc == half)
+            {
+                double next = (j + 1 < pairs.Count) ? pairs[j + 1].Value : pairs[j].Value;
+                medianFiltered[i] = (pairs[j].Value + next) / 2.0;
+                break;
+            }
         }
     }
-
-    // Fallback: return the largest value
-    return pairs[^1].Value;
 }
 ```
 
@@ -764,16 +751,19 @@ A discrete approximation of Gaussian smoothing (binomial coefficients approximat
 ```csharp
 else if (useAvg)
 {
-    double sum = 0;
-    int cs = 0;
-    for (int k = -r; k <= r; k++)
+    long[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double binomSum = binom.Sum();
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+    
+    for (int i = 0; i < input.Length; i++)
     {
-        int idx = i + k;
-        if (idx < 0 || idx >= n) continue;
-        sum += input[idx] * binom[k + r];
-        cs += binom[k + r];
+        double sum = 0.0;
+        for (int k = -r; k <= r; k++)
+        {
+            sum += Sample(i + k) * binom[k + r];
+        }
+        binomFiltered[i] = sum / binomSum;
     }
-    return cs > 0 ? sum / cs : 0;
 }
 ```
 
@@ -789,15 +779,17 @@ Gaussian weights emphasize central values, producing smooth results.
 if (useGauss)
 {
     double[] gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
-    double sum = 0;
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
-    for (int k = -r; k <= r; k++)
+    for (int i = 0; i < input.Length; i++)
     {
-        int mi = Mirror(i + k);
-        sum += gaussCoeffs[k + r] * input[mi];
+        double sum = 0.0;
+        for (int k = -r; k <= r; k++)
+        {
+            sum += gaussCoeffs[k + r] * Sample(i + k);
+        }
+      gaussFiltered[i] = sum;
     }
-
-    return sum;
 }
 ```
 
@@ -823,19 +815,18 @@ Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curv
 ```csharp
 else if (useSG)
 {
-    double sum = 0;
-    for (int k = -r; k <= r; k++)
+    double[] sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+    
+    for (int i = 0; i < input.Length; i++)
     {
-        int mi = Mirror(i + k);
-        sum += sgCoeffs[k + r] * input[mi];
+        double sum = 0.0;
+        for (int k = -r; k <= r; k++)
+        {
+            sum += sgCoeffs[k + r] * Sample(i + k);
+        }
+        sgFiltered[i] = sum;
     }
-    return sum;
-}
-
-// Coefficient calculation :
-private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
-{
-    // ... (matrix construction and inversion)
 }
 ```
 
