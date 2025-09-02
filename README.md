@@ -336,8 +336,8 @@ Edge handling determines which values are used when the kernel window extends be
 ### Available Modes (ComboBox: `cbxBoundaryMethod`)
 | Mode | Also Known As | Behavior | Formula / Mapping | Pros | Cons |
 |------|---------------|----------|-------------------|------|------|
-| Symmetric | Mirror / Reflect | Reflects indices across edge (excluding the edge duplicated) | `i<0 → -i-1`, `i≥n → 2n - i - 1` | Smooth continuity, preserves slope | May exaggerate boundary extrema if edge is extreme |
-| Replicate | Nearest / Clamp | Uses closest valid endpoint | `i<0 → 0`, `i≥n → n-1` | Simple, stable under plateaus | Can flatten curvature at edges |
+| Symmetric | Mirror / Reflect | Reflects indices across edge (excluding the edge duplicated) | `i < 0 → -i - 1`, `i ≥ n → 2n - i - 1` | Smooth continuity, preserves slope | May exaggerate boundary extrema if edge is extreme |
+| Replicate | Nearest / Clamp | Uses closest valid endpoint | `i < 0 → 0`, `i ≥ n → n - 1` | Simple, stable under plateaus | Can flatten curvature at edges |
 | Zero Padding | Constant 0 | Outside values treated as 0 | Outside → 0 | Highlights edge contrast, explicit decay | Artificial dips at ends; energy loss |
 
 ### Core Enum & Accessor
