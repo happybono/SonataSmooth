@@ -333,12 +333,14 @@ That final value (`2.75`) becomes your new filtered point.
 ## Boundary Handling Method
 Edge handling determines which values are used when the kernel window extends beyond the first or last element.
 
+
 ### Available Modes (ComboBox: `cbxBoundaryMethod`)
-| Mode | Also Known As | Behavior | Formula / Mapping | Pros | Cons |
-|------|---------------|----------|-------------------|------|------|
-| Symmetric | Mirror / Reflect | Reflects indices across edge (excluding the edge duplicated) | `i < 0`<br>`→ -i - 1`<br>`i ≥ n`<br>`→ 2n - i - 1` | Smooth continuity, preserves slope | May exaggerate boundary extrema if edge is extreme |
-| Replicate | Nearest / Clamp | Uses closest valid endpoint | `i < 0 → 0`,<br>`i ≥ n`<br>`→ n - 1` | Simple, stable under plateaus | Can flatten curvature at edges |
-| Zero Padding | Constant 0 | Outside values treated as 0 | Outside → 0 | Highlights edge contrast, explicit decay | Artificial dips at ends; energy loss |
+
+| Mode        | Also Known As               | Formula / Mapping                                      | Behavior                        | Pros                                      | Cons                                                              |
+|-------------|-----------------------------|--------------------------------------------------------|----------------------------------|-------------------------------------------|-------------------------------------------------------------------|
+| Symmetric   | Mirror, Reflect             | `i < 0`<br>`→ -i - 1`,<br>`i ≥ n`<br>`→ 2n - i - 1`                  | Reflects across edge             | Smooth continuity, preserves slope        | May exaggerate boundary extrema if edge is extreme                |
+| Replicate   | Nearest, Clamp,             | `i < 0 → 0`,<br>`i ≥ n`<br>`→ n - 1`                            | Uses closest endpoint            | Simple, stable under plateaus             | Can flatten curvature at edges                                    |
+| Zero Padding| Constant 0,                 | `i < 0` or <br>`i ≥ n → 0`                                    | Outside values become zero       | Highlights edge contrast, explicit decay | Artificial dips at ends; energy loss                              |
 
 ### Core Enum & Accessor
 ```csharp
