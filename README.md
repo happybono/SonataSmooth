@@ -334,7 +334,7 @@ That final value (`2.75`) becomes your new filtered point.
 Edge handling determines which values are used when the kernel window extends beyond the first or last element.
 
 
-### Available Modes (ComboBox: `cbxBoundaryMethod`)
+### Available Modes (ComboBox : `cbxBoundaryMethod`)
 
 | Mode        | Also Known As               | Formula / Mapping                                      | Behavior                        | Pros                                      | Cons                                                              |
 |-------------|-----------------------------|--------------------------------------------------------|----------------------------------|-------------------------------------------|-------------------------------------------------------------------|
