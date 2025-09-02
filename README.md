@@ -557,7 +557,7 @@ Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserve
 
 -	**Parallelization** : Uses Parallel.For and ParallelEnumerable to process large datasets efficiently.
 -	**Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
--	**Boundary Handling**: Edge behavior is configurable (Symmetric / Replicate / Zero-Pad) for every smoothing method
+-	**Boundary Handling** : Edge behavior is configurable (Symmetric / Replicate / Zero-Pad) for every smoothing method
 -	**Thread-Safe UI** : Progress bars and status labels are updated safely from background threads.
 
 -	**Parallel Processing** : Uses all available CPU cores for fast computation.
