@@ -219,7 +219,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ### v4.8.1.0
 #### September 02, 2025
 > Added boundary handling options for Savitzky-Golay filter : Symmetric (Mirror), Replicate (Nearest), Zero-Pad.  
-  `BoundaryMode` enum and `GetIndex` method updated to support all three modes.  
+  `BoundaryMode` enum and `GetIndex` method updated to support all three modes.<br><br>
 > Minor bug fixes and UI improvements.
 
 ## Required Components & Setup
