@@ -565,97 +565,97 @@ Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserve
 
 #### Code Implementation
 ```csharp
-        private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-           ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode,
-                          bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
+private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
+   ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode,
+                  bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
+{
+    int n = input.Length;
+    int windowSize = 2 * r + 1;
+
+    long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
+    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
+    double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder) : null;
+
+    var rect = new double[n];
+    var binomAvg = new double[n];
+    var median = new double[n];
+    var gauss = new double[n];
+    var sg = new double[n];
+
+   // Precompute division factor for Rectangular and sum of coefficients for Binomial Average
+    double invRectDiv = doRect ? 1.0 / windowSize : 0.0;
+    double binomSum = 0.0;
+    if (doAvg && binom != null)
+    {
+        for (int i = 0; i < binom.Length; i++) binomSum += binom[i];
+    }
+
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+
+    // For small datasets, serial execution is faster due to parallel overhead
+    bool useParallel = n >= 2000;
+
+    Action<int> smoothingAction = i =>
+    {
+        // Rectangular
+        if (doRect)
         {
-            int n = input.Length;
-            int windowSize = 2 * r + 1;
-
-            long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
-            double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
-            double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder) : null;
-
-            var rect = new double[n];
-            var binomAvg = new double[n];
-            var median = new double[n];
-            var gauss = new double[n];
-            var sg = new double[n];
-
-           // Precompute division factor for Rectangular and sum of coefficients for Binomial Average
-            double invRectDiv = doRect ? 1.0 / windowSize : 0.0;
-            double binomSum = 0.0;
-            if (doAvg && binom != null)
-            {
-                for (int i = 0; i < binom.Length; i++) binomSum += binom[i];
-            }
-
-            double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
-
-            // For small datasets, serial execution is faster due to parallel overhead
-            bool useParallel = n >= 2000;
-
-            Action<int> smoothingAction = i =>
-            {
-                // Rectangular
-                if (doRect)
-                {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += Sample(i + k);
-                    rect[i] = sum * invRectDiv;
-                }
-
-                // Binomial Average
-                if (doAvg && binom != null)
-                {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += Sample(i + k) * binom[k + r];
-                    binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
-                }
-
-                // Weighted Median
-                if (doMed && binom != null)
-                {
-                    median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
-                }
-
-                // Gaussian
-                if (doGauss && gaussCoeffs != null)
-                {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += gaussCoeffs[k + r] * Sample(i + k);
-                    gauss[i] = sum;
-                }
-
-                // Savitzky-Golay
-                if (doSG && sgCoeffs != null)
-                {
-                    // The `Sample` function correctly handles all boundary modes (including ZeroPad),
-                    // so no separate branching is needed here.
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += sgCoeffs[k + r] * Sample(i + k);
-                    sg[i] = sum;
-                }
-            };
-
-            if (useParallel)
-            {
-                Parallel.For(0, n, smoothingAction);
-            }
-            else
-            {
-                for (int i = 0; i < n; i++)
-                {
-                    smoothingAction(i);
-                }
-            }
-
-            return (rect, binomAvg, median, gauss, sg);
+            double sum = 0.0;
+            for (int k = -r; k <= r; k++)
+                sum += Sample(i + k);
+            rect[i] = sum * invRectDiv;
         }
+
+        // Binomial Average
+        if (doAvg && binom != null)
+        {
+            double sum = 0.0;
+            for (int k = -r; k <= r; k++)
+                sum += Sample(i + k) * binom[k + r];
+            binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+        }
+
+        // Weighted Median
+        if (doMed && binom != null)
+        {
+            median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+        }
+
+        // Gaussian
+        if (doGauss && gaussCoeffs != null)
+        {
+            double sum = 0.0;
+            for (int k = -r; k <= r; k++)
+                sum += gaussCoeffs[k + r] * Sample(i + k);
+            gauss[i] = sum;
+        }
+
+        // Savitzky-Golay
+        if (doSG && sgCoeffs != null)
+        {
+            // The `Sample` function correctly handles all boundary modes (including ZeroPad),
+            // so no separate branching is needed here.
+            double sum = 0.0;
+            for (int k = -r; k <= r; k++)
+                sum += sgCoeffs[k + r] * Sample(i + k);
+            sg[i] = sum;
+        }
+    };
+
+    if (useParallel)
+    {
+        Parallel.For(0, n, smoothingAction);
+    }
+    else
+    {
+        for (int i = 0; i < n; i++)
+        {
+            smoothingAction(i);
+        }
+    }
+
+    return (rect, binomAvg, median, gauss, sg);
+}
 ```
 
 ### 3. Rectangular (Uniform) Mean Filter
