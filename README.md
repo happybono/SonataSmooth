@@ -220,7 +220,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.8.1.0
 #### September 02, 2025
-> Boundary handling options can now be configured and applied to all Smoothing (Calibration) methods.
+> Boundary handling options can now be configured and applied to all Smoothing (Calibration) methods.<br><br>
 > Minor bug fixes and UI improvements.
 
 ## Required Components & Setup
