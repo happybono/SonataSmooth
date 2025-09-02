@@ -206,9 +206,11 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 >	Implemented unified parameter sourcing for export : `ExportCsvAsync` and `ExportExcelAsync` now read Kernel Radius / Polynomial Order from the applied status labels (`slblKernelRadius`, `slblPolyOrder`) instead of the settings dialog ComboBoxes : ensuring exports always reflect the last calibrated parameters, preventing use of stale or unsaved values, avoiding unintended field mutation, and tightening variable scope.<br><br>
 > Minor bugs fixed.
 
-
 ### v4.8.0.0
 #### August 31, 2025
+> Added boundary handling options for Savitzky-Golay filter : Symmetric (Mirror), Replicate (Nearest), Zero-Pad.  
+  `BoundaryMode` enum and `GetIndex` method updated to support all three modes.  
+  ComboBox (`cbxBoundaryMethod`) selection now determines edge handling for Savitzky-Golay smoothing.  
 > `ApplySmoothing` and calibration logic refactored to use `GetIndex` and `boundaryMode` for Savitzky-Golay filter, ensuring correct edge behavior per user selection.<br><br>
 > Export routines (CSV / Excel) now display and save the selected boundary method for the Savitzky-Golay filter.<br><br>
 > UI status label and ComboBox text synchronized for boundary method display.<br><br>
@@ -218,8 +220,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.8.1.0
 #### September 02, 2025
-> Added boundary handling options for Savitzky-Golay filter : Symmetric (Mirror), Replicate (Nearest), Zero-Pad.  
-  `BoundaryMode` enum and `GetIndex` method updated to support all three modes.<br><br>
+> Boundary handling options can now be configured and applied to all Smoothing (Calibration) methods.
 > Minor bug fixes and UI improvements.
 
 ## Required Components & Setup
