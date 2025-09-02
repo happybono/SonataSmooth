@@ -331,7 +331,7 @@ Apply the weights :
 That final value (`2.75`) becomes your new filtered point.
 
 ## Boundary Handling Method
-Edge handling determines which values are used when the kernel window extends beyond the first or last element. Sonata
+Edge handling determines which values are used when the kernel window extends beyond the first or last element.
 
 ### Available Modes (ComboBox: `cbxBoundaryMethod`)
 | Mode | Also Known As | Behavior | Formula / Mapping | Pros | Cons |
