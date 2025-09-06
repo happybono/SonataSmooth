@@ -216,12 +216,16 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > UI status label and ComboBox text synchronized for boundary method display.<br><br>
 > Other smoothing methods remain unchanged; the boundary option applies only to the Savitzky-Golay filter.<br><br>
 > Minor bug fixes and code cleanup.
-</details>
 
 ### v4.8.1.0
 #### September 02, 2025
 > Boundary Handling Options can now be configured and applied to all Smoothing (Calibration) Methods.<br><br>
 > Minor bug fixes and user interface enhancement.
+</details>
+
+### v4.8.2.0
+#### September 7, 2025
+> With the transition to ARM64 native based on `.NET Framework 4.8.1`, PCs running in this environment now deliver improved performance.
 
 ## Required Components & Setup
 ### Prerequisites
