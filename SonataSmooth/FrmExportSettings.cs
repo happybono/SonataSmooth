@@ -100,8 +100,6 @@ namespace SonataSmooth
         {         
             lblPolyOrder.Enabled = chbSG.Checked;
             cbxPolyOrder.Enabled = chbSG.Checked;
-            lblBoundaryMethod.Enabled = chbSG.Checked;
-            cbxBoundaryMethod.Enabled = chbSG.Checked;
         }
 
         public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod)
