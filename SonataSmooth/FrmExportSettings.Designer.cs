@@ -49,9 +49,9 @@
             this.chbOpenFile = new System.Windows.Forms.CheckBox();
             this.rbtnCSV = new System.Windows.Forms.RadioButton();
             this.rbtnXLSX = new System.Windows.Forms.RadioButton();
-            this.lblExportConfigSubttl = new System.Windows.Forms.Label();
             this.statStripExportConfig = new System.Windows.Forms.StatusStrip();
             this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblExportConfigSubttl = new System.Windows.Forms.Label();
             this.gbSmoothParams.SuspendLayout();
             this.gbSmoothMtd.SuspendLayout();
             this.gbExportOpts.SuspendLayout();
@@ -147,7 +147,7 @@
             this.gbSmoothParams.Controls.Add(this.cbxPolyOrder);
             this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
             this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
-            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbSmoothParams.Location = new System.Drawing.Point(372, 73);
             this.gbSmoothParams.Name = "gbSmoothParams";
             this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
@@ -159,7 +159,6 @@
             // 
             this.cbxBoundaryMethod.DropDownHeight = 150;
             this.cbxBoundaryMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbxBoundaryMethod.Enabled = false;
             this.cbxBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
             this.cbxBoundaryMethod.FormattingEnabled = true;
             this.cbxBoundaryMethod.IntegralHeight = false;
@@ -177,7 +176,6 @@
             // 
             // lblBoundaryMethod
             // 
-            this.lblBoundaryMethod.Enabled = false;
             this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
             this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 100);
             this.lblBoundaryMethod.Name = "lblBoundaryMethod";
@@ -267,13 +265,13 @@
             this.gbSmoothMtd.Controls.Add(this.chbSG);
             this.gbSmoothMtd.Controls.Add(this.chbMed);
             this.gbSmoothMtd.Controls.Add(this.chbGauss);
-            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbSmoothMtd.Location = new System.Drawing.Point(11, 73);
             this.gbSmoothMtd.Name = "gbSmoothMtd";
             this.gbSmoothMtd.Size = new System.Drawing.Size(344, 130);
             this.gbSmoothMtd.TabIndex = 24;
             this.gbSmoothMtd.TabStop = false;
-            this.gbSmoothMtd.Text = "Calibration Method";
+            this.gbSmoothMtd.Text = "Smoothing Methods";
             // 
             // btnCancel
             // 
@@ -316,7 +314,7 @@
             this.gbExportOpts.Controls.Add(this.chbOpenFile);
             this.gbExportOpts.Controls.Add(this.rbtnCSV);
             this.gbExportOpts.Controls.Add(this.rbtnXLSX);
-            this.gbExportOpts.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbExportOpts.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbExportOpts.Location = new System.Drawing.Point(11, 209);
             this.gbExportOpts.Name = "gbExportOpts";
             this.gbExportOpts.Size = new System.Drawing.Size(705, 85);
@@ -370,16 +368,6 @@
             this.rbtnXLSX.MouseLeave += new System.EventHandler(this.rbtnXLSX_MouseLeave);
             this.rbtnXLSX.MouseHover += new System.EventHandler(this.rbtnXLSX_MouseHover);
             // 
-            // lblExportConfigSubttl
-            // 
-            this.lblExportConfigSubttl.AutoSize = true;
-            this.lblExportConfigSubttl.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 12F);
-            this.lblExportConfigSubttl.Location = new System.Drawing.Point(10, 42);
-            this.lblExportConfigSubttl.Name = "lblExportConfigSubttl";
-            this.lblExportConfigSubttl.Size = new System.Drawing.Size(270, 21);
-            this.lblExportConfigSubttl.TabIndex = 33;
-            this.lblExportConfigSubttl.Text = "Calibration and Smoothing Settings";
-            // 
             // statStripExportConfig
             // 
             this.statStripExportConfig.AutoSize = false;
@@ -402,6 +390,16 @@
             this.slblDesc.Spring = true;
             this.slblDesc.Text = "To save the settings, please select the desired options and click the \'Save\' butt" +
     "on.";
+            // 
+            // lblExportConfigSubttl
+            // 
+            this.lblExportConfigSubttl.AutoSize = true;
+            this.lblExportConfigSubttl.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 12F);
+            this.lblExportConfigSubttl.Location = new System.Drawing.Point(10, 42);
+            this.lblExportConfigSubttl.Name = "lblExportConfigSubttl";
+            this.lblExportConfigSubttl.Size = new System.Drawing.Size(270, 21);
+            this.lblExportConfigSubttl.TabIndex = 33;
+            this.lblExportConfigSubttl.Text = "Calibration and Smoothing Settings";
             // 
             // FrmExportSettings
             // 
@@ -454,7 +452,6 @@
         public System.Windows.Forms.RadioButton rbtnCSV;
         public System.Windows.Forms.RadioButton rbtnXLSX;
         public System.Windows.Forms.CheckBox chbOpenFile;
-        private System.Windows.Forms.Label lblExportConfigSubttl;
         private System.Windows.Forms.StatusStrip statStripExportConfig;
         private System.Windows.Forms.ToolStripStatusLabel slblDesc;
         private System.Windows.Forms.Label lblBoundaryMethod;
@@ -463,5 +460,6 @@
         private System.Windows.Forms.Label lblKernelRadius;
         public System.Windows.Forms.ComboBox cbxPolyOrder;
         public System.Windows.Forms.ComboBox cbxBoundaryMethod;
+        private System.Windows.Forms.Label lblExportConfigSubttl;
     }
 }

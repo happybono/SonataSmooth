@@ -476,7 +476,7 @@
             this.gbInitData.Controls.Add(this.btnInitPaste);
             this.gbInitData.Controls.Add(this.btnInitSelectClr);
             this.gbInitData.Controls.Add(this.btnInitSelectAll);
-            this.gbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gbInitData.Location = new System.Drawing.Point(15, 52);
             this.gbInitData.Name = "gbInitData";
             this.gbInitData.Size = new System.Drawing.Size(344, 586);
@@ -540,7 +540,7 @@
             this.gbRefinedData.Controls.Add(this.btnRefSelectClr);
             this.gbRefinedData.Controls.Add(this.btnRefCopy);
             this.gbRefinedData.Controls.Add(this.btnRefSelectAll);
-            this.gbRefinedData.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbRefinedData.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbRefinedData.Location = new System.Drawing.Point(376, 52);
             this.gbRefinedData.Name = "gbRefinedData";
             this.gbRefinedData.Size = new System.Drawing.Size(344, 586);
@@ -579,13 +579,13 @@
             this.gbSmoothMtd.Controls.Add(this.rbtnRect);
             this.gbSmoothMtd.Controls.Add(this.rbtnAvg);
             this.gbSmoothMtd.Controls.Add(this.rbtnMed);
-            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbSmoothMtd.Location = new System.Drawing.Point(15, 644);
             this.gbSmoothMtd.Name = "gbSmoothMtd";
             this.gbSmoothMtd.Size = new System.Drawing.Size(344, 130);
             this.gbSmoothMtd.TabIndex = 13;
             this.gbSmoothMtd.TabStop = false;
-            this.gbSmoothMtd.Text = "Smoothing Method";
+            this.gbSmoothMtd.Text = "Smoothing Methods";
             // 
             // rbtnGauss
             // 
@@ -611,7 +611,7 @@
             this.gbSmoothParams.Controls.Add(this.cbxPolyOrder);
             this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
             this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
-            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F);
             this.gbSmoothParams.Location = new System.Drawing.Point(376, 644);
             this.gbSmoothParams.Name = "gbSmoothParams";
             this.gbSmoothParams.Size = new System.Drawing.Size(344, 130);
