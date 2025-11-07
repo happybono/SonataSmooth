@@ -51,7 +51,7 @@ namespace SonataSmooth
             );
 
         // 경계 처리 방식 열거형
-        public enum BoundaryMode { Symmetric, Replicate, ZeroPad }
+        public enum BoundaryMode { Symmetric, Replicate, Adaptive, ZeroPad }
 
         private CancellationTokenSource _ctsInitSelectAll;
         private CancellationTokenSource _ctsRefSelectAll;
@@ -72,6 +72,17 @@ namespace SonataSmooth
 
         private bool _isShowingTitleValidationMessage;
         private string _lastInvalidTitle;
+
+        // Savitzky-Golay 미분 필터에서 사용하는 기본 샘플 간격 Δ
+        private const double delta = 1.0;
+
+        // 비대칭 Savitzky-Golay 계수 Vector 를 (left, right, effectivePolyOrder) 로 키를 지정해 Caching
+        private static readonly Dictionary<Tuple<int, int, int>, double[]> _sgAsymCoeffCache = new Dictionary<Tuple<int, int, int>, double[]>();
+        private static readonly object _sgAsymCoeffCacheLock = new object();
+
+        // 비대칭 Savitzky-Golay 미분 계수 Vector 를 (left, right, effPoly, derivOrder, deltaBits) 로 키를 지정해 Caching
+        private static readonly Dictionary<Tuple<int, int, int, int, long>, double[]> _sgAsymDerivCoeffCache = new Dictionary<Tuple<int, int, int, int, long>, double[]>();
+        private static readonly object _sgAsymDerivCoeffCacheLock = new object();
 
         public FrmMain()
         {
@@ -96,6 +107,9 @@ namespace SonataSmooth
                     return idx < 0 ? 0 : idx >= n ? n - 1 : idx;
                 case BoundaryMode.ZeroPad:                                          // 경계 밖의 값을 0 으로 채우는 Zero Padding 
                     return (idx < 0 || idx >= n) ? -1 : idx;                        // -1 은 0 으로 처리
+                case BoundaryMode.Adaptive:
+                    // 샘플 단독 호출에서는 Symmetric 과 동일한 인덱스 매핑 사용
+                    return idx < 0 ? -idx - 1 : idx >= n ? 2 * n - idx - 1 : idx;
                 default:
                     return idx;
             }
@@ -109,6 +123,9 @@ namespace SonataSmooth
             {
                 // 기본값은 Symmetric
                 case "Symmetric": return BoundaryMode.Symmetric;
+
+                // Adaptive
+                case "Adaptive": return BoundaryMode.Adaptive;
 
                 // Replicate
                 case "Replicate": return BoundaryMode.Replicate;
@@ -213,7 +230,7 @@ namespace SonataSmooth
             BoundaryMode boundaryMode = GetBoundaryMode();
 
             // Export 설정 폼에 현재 Kernel 반경 / 다항식 차수 값 동기화
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
 
             // ProgressBar 초기화
             pbMain.Style = ProgressBarStyle.Continuous;
@@ -243,11 +260,25 @@ namespace SonataSmooth
                     return;
                 }
 
+                int derivOrder = 0;
+                if (cbxDerivOrder != null && !int.TryParse(cbxDerivOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out derivOrder))
+                    derivOrder = 0;
+
                 // Parameters 유효성 검증 (윈도우 크기 및 다항식 차수) (실패 시 반환)
                 var validateResult = ValidateSmoothingParameters(lbInitData.Items.Count, r, polyOrder);
                 if (!validateResult.Success)
                 {
                     ShowError("Parameter Validation Error", validateResult.Error);
+                    return;
+                }
+
+                // Savitzky-Golay 필터에서 미분 차수는 설정된 다항식 차수보다 크면 안 됨.
+                if (rbtnSG.Checked && derivOrder > polyOrder)
+                {
+                    ShowError("Parameter Validation Error",
+                        $"Derivative order must be ≤ polynomial order.\n\n" +
+                        $"Current derivativeOrder : {derivOrder}\n" +
+                        $"Current polyOrder : {polyOrder}");
                     return;
                 }
 
@@ -270,6 +301,8 @@ namespace SonataSmooth
                             input,
                             r,
                             polyOrder,
+                            derivOrder,
+                            delta,
                             boundaryMode,
                             useRect,
                             useAvg,
@@ -285,6 +318,13 @@ namespace SonataSmooth
                         if (useSG) return multi.SG;
                         return new double[n];
                     });
+                }
+                catch (InvalidOperationException vex)
+                {
+                    // ApplySmoothing 함수에서 검증 결과와 일관된 메시지 생성
+                    ShowError("Parameter Validation Error", vex.Message);
+                    UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
+                    return;
                 }
                 catch (Exception ex)
                 {
@@ -339,12 +379,17 @@ namespace SonataSmooth
                     slblKernelRadius.Text = r.ToString();
 
 
-                    // 다항식 차수 표시 (Savitzky-Golay 방식에서만 사용)
-                    bool showPoly = useSG;
-                    tlblPolyOrder.Visible = showPoly;
-                    tlblSeparator2.Visible = showPoly;
-                    slblPolyOrder.Visible = showPoly;
-                    if (showPoly) slblPolyOrder.Text = polyOrder.ToString();
+                    // 다항식 차수 / 미분 차수 표시 (Savitzky-Golay 방식에서만 사용)
+                    bool showSGParams = useSG;
+                    tlblPolyOrder.Visible = showSGParams;
+                    tlblSeparator2.Visible = showSGParams;
+                    slblPolyOrder.Visible = showSGParams;
+                    if (showSGParams) slblPolyOrder.Text = polyOrder.ToString();
+
+                    tlblSeparator4.Visible = showSGParams;
+                    tlblDerivativeOrder.Visible = showSGParams;
+                    slblDerivativeOrder.Visible = showSGParams;
+                    if (showSGParams) slblDerivativeOrder.Text = (cbxDerivOrder?.Text ?? "0");
 
                     // 경계 처리 방식 표시
                     tlblSeparator3.Visible = true;
@@ -354,6 +399,7 @@ namespace SonataSmooth
                     switch (boundaryMode)
                     {
                         case BoundaryMode.Symmetric: slblBoundaryMethod.Text = "Symmetric"; break;
+                        case BoundaryMode.Adaptive: slblBoundaryMethod.Text = "Adaptive"; break;
                         case BoundaryMode.Replicate: slblBoundaryMethod.Text = "Replicate"; break;
                         case BoundaryMode.ZeroPad: slblBoundaryMethod.Text = "Zero Padding"; break;
                         default: slblBoundaryMethod.Text = "Symmetric"; break;
@@ -392,15 +438,35 @@ namespace SonataSmooth
 
         // 입력된 데이터에 대해 다양한 보정 방식 (Smoothing Filter) 을 적용하는 메서드.
         private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-           ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode,
+           ApplySmoothing(double[] input, int r, int polyOrder, int derivOrder, double delta, BoundaryMode boundaryMode,
                           bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
         {
+            var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
+            if (!vr.Success)
+                throw new InvalidOperationException(vr.Error);
+
+            if (doSG && derivOrder > polyOrder)
+            {
+                throw new InvalidOperationException(
+                    $"Derivative order must be ≤ polynomial order.\n\n" +
+                        $"Current derivativeOrder : {derivOrder}\n" +
+                        $"Current polyOrder : {polyOrder}");
+            }
+
             int n = input.Length;
             int windowSize = 2 * r + 1;
 
             long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
             double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
-            double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder) : null;
+            double[] sgCoeffs = (doSG && boundaryMode != BoundaryMode.Adaptive) ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0) : null;
+
+            double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
+                ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0)
+                : null;
+
+            double[] sgDerivCoeffs = (doSG && derivOrder > 0 && boundaryMode != BoundaryMode.Adaptive)
+                ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0)
+                : null;
 
             var rect = new double[n];
             var binomAvg = new double[n];
@@ -409,7 +475,7 @@ namespace SonataSmooth
             var sg = new double[n];
 
             // Rectangular, Binomial Average 의 나누기 / 합계 값 미리 계산
-            double invRectDiv = doRect ? 1.0 / windowSize : 0.0;
+            double invRectDiv = (doRect && windowSize > 0) ? 1.0 / windowSize : 0.0;
             double binomSum = 0.0;
             if (doAvg && binom != null)
             {
@@ -417,6 +483,14 @@ namespace SonataSmooth
             }
 
             double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+
+            // Adaptive mode : Rect / Binom / Median / Gauss 는 경계에서 창을 축소하여 in-range 만 사용.
+            void GetAdaptiveWindow(int center, out int left, out int right, out int start)
+            {
+                left = Math.Min(r, center);
+                right = Math.Min(r, n - 1 - center);
+                start = center - left;
+            }
 
             // 데이터가 적을 경우 병렬 처리 OverHead 가 더 크므로 직렬로 실행
             bool useParallel = n >= 2000;
@@ -426,44 +500,188 @@ namespace SonataSmooth
                 // Rectangular
                 if (doRect)
                 {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += Sample(i + k);
-                    rect[i] = sum * invRectDiv;
+                    if (boundaryMode == BoundaryMode.Adaptive)
+                    {
+                        GetAdaptiveWindow(i, out int left, out int right, out int start);
+                        int W = left + right + 1;
+                        double sum = 0.0;
+                        for (int pos = 0; pos < W; pos++)
+                            sum += input[start + pos];
+                        rect[i] = W > 0 ? sum / W : 0.0;
+                    }
+                    else
+                    {
+                        double sum = 0.0;
+                        for (int k = -r; k <= r; k++)
+                            sum += Sample(i + k);
+                        rect[i] = sum * invRectDiv;
+                    }
                 }
 
                 // Binomial Average
                 if (doAvg && binom != null)
                 {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += Sample(i + k) * binom[k + r];
-                    binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+                    if (boundaryMode == BoundaryMode.Adaptive)
+                    {
+                        GetAdaptiveWindow(i, out int left, out int right, out int start);
+                        int W = left + right + 1;
+                        if (W < 1) { binomAvg[i] = 0.0; }
+                        else
+                        {
+                            long[] localBinom = CalcBinomialCoefficients(W);
+                            double localSum = 0.0;
+                            for (int j = 0; j < W; j++) localSum += localBinom[j];
+                            double sum = 0.0;
+                            for (int pos = 0; pos < W; pos++)
+                                sum += input[start + pos] * localBinom[pos];
+                            binomAvg[i] = localSum > 0 ? sum / localSum : 0.0;
+                        }
+                    }
+                    else
+                    {
+                        double sum = 0.0;
+                        for (int k = -r; k <= r; k++)
+                            sum += Sample(i + k) * binom[k + r];
+                        binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+                    }
                 }
 
                 // Weighted Median
                 if (doMed && binom != null)
                 {
-                    median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+                    if (boundaryMode == BoundaryMode.Adaptive)
+                    {
+                        GetAdaptiveWindow(i, out int left, out int right, out int start);
+                        int W = left + right + 1;
+                        if (W < 1) { median[i] = 0.0; }
+                        else
+                        {
+                            long[] localBinom = CalcBinomialCoefficients(W);
+                            var pairs = new List<(double Value, long Weight)>(W);
+                            for (int pos = 0; pos < W; pos++)
+                                pairs.Add((input[start + pos], localBinom[pos]));
+                            if (pairs.Count == 0) { median[i] = 0.0; }
+                            else
+                            {
+                                pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+                                long totalWeight = 0;
+                                for (int j = 0; j < pairs.Count; j++)
+                                    totalWeight += pairs[j].Weight;
+                                if (totalWeight <= 0) { median[i] = 0.0; }
+                                else
+                                {
+                                    bool even = (totalWeight & 1L) == 0;
+                                    long half = totalWeight / 2;
+                                    long accum = 0;
+                                    for (int j = 0; j < pairs.Count; j++)
+                                    {
+                                        accum += pairs[j].Weight;
+                                        if (accum > half)
+                                        {
+                                            median[i] = pairs[j].Value;
+                                            break;
+                                        }
+                                        if (even && accum == half)
+                                        {
+                                            double nextVal = (j + 1 < pairs.Count) ? pairs[j + 1].Value : pairs[j].Value;
+                                            median[i] = (pairs[j].Value + nextVal) / 2.0;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+                    }
                 }
 
                 // Gaussian
                 if (doGauss && gaussCoeffs != null)
                 {
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += gaussCoeffs[k + r] * Sample(i + k);
-                    gauss[i] = sum;
+                    if (boundaryMode == BoundaryMode.Adaptive)
+                    {
+                        GetAdaptiveWindow(i, out int left, out int right, out int start);
+                        int W = left + right + 1;
+                        if (W < 1) { gauss[i] = 0.0; }
+                        else
+                        {
+                            double sigma = W / 6.0;
+                            double[] localGauss = ComputeGaussianCoefficients(W, sigma);
+                            double sum = 0.0;
+                            for (int pos = 0; pos < W; pos++)
+                                sum += localGauss[pos] * input[start + pos];
+                            gauss[i] = sum;
+                        }
+                    }
+                    else
+                    {
+                        double sum = 0.0;
+                        for (int k = -r; k <= r; k++)
+                            sum += gaussCoeffs[k + r] * Sample(i + k);
+                        gauss[i] = sum;
+                    }
                 }
 
                 // Savitzky-Golay
-                if (doSG && sgCoeffs != null)
+                if (doSG)
                 {
-                    // `Sample` 함수가 모든 경계 모드 (ZeroPad 포함) 를 올바르게 처리하므로 별도 분기 없이 통합된 로직 사용.
-                    double sum = 0.0;
-                    for (int k = -r; k <= r; k++)
-                        sum += sgCoeffs[k + r] * Sample(i + k);
-                    sg[i] = sum;
+                    if (boundaryMode == BoundaryMode.Adaptive)
+                    {
+                        int desiredW = windowSize;
+                        int left = Math.Min(r, i);
+                        int right = desiredW - 1 - left;
+                        if (i + right > n - 1)
+                        {
+                            int shift = (i + right) - (n - 1);
+                            right -= shift;
+                            left += shift;
+                        }
+                        if (left < 0) left = 0;
+                        if (right < 0) right = 0;
+
+                        double sum = 0.0;
+                        if (derivOrder == 0)
+                        {
+                            var coeffs = ComputeSGCoefficientsAsymmetric(left, right, polyOrder);
+                            for (int k = -left; k <= right; k++)
+                                sum += coeffs[k + left] * input[i + k];
+                        }
+                        else
+                        {
+                            int W = left + right + 1;
+                            int effPoly = Math.Min(polyOrder, W - 1);
+                            if (derivOrder > effPoly)
+                            {
+                                // 요청된 미분 차수를 적용하기에 윈도우 크기가 너무 작을 경우 오류 처리
+                                throw new InvalidOperationException(
+                                    $"Edge-adaptive window too small for derivative (W = {W}, effPoly = {effPoly}, derivative = {derivOrder}).");
+                            }
+                            var coeffs = ComputeSGCoefficientsAsymmetricDerivative(left, right, effPoly, derivOrder, delta);
+                            for (int k = -left; k <= right; k++)
+                                sum += coeffs[k + left] * input[i + k];
+                        }
+                        sg[i] = sum;
+                    }
+                    else
+                    {
+                        if (derivOrder == 0 && sgSmoothCoeffs != null)
+                        {
+                            double sum = 0.0;
+                            for (int k = -r; k <= r; k++)
+                                sum += sgSmoothCoeffs[k + r] * Sample(i + k);
+                            sg[i] = sum;
+                        }
+                        else if (derivOrder > 0 && sgDerivCoeffs != null)
+                        {
+                            double sum = 0.0;
+                            for (int k = -r; k <= r; k++)
+                                sum += sgDerivCoeffs[k + r] * Sample(i + k);
+                            sg[i] = sum;
+                        }
+                    }
                 }
             };
 
@@ -527,7 +745,7 @@ namespace SonataSmooth
                     // Symmetric : 대칭 반사 (경계 지점 기준) Mirroring
                     if (idx < 0) idx = -idx - 1;
                     else if (idx >= n) idx = 2 * n - idx - 1;
-                    if (idx < 0) return 0; 
+                    if (idx < 0) return 0;
                     return data[idx];
 
                 case BoundaryMode.Replicate:
@@ -539,6 +757,13 @@ namespace SonataSmooth
                 case BoundaryMode.ZeroPad:
                     // Zero Padding : 범위를 벗어나면 0 반환
                     if (idx < 0 || idx >= n) return 0.0;
+                    return data[idx];
+
+                case BoundaryMode.Adaptive:
+                    // Non-SG 등에서 단일 샘플 접근 시에는 Symmetric 과 동일 동작
+                    if (idx < 0) idx = -idx - 1;
+                    else if (idx >= n) idx = 2 * n - idx - 1;
+                    if (idx < 0) return 0;
                     return data[idx];
 
                 default:
@@ -559,10 +784,62 @@ namespace SonataSmooth
         /// - BoundaryMode 에 따라 경계 밖의 Index 처리 방식을 결정합니다.
         private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode boundaryMode)
         {
-            // 값, 가중치 쌍을 담을 리스트 생성 (윈도우 크기 : 2w + 1)
+            int desiredW = 2 * w + 1;
+
+            // Adaptive : 전체 길이 desiredW 를 유지한 채, 창을 데이터 범위 안으로 완전히 슬라이드.
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                int n = data.Length;
+                int left = Math.Min(w, center);
+                int right = desiredW - 1 - left;
+                if (center + right > n - 1)
+                {
+                    int shift = (center + right) - (n - 1);
+                    right -= shift;
+                    left += shift;
+                }
+                if (left < 0) left = 0;
+                if (right < 0) right = 0;
+                int start = center - left;
+
+                var pairsStd = new List<(double Value, long Weight)>(desiredW);
+                for (int pos = 0; pos < desiredW; pos++)
+                {
+                    double v = data[start + pos];
+                    long weight = binom[pos];
+                    pairsStd.Add((v, weight));
+                }
+
+                if (pairsStd.Count == 0) return 0.0;
+                pairsStd.Sort((a, b) => a.Value.CompareTo(b.Value));
+
+                long totalWeightStd = 0;
+                for (int i = 0; i < pairsStd.Count; i++)
+                    totalWeightStd += pairsStd[i].Weight;
+                if (totalWeightStd <= 0) return 0.0;
+
+                bool evenStd = (totalWeightStd & 1L) == 0;
+                long halfStd = totalWeightStd / 2;
+
+                long accumStd = 0;
+                for (int i = 0; i < pairsStd.Count; i++)
+                {
+                    accumStd += pairsStd[i].Weight;
+                    if (accumStd > halfStd)
+                        return pairsStd[i].Value;
+
+                    if (evenStd && accumStd == halfStd)
+                    {
+                        double nextVal = (i + 1 < pairsStd.Count) ? pairsStd[i + 1].Value : pairsStd[i].Value;
+                        return (pairsStd[i].Value + nextVal) / 2.0;
+                    }
+                }
+                return pairsStd[pairsStd.Count - 1].Value;
+            }
+
+            // 기존 경로 (Symmetric, Replicate, ZeroPad)
             var pairs = new List<(double Value, long Weight)>(2 * w + 1);
 
-            // 중앙 (Center) 기준으로 좌우 w 개 씩 샘플 수집
             for (int k = -w; k <= w; k++)
             {
                 int idx = center + k;
@@ -643,7 +920,6 @@ namespace SonataSmooth
             var c = new long[length];
             c[0] = 1; // 첫 번째 계수는 항상 1
 
-
             try
             {
                 checked // Overflow 발생 시 예외 발생
@@ -660,8 +936,15 @@ namespace SonataSmooth
             return c;
         }
 
-        // Savitzky-Golay 보정 방식 : 계수 계산 메서드
-        private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
+        private static double FactorialAsDouble(int n)
+        {
+            double f = 1.0;
+            for (int i = 2; i <= n; i++) f *= i;
+            return f;
+        }
+
+        // Savitzky-Golay 보정 방식 : 계수 계산 메서드 (대칭 창)
+        private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder, int derivOrder, double delta)
         {
             if (windowSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(windowSize), "windowSize must be > 0.");
@@ -671,12 +954,17 @@ namespace SonataSmooth
                 throw new ArgumentOutOfRangeException(nameof(polyOrder), "polyOrder must be ≥ 0.");
             if (polyOrder >= windowSize)
                 throw new ArgumentException("polyOrder must be < windowSize.", nameof(polyOrder));
+            if (derivOrder < 0)
+                throw new ArgumentOutOfRangeException(nameof(derivOrder), "derivOrder must be ≥ 0.");
+            if (derivOrder > polyOrder)
+                throw new ArgumentException("derivOrder must be ≤ polyOrder.");
+            if (delta <= 0)
+                throw new ArgumentOutOfRangeException(nameof(delta), "delta must be > 0.");
 
             int m = polyOrder;
             int half = windowSize / 2;
-            var A = new double[windowSize, m + 1];
 
-            // Build Vandermonde matrix
+            var A = new double[windowSize, m + 1];
             for (int i = -half; i <= half; i++)
             {
                 double x = i;
@@ -688,7 +976,6 @@ namespace SonataSmooth
                 }
             }
 
-            // Compute ATA = A^T * A
             var ATA = new double[m + 1, m + 1];
             for (int i = 0; i <= m; i++)
                 for (int j = 0; j <= m; j++)
@@ -699,62 +986,204 @@ namespace SonataSmooth
                     ATA[i, j] = s;
                 }
 
-            // 실패 시 예외 발생
             var invATA = InvertMatrixStrict(ATA);
 
-            // A^T
             var AT = new double[m + 1, windowSize];
             for (int i = 0; i <= m; i++)
                 for (int k = 0; k < windowSize; k++)
                     AT[i, k] = A[k, i];
 
-            // h = e0^T * (A^T A)^(-1) * A^T  (0 번째 행 선택)
             var h = new double[windowSize];
             for (int k = 0; k < windowSize; k++)
             {
                 double sum = 0;
                 for (int j = 0; j <= m; j++)
+                    sum += invATA[derivOrder, j] * AT[j, k];
+                h[k] = sum;
+            }
+
+            if (derivOrder == 0)
+            {
+                double hSum = 0;
+                for (int i = 0; i < windowSize; i++) hSum += h[i];
+                if (Math.Abs(hSum) < 1e-20)
+                    throw new InvalidOperationException("Computed Savitzky-Golay coefficients sum to ~ 0.");
+                for (int i = 0; i < windowSize; i++) h[i] /= hSum;
+            }
+            else
+            {
+                double scale = FactorialAsDouble(derivOrder) / Math.Pow(delta, derivOrder);
+                for (int i = 0; i < windowSize; i++) h[i] *= scale;
+            }
+
+            return h;
+        }
+
+        /// <summary>
+        /// 비대칭 SG 계수 계산: 중심에서 좌측 left, 우측 right 범위 (총 W = left + right + 1) 를 가지는 창에 대해
+        /// 0 차 미분 (스무딩) 계수 벡터를 생성. 합은 1 로 정규화. (캐시 사용)
+        /// </summary>
+        private static double[] ComputeSGCoefficientsAsymmetric(int left, int right, int polyOrder)
+        {
+            if (left < 0 || right < 0) throw new ArgumentOutOfRangeException("left / right must be ≥ 0.");
+            int W = left + right + 1;
+            if (W <= 0) throw new ArgumentOutOfRangeException(nameof(W));
+
+            int m = Math.Min(Math.Max(polyOrder, 0), W - 1);
+            var key = Tuple.Create(left, right, m);
+
+            lock (_sgAsymCoeffCacheLock)
+            {
+                if (_sgAsymCoeffCache.TryGetValue(key, out var cached))
+                    return cached;
+            }
+
+            // 디자인 행렬 A : 행은 x 가 -left 부터 +right 까지의 값 열은 x^0 부터 x^m 까지의 항
+            var A = new double[W, m + 1];
+            for (int rIdx = 0; rIdx < W; rIdx++)
+            {
+                double x = rIdx - (double)left; // 중심은 0
+                double p = 1.0;
+                for (int c = 0; c <= m; c++)
+                {
+                    A[rIdx, c] = p;
+                    p *= x;
+                }
+            }
+
+            // ATA = A^T A
+            var ATA = new double[m + 1, m + 1];
+            for (int i = 0; i <= m; i++)
+                for (int j = 0; j <= m; j++)
+                {
+                    double s = 0.0;
+                    for (int rIdx = 0; rIdx < W; rIdx++)
+                        s += A[rIdx, i] * A[rIdx, j];
+                    ATA[i, j] = s;
+                }
+
+            var invATA = InvertMatrixStrict(ATA);
+
+            // AT
+            var AT = new double[m + 1, W];
+            for (int i = 0; i <= m; i++)
+                for (int rIdx = 0; rIdx < W; rIdx++)
+                    AT[i, rIdx] = A[rIdx, i];
+
+            // 중심 x = 0에서 평활화를 수행할 때 상수항 (0차 항) 에 해당하는 행을 선택
+            var h = new double[W];
+            for (int k = 0; k < W; k++)
+            {
+                double sum = 0.0;
+                for (int j = 0; j <= m; j++)
                     sum += invATA[0, j] * AT[j, k];
                 h[k] = sum;
             }
 
-            // Smoothing Kernel 의 계수 합이 1 이 되도록 정규화.
-            // (필터 적용 후 전체 값의 크기가 변하지 않도록 Kernel 을 비례 조정.)
-            double hSum = 0;
-            for (int i = 0; i < windowSize; i++) hSum += h[i];
-            if (Math.Abs(hSum) < 1e-20)
-                throw new InvalidOperationException("Computed Savitzky-Golay coefficients sum to ~ 0.");
-            for (int i = 0; i < windowSize; i++) h[i] /= hSum;
-
-#if DEBUG
-            // 선택 : 다항식 재현성 (polynomial reproduction) 을 확인.
-            // (차수 ≤ m 조건을 만족하는 다항식에 대해 본래 함수를 재현하는지 여부 검증)
-
-            for (int deg = 0; deg <= m; deg++)
+            // DC 성분이 유지되도록 정규화
+            double ssum = 0.0;
+            for (int i = 0; i < W; i++) ssum += h[i];
+            if (Math.Abs(ssum) > 0)
             {
-                double acc = 0;
-                for (int i = -half; i <= half; i++)
+                for (int i = 0; i < W; i++) h[i] /= ssum;
+            }
+
+            lock (_sgAsymCoeffCacheLock)
+            {
+                if (!_sgAsymCoeffCache.ContainsKey(key))
+                    _sgAsymCoeffCache[key] = h;
+                return _sgAsymCoeffCache[key];
+            }
+        }
+
+        private static double[] ComputeSGCoefficientsAsymmetricDerivative(
+    int left,
+    int right,
+    int polyOrder,
+    int derivOrder,
+    double delta)
+        {
+            if (left < 0 || right < 0) throw new ArgumentOutOfRangeException("left / right must be ≥ 0.");
+            if (derivOrder < 0) throw new ArgumentOutOfRangeException(nameof(derivOrder));
+            if (delta <= 0) throw new ArgumentOutOfRangeException(nameof(delta));
+
+            int W = left + right + 1;
+            if (W <= 0) throw new ArgumentOutOfRangeException(nameof(W));
+
+            int m = Math.Min(Math.Max(polyOrder, 0), W - 1);
+            if (derivOrder > m)
+                throw new ArgumentException("derivOrder must be ≤ effective polynomial order after clamping.");
+
+            long deltaBits = BitConverter.DoubleToInt64Bits(delta);
+            var key = Tuple.Create(left, right, m, derivOrder, deltaBits);
+
+            lock (_sgAsymDerivCoeffCacheLock)
+            {
+                if (_sgAsymDerivCoeffCache.TryGetValue(key, out var cached))
+                    return cached;
+            }
+
+            var A = new double[W, m + 1];
+            for (int rIdx = 0; rIdx < W; rIdx++)
+            {
+                double x = rIdx - (double)left;
+                double p = 1.0;
+                for (int c = 0; c <= m; c++)
                 {
-                    double val = 1.0;
-                    if (deg > 0)
-                        val = Math.Pow(i, deg);
-                    acc += h[i + half] * val;
+                    A[rIdx, c] = p;
+                    p *= x;
+                }
+            }
+
+            var ATA = new double[m + 1, m + 1];
+            for (int i = 0; i <= m; i++)
+                for (int j = 0; j <= m; j++)
+                {
+                    double s = 0.0;
+                    for (int rIdx = 0; rIdx < W; rIdx++)
+                        s += A[rIdx, i] * A[rIdx, j];
+                    ATA[i, j] = s;
                 }
 
-                // 중심점 x = 0 ^ {\text{deg}} 에서의 기대 값:
-                // 차수 (degree) > 0 일 때 : 0
-                // 차수 = 0 일 때 : 1
+            var invATA = InvertMatrixStrict(ATA);
 
-                double expected = (deg == 0) ? 1.0 : 0.0;
-                if (Math.Abs(acc - expected) > 1e-8)
-                    System.Diagnostics.Debug.WriteLine($"[SG CHECK] Degree {deg} reproduction deviation: {acc - expected}");
+            var AT = new double[m + 1, W];
+            for (int i = 0; i <= m; i++)
+                for (int rIdx = 0; rIdx < W; rIdx++)
+                    AT[i, rIdx] = A[rIdx, i];
+
+            var h = new double[W];
+            for (int k = 0; k < W; k++)
+            {
+                double acc = 0.0;
+                for (int j = 0; j <= m; j++)
+                    acc += invATA[derivOrder, j] * AT[j, k];
+                h[k] = acc;
             }
-#endif
-            return h;
+
+            if (derivOrder == 0)
+            {
+                double ssum = 0.0;
+                for (int i = 0; i < W; i++) ssum += h[i];
+                if (Math.Abs(ssum) < 1e-20)
+                    throw new InvalidOperationException("Asymmetric smoothing coefficients sum to ~ 0.");
+                for (int i = 0; i < W; i++) h[i] /= ssum;
+            }
+            else
+            {
+                double scale = FactorialAsDouble(derivOrder) / Math.Pow(delta, derivOrder);
+                for (int i = 0; i < W; i++) h[i] *= scale;
+            }
+
+            lock (_sgAsymDerivCoeffCacheLock)
+            {
+                if (!_sgAsymDerivCoeffCache.ContainsKey(key))
+                    _sgAsymDerivCoeffCache[key] = h;
+                return _sgAsymDerivCoeffCache[key];
+            }
         }
 
         // 행렬 역행렬 (실패 시 예외 Throw)
-
         private static double[,] InvertMatrixStrict(double[,] a)
         {
             int n = a.GetLength(0);
@@ -771,10 +1200,6 @@ namespace SonataSmooth
 
             for (int i = 0; i < n; i++)
             {
-                // Pivot Selection:
-                // 현재 열 i 에서 절대값이 가장 큰 원소 탐색
-                // 수치적 안정성을 높이고, 0 또는 매우 작은 Pivot 으로 인한 계산 불안정을 방지.
-
                 int maxRow = i;
                 double maxVal = Math.Abs(aug[i, i]);
                 for (int r = i + 1; r < n; r++)
@@ -787,10 +1212,6 @@ namespace SonataSmooth
                     }
                 }
 
-                // Row Swap:
-                // 찾은 Pivot 행 (maxRow) 이 현재 행 (i) 와 다르면 두 행을 교환.
-                // Pivot 을 현재 위치로 가져와 이후 소거 단계에서 사용.
-
                 if (maxRow != i)
                 {
                     for (int c = 0; c < 2 * n; c++)
@@ -801,7 +1222,6 @@ namespace SonataSmooth
                     }
                 }
 
-                // Pivot 요소 확인.
                 double pivot = aug[i, i];
                 double rowScale = 0;
                 for (int c = i; c < n; c++)
@@ -810,11 +1230,9 @@ namespace SonataSmooth
                 if (Math.Abs(pivot) < tol)
                     throw new InvalidOperationException("Matrix is singular or ill-conditioned for inversion.");
 
-                // 피벗이 있는 행 정규화
                 for (int c = 0; c < 2 * n; c++)
                     aug[i, c] /= pivot;
 
-                // 소거 (Eliminate)
                 for (int r = 0; r < n; r++)
                 {
                     if (r == i) continue;
@@ -858,7 +1276,7 @@ namespace SonataSmooth
                     "Polynomial order must be smaller than the window size.\n\n" +
                     $"Rule : polyOrder < windowSize\n" +
                     $"Current polyOrder : {polyOrder}\n" +
-                    $"Window size      : {windowSize}\n\n" +
+                    $"Window size : {windowSize}\n\n" +
                     "Tip : windowSize = (2 × radius) + 1";
                 return OperationResult.Fail(msg);
             }
@@ -1082,11 +1500,12 @@ Are you sure you want to proceed?";
             txtInitAdd.Select();
         }
 
-        public void SetComboValues(string kernelRadius, string polyOrder, string boundaryMethod)
+        public void SetComboValues(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
             cbxBoundaryMethod.Text = boundaryMethod;
+            cbxDerivOrder.Text = derivOrder;
         }
 
 
@@ -1803,12 +2222,24 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             {
                 lblPolyOrder.Enabled = true;
                 cbxPolyOrder.Enabled = true;
-                SetBoundaryMethod("Symmetric");
+
+                // Savitzky-Golay 필터용 미분 차수 제어 기능을 활성화
+                if (lblDerivOrder != null) lblDerivOrder.Enabled = true;
+                if (cbxDerivOrder != null)
+                {
+                    cbxDerivOrder.Enabled = true;
+                    if (cbxDerivOrder.SelectedIndex < 0) cbxDerivOrder.SelectedIndex = 0; // 기본값 d = 0
+                }
+
+                SetBoundaryMethod("Adaptive");
             }
             else
             {
                 lblPolyOrder.Enabled = false;
                 cbxPolyOrder.Enabled = false;
+
+                if (lblDerivOrder != null) lblDerivOrder.Enabled = false;
+                if (cbxDerivOrder != null) cbxDerivOrder.Enabled = false;
             }
         }
 
@@ -1817,6 +2248,14 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             cbxKernelRadius.SelectedIndex = 3;
             cbxPolyOrder.SelectedIndex = 1;
             cbxBoundaryMethod.SelectedIndex = 1;
+
+            if (cbxDerivOrder != null)
+            {
+                if (cbxDerivOrder.Items.Count > 0 && cbxDerivOrder.SelectedIndex < 0)
+                    cbxDerivOrder.SelectedIndex = 0; 
+                cbxDerivOrder.Enabled = rbtnSG.Checked;
+                lblDerivOrder.Enabled = rbtnSG.Checked;
+            }
 
             using (Graphics g = this.CreateGraphics())
             {
@@ -1911,7 +2350,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 pbMain.Value = 0;
             }
 
-            int r = 4, polyOrder = 3, n = 0;
+            int r = 4, polyOrder = 3, n = 0, derivOrder = 0;
             bool doRect = false, doAvg = false, doMed = false, doGauss = false, doSG = false;
             var boundaryMode = GetBoundaryMode();
             string excelTitle = "";
@@ -1924,6 +2363,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 {
                     r = int.TryParse(cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                     polyOrder = int.TryParse(cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+                    derivOrder = (cbxDerivOrder != null && int.TryParse(cbxDerivOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var dOrd)) ? dOrd : 0;
                     doRect = settingsForm.chbRect.Checked;
                     doAvg = settingsForm.chbAvg.Checked;
                     doMed = settingsForm.chbMed.Checked;
@@ -1934,7 +2374,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
                     initialData = lbInitData.Items
                         .Cast<object>()
-                        .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : 0.0)
+                        .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var dv) ? dv : 0.0)
                         .ToArray();
 
                     n = initialData.Length;
@@ -1944,6 +2384,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             {
                 r = int.TryParse(cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
                 polyOrder = int.TryParse(cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+                derivOrder = (cbxDerivOrder != null && int.TryParse(cbxDerivOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var dOrd)) ? dOrd : 0;
                 doRect = settingsForm.chbRect.Checked;
                 doAvg = settingsForm.chbAvg.Checked;
                 doMed = settingsForm.chbMed.Checked;
@@ -1966,6 +2407,15 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 ShowError("Export Parameter Error", validateCsvParams.Error);
                 return;
             }
+            // Savitzky-Golay 필터에서 미분 차수는 설정된 다항식 차수보다 크면 안 됨.
+            if (doSG && derivOrder > polyOrder)
+            {
+                ShowError("Export Parameter Error",
+                    $"Derivative order must be ≤ polynomial order.\n\n" +
+                        $"Current derivativeOrder : {derivOrder}\n" +
+                        $"Current polyOrder : {polyOrder}");
+                return;
+            }
 
             if (n == 0)
             {
@@ -1982,21 +2432,28 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             var gaussFilt = new double[n];
             var sgFilt = new double[n];
 
-            // 데이터 계산
-            await Task.Run(() =>
+            try
             {
-                // 변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
-                var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                    ApplySmoothing(initialData, r, polyOrder, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
+                // 데이터 계산
+                await Task.Run(() =>
+                {
+                    // 변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
+                    var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
+                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
 
-                // 결과를 내보내기 위해 배열에 값을 할당합니다.
-                if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
-                if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
-                if (doMed) Array.Copy(medianResult, binomMed, n);
-                if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
-                if (doSG) Array.Copy(sgResult, sgFilt, n);
-            });
-
+                    // 결과를 내보내기 위해 배열에 값을 할당합니다.
+                    if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
+                    if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
+                    if (doMed) Array.Copy(medianResult, binomMed, n);
+                    if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
+                    if (doSG) Array.Copy(sgResult, sgFilt, n);
+                });
+            }
+            catch (InvalidOperationException vex)
+            {
+                ShowError("Export Parameter Error", vex.Message);
+                return;
+            }
 
             // 저장 경로 Dialog
             string basePath = null;
@@ -2048,6 +2505,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 1 + // Kernel Radius
                 1 + // Kernel Width
                 (doSG ? 1 : 0) + // Polynomial Order
+                (doSG ? 1 : 0) + // Derivative Order
                 1 + // Boundary Method
                 1 + // blank
                 1 + // Generated
@@ -2095,6 +2553,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         await sw.WriteLineAsync($"Kernel Radius : {r}");
                         await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
                         if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+                        if (doSG) await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
                         await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
 
                         await sw.WriteLineAsync(string.Empty);
@@ -2123,7 +2582,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
             finally
             {
-                // 완료 표시: 이후 들어오는 Report 무시
+                // 완료 표시 : 이후 들어오는 Report 무시
                 completed = true;
 
                 if (pbMain.InvokeRequired)
@@ -2286,6 +2745,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             switch (mode)
             {
                 case BoundaryMode.Symmetric: return "Symmetric (Mirror)";
+                case BoundaryMode.Adaptive: return "Adaptive";
                 case BoundaryMode.Replicate: return "Replicate (Nearest)";
                 case BoundaryMode.ZeroPad: return "Zero Padding";
                 default: return "Symmetric (Mirror)";
@@ -2315,6 +2775,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
             int r = int.TryParse(cbxKernelRadius.Text, out var tmpW) ? tmpW : 2;
             int polyOrder = int.TryParse(cbxPolyOrder.Text, out var tmpP) ? tmpP : 2;
+            int derivOrder = (cbxDerivOrder != null && int.TryParse(cbxDerivOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var d)) ? d : 0;
             var boundaryMode = GetBoundaryMode();
 
             bool doRect = settingsForm.chbRect.Checked;
@@ -2330,7 +2791,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
             var initialData = lbInitData.Items
                 .Cast<object>()
-                .Select(item => double.TryParse(item?.ToString(), out var d) ? d : 0.0)
+                .Select(item => double.TryParse(item?.ToString(), out var dv) ? dv : 0.0)
                 .ToArray();
 
             int n = initialData.Length;
@@ -2339,6 +2800,16 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             if (!validateXlsxParams.Success)
             {
                 ShowError("Export Parameter Error", validateXlsxParams.Error);
+                return;
+            }
+
+            // Savitzky-Golay 필터에서 미분 차수는 설정된 다항식 차수보다 크면 안 됨.
+            if (doSG && derivOrder > polyOrder)
+            {
+                ShowError("Export Parameter Error",
+                    $"Derivative order must be ≤ polynomial order.\n\n" +
+                        $"Current derivativeOrder : {derivOrder}\n" +
+                        $"Current polyOrder : {polyOrder}");
                 return;
             }
 
@@ -2362,19 +2833,27 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             double[] gaussFilt = new double[n];
             double[] sgFilt = new double[n];
 
-            await Task.Run(() =>
+            try
             {
-                //  변수 Shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 1 회만 호출.
-                var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                    ApplySmoothing(initialData, r, polyOrder, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
+                await Task.Run(() =>
+                {
+                    //  변수 Shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 1 회만 호출.
+                    var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
+                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
 
-                // 결과를 내보내기 위해 배열에 값을 할당.
-                if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
-                if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
-                if (doMed) Array.Copy(medianResult, binomMed, n);
-                if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
-                if (doSG) Array.Copy(sgResult, sgFilt, n);
-            });
+                    // 결과를 내보내기 위해 배열에 값을 할당.
+                    if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
+                    if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
+                    if (doMed) Array.Copy(medianResult, binomMed, n);
+                    if (doGauss) Array.Copy(gaussResult, gaussFilt, n);
+                    if (doSG) Array.Copy(sgResult, sgFilt, n);
+                });
+            }
+            catch (InvalidOperationException vex)
+            {
+                ShowError("Export Parameter Error", vex.Message);
+                return;
+            }
 
             // COM 객체 추적 Stack
             var coms = new Stack<object>();
@@ -2544,6 +3023,9 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 ws.Cells[6, 1] = doSG
                     ? $"Polynomial Order : {polyOrder}"
                     : "Polynomial Order : N/A";
+                ws.Cells[7, 1] = doSG
+                    ? $"Derivative Order : {derivOrder}"
+                    : "Derivative Order : N/A";
                 ws.Cells[7, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
 
                 async Task<int> FillData(double[] data, int startCol)
@@ -2833,7 +3315,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
         private void btnExportSettings_Click(object sender, EventArgs e)
         {
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
             settingsForm.ShowDialog();
         }
 
@@ -2993,7 +3475,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 if (string.Equals(txt, target, StringComparison.OrdinalIgnoreCase))
                 {
                     cbxBoundaryMethod.SelectedIndex = i;
-                    // Keep settings form in sync if it exists
+                    // 설정 Form 이 존재할 경우, 항상 설정 값 동기화 상태를 유지
                     if (settingsForm != null)
                     {
                         settingsForm.BoundaryMethod = i;
@@ -3534,7 +4016,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
         }
 
         private void lblBoundaryMethod_MouseLeave(object sender, EventArgs e)
@@ -3545,10 +4027,32 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         private void cbxBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
         }
 
         private void cbxBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblDerivOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = $"Specifies the order of the derivative to compute from the smoothed data. (Recommended : 0 - 3).";
+        }
+
+        private void lblDerivOrder_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxDerivOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = $"Specifies the order of the derivative to compute from the smoothed data. (Recommended : 0 - 3).";
+        }
+
+        private void cbxDerivOrder_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
         }

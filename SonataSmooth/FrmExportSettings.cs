@@ -15,11 +15,15 @@ namespace SonataSmooth
         public int KernelRadius { get; set; } = 4;
         public int PolyOrder { get; set; } = 3;
         public int BoundaryMethod { get; set; } = 1;
+        public int DerivOrder { get; set; } = 0;
 
         private const int RecommendedMinRadius = 3;
         private const int RecommendedMaxRadius = 7;
         private const int RecommendedMinPolyOrder = 2;
         private const int RecommendedMaxPolyOrder = 6;
+
+        private double dpiX;
+        private double dpiY;
 
         private FrmMain _mainForm;
 
@@ -56,8 +60,14 @@ namespace SonataSmooth
             if (int.TryParse(cbxPolyOrder.Text, out var p))
                 PolyOrder = p;
 
-            if (int.TryParse(cbxBoundaryMethod.Text, out var b))
-                BoundaryMethod = b;
+            BoundaryMethod = cbxBoundaryMethod.SelectedIndex;
+
+            if (int.TryParse(cbxDerivOrder.Text, out var d))
+            {
+                if (d < 0) d = 0;
+                if (d > 10) d = 10;
+                DerivOrder = d;
+            }
 
             DoRectAvg = chbRect.Checked;
             DoBinomAvg = chbAvg.Checked;
@@ -69,7 +79,7 @@ namespace SonataSmooth
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
-            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text);
+            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -82,7 +92,15 @@ namespace SonataSmooth
 
             cbxKernelRadius.Text = KernelRadius.ToString();
             cbxPolyOrder.Text = PolyOrder.ToString();
-            cbxBoundaryMethod.Text = BoundaryMethod.ToString();
+
+            // 지정된 index 값으로 복원
+            // index 가 범위를 벗어날 경우 첫 번째 항목을 사용
+            cbxBoundaryMethod.SelectedIndex =
+                (BoundaryMethod >= 0 && BoundaryMethod < cbxBoundaryMethod.Items.Count)
+                    ? BoundaryMethod
+                    : 0;
+
+            cbxDerivOrder.Text = DerivOrder.ToString();
 
             chbRect.Checked = DoRectAvg;
             chbAvg.Checked = DoBinomAvg;
@@ -97,20 +115,41 @@ namespace SonataSmooth
 
 
         private void FrmExportSettings_Load(object sender, EventArgs e)
-        {         
+        {
+            using (Graphics g = this.CreateGraphics())
+            {
+                dpiX = g.DpiX;
+                dpiY = g.DpiY;
+            }
+
+            slblDesc.Size = new Size(
+                (int)(724 * dpiX / 96),
+                (int)(19 * dpiY / 96)
+                );
+
             lblPolyOrder.Enabled = chbSG.Checked;
             cbxPolyOrder.Enabled = chbSG.Checked;
+            lblDerivOrder.Enabled = chbSG.Checked;
+            cbxDerivOrder.Enabled = chbSG.Checked;
         }
 
-        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod)
+        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
+
+            // 화면에 보이는 텍스트를 기준으로 선택 (예: "Standard")
             cbxBoundaryMethod.Text = boundaryMethod;
+
+            cbxDerivOrder.Text = derivOrder;
 
             if (int.TryParse(kernelRadius, out var r)) this.KernelRadius = r;
             if (int.TryParse(polyOrder, out var p)) this.PolyOrder = p;
-            if (int.TryParse(boundaryMethod, out var b)) this.BoundaryMethod = b;
+
+            // 선택된 인덱스를 저장 (0 : Symmetric, 1 : Replicate, 2 : Adaptive, 3 : Zero-Pad)
+            this.BoundaryMethod = cbxBoundaryMethod.SelectedIndex;
+
+            if (int.TryParse(derivOrder, out var d)) this.DerivOrder = Math.Max(0, Math.Min(10, d));
         }
 
         private void chbSG_CheckedChanged(object sender, EventArgs e)
@@ -119,11 +158,15 @@ namespace SonataSmooth
             {
                 lblPolyOrder.Enabled = true;
                 cbxPolyOrder.Enabled = true;
+                lblDerivOrder.Enabled = true;
+                cbxDerivOrder.Enabled = true;
             }
             else
             {
                 lblPolyOrder.Enabled = false;
                 cbxPolyOrder.Enabled = false;
+                lblDerivOrder.Enabled = false;
+                cbxDerivOrder.Enabled = false;
             }
         }
 
@@ -210,7 +253,7 @@ namespace SonataSmooth
 
         private void lblPolyOrder_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder})."; 
+            slblDesc.Text = $"Specifies the degree of the polynomial used to fit the data within each smoothing window. (Recommended : {RecommendedMinPolyOrder} - {RecommendedMaxPolyOrder}).";
         }
 
         private void lblPolyOrder_MouseLeave(object sender, EventArgs e)
@@ -289,7 +332,7 @@ namespace SonataSmooth
 
         private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
         }
 
         private void lblBoundaryMethod_MouseLeave(object sender, EventArgs e)
@@ -299,10 +342,30 @@ namespace SonataSmooth
 
         private void cbxBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric (mirror), Replicate (repeat), or Zero-Pad (fill with zero).";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
         }
 
         private void cbxBoundaryMethod_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblDerivOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = $"Specifies the order of the derivative to compute from the smoothed data. (Recommended : 0 - 3).";
+        }
+
+        private void lblDerivOrder_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxDerivOrder_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = $"Specifies the order of the derivative to compute from the smoothed data. (Recommended : 0 - 3).";
+        }
+
+        private void cbxDerivOrder_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
         }
