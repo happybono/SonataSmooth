@@ -221,11 +221,17 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 #### September 02, 2025
 > Boundary Handling Options can now be configured and applied to all Smoothing (Calibration) Methods.<br><br>
 > Minor bug fixes and user interface enhancement.
-</details>
 
 ### v4.8.2.0
 #### September 7, 2025
 > With the transition to ARM64 native based on `.NET Framework 4.8.1`, PCs running in this environment now deliver improved performance.
+</details>
+
+### v5.0.0.0
+#### November 7, 2025
+> Added support for `Adaptive` mode in Boundary Handling Method configuration.<br><br>
+> `Derivative order` control is now available exclusively for the `Savitzky–Golay` smoothing method.<br><br>
+> Minor bug fixes, performance improvements, and user interface enhancements.
 
 ## Required Components & Setup
 ### Prerequisites
