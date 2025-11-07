@@ -894,15 +894,15 @@ namespace SonataSmooth
         }
 
         /// <summary>
-        /// 주어진 길이(length)에 해당하는 이항계수(파스칼 삼각형의 한 행)를 계산하여 반환합니다.
-        /// 예: length = 5 → [1, 4, 6, 4, 1]
+        /// 주어진 길이(length)에 해당하는 이항계수 (파스칼 삼각형의 한 행) 를 계산하여 반환합니다.
+        /// 예 : length = 5 → [1, 4, 6, 4, 1]
         /// 
         /// - 파스칼의 삼각형 n 번째 행의 각 원소는 이항계수 C(n, k) = n! / (k! * (n - k)!) 로 계산됩니다.
-        /// - 여기서는 length개의 계수를 구하므로, n = length - 1 에 해당하는 행을 생성합니다.
+        /// - 여기서는 length 개의 계수를 구하므로, n = length - 1 에 해당하는 행을 생성합니다.
         /// - 이항계수는 대칭적이며, Binomial Average, Weighted Median 등 스무딩 필터의 가중치로 자주 사용됩니다.
         /// 
-        /// - 첫 번째 계수 C(n, 0)은 항상 1
-        /// - 이후 C(n, k) = C(n, k-1) * (n - (k-1)) / k 공식을 이용해 반복 계산
+        /// - 첫 번째 계수 C(n, 0) 은 항상 1
+        /// - 이후 C(n, k) = C(n, k - 1) * (n - (k - 1)) / k 공식을 이용해 반복 계산
         /// - checked 블록으로 Overflow 감지
         /// 
         /// <param name="length">Kernel (윈도우) 의 크기. 반드시 1 이상이어야 합니다.</param>
@@ -1070,7 +1070,7 @@ namespace SonataSmooth
                 for (int rIdx = 0; rIdx < W; rIdx++)
                     AT[i, rIdx] = A[rIdx, i];
 
-            // 중심 x = 0에서 평활화를 수행할 때 상수항 (0차 항) 에 해당하는 행을 선택
+            // 중심 x = 0 에서 평활화를 수행할 때 상수항 (0 차 항) 에 해당하는 행을 선택
             var h = new double[W];
             for (int k = 0; k < W; k++)
             {
@@ -4058,4 +4058,5 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         }
     }
     #endregion
+
 }
