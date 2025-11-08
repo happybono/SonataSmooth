@@ -208,7 +208,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.8.0.0
 #### August 31, 2025
-> Added boundary handling options for Savitzky-Golay filter : Symmetric (Mirror), Replicate (Nearest), Zero-Pad.<br><b>  
+> Added boundary handling options for Savitzky-Golay filter : `Symmetric` (Mirror), `Replicate` (Nearest), `Zero-Pad`.<br><br>  
 > `BoundaryMode` enum and `GetIndex` method updated to support all three modes.<br><br>
 > ComboBox (`cbxBoundaryMethod`) selection now determines edge handling for Savitzky-Golay smoothing.<br><br>
 > `ApplySmoothing` and calibration logic refactored to use `GetIndex` and `boundaryMode` for Savitzky-Golay filter, ensuring correct edge behavior per user selection.<br><br>
@@ -220,7 +220,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ### v4.8.1.0
 #### September 02, 2025
 > Boundary Handling Options can now be configured and applied to all Smoothing (Calibration) Methods.<br><br>
-> Minor bug fixes and user interface enhancement.
+> Minor bug fixes and user interface enhancements.
 
 ### v4.8.2.0
 #### September 7, 2025
