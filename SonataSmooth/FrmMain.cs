@@ -458,14 +458,13 @@ namespace SonataSmooth
 
             long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
             double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
-            double[] sgCoeffs = (doSG && boundaryMode != BoundaryMode.Adaptive) ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0) : null;
 
             double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
                 ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0)
                 : null;
 
             double[] sgDerivCoeffs = (doSG && derivOrder > 0 && boundaryMode != BoundaryMode.Adaptive)
-                ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0)
+                ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder, delta)
                 : null;
 
             var rect = new double[n];
@@ -894,7 +893,7 @@ namespace SonataSmooth
         }
 
         /// <summary>
-        /// 주어진 길이(length)에 해당하는 이항계수 (파스칼 삼각형의 한 행) 를 계산하여 반환합니다.
+        /// 주어진 길이 (length) 에 해당하는 이항계수 (파스칼 삼각형의 한 행) 를 계산하여 반환합니다.
         /// 예 : length = 5 → [1, 4, 6, 4, 1]
         /// 
         /// - 파스칼의 삼각형 n 번째 행의 각 원소는 이항계수 C(n, k) = n! / (k! * (n - k)!) 로 계산됩니다.
@@ -2552,10 +2551,9 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         await sw.WriteLineAsync("Smoothing Parameters");
                         await sw.WriteLineAsync($"Kernel Radius : {r}");
                         await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
+                        await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
                         if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
                         if (doSG) await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
-                        await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
-
                         await sw.WriteLineAsync(string.Empty);
                         await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
                         await sw.WriteLineAsync(string.Empty);
@@ -3020,13 +3018,13 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 ws.Cells[3, 1] = "Smoothing Parameters";
                 ws.Cells[4, 1] = $"Kernel Radius : {r}";
                 ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
-                ws.Cells[6, 1] = doSG
+                ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
+                ws.Cells[7, 1] = doSG
                     ? $"Polynomial Order : {polyOrder}"
                     : "Polynomial Order : N/A";
-                ws.Cells[7, 1] = doSG
+                ws.Cells[8, 1] = doSG
                     ? $"Derivative Order : {derivOrder}"
                     : "Derivative Order : N/A";
-                ws.Cells[7, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
 
                 async Task<int> FillData(double[] data, int startCol)
                 {
@@ -4058,5 +4056,4 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         }
     }
     #endregion
-
 }
