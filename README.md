@@ -263,8 +263,8 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 #### Dataset Title Validation
 The export title (Excel sheet name & metadata) is validated:
-- Max length: 31 characters
-- Disallowed characters: `: \ / ? * [ ]` and all OS-invalid filename characters
+- Max length : 31 characters
+- Disallowed characters : `: \ / ? * [ ]` and all OS-invalid filename characters
 - Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 – COM9, LPT1 – LPT9)
 
 Invalid input reverts to the placeholder and shows a warning dialog.
@@ -428,7 +428,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
             return data[idx];
 
         case BoundaryMode.Adaptive:
-            // Single-sample access: treat like symmetric (window logic handled separately)
+            // Single-sample access : treat like symmetric (window logic handled separately)
             if (idx < 0)
                 idx = -idx - 1;
             else if (idx >= n)
@@ -701,7 +701,7 @@ When the user clicks "Calibrate", the application processes the input data using
 -	All filter results are computed in a single pass, leveraging all available CPU cores.
 -	The UI remains responsive, and progress is reported in real time.  
   
-Adaptive mode introduces per-index dynamic window sizing or window shifting (Savitzky-Golay). Parallel execution remains safe because each index writes to distinct output arrays and uses only read-only input. Minimum size for parallel dispatch: if n < 2000 a serial loop is used to avoid Parallel.For overhead (threshold hard-coded in ApplySmoothing).
+Adaptive mode introduces per-index dynamic window sizing or window shifting (Savitzky-Golay). Parallel execution remains safe because each index writes to distinct output arrays and uses only read-only input. Minimum size for parallel dispatch : if n < 2000 a serial loop is used to avoid Parallel.For overhead (threshold hard-coded in ApplySmoothing).
 
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.  
@@ -1191,7 +1191,7 @@ Guidance:
 - Start with 0 (smoothing) or 1 (slope).  
 - Higher orders rapidly amplify noise - ensure sufficient radius (larger window) before using 2 or 3.  
 - Avoid derivative orders close to polyOrder when the dataset is short or radius is minimal.
-- For Adaptive edge windows, the effective polynomial order is clamped: effPoly = min(polyOrder, W - 1). Derivative coefficients are scaled by factorial(derivOrder) / delta^derivOrder after construction, matching the symmetric path.
+- For Adaptive edge windows, the effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Derivative coefficients are scaled by factorial(derivOrder) / delta^derivOrder after construction, matching the symmetric path.
 
 #### Asymmetric Savitzky-Golay Coefficient Caching
 To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory caches are maintained:
@@ -1200,8 +1200,8 @@ To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory cac
 - `_sgAsymDerivCoeffCache` keyed by `(left, right, effectivePolyOrder, derivOrder, deltaBits)` for derivatives
 
 Cache keys :
-- Smoothing: (left, right, effPoly)
-- Derivative: (left, right, effPoly, derivOrder, deltaBits) where deltaBits = BitConverter.DoubleToInt64Bits(delta)
+- Smoothing : (left, right, effPoly)
+- Derivative : (left, right, effPoly, derivOrder, deltaBits) where deltaBits = BitConverter.DoubleToInt64Bits(delta)
 
 These caches drastically reduce overhead on large datasets with repeated edge window shapes.
 
@@ -1249,13 +1249,13 @@ Behavior :
 Status label displays a synchronized item count message.
 
 #### 8.2 Progressive Selection & Deselect Feedback
-- Select All: updates `pbMain` from 0% – 100% using dynamic intervals
-  - Report interval: `reportInterval = max(1, count / 100)`
-  - UI yield interval: `yieldInterval = max(1, count / 1000)` with `await Task.Yield()`
-  - Cancelable: a new Select All starts cancels the previous via `_ctsInitSelectAll` / `_ctsRefSelectAll`
-  - Completion: briefly holds 100%, then resets to 0  
+- Select All : updates `pbMain` from 0% – 100% using dynamic intervals
+  - Report interval : `reportInterval = max(1, count / 100)`
+  - UI yield interval : `yieldInterval = max(1, count / 1000)` with `await Task.Yield()`
+  - Cancelable : a new Select All starts cancels the previous via `_ctsInitSelectAll` / `_ctsRefSelectAll`
+  - Completion : briefly holds 100%, then resets to 0  
   
-- Deselect All: step‑based progress (0 → selectedCount)
+- Deselect All : step‑based progress (0 → selectedCount)
   - Increments the progress bar per deselected item with a small delay (`await Task.Delay(10)`)
   - Resets to 0 on completion
 
@@ -1285,7 +1285,7 @@ private static long[] CalcBinomialCoefficients(int length)
         throw new ArgumentException("length must be ≥ 1", nameof(length));
 
     // Limit 'length' to ensure the sum can be safely calculated within the 64-bit long range
-    // (Condition: 2 ^ (length - 1) ≤ 2 ^ 62)
+    // (Condition : 2 ^ (length - 1) ≤ 2 ^ 62)
     if (length > 63)
         throw new ArgumentOutOfRangeException(nameof(length),
             "length must be ≤ 63 to avoid 64-bit weight sum overflow (2 ^ (length - 1) <= 2 ^ 62). Reduce kernel radius.");
@@ -1543,7 +1543,7 @@ All enabled filter outputs are computed in a single ApplySmoothing pass (no per-
 private async Task ExportCsvAsync()
 {
     // 1. Initialize progress bar (pbMain).
-    // 2. Parse UI values: radius (r), polyOrder, derivOrder (if SG), boundaryMode.
+    // 2. Parse UI values : radius (r), polyOrder, derivOrder (if SG), boundaryMode.
     // 3. Validate with ValidateSmoothingParameters (OperationResult).
     // 4. Enforce derivative rule (derivOrder ≤ polyOrder if SG).
     // 5. Compute all enabled filters in one pass:
@@ -1564,8 +1564,8 @@ private async Task ExportCsvAsync()
     //          (blank)
     //          Generated : timestamp
     //          (blank)
-    //          CSV header row: Initial Dataset, then enabled filter column headers
-    //      Data rows: ONLY numeric values per column (no index)
+    //          CSV header row : Initial Dataset, then enabled filter column headers
+    //      Data rows : ONLY numeric values per column (no index)
     // 8. Progress reported (0 – 100) as rows flush.
     // 9. Optional auto-open of generated file(s).
     // CSV export always prompts for a target file via a SaveFileDialog; the base file name is used for all parts when the dataset is split.
@@ -1745,9 +1745,9 @@ Both CSV and Excel exports now include :
 Excel additionally embeds musical-themed properties and (if four methods selected) the hidden "Quartet" comment.
 
 ##### Excel Interop Error Handling
-Specific exception handling paths:  
+Specific exception handling paths :  
   
-- COMException: Excel not installed / interop failure → guidance dialog.
+- COMException : Excel not installed / interop failure → guidance dialog.
 - ArgumentException / InvalidCastException : malformed property assignments.
 - UnauthorizedAccessException : insufficient file or registry permission.
 - PathTooLongException, DirectoryNotFoundException, IOException, OutOfMemoryException, BadImageFormatException : environment and file-system issues.
@@ -1769,7 +1769,7 @@ When the user clicks **Calibrate** Button :
 - Results are added to the output list box in batches, with progress feedback.
 - ProgressBar (`pbMain`) is reused across smoothing and export operations (0 – 100), reset to 0 after completion or cancellation.
 - If no items exist in the Initial Dataset, calibration / export handlers exit immediately after resetting progress.
-- During calibration the following controls are temporarily disabled and restored afterward: btnCalibrate, btnInitClear, btnInitEdit, btnInitPaste, btnInitDelete, btnInitSelectAll, btnInitSelectSync, btnRefClear, btnRefSelectSync, btnRefSelectAll.
+- During calibration the following controls are temporarily disabled and restored afterward : btnCalibrate, btnInitClear, btnInitEdit, btnInitPaste, btnInitDelete, btnInitSelectAll, btnInitSelectSync, btnRefClear, btnRefSelectSync, btnRefSelectAll.
 
 #### Filter Algorithm Implementation
 - **Rectangular Mean** : Computes the average of values within a fixed-size window.
@@ -1806,7 +1806,7 @@ When the user clicks **Calibrate** Button :
 -	Supports data input via manual entry, clipboard paste, and drag-and-drop.
 -	Automatically parses and validates numeric data, removing non-numeric content (e.g., HTML tags).
 -	Stores data as high-precision double values for accurate processing.
--	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters.
+-	Implements multiple noise reduction algorithms : Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters.
 -   Utilizes Parallel.For for smoothing (and PLINQ only for parsing large text inputs).
 -	Calculates binomial coefficients using Pascal's Triangle for weighted filters.
 -	Displays processed results in a separate output list for further use.
