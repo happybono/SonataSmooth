@@ -1013,7 +1013,7 @@ if (useRect)
 #### How it works
 Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.  
   
-Note : Labeled internally as "Weighted Median" (using binomial weights). README refers to it as "Binomial Median Filtering" — both denote the same weighted-median operation.
+Note : Labeled internally as "Weighted Median" (using binomial weights). README refers to it as "Binomial Median Filtering" - both denote the same weighted-median operation.
 
 #### Principle
 Median filtering is robust against outliers; binomial weights bias the median toward center points.
@@ -1062,7 +1062,7 @@ else if (useMed)
 ```
 
 #### Weighted Median – Adaptive Note
-Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples—removing edge padding bias.
+Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples - removing edge padding bias.
 (Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the truncated‑recompute strategy documented above.)
 
 ### 5. Binomial (Weighted) Average Filter
@@ -1186,11 +1186,11 @@ Rules & Validation:
 
 Guidance:
 - Start with 0 (smoothing) or 1 (slope).  
-- Higher orders rapidly amplify noise—ensure sufficient radius (larger window) before using 2 or 3.  
+- Higher orders rapidly amplify noise - ensure sufficient radius (larger window) before using 2 or 3.  
 - Avoid derivative orders close to polyOrder when the dataset is short or radius is minimal.
 - For Adaptive edge windows, the effective polynomial order is clamped: effPoly = min(polyOrder, W - 1). Derivative coefficients are scaled by factorial(derivOrder) / delta^derivOrder after construction, matching the symmetric path.
 
-#### Asymmetric Savitzky–Golay Coefficient Caching
+#### Asymmetric Savitzky-Golay Coefficient Caching
 To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory caches are maintained:
 
 - `_sgAsymCoeffCache` keyed by `(left, right, effectivePolyOrder)` for smoothing (derivOrder = 0)
