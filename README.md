@@ -131,7 +131,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.2.7.0
 #### August 15, 2025
-> Renamed “kernel width” to “kernel radius” throughout the UI and code, while still computing the actual width internally as `2 × {radius} + 1.`.<br><br>
+> Renamed "kernel width" to "kernel radius" throughout the UI and code, while still computing the actual width internally as `2 × {radius} + 1.`.<br><br>
 > Refactored variable names and code references to use "Kernel Radius (r)" instead of "Kernel Width (w)".<br><br>
 > Minor bugs fixed.
 
@@ -203,7 +203,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.7.1.5
 #### August 30, 2025
->	Implemented unified parameter sourcing for export : `ExportCsvAsync` and `ExportExcelAsync` now read Kernel Radius / Polynomial Order from the applied status labels (`slblKernelRadius`, `slblPolyOrder`) instead of the settings dialog ComboBoxes : ensuring exports always reflect the last calibrated parameters, preventing use of stale or unsaved values, avoiding unintended field mutation, and tightening variable scope.<br><br>
+> Implemented unified parameter sourcing for export (initial design used status labels); current implementation reads Kernel Radius / Polynomial Order directly from the ComboBoxes (`cbxKernelRadius`, `cbxPolyOrder`) at export time to avoid stale UI state. Future refactor may restore label sourcing.<br><br>
 > Minor bugs fixed.
 
 ### v4.8.0.0
@@ -223,19 +223,24 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Minor bug fixes and user interface enhancements.
 
 ### v4.8.2.0
-#### September 7, 2025
+#### September 07, 2025
 > With the transition to ARM64 native based on `.NET Framework 4.8.1`, PCs running in this environment now deliver improved performance.
 </details>
 
 ### v5.0.0.0
-#### November 7, 2025
+#### November 07, 2025
 > Added support for `Adaptive` mode in Boundary Handling Method configuration.<br><br>
 > `Derivative order` control is now available exclusively for the `Savitzky–Golay` smoothing method.<br><br>
 > Minor bug fixes, performance improvements, and user interface enhancements.
 
+### v5.0.1.0
+#### November 09, 2025
+> Revised and updated `README.md` documentation.
+> Minor bugs fixed.
+
 ## Required Components & Setup
 ### Prerequisites
-- [.NET Framework 4.7.2](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net472) or later ([.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) recommended)
+- [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or 4.8.1 (target build uses 4.8.1; ARM64-compatible; earlier versions are not tested)
 - Windows Operating System (Windows 10 or later recommended)
 - [Visual Studio 2019 or newer](https://visualstudio.microsoft.com/) (for development)
 - [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) - **Required for Microsoft Excel export functionality** via `Interop`
@@ -253,27 +258,49 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 - Build the project.
 - Run the application.
 
+#### Dataset Title Validation
+The export title (Excel sheet name & metadata) is validated:
+- Max length: 31 characters
+- Disallowed characters: `: \ / ? * [ ]` and all OS-invalid filename characters
+- Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 – COM9, LPT1 – LPT9)
+
+Invalid input reverts to the placeholder and shows a warning dialog.
+The placeholder text "Click here to enter a title for your dataset." is restored whenever validation fails or the field is cleared.
+On invalid or cleared input the placeholder is restored with centered alignment and gray foreground; valid titles display left-aligned with normal system text color.
+
+Export Enablement Rules:
+- Export button is enabled when the Initial Dataset contains at least one entry AND the title field is non‑placeholder. Full title validation runs when the field loses focus; invalid titles are reverted to the placeholder and export becomes disabled.
+- Clearing all Initial Dataset items or reverting the title to the placeholder immediately disables export.
+
 ## Execution Instructions
 1. **Launch the Application** : Run the compiled `.exe` file or start the project from Visual Studio.
 2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text / HTML.
-3. **Select Filter** : Choose one or more smoothing algorithms using the checkboxes in the "Calibration Method" group (`chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`). Configure kernel radius and polynomial order using the combo boxes (`cbxKernelRadius`, `cbxPolyOrder`).
+3. **Select Filter** : Choose exactly one smoothing method for calibration using the radio buttons (`rbtnRect`, `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnSG`). In the Export Settings dialog you can enable multiple methods (`chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`) for batch export.
 4. **Calibrate** : Click the 'Calibrate' button (`btnCalibrate`) to apply the selected filter(s).
 5. **Review Results** : View the smoothed output in the "Refined Dataset" listbox (`lbRefinedData`).
 6. **Edit Data** : Use the "Modify Selected Entries" dialog (`btnInitEdit`) to batch-edit selected items in the initial dataset.
 7. **Export** : Click Export (`btnExport`) to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization. Configure export options in the "Export Configuration" dialog (`btnExportSettings`).
+
+> Note : You do not need to run "Calibrate" before exporting. Both CSV and Excel exports recompute the selected filters directly from the Initial Dataset.
 
 ## UI Controls & Naming Conventions
 - **Initial Dataset ListBox** : `lbInitData`
 - **Refined Dataset ListBox** : `lbRefinedData`
 - **Kernel Radius ComboBox** : `cbxKernelRadius`
 - **Polynomial Order ComboBox** : `cbxPolyOrder`
+- **Derivative Order ComboBox** : `cbxDerivOrder`
 - **Boundary Method ComboBox** : `cbxBoundaryMethod`
 - **Calibration Method CheckBoxes** : `chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`
-- **Export Buttons** : `btnExport`, `btnExportSettings`
 - **Edit Button** : `btnInitEdit`
+- **Initial ↔ Refined Selection Sync Buttons** : `btnInitSelectSync`, `btnRefSelectSync`
+- **Dataset Title TextBox** : `txtDatasetTitle`
+- **Export Buttons** : `btnExport`, `btnExportSettings`
 - **ProgressBar** : `pbMain`, `pbModify`
-- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `slblPolyOrder`, `slblBoundaryMethod`, `slblDesc`
+- **Count Labels** : `lblInitCnt`, `lblRefCnt`
+- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder`, `tlblBoundaryMethod`, `slblBoundaryMethod`, `slblDesc`, `tlblSeparator1`, `tlblSeparator2`, `tlblSeparator3`, `tlblSeparator4`
 - **Other Controls** : All controls use clear, descriptive names matching their function in the codebase.
+
+Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder` are only shown when Savitzky–Golay is active.
 
 ## Noise Filter Comparison
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
@@ -301,7 +328,7 @@ This guide explains how different noise filters work with different types of sig
 - **Savitzky‑Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
 
 ## What Is Pascal's Triangle?
-Pascal’s Triangle is a triangle of numbers built like this :
+Pascal's Triangle is a triangle of numbers built like this :
 
 - Start with `1` at the top.
 - Each new row adds two numbers from the row above to get a new one.
@@ -321,7 +348,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
   Adds up a group of points and divides by how many there are. It's simple and fast. Best for removing constant buzz or small jitters.
 
 - **Binomial Averaging**<br>
-  Like a moving average, but with weights from Pascal’s Triangle. The center gets more focus. Keeps the shape of your signal better while smoothing small noise.
+  Like a moving average, but with weights from Pascal's Triangle. The center gets more focus. Keeps the shape of your signal better while smoothing small noise.
 
 - **Binomial Median Filtering**<br>
   Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
@@ -333,7 +360,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
   Fits tiny curves to chunks of data. Keeps wave shapes and slow changes almost perfectly, but not as strong for sudden spikes.
 
 ### Example of Using Pascal's Triangle in Filtering
-Let’s say we use the 5th row : `1 4 6 4 1`
+Let's say we use the 5th row : `1 4 6 4 1`
 
 1. **Total** = `1` + `4` + `6` + `4` + `1` = `16`
 2. **Weights** = [`1 / 16`, `4 / 16`, `6 / 16`, `4 / 16`, `1 / 16`]
@@ -348,71 +375,121 @@ That final value (`2.75`) becomes your new filtered point.
 ## Boundary Handling Method
 Edge handling determines which values are used when the kernel window extends beyond the first or last element.
 
+### Boundary Handling Mode (ComboBox : `cbxBoundaryMethod`)
+| Mode        | Also Known As | Formula / Mapping (index transform) | Behavior | Pros | Cons |
+|-------------|---------------|-------------------------------------|----------|------|------|
+| Symmetric   | Mirror        | i < 0 → -i - 1<br>i ≥ n → 2n - i - 1 | Reflects across boundary | Smooth continuity; preserves slope | Can amplify extreme edge values if outlier |
+| Replicate   | Nearest       | i < 0 → 0<br>i ≥ n → n - 1          | Clamps to nearest endpoint | Stable on plateaus; simple | Flattens curvature; may bias means |
+| Adaptive    | Edge-aware    | Window dynamically trimmed or shifted; index sampling in SG may be asymmetric | Uses only in-range samples (non-SG) or shifts asymmetric SG window to keep length | Removes artificial padding; minimizes bias; accurate near edges | Varies window support; derivative order may be limited at extreme edges |
+| Zero Padding| Constant 0    | i < 0 or i ≥ n → 0                  | Outside treated as zero | Highlights decay / boundary contrast | Artificial dips; energy loss |
 
-### Available Modes (ComboBox : `cbxBoundaryMethod`)
+Display names in exports :
+- Symmetric → "Symmetric (Mirror)"
+- Replicate → "Replicate (Nearest)"
+- ZeroPad → "Zero Padding"
+- Adaptive → "Adaptive"
 
-| Mode        | Also Known As               | Formula / Mapping                                      | Behavior                        | Pros                                      | Cons                                                              |
-|-------------|-----------------------------|--------------------------------------------------------|----------------------------------|-------------------------------------------|-------------------------------------------------------------------|
-| Symmetric   | Mirror, Reflect             | `i < 0`<br>`→ -i - 1`,<br>`i ≥ n`<br>`→ 2n - i - 1`                  | Reflects across edge             | Smooth continuity, preserves slope        | May exaggerate boundary extrema if edge is extreme                |
-| Replicate   | Nearest, Clamp             | `i < 0 → 0`,<br>`i ≥ n`<br>`→ n - 1`                            | Uses closest endpoint            | Simple, stable under plateaus             | Can flatten curvature at edges                                    |
-| Zero Padding| Constant 0                 | `i < 0` or <br>`i ≥ n → 0`                                    | Outside values become zero       | Highlights edge contrast, explicit decay | Artificial dips at ends; energy loss                              |
-
-### Core Enum & Accessor
+### BoundaryMode Enum & Accessor
 ```csharp
-public enum BoundaryMode { Symmetric, Replicate, ZeroPad }
+public enum BoundaryMode { Symmetric, Replicate, Adaptive, ZeroPad }
 
 private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 {
     int n = data.Length;
+
     switch (mode)
     {
         case BoundaryMode.Symmetric:
-            // Symmetric : Mirror reflection based on the boundary point
-            if (idx < 0) idx = -idx - 1;
-            else if (idx >= n) idx = 2 * n - idx - 1;
-            if (idx < 0) return 0; 
+            if (idx < 0)
+                idx = -idx - 1;
+            else if (idx >= n)
+                idx = 2 * n - idx - 1;
+
+            if (idx < 0)
+                return 0;
+
             return data[idx];
 
         case BoundaryMode.Replicate:
-            // Replicate : Use the edge value when the index is out of range
-            if (idx < 0) idx = 0;
-            else if (idx >= n) idx = n - 1;
+            if (idx < 0)
+                idx = 0;
+            else if (idx >= n)
+                idx = n - 1;
+
             return data[idx];
 
         case BoundaryMode.ZeroPad:
-            // Zero Padding : Return 0 when the index is out of range
-            if (idx < 0 || idx >= n) return 0.0;
+            if (idx < 0 || idx >= n)
+                return 0.0;
+
+            return data[idx];
+
+        case BoundaryMode.Adaptive:
+            // Single-sample access: treat like symmetric (window logic handled separately)
+            if (idx < 0)
+                idx = -idx - 1;
+            else if (idx >= n)
+                idx = 2 * n - idx - 1;
+
+            if (idx < 0)
+                return 0;
+
             return data[idx];
 
         default:
-            // If the mode is unknown, handle it the same as mirror reflection
-            if (idx < 0) idx = -idx - 1;
-            else if (idx >= n) idx = 2 * n - idx - 1;
-            if (idx < 0) return 0;
+            if (idx < 0)
+                idx = -idx - 1;
+            else if (idx >= n)
+                idx = 2 * n - idx - 1;
+
+            if (idx < 0)
+                return 0;
+
             return data[idx];
     }
 }
 ```
 
-### Integration
-All convolution / window operations now fetch samples through a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. The weighted median reuses the same accessor ensuring consistent semantics across filters and exports.
+Non‑Adaptive paths (Rect / Avg / Median / Gauss / SG) fetch samples via a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. In Adaptive mode, filters that shrink the window (Rect / Avg / Median / Gauss) access only in‑range samples directly, and Savitzky–Golay shifts an asymmetric window; both avoid padding and match the intended edge semantics. `WeightedMedianAt`'s non‑Adaptive path also uses the accessor for consistency.  
+  
+Note : `GetIndex` remains only for compatibility; current code paths either use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
 ### Choosing a Mode
-- Use **Symmetric** for smooth analytical signals (default).
+- Use **Symmetric** for smooth analytical signals (recommended default).
 - Use **Replicate** for stepwise / plateau sensor data.
 - Use **ZeroPad** when emphasizing decay or isolating interior structure.
+
+Auto-switching behavior :
+- Rectangular (when selected) → Boundary Method automatically set to Replicate
+- Binomial Average / Weighted Median / Gaussian (when selected) → Boundary Method automatically set to Symmetric
+- Savitzky–Golay (when selected) → Boundary Method automatically set to Adaptive
+
+### Adaptive Mode
+Adaptive handling executes distinct logic per filter :
+- Rectangular (Moving Average) : At edges, window size W shrinks (W = left + right + 1) and only available samples are averaged (no zero / replicate bias).
+- Binomial Average : Recomputes a fresh binomial coefficient row for the truncated W (NOT a slice of the full 2r + 1 row) ensuring proper central weighting.
+- Weighted Median : Uses a recomputed binomial coefficient vector for truncated W, then performs weighted median over strictly in-range values.
+- Gaussian : Recomputes a Gaussian kernel of length W with σ = W / 6.0 and normalizes; avoids distortion from padding.
+- Savitzky–Golay (Smoothing or Derivative) : Attempts to retain full intended window size (2r + 1) by shifting window left / right when near boundaries. If the dataset cannot supply full support, effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Asymmetric coefficients are generated via least‑squares on the shifted grid (left / right adjusted so i + right ≤ n − 1) and cached for performance. 
+
+When the Savitzky–Golay method is selected (radio button checked), the boundary method is automatically switched to Adaptive to enable asymmetric window logic and derivative edge stability.
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
 #### How it works
 SonataSmooth provides a robust, user-friendly interface for entering and managing numerical datasets :  
-
 -	**Manual Entry** : Users can type values directly into the input box and add them to the Initial Dataset with a button click or by pressing Enter.
 -	**Clipboard Paste** : Numeric values can be pasted from the clipboard; the app uses optimized regular expressions to extract numbers, even from mixed or formatted text.
 -	**Drag & Drop** : Supports dropping plain text, CSV, or HTML-formatted data; HTML tags are stripped and all valid numbers are parsed.
--	**Batch Addition** : Large datasets are added in batches to the ListBox, with real-time progress feedback and smooth UI updates.
+-	**Batch Addition** : Large datasets are added in batches to the ListBox, with real-time progress feedback and smooth UI updates. (Batch Addition detail : items are appended in chunks of 1000 per AddItemsInBatches to keep UI responsive.)
 -	**Validation** : All input is validated for numeric format; errors are reported with clear messages and invalid entries are rejected.
 -	**Selection & Editing** : Items can be selected, deselected, edited (single or multiple), deleted, or copied to the clipboard. Selection operations are optimized for large lists.
+-   **Copy Behavior** : If no items (or all items) are selected, copying exports the entire list; if a partial selection exists, only the selected items are copied. (Applies to both Initial and Refined datasets.)
+-   **Clear All Behavior** : Clearing all items in the Initial Dataset also clears the Refined Dataset and resets related status labels and placeholders.
+-   **Delete Selected Behavior** : When deleting only selected items, the Initial Dataset removes those items and the Refined Dataset is preserved. If all items are selected (i.e., selected count equals total count), the operation behaves like Clear All: the Refined Dataset is cleared and the dataset title is reset to the placeholder (centered, gray).
+-   **Selection Operation Cancellation** : "Select All" uses internal `CancellationTokenSource` instances (`_ctsInitSelectAll`, `_ctsRefSelectAll`) so starting a new selection immediately cancels any in‑progress selection. The UI remains responsive and can be retriggered to interrupt long operations.
+
+When large batches are added (paste / drag-drop / bulk append), the list auto-scrolls to the newest appended item (TopIndex set to last) to provide immediate visual confirmation.
 
 #### Smoothing Parameters
 ##### Kernel Radius (`r`)
@@ -455,11 +532,36 @@ For example, if (`polyOrder` = 2) :
 
 This means the filter will fit a 2nd-degree polynomial (a parabola) across each window of data points.
 
+##### Derivative Order (`derivOrder`)
+(Displayed only when Savitzky-Golay is selected.)
+
+- Defines which derivative of the fitted local polynomial is evaluated.
+- Constraint : `derivOrder ≤ polyOrder`
+- Effective clamp (Adaptive edges) : `effPoly = min(polyOrder, W - 1)`; runtime validation enforces `derivOrder ≤ effPoly`.
+- Scaling : coefficients multiplied by `factorial(derivOrder) / delta^derivOrder` (delta = 1.0).
+- Recommended range : 0 – 3 (higher orders amplify noise sharply).
+
+Typical uses:
+- 0 : Smoothing (baseline SG)
+- 1 : Slope estimation
+- 2 : Curvature / peak detection
+- 3 : Inflection diagnostics (only with sufficiently wide windows)
+
 #### Tips for Choosing `polyOrder`
 - `polyOrder` must be less than the window length (2 × `r` + 1) to ensure a well-posed fitting problem.
 - Increasing `polyOrder` improves flexibility but risks ringing artifacts at the boundaries.
 - Common practice is to start with `polyOrder` = 2 or 3 and adjust based on how well features are preserved versus noise reduction.
 - Always validate smoothing performance on representative signal segments before batch processing.
+
+#### Validation Rules
+- Window size : `windowSize = 2 × radius + 1`
+- Constraint : `windowSize ≤ dataCount`
+- Polynomial constraint (SG only) : `polyOrder < windowSize`
+- Derivative constraint (SG only) : `derivOrder ≤ polyOrder`
+- Adaptive SG edge constraint: if effPoly = min(polyOrder, W - 1) then `derivOrder ≤ effPoly`  
+  
+Failure triggers explicit error dialogs matching runtime validation.  
+Caution : If the dataset count is smaller than the required window size ((2 × radius) + 1), calibration / export is aborted with a dialog instead of attempting partial smoothing.
 
 #### Principle
 -	**Regex-based Parsing** : Uses compiled regular expressions to efficiently extract numbers from any text source.
@@ -534,57 +636,116 @@ private async void lbInitData_DragDrop(object sender, DragEventArgs e)
 }
 
 // Parameter validation
-private bool ValidateSmoothingParameters(int dataCount, int radius, int polyOrder)
+// Result wrapper (mirrors FrmMain.cs)
+private struct OperationResult
 {
-    int windowSize = 2 * radius + 1;
+    public bool Success { get; }
+    public string Error { get; }
+
+    private OperationResult(bool success, string error)
+    {
+        Success = success;
+        Error = error;
+    }
+
+    public static OperationResult OK() => new OperationResult(true, null);
+
+    public static OperationResult Fail(string error) => new OperationResult(false, error);
+}
+
+// Parameter validation
+private OperationResult ValidateSmoothingParameters(int dataCount, int w, int polyOrder)
+{
+    int windowSize = 2 * w + 1;
+    bool useSG = rbtnSG != null && rbtnSG.Checked;
+
     if (windowSize > dataCount)
     {
-        MessageBox.Show("Kernel radius is too large for the dataset.", "Parameter Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        return false;
+        var msg =
+            "Kernel radius is too large.\n\n" +
+            "Window size formula : (2 × radius) + 1\n" +
+            $"Current : (2 × {w}) + 1 = {windowSize}\n" +
+            $"Data count : {dataCount}\n\n" +
+            "Rule : windowSize ≤ dataCount";
+
+        return OperationResult.Fail(msg);
     }
-    if (rbtnSG.Checked && polyOrder >= windowSize)
+
+    if (useSG && polyOrder >= windowSize)
     {
-        MessageBox.Show("Polynomial order must be smaller than the window size.", "Parameter Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        return false;
+        var msg =
+            "Polynomial order must be smaller than the window size.\n\n" +
+            "Rule : polyOrder < windowSize\n" +
+            $"Current polyOrder : {polyOrder}\n" +
+            $"Window size : {windowSize}\n\n" +
+            "Tip : windowSize = (2 × radius) + 1";
+
+        return OperationResult.Fail(msg);
     }
-    return true;
+
+    return OperationResult.OK();
 }
 ```
 
 ### 2. Parallel Kernel Filtering
 #### How it works
-All array indices [0 … n - 1] are processed in parallel using PLINQ. For each position `i`, the code checks which radio button is selected (rectangular average, weighted median, or binomial average) and computes a filtered value.
+Leverage all CPU cores without blocking the UI. The smoothing kernels are executed with Parallel.For (small arrays run serially), writing per-index results to distinct buffers. PLINQ is used only in input parsing (clipboard / drag-drop), not in the smoothing pass.
 
-When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized for performance using PLINQ.
+When the user clicks "Calibrate", the application processes the input data using the selected filter. The computation is parallelized using Parallel.For (falls back to serial for small n).
 
 -	When the user calibrates or exports data, the selected filters are applied to each data point in parallel.
--	Each filter uses its own kernel (window) and boundary handling (mirror-padding).
+-	Each filter uses its own kernel (window) and boundary handling (selected boundary mode, including Adaptive).
 -	All filter results are computed in a single pass, leveraging all available CPU cores.
--	The UI remains responsive, and progress is reported in real time.
+-	The UI remains responsive, and progress is reported in real time.  
+  
+Adaptive mode introduces per-index dynamic window sizing or window shifting (Savitzky-Golay). Parallel execution remains safe because each index writes to distinct output arrays and uses only read-only input. Minimum size for parallel dispatch: if n < 2000 a serial loop is used to avoid Parallel.For overhead (threshold hard-coded in ApplySmoothing).
 
 #### Principle
-Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.
+Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.  
+  
+Note : The smoothing pass uses only `Parallel.For`; PLINQ is used solely for input parsing, not for kernel execution.
 
--	**Parallelization** : Uses Parallel.For and ParallelEnumerable to process large datasets efficiently.
--	**Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
--	**Boundary Handling** : Edge behavior is configurable (Symmetric / Replicate / Zero-Pad) for every smoothing method
--	**Thread-Safe UI** : Progress bars and status labels are updated safely from background threads.
-
--	**Parallel Processing** : Uses all available CPU cores for fast computation.
--	**Kernel Filtering** : Applies the selected filter to each data point using a moving window.
+- **Parallelization** : Uses `Parallel.For` for the smoothing pass. PLINQ is used only for input parsing (clipboard / drag‑drop), not during kernel execution.
+- **Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
+- **Boundary Handling** : Edge behavior is configurable (Symmetric / Replicate / Zero‑Pad / Adaptive) for every smoothing method.
+- **Thread-Safe UI** : Progress bars and status labels are updated safely from background threads.
 
 #### Code Implementation
 ```csharp
-private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-   ApplySmoothing(double[] input, int r, int polyOrder, BoundaryMode boundaryMode,
-                  bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
-{
+private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG) ApplySmoothing(
+    double[] input,
+    int r,
+    int polyOrder,
+    int derivOrder,
+    double delta,
+    BoundaryMode boundaryMode,
+    bool doRect,
+    bool doAvg,
+    bool doMed,
+    bool doGauss,
+    bool doSG)
+    {
+    var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
+    if (!vr.Success)
+        throw new InvalidOperationException(vr.Error);
+
+    if (doSG && derivOrder > polyOrder)
+        throw new InvalidOperationException($"Derivative order must be ≤ polynomial order.");
+
     int n = input.Length;
     int windowSize = 2 * r + 1;
 
     long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
     double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
-    double[] sgCoeffs = doSG ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder) : null;
+
+    // SG symmetric coefficients only when NOT Adaptive
+    double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
+        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, 0, 1.0)
+        : null;
+
+    double[] sgDerivCoeffs = (doSG && derivOrder > 0 && boundaryMode != BoundaryMode.Adaptive)
+        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder, 1.0)
+        : null;
 
     var rect = new double[n];
     var binomAvg = new double[n];
@@ -592,85 +753,236 @@ private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[
     var gauss = new double[n];
     var sg = new double[n];
 
-   // Precompute division factor for Rectangular and sum of coefficients for Binomial Average
-    double invRectDiv = doRect ? 1.0 / windowSize : 0.0;
+    double invRectDiv = (doRect && windowSize > 0) ? 1.0 / windowSize : 0.0;
     double binomSum = 0.0;
+
     if (doAvg && binom != null)
     {
-        for (int i = 0; i < binom.Length; i++) binomSum += binom[i];
+        for (int i = 0; i < binom.Length; i++)
+            binomSum += binom[i];
     }
 
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
-    // For small datasets, serial execution is faster due to parallel overhead
+    void GetAdaptiveWindow(int center, out int left, out int right, out int start)
+    {
+        left = Math.Min(r, center);
+        right = Math.Min(r, n - 1 - center);
+        start = center - left;
+    }
+
     bool useParallel = n >= 2000;
 
-    Action<int> smoothingAction = i =>
+    Action<int> act = i =>
     {
         // Rectangular
         if (doRect)
         {
-            double sum = 0.0;
-            for (int k = -r; k <= r; k++)
-                sum += Sample(i + k);
-            rect[i] = sum * invRectDiv;
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                GetAdaptiveWindow(i, out int left, out int right, out int start);
+                int W = left + right + 1;
+                double sum = 0;
+                for (int p = 0; p < W; p++)
+                    sum += input[start + p];
+                rect[i] = W > 0 ? sum / W : 0.0;
+            }
+            else
+            {
+                double sum = 0;
+                for (int k = -r; k <= r; k++)
+                    sum += Sample(i + k);
+                rect[i] = sum * invRectDiv;
+            }
         }
 
         // Binomial Average
         if (doAvg && binom != null)
         {
-            double sum = 0.0;
-            for (int k = -r; k <= r; k++)
-                sum += Sample(i + k) * binom[k + r];
-            binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                GetAdaptiveWindow(i, out int left, out int right, out int start);
+                int W = left + right + 1;
+                if (W < 1)
+                {
+                    binomAvg[i] = 0.0;
+                }
+                else
+                {
+                    var localBinom = CalcBinomialCoefficients(W);
+                    long localSum = 0;
+                    for (int p = 0; p < W; p++)
+                        localSum += localBinom[p];
+
+                    double sum = 0;
+                    for (int p = 0; p < W; p++)
+                        sum += input[start + p] * localBinom[p];
+
+                    binomAvg[i] = localSum > 0 ? sum / localSum : 0.0;
+                }
+            }
+            else
+            {
+                double sum = 0;
+                for (int k = -r; k <= r; k++)
+                    sum += Sample(i + k) * binom[k + r];
+                binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+            }
         }
 
         // Weighted Median
         if (doMed && binom != null)
         {
-            median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                GetAdaptiveWindow(i, out int left, out int right, out int start);
+                int W = left + right + 1;
+                if (W < 1)
+                {
+                    median[i] = 0.0;
+                }
+                else
+                {
+                    var localBinom = CalcBinomialCoefficients(W);
+                    var pairs = new List<(double v, long w)>(W);
+                    for (int p = 0; p < W; p++)
+                        pairs.Add((input[start + p], localBinom[p]));
+
+                    pairs.Sort((a, b) => a.v.CompareTo(b.v));
+
+                    long total = 0;
+                    foreach (var t in pairs)
+                        total += t.w;
+
+                    if (total <= 0)
+                    {
+                        median[i] = 0.0;
+                    }
+                    else
+                    {
+                        bool even = (total & 1L) == 0;
+                        long half = total / 2;
+                        long acc = 0;
+
+                        for (int q = 0; q < pairs.Count; q++)
+                        {
+                            acc += pairs[q].w;
+                            if (acc > half)
+                            {
+                                median[i] = pairs[q].v;
+                                break;
+                            }
+
+                            if (even && acc == half)
+                            {
+                                double next = (q + 1 < pairs.Count) ? pairs[q + 1].v : pairs[q].v;
+                                median[i] = (pairs[q].v + next) / 2.0;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+            }
         }
 
         // Gaussian
         if (doGauss && gaussCoeffs != null)
         {
-            double sum = 0.0;
-            for (int k = -r; k <= r; k++)
-                sum += gaussCoeffs[k + r] * Sample(i + k);
-            gauss[i] = sum;
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                GetAdaptiveWindow(i, out int left, out int right, out int start);
+                int W = left + right + 1;
+                if (W < 1)
+                {
+                    gauss[i] = 0.0;
+                }
+                else
+                {
+                    double sigma = W / 6.0;
+                    var local = ComputeGaussianCoefficients(W, sigma);
+                    double sum = 0;
+                    for (int p = 0; p < W; p++)
+                        sum += local[p] * input[start + p];
+                    gauss[i] = sum;
+                }
+            }
+            else
+            {
+                double sum = 0;
+                for (int k = -r; k <= r; k++)
+                    sum += gaussCoeffs[k + r] * Sample(i + k);
+                gauss[i] = sum;
+            }
         }
 
-        // Savitzky-Golay
-        if (doSG && sgCoeffs != null)
+        // Savitzky-Golay (smoothing or derivative)
+        if (doSG)
         {
-            // The `Sample` function correctly handles all boundary modes (including ZeroPad),
-            // so no separate branching is needed here.
-            double sum = 0.0;
-            for (int k = -r; k <= r; k++)
-                sum += sgCoeffs[k + r] * Sample(i + k);
-            sg[i] = sum;
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                int desiredW = windowSize;
+                int left = Math.Min(r, i);
+                int right = desiredW - 1 - left;
+
+                if (i + right > n - 1)
+                {
+                    int shift = (i + right) - (n - 1);
+                    right -= shift;
+                    left += shift;
+                }
+
+                if (left < 0) left = 0;
+                if (right < 0) right = 0;
+
+                double sum = 0;
+                if (derivOrder == 0)
+                {
+                    var coeffs = ComputeSGCoefficientsAsymmetric(left, right, polyOrder);
+                    for (int k = -left; k <= right; k++)
+                        sum += coeffs[k + left] * input[i + k];
+                    sg[i] = sum;
+                }
+                else
+                {
+                    int W = left + right + 1;
+                    int effPoly = Math.Min(polyOrder, W - 1);
+                    if (derivOrder > effPoly)
+                        throw new InvalidOperationException(
+                            $"Edge-adaptive window too small for derivative (W={W}, effPoly={effPoly}, d={derivOrder}).");
+
+                    var coeffs = ComputeSGCoefficientsAsymmetricDerivative(left, right, effPoly, derivOrder, delta);
+                    for (int k = -left; k <= right; k++)
+                        sum += coeffs[k + left] * input[i + k];
+                    sg[i] = sum;
+                }
+            }
         }
     };
 
+    // Dispatch
     if (useParallel)
     {
-        Parallel.For(0, n, smoothingAction);
+        Parallel.For(0, n, act);
     }
     else
     {
         for (int i = 0; i < n; i++)
-        {
-            smoothingAction(i);
-        }
+            act(i);
     }
 
+    // Return results
     return (rect, binomAvg, median, gauss, sg);
-}
 ```
+
+Note : Derivative support and adaptive asymmetric SG handling are integrated into this unified pass. Parallelization is skipped for very small arrays (`n < 2000`) to avoid overhead.
 
 ### 3. Rectangular (Uniform) Mean Filter
 #### How it works
-A simple sliding-window average over 2 × r + 1 points, ignoring out-of-bounds indices.
+A simple sliding-window average over 2 × r + 1 points honoring the selected Boundary Mode (Symmetric, Replicate, Zero‑Pad). In Adaptive mode the window shrinks at edges and averages only in‑range samples.
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
@@ -697,9 +1009,11 @@ if (useRect)
 }
 ```
 
-### 4. Weighted Median Filter
+### 4. Binomial (Weighted) Median Filter
 #### How it works
-Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.
+Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.  
+  
+Note : Labeled internally as "Weighted Median" (using binomial weights). README refers to it as "Binomial Median Filtering" — both denote the same weighted-median operation.
 
 #### Principle
 Median filtering is robust against outliers; binomial weights bias the median toward center points.
@@ -747,6 +1061,10 @@ else if (useMed)
 }
 ```
 
+#### Weighted Median – Adaptive Note
+Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples—removing edge padding bias.
+(Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the truncated‑recompute strategy documented above.)
+
 ### 5. Binomial (Weighted) Average Filter
 #### How it works
 Averages values in the window, but each value is weighted according to binomial coefficients, giving more importance to central values.
@@ -777,9 +1095,12 @@ else if (useAvg)
 }
 ```
 
+#### Binomial (Weighted) Average – Adaptive Note
+In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of length W is computed (`CalcBinomialCoefficients(W)`), ensuring correct symmetric weighting rather than truncating the full-length coefficients.
+
 ### 6. Gaussian Filter
 #### How it works
-Applies a normalized 1D Gaussian kernel to the data, using mirror-mode boundary handling.
+Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode the kernel length W shrinks and σ = W / 6.0 is recomputed.
 
 #### Principle
 Gaussian weights emphasize central values, producing smooth results.
@@ -788,6 +1109,7 @@ Gaussian weights emphasize central values, producing smooth results.
 ```csharp
 if (useGauss)
 {
+    double sigma = (2.0 * r + 1) / 6.0;
     double[] gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
@@ -798,10 +1120,14 @@ if (useGauss)
         {
             sum += gaussCoeffs[k + r] * Sample(i + k);
         }
-      gaussFiltered[i] = sum;
+        gaussFiltered[i] = sum;
     }
 }
 ```
+
+#### Gaussian Filter – Adaptive Note
+Adaptive recomputes a Gaussian kernel of length W with σ = W / 6.0. This keeps relative spread consistent across varying window sizes and avoids artificial flattening.
+Sigma recomputation uses σ = W / 6.0 (same formula used initially for full symmetric kernels), keeping relative spread consistent.
 
 ### 7. Savitzky‑Golay Filter
 #### How it works
@@ -809,8 +1135,8 @@ A fixed-size window of length **2 × r + 1** slides over the 1D signal.
 
 At each position :
 
-1. Out‑of‑bounds indices are "mirrored" back into the valid range to handle boundaries smoothly.
-2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point.
+1. Out‑of‑bounds indices are handled according to the selected Boundary Mode. With Adaptive (auto‑selected when SG is chosen), the window is shifted asymmetrically near edges to maintain length without artificial padding; non‑Adaptive modes map indices using Mirror (Symmetric), Replicate (Nearest), or Zero‑Pad.
+2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point. (When Adaptive is selected, the window is shifted asymmetrically near edges and coefficients are recomputed from edge-specific least‑squares fits with caching.)
 
 This method preserves important features such as peaks and edges better than simple moving averages.
 
@@ -825,7 +1151,7 @@ Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curv
 ```csharp
 else if (useSG)
 {
-    double[] sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder);
+    double[] sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder, derivOrder: 0, delta: 1.0);
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
     
     for (int i = 0; i < input.Length; i++)
@@ -839,6 +1165,42 @@ else if (useSG)
     }
 }
 ```
+
+Note : This snippet shows the non‑Adaptive, smoothing‑only path. Runtime uses the derivative‑capable overload and switches to asymmetric coefficients near edges when Adaptive is selected.
+
+#### Derivative Order (`derivOrder`)
+Used only when Savitzky–Golay is selected.
+
+| Value | Meaning | Typical Use |
+|-------|---------|-------------|
+| 0     | Smoothing (original SG) | Noise reduction while preserving shape |
+| 1     | First derivative (slope) | Trend / rate-of-change detection |
+| 2     | Second derivative (curvature) | Peak / inflection / acceleration analysis |
+| 3     | Third derivative | Specialized scientific diagnostics (use cautiously) |
+
+Rules & Validation:
+- `derivOrder ≤ polyOrder` (enforced during calibration & export).
+- In adaptive edge windows : effective polynomial `effPoly = min(polyOrder, W - 1)`; if `derivOrder > effPoly`, an error is raised.
+- Coefficient scaling : derivative coefficients are multiplied by `factorial(derivOrder) / delta^derivOrder` (`delta = 1.0` in current implementation).
+- For `derivOrder == 0`, coefficients are normalized to sum to 1 (DC preservation). For `derivOrder > 0`, no DC normalization (derivative sums ≠ 1 by design).
+
+Guidance:
+- Start with 0 (smoothing) or 1 (slope).  
+- Higher orders rapidly amplify noise—ensure sufficient radius (larger window) before using 2 or 3.  
+- Avoid derivative orders close to polyOrder when the dataset is short or radius is minimal.
+- For Adaptive edge windows, the effective polynomial order is clamped: effPoly = min(polyOrder, W - 1). Derivative coefficients are scaled by factorial(derivOrder) / delta^derivOrder after construction, matching the symmetric path.
+
+#### Asymmetric Savitzky–Golay Coefficient Caching
+To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory caches are maintained:
+
+- `_sgAsymCoeffCache` keyed by `(left, right, effectivePolyOrder)` for smoothing (derivOrder = 0)
+- `_sgAsymDerivCoeffCache` keyed by `(left, right, effectivePolyOrder, derivOrder, deltaBits)` for derivatives
+
+Cache keys :
+- Smoothing: (left, right, effPoly)
+- Derivative: (left, right, effPoly, derivOrder, deltaBits) where deltaBits = BitConverter.DoubleToInt64Bits(delta)
+
+These caches drastically reduce overhead on large datasets with repeated edge window shapes.
 
 ### 8. Results Aggregation & UI Update
 #### How it works
@@ -856,7 +1218,7 @@ Batch updates and progress reporting keep the UI responsive. A finally block ens
 lbRefinedData.BeginUpdate();
 lbRefinedData.Items.Clear();
 
-await AddItemsInBatches(lbRefinedData, results, progressReporter);
+await AddItemsInBatches(lbRefinedData, results, progressReporter, 60);
 
 lbRefinedData.EndUpdate();
 lblRefCnt.Text = $"Count : {lbRefinedData.Items.Count}";
@@ -870,6 +1232,39 @@ slblCalibratedType.Text = useRect ? "Rectangular Average"
 
 slblKernelRadius.Text = r.ToString();
 ```
+### 8.1 Selection Synchronization
+Buttons `btnInitSelectSync` and `btnRefSelectSync` synchronize selected indices and scroll positions between Initial and Refined datasets.
+  
+Enablement rule :
+- Both listboxes must contain the same number of items.
+- At least one item is selected in the source listbox.  
+   
+Behavior :
+- Clears target selection.
+- Copies all selected indices.
+- Sets `TopIndex` of target to match source for scroll alignment.
+Status label displays a synchronized item count message.
+
+#### 8.2 Progressive Selection & Deselect Feedback
+- Select All: updates `pbMain` from 0% – 100% using dynamic intervals
+  - Report interval: `reportInterval = max(1, count / 100)`
+  - UI yield interval: `yieldInterval = max(1, count / 1000)` with `await Task.Yield()`
+  - Cancelable: a new Select All starts cancels the previous via `_ctsInitSelectAll` / `_ctsRefSelectAll`
+  - Completion: briefly holds 100%, then resets to 0  
+  
+- Deselect All: step‑based progress (0 → selectedCount)
+  - Increments the progress bar per deselected item with a small delay (`await Task.Delay(10)`)
+  - Resets to 0 on completion
+
+This keeps very large list operations smooth and clearly communicated without blocking the UI thread.
+
+#### 8.3 Refined Clear Behavior
+Clicking "Clear Refined" removes all entries from the Refined Dataset and resets status indicators:
+- `slblCalibratedType` → "--"
+- `slblKernelRadius` → "--"
+- SG parameter labels hidden : `tlblPolyOrder`, `slblPolyOrder`, and the separator label; `slblPolyOrder` text is set to "--"  
+  
+The progress bar briefly shows 100% and then returns to 0% to signal completion.
 
 ### 9. Pascal's Triangle (Binomial Coefficient Calculation)
 #### How it works
@@ -911,7 +1306,8 @@ private static long[] CalcBinomialCoefficients(int length)
     return c;
 }
 ```
--	This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters.
+- This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters. 
+- Maximum supported window length for binomial weighting is 63 (length ≤ 63) to prevent 64‑bit overflow of the cumulative weight (2^(length − 1) ≤ 2^62). Attempts above this throw an exception.
 
 ### 10. Savitzky-Golay Coefficients Computation
 #### How it works
@@ -923,43 +1319,111 @@ Savitzky-Golay filters derive from least‐squares polynomial fitting.
 - Form the normal equations (AᵀA), invert them, and multiply by Aᵀ to get the pseudoinverse.
 - The convolution coefficients for smoothing (value at central point) are the first row of this pseudoinverse.
 
+
 #### Code Implementation
 ```csharp
-private static double[] ComputeSavitzkyGolayCoefficients(int windowSize, int polyOrder)
+private static double[] ComputeSavitzkyGolayCoefficients(
+    int windowSize,
+    int polyOrder,
+    int derivOrder,
+    double delta)
 {
+    if (windowSize <= 0)
+        throw new ArgumentOutOfRangeException(nameof(windowSize), "windowSize must be > 0.");
+
+    if ((windowSize & 1) == 0)
+        throw new ArgumentException("windowSize must be odd (2 * r + 1).", nameof(windowSize));
+
+    if (polyOrder < 0)
+        throw new ArgumentOutOfRangeException(nameof(polyOrder), "polyOrder must be ≥ 0.");
+
+    if (polyOrder >= windowSize)
+        throw new ArgumentException("polyOrder must be < windowSize.", nameof(polyOrder));
+
+    if (derivOrder < 0)
+        throw new ArgumentOutOfRangeException(nameof(derivOrder), "derivOrder must be ≥ 0.");
+
+    if (derivOrder > polyOrder)
+        throw new ArgumentException("derivOrder must be ≤ polyOrder.");
+
+    if (delta <= 0)
+        throw new ArgumentOutOfRangeException(nameof(delta), "delta must be > 0.");
+
     int m = polyOrder;
     int half = windowSize / 2;
-    double[,] A = new double[windowSize, m + 1];
 
+    // Design matrix
+    var A = new double[windowSize, m + 1];
     for (int i = -half; i <= half; i++)
+    {
+        double x = i;
+        double p = 1.0;
         for (int j = 0; j <= m; j++)
-            A[i + half, j] = Math.Pow(i, j);
+        {
+            A[i + half, j] = p;
+            p *= x;
+        }
+    }
 
+    // Normal equations (A^T A)
     var ATA = new double[m + 1, m + 1];
     for (int i = 0; i <= m; i++)
+    {
         for (int j = 0; j <= m; j++)
+        {
+            double s = 0;
             for (int k = 0; k < windowSize; k++)
-                ATA[i, j] += A[k, i] * A[k, j];
+                s += A[k, i] * A[k, j];
+            ATA[i, j] = s;
+        }
+    }
 
-    var invATA = InvertMatrix(ATA);
+    var invATA = InvertMatrixStrict(ATA);
 
+    // A^T
     var AT = new double[m + 1, windowSize];
     for (int i = 0; i <= m; i++)
+    {
         for (int k = 0; k < windowSize; k++)
             AT[i, k] = A[k, i];
+    }
 
+    // Coefficient row for derivOrder
     var h = new double[windowSize];
     for (int k = 0; k < windowSize; k++)
     {
         double sum = 0;
         for (int j = 0; j <= m; j++)
-            sum += invATA[0, j] * AT[j, k];
+            sum += invATA[derivOrder, j] * AT[j, k];
         h[k] = sum;
+    }
+
+    if (derivOrder == 0)
+    {
+        // DC normalization for smoothing
+        double total = 0;
+        for (int i = 0; i < windowSize; i++)
+            total += h[i];
+
+        if (Math.Abs(total) < 1e-20)
+            throw new InvalidOperationException("Computed Savitzky-Golay coefficients sum to ~ 0.");
+
+        for (int i = 0; i < windowSize; i++)
+            h[i] /= total;
+    }
+    else
+    {
+        // Derivative scaling : factorial(d) / Δ^d
+        double scale = FactorialAsDouble(derivOrder) / Math.Pow(delta, derivOrder);
+        for (int i = 0; i < windowSize; i++)
+            h[i] *= scale;
     }
 
     return h;
 }
 ```
+(Implementation uses InvertMatrixStrict with partial pivoting and a dynamic tolerance 1e - 14 × rowScale for stability.)
+(Derivative-capable version in runtime adds derivOrder & delta parameters; see full adaptive + derivative implementation in the unified ApplySmoothing section above.)
 
 ### 11. Numerical Pivot Calculation (Matrix Inversion)
 #### How it Works
@@ -968,76 +1432,72 @@ This routine applies **Gauss-Jordan elimination with partial pivoting** and a **
 
 - For each column, the row with the largest absolute value is selected as the pivot and swapped to the top.
 - The pivot row is normalized, and all other rows are updated to eliminate the current column.
-- If the pivot is below a dynamic threshold (based on the row's scale and machine epsilon), the matrix is considered singular and a zero matrix is returned.
+- If the pivot is below a dynamic threshold (based on the row's scale and machine epsilon), the matrix is considered singular and an InvalidOperationException is thrown.
 
 #### Principle
 - **Partial Pivoting** : Improves numerical stability by always using the largest available pivot.
 - **Dynamic Tolerance** : Prevents catastrophic errors by comparing the pivot to a scaled threshold, not a fixed value.
-- **Singular Matrix Handling** : If the matrix cannot be inverted (pivot too small), a zero matrix is returned instead of propagating errors.
+- **Singular Matrix Handling** : If the matrix cannot be inverted (pivot too small), an InvalidOperationException is thrown to prevent propagating errors.
 
 This approach ensures that Savitzky-Golay and other matrix-based filters remain stable and reliable, even for ill-conditioned or nearly singular matrices.
 
 #### Code Implementation
 ```csharp
-private static double[,] InvertMatrix(double[,] a)
+private static double[,] InvertMatrixStrict(double[,] a)
 {
     int n = a.GetLength(0);
-    var aug = new double[n, 2 * n];
+    if (a.GetLength(1) != n)
+        throw new ArgumentException("Matrix must be square.", nameof(a));
 
-    // Initialize augmented matrix [A | I]
+    var aug = new double[n, 2 * n];
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
             aug[i, j] = a[i, j];
-        aug[i, n + i] = 1;
+        aug[i, n + i] = 1.0;
     }
 
     for (int i = 0; i < n; i++)
     {
-        // Partial pivoting : find row with largest absolute value in column i
         int maxRow = i;
-        for (int k = i + 1; k < n; k++)
-            if (Math.Abs(aug[k, i]) > Math.Abs(aug[maxRow, i]))
-                maxRow = k;
+        double maxVal = Math.Abs(aug[i, i]);
+        for (int r = i + 1; r < n; r++)
+        {
+            double v = Math.Abs(aug[r, i]);
+            if (v > maxVal) { maxVal = v; maxRow = r; }
+        }
 
-        // Swap rows if needed
         if (maxRow != i)
         {
-            for (int k = 0; k < 2 * n; k++)
+            for (int c = 0; c < 2 * n; c++)
             {
-                double temp = aug[i, k];
-                aug[i, k] = aug[maxRow, k];
-                aug[maxRow, k] = temp;
+                double tmp = aug[i, c];
+                aug[i, c] = aug[maxRow, c];
+                aug[maxRow, c] = tmp;
             }
         }
 
         double pivot = aug[i, i];
-        double rowScale = 0.0;
-        for (int j = i; j < n; j++)
-            rowScale = Math.Max(rowScale, Math.Abs(aug[i, j]));
-        double tol = Math.Max(rowScale * 1e-12, Double.Epsilon);
-
+        double rowScale = 0;
+        for (int c = i; c < n; c++)
+            rowScale = Math.Max(rowScale, Math.Abs(aug[i, c]));
+        double tol = Math.Max(rowScale * 1e-14, double.Epsilon);
         if (Math.Abs(pivot) < tol)
-        {
-            // Singular matrix : return zero matrix
-            return new double[n, n];
-        }
+            throw new InvalidOperationException("Matrix is singular or ill-conditioned for inversion.");
 
-        // Normalize pivot row
-        for (int j = 0; j < 2 * n; j++)
-            aug[i, j] /= pivot;
+        for (int c = 0; c < 2 * n; c++)
+            aug[i, c] /= pivot;
 
-        // Eliminate current column from other rows
         for (int r = 0; r < n; r++)
         {
             if (r == i) continue;
             double factor = aug[r, i];
+            if (Math.Abs(factor) < 1e-20) continue;
             for (int c = 0; c < 2 * n; c++)
                 aug[r, c] -= factor * aug[i, c];
         }
     }
 
-    // Extract inverse matrix
     var inv = new double[n, n];
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
@@ -1058,12 +1518,16 @@ private static double[,] InvertMatrix(double[,] a)
 
 ### 12. CSV Export Functionality
 #### How it works
-When the user selects the CSV export option and clicks Export, the application :
+When the user selects the CSV export option and clicks Export, the application :  
 
 - Reads the initial dataset and selected smoothing parameters.
 - Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay).
 - Splits the output into multiple CSV files if the dataset exceeds Excel's row limit.
 - Writes metadata, parameters, and results to each file in a structured format.
+- When output is split, files are named using the pattern : {baseName}_Part{X}.csv.
+- The SaveFileDialog defaults the file name to the dataset title : "{DatasetTitle}.csv"
+ 
+All enabled filter outputs are computed in a single ApplySmoothing pass (no per-filter recomputation), then written to the file / worksheet.
 
 #### Principle
 - **Modular Export** : Each filter result is stored in a separate column.
@@ -1072,112 +1536,58 @@ When the user selects the CSV export option and clicks Export, the application :
 
 #### Code Implementation
 ```csharp
-public async Task ExportCsvAsync(
-    string filePath,
-    double[] initialData,
-    IDictionary<string, double[]> filterResults,
-    int kernelRadius,
-    int? polyOrder,
-    IProgress<int> progress = null)
+// Internal CSV export (collects UI state; no external parameters)
+private async Task ExportCsvAsync()
 {
-    // Create and open the CSV file for writing
-    using var sw = new StreamWriter(filePath, false, Encoding.UTF8);
-
-    // Write metadata header
-    await sw.WriteLineAsync($"SonataSmooth Export – {DateTime.Now:yyyy-MM-dd HH:mm}");
-    await sw.WriteLineAsync($"Kernel Radius: {kernelRadius}");
-    if (polyOrder.HasValue)
-        await sw.WriteLineAsync($"Polynomial Order: {polyOrder.Value}");
-    await sw.WriteLineAsync();
-
-    // Write column headers (Index, Original, then each filter)
-    var headers = new List<string> { "Index", "Original" };
-    headers.AddRange(filterResults.Keys);
-    await sw.WriteLineAsync(string.Join(",", headers));
-
-    // Write each row and report progress
-    int n = initialData.Length;
-    for (int i = 0; i < n; i++)
-    {
-        var row = new List<string>
-        {
-            i.ToString(),
-            initialData[i].ToString(CultureInfo.InvariantCulture)
-        };
-
-        foreach (var result in filterResults.Values)
-            row.Add(result[i].ToString(CultureInfo.InvariantCulture));
-
-        await sw.WriteLineAsync(string.Join(",", row));
-        progress?.Report((i + 1) * 100 / n);
-    }
-
-    progress?.Report(100);
-}
-```
-```csharp
-private async void btnExportCsv_Click(object sender, EventArgs e)
-{
-    // Build the file path
-    string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-    string filePath = Path.Combine(desktop, "SonataSmooth_Output.csv");
-
-    // Grab the original data from lbInitData
-    double[] originalData = lbInitData.Items
-        .Cast<object>()
-        .Select(item => double.Parse(item.ToString(), CultureInfo.InvariantCulture))
-        .ToArray();
-
-    // Prepare your computed filter results (assume these arrays already exist)
-    var filterResults = new Dictionary<string, double[]>();
-    if (rbtnRect.Checked)    filterResults["Rectangular"]       = rectAvg;
-    if (rbtnAvg.Checked)     filterResults["Binomial"]          = binomAvg;
-    if (rbtnMed.Checked)     filterResults["WeightedMedian"]    = medFiltered;
-    if (rbtnGauss.Checked)   filterResults["Gaussian"]          = gaussFiltered;
-    if (rbtnSG.Checked)      filterResults["SavitzkyGolay"]     = sgFiltered;
-
-    // Read smoothing parameters from the UI
-    int kernelRadius = int.Parse(cbxKernelRadius.Text, CultureInfo.InvariantCulture);
-    int? polyOrder   = rbtnSG.Checked
-                      ? (int?)int.Parse(cbxPolyOrder.Text, CultureInfo.InvariantCulture)
-                      : null;
-
-    // Create a progress reporter to update your ProgressBar (pbMain)
-    var progressReporter = new Progress<int>(percent =>
-    {
-        pbMain.Value = Math.Clamp(percent, pbMain.Minimum, pbMain.Maximum);
-    });
-
-    // Invoke the async CSV exporter
-    await ExportCsvAsync(
-        filePath,
-        originalData,
-        filterResults,
-        kernelRadius,
-        polyOrder,
-        progressReporter
-    );
-
-    // Notify the user
-    MessageBox.Show("CSV export completed:\n" + filePath,
-                    "Export Complete",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+    // 1. Initialize progress bar (pbMain).
+    // 2. Parse UI values: radius (r), polyOrder, derivOrder (if SG), boundaryMode.
+    // 3. Validate with ValidateSmoothingParameters (OperationResult).
+    // 4. Enforce derivative rule (derivOrder ≤ polyOrder if SG).
+    // 5. Compute all enabled filters in one pass:
+    //      var (rect, binomAvg, median, gauss, sg) = ApplySmoothing(...);
+    // 6. Prepare columns list:
+    //      ("Initial Dataset"), plus each enabled filter.
+    // 7. Multi-part writing logic (splits if row threshold exceeded):
+    //      Header layout per part:
+    //          Title
+    //          Part X of Y
+    //          (blank)
+    //          Smoothing Parameters
+    //          Kernel Radius : r
+    //          Kernel Width : (2 * r + 1)
+    //          Boundary Method : {Adaptive|Symmetric|Replicate|Zero Padding}
+    //          [Polynomial Order : polyOrder] (if SG)
+    //          [Derivative Order : derivOrder] (if SG)
+    //          (blank)
+    //          Generated : timestamp
+    //          (blank)
+    //          CSV header row: Initial Dataset, then enabled filter column headers
+    //      Data rows: ONLY numeric values per column (no index)
+    // 8. Progress reported (0 – 100) as rows flush.
+    // 9. Optional auto-open of generated file(s).
+    // CSV export always prompts for a target file via a SaveFileDialog; the base file name is used for all parts when the dataset is split.
 }
 ```
 
 ### 13. Excel Export Functionality
 #### How it works
-When the user selects Excel export and clicks Export, the application :
+When the user selects Excel export and clicks Export, the application :  
 
 -	Reads the initial dataset and all selected smoothing parameters from the UI.
 -	Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay) in parallel.
 -	Writes each filter result to a separate column in a new Excel worksheet.
--	Embeds metadata at the top of the sheet : dataset title, kernel radius, kernel width, polynomial order, and timestamp.
+-   Embeds metadata at the top of the sheet : dataset title, kernel radius, kernel width, boundary method, and polynomial / derivative (for SG).
 -	Sets musical-themed document properties (Title, Category, Author, Keywords, Subject, Comments) for the exported file.
 -	Automatically generates a line chart visualizing all filter results.
 -	Handles large datasets by splitting across multiple columns if needed.
--	Cleans up all COM objects and forces garbage collection to prevent lingering Excel processes.
+-	Cleans up all COM objects and forces garbage collection to prevent lingering Excel processes.  
+  
+All enabled filter outputs are computed in a single ApplySmoothing pass (no per-filter recomputation), then written to the file / worksheet.
+
+Additional details:
+- Worksheet name is set to the dataset title (txtDatasetTitle.Text).
+- Line chart axes are titled "Value" (Y) and "Sequence Number" (X) for clearer interpretation.
+- Excel export opens an interactive Excel instance with the new workbook; the application does not auto‑save a .xlsx file. Save the workbook from Excel when ready.
 
 #### Principle
 -	**Parallel Filtering** : All smoothing algorithms are applied in parallel for speed and consistency.
@@ -1185,76 +1595,161 @@ When the user selects Excel export and clicks Export, the application :
 -	**Musical Metadata** : Excel document properties and comments are dynamically set with musical phrases and filter info for a unique, playful touch.
 -	**Chart Generation** : A line chart is automatically created to compare all filter outputs visually.
 -	**Robust COM Cleanup** : All Excel interop objects are released and garbage collected to avoid memory leaks.
-
+-   **Metadata Rows** : A1 Title, A3 label, A4 Radius, A5 Width, A6 Boundary, A7 Polynomial (or N/A), A8 Derivative (or N/A). (Note : The "Generated" timestamp row is written in CSV export; it is not written as a worksheet row in Excel export.)
+-   **Excel Built-in Document Properties set** : Title, Category, Author, Last Author, Keywords, Subject, Comments (random musical phrase + quartet Easter egg when exactly four methods are enabled).
+    
 #### Code Implemenation
+(Note : The code sample omits the BuiltinDocumentProperties musical metadata and Easter egg block for brevity; runtime sets Title, Category, Author, Subject, Keywords, Comments with randomized phrases and quartet unlock message when exactly four methods are enabled.)
 ```csharp
-public async Task ExportExcelAsync(
-    string filePath,
-    double[] initialData,
-    IDictionary<string, double[]> filterResults,
-    int kernelRadius,
-    int? polyOrder)
+private async void ExportExcelAsync()
 {
-    await Task.Run(() =>
+    // Parse UI
+    int r = int.TryParse(cbxKernelRadius.Text, out var rr) ? rr : 2;
+    int polyOrder = int.TryParse(cbxPolyOrder.Text, out var po) ? po : 2;
+    int derivOrder = (cbxDerivOrder != null && int.TryParse(cbxDerivOrder.Text, out var d)) ? d : 0;
+    var boundaryMode = GetBoundaryMode();
+
+    bool doRect = settingsForm.chbRect.Checked;
+    bool doAvg = settingsForm.chbAvg.Checked;
+    bool doMed = settingsForm.chbMed.Checked;
+    bool doGauss = settingsForm.chbGauss.Checked;
+    bool doSG = settingsForm.chbSG.Checked;
+
+    var initialData = lbInitData.Items
+        .Cast<object>()
+        .Select(x => double.TryParse(x?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var v) ? v : 0.0)
+        .ToArray();
+
+    // Validate
+    var vr = ValidateSmoothingParameters(initialData.Length, r, polyOrder);
+    if (!vr.Success)
     {
-        // Start Excel in background
-        var excelApp = new Excel.Application { Visible = false };
-        var wb = excelApp.Workbooks.Add();
-        var ws = (Excel.Worksheet)wb.Worksheets[1];
-        ws.Name = "SonataSmooth";
+        ShowError("Export Parameter Error", vr.Error);
+        return;
+    }
 
-        // Write metadata cells
-        ws.Cells[1, 1] = "SonataSmooth Export";
-        ws.Cells[2, 1] = $"Generated: {DateTime.Now:G}";
-        ws.Cells[3, 1] = $"Kernel Radius: {kernelRadius}";
-        if (polyOrder.HasValue)
-            ws.Cells[4, 1] = $"Polynomial Order: {polyOrder.Value}";
+    if (doSG && derivOrder > polyOrder)
+    {
+        ShowError("Export Parameter Error", "Derivative order must be ≤ polynomial order.");
+        return;
+    }
 
-        // Write headers in row 6
-        var headers = new List<string> { "Index", "Original" };
-        headers.AddRange(filterResults.Keys);
-        for (int c = 0; c < headers.Count; c++)
-            ws.Cells[6, c + 1] = headers[c];
+    // Compute filters
+    var (rect, binomAvg, median, gauss, sg) =
+        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
 
-        // Write data starting at row 7
-        int n = initialData.Length;
-        for (int i = 0; i < n; i++)
+    // Start Excel
+    Excel.Application excel = null;
+    Excel.Workbook wb = null;
+    Excel.Worksheet ws = null;
+    var comStack = new Stack<object>();
+
+    try
+    {
+        excel = new Excel.Application();
+        comStack.Push(excel);
+
+        wb = excel.Workbooks.Add();
+        comStack.Push(wb);
+
+        ws = (Excel.Worksheet)wb.Worksheets[1];
+        comStack.Push(ws);
+
+        // Metadata
+        ws.Cells[1, 1] = txtDatasetTitle.Text;
+        ws.Cells[3, 1] = "Smoothing Parameters";
+        ws.Cells[4, 1] = $"Kernel Radius : {r}";
+        ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
+        ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
+        ws.Cells[7, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
+        ws.Cells[8, 1] = doSG ? $"Derivative Order : {derivOrder}" : "Derivative Order : N/A";
+
+        // Sections (C column base)
+        int col = 3;
+
+        async Task WriteSection(string title, double[] data, bool enabled)
         {
-            ws.Cells[7 + i, 1] = i;
-            ws.Cells[7 + i, 2] = initialData[i];
-            int col = 3;
-            foreach (var result in filterResults.Values)
-                ws.Cells[7 + i, col++] = result[i];
+            if (!enabled) return;
+
+            ws.Cells[3, col] = title;
+            for (int i = 0; i < data.Length; i++)
+                ws.Cells[4 + i, col] = data[i];
+
+            col += 2;
+            await Task.Yield();
         }
 
-        // Add a line chart under data
-        var chartObj = (Excel.ChartObject)ws.ChartObjects(Type.Missing).Add(
-            Left: 300, Top: 10, Width: 600, Height: 300);
+        await WriteSection("Initial Dataset", initialData, true);
+        await WriteSection("Rectangular Averaging", rect, doRect);
+        await WriteSection("Binomial Averaging", binomAvg, doAvg);
+        await WriteSection("Binomial Median Filtering", median, doMed);
+        await WriteSection("Gaussian Filtering", gauss, doGauss);
+        await WriteSection("Savitzky-Golay Filtering", sg, doSG);
+
+        // Chart (simplified)
+        var charts = (Excel.ChartObjects)ws.ChartObjects();
+        comStack.Push(charts);
+
+        var chartObj = charts.Add(ws.Cells[3, col + 1].Left, ws.Cells[3, col + 1].Top, 900, 600);
+        comStack.Push(chartObj);
+
         var chart = chartObj.Chart;
+        comStack.Push(chart);
+
         chart.ChartType = Excel.XlChartType.xlLine;
-        var startCell = ws.Cells[6, 1];
-        var endCell = ws.Cells[6 + n, headers.Count];
-        chart.SetSourceData(ws.Range[startCell, endCell]);
         chart.HasTitle = true;
-        chart.ChartTitle.Text = "Filter Comparison";
+        chart.ChartTitle.Text = txtDatasetTitle.Text;
 
-        // Save, close and quit
-        wb.SaveAs(filePath);
-        wb.Close();
-        excelApp.Quit();
-
-        // Release all COM objects to avoid Excel hanging
-        Marshal.ReleaseComObject(chart);
-        Marshal.ReleaseComObject(chartObj);
-        Marshal.ReleaseComObject(ws);
-        Marshal.ReleaseComObject(wb);
-        Marshal.ReleaseComObject(excelApp);
+        // (Series union logic omitted for brevity)
+        excel.Visible = true;
+    }
+    catch (Exception ex)
+    {
+        ShowError("Export Error", ex.Message);
+    }
+    finally
+    {
+        while (comStack.Count > 0)
+        {
+            var o = comStack.Pop();
+            try
+            {
+                if (o != null && System.Runtime.InteropServices.Marshal.IsComObject(o))
+                    System.Runtime.InteropServices.Marshal.FinalReleaseComObject(o);
+            }
+            catch
+            {
+            }
+        }
 
         GC.Collect();
         GC.WaitForPendingFinalizers();
-    });
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
 }
 ```
+
+#### Export Metadata Enhancements
+Both CSV and Excel exports now include :  
+  
+- Kernel Radius and computed Kernel Width
+- Polynomial Order (if SG selected)
+- Derivative Order (if SG selected)
+- Boundary Method (reflects selected mode, including Adaptive)
+- Timestamp  
+  
+Excel additionally embeds musical-themed properties and (if four methods selected) the hidden "Quartet" comment.
+
+##### Excel Interop Error Handling
+Specific exception handling paths:  
+  
+- COMException: Excel not installed / interop failure → guidance dialog.
+- ArgumentException / InvalidCastException : malformed property assignments.
+- UnauthorizedAccessException : insufficient file or registry permission.
+- PathTooLongException, DirectoryNotFoundException, IOException, OutOfMemoryException, BadImageFormatException : environment and file-system issues.
+  
+All COM RCWs are released via FinalRelease and followed by dual GC cycles to prevent orphaned Excel processes.
 
 ### Implementation Details
 #### Input Handling
@@ -1267,18 +1762,21 @@ public async Task ExportExcelAsync(
 When the user clicks **Calibrate** Button :
 - All input values are converted to a double[] array.
 - Kernel radius and polynomial order are parsed from combo-boxes.
-- The selected filter is applied using parallel processing (PLINQ).
+- The selected filter is applied via Parallel.For (falls back to serial for small datasets).
 - Results are added to the output list box in batches, with progress feedback.
+- ProgressBar (`pbMain`) is reused across smoothing and export operations (0 – 100), reset to 0 after completion or cancellation.
+- If no items exist in the Initial Dataset, calibration / export handlers exit immediately after resetting progress.
+- During calibration the following controls are temporarily disabled and restored afterward: btnCalibrate, btnInitClear, btnInitEdit, btnInitPaste, btnInitDelete, btnInitSelectAll, btnInitSelectSync, btnRefClear, btnRefSelectSync, btnRefSelectAll.
 
 #### Filter Algorithm Implementation
 - **Rectangular Mean** : Computes the average of values within a fixed-size window.
 - **Weighted Median** : Uses binomial coefficients as weights to compute a robust median.
 - **Binomial Average** : Applies Pascal's triangle coefficients for a Gaussian-like smoothing.
 - **Savitzky-Golay** : Constructs a Vandermonde matrix and performs least-squares polynomial fitting.
-- **Gaussian Filter** : Generates a normalized Gaussian kernel and applies it with mirrored boundary handling.
+- **Gaussian Filter** : Generates a normalized Gaussian kernel and applies it honoring the selected Boundary Mode (Adaptive recomputes σ with the truncated window).
 
 #### Parallel Processing & UI Responsiveness
-- All filtering operations are executed using `ParallelEnumerable` or `Parallel.For` to utilize all CPU cores.
+- All filtering operations are executed using `Parallel.For` to utilize all CPU cores. PLINQ is used only during input parsing (clipboard / drag‑drop), not in the smoothing pass.
 - `Progress<T>` is used to update the UI progress bar in real-time.
 - `BeginUpdate` / `EndUpdate` prevent flickering during listbox updates.
 - `Task.Yield()` ensures the UI thread remains responsive during long operations.
@@ -1306,7 +1804,7 @@ When the user clicks **Calibrate** Button :
 -	Automatically parses and validates numeric data, removing non-numeric content (e.g., HTML tags).
 -	Stores data as high-precision double values for accurate processing.
 -	Implements multiple noise reduction algorithms: Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters.
--	Utilizes parallel processing (PLINQ) for efficient computation on large datasets.
+-   Utilizes Parallel.For for smoothing (and PLINQ only for parsing large text inputs).
 -	Calculates binomial coefficients using Pascal's Triangle for weighted filters.
 -	Displays processed results in a separate output list for further use.
 
@@ -1333,7 +1831,7 @@ In particular :
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
 - Savitzky-Golay smoothing fits a local low-order polynomial via least-squares, preserving peaks and higher-order signal characteristics while reducing noise.
 
-Beyond the choice of filter, the implementation harnesses parallel processing (PLINQ) to maximize CPU utilization without blocking the UI, incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel radius and polynomial order give users fine-grained control over the degree and nature of smoothing.
+Beyond the choice of filter, the implementation harnesses Parallel.For for smoothing (and PLINQ only for large-text parsing), and incremental batch updates with a progress reporter keep the application responsive even on large datasets. The adjustable kernel radius and polynomial order give users fine-grained control over the degree and nature of smoothing.
 
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
