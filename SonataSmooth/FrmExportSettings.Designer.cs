@@ -68,7 +68,7 @@
             this.chbRect.Location = new System.Drawing.Point(6, 46);
             this.chbRect.Name = "chbRect";
             this.chbRect.Size = new System.Drawing.Size(163, 30);
-            this.chbRect.TabIndex = 1;
+            this.chbRect.TabIndex = 2;
             this.chbRect.Text = "Rectangular Averaging";
             this.chbRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbRect.UseVisualStyleBackColor = true;
@@ -84,7 +84,7 @@
             this.chbAvg.Location = new System.Drawing.Point(175, 46);
             this.chbAvg.Name = "chbAvg";
             this.chbAvg.Size = new System.Drawing.Size(163, 30);
-            this.chbAvg.TabIndex = 2;
+            this.chbAvg.TabIndex = 3;
             this.chbAvg.Text = "Binomial Averaging";
             this.chbAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbAvg.UseVisualStyleBackColor = true;
@@ -100,7 +100,7 @@
             this.chbMed.Location = new System.Drawing.Point(7, 80);
             this.chbMed.Name = "chbMed";
             this.chbMed.Size = new System.Drawing.Size(331, 30);
-            this.chbMed.TabIndex = 3;
+            this.chbMed.TabIndex = 4;
             this.chbMed.Text = "Binomial Median Filtering";
             this.chbMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbMed.UseVisualStyleBackColor = true;
@@ -116,7 +116,7 @@
             this.chbGauss.Location = new System.Drawing.Point(7, 114);
             this.chbGauss.Name = "chbGauss";
             this.chbGauss.Size = new System.Drawing.Size(163, 30);
-            this.chbGauss.TabIndex = 4;
+            this.chbGauss.TabIndex = 5;
             this.chbGauss.Text = "Gaussian Filtering";
             this.chbGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbGauss.UseVisualStyleBackColor = true;
@@ -132,7 +132,7 @@
             this.chbSG.Location = new System.Drawing.Point(175, 114);
             this.chbSG.Name = "chbSG";
             this.chbSG.Size = new System.Drawing.Size(163, 30);
-            this.chbSG.TabIndex = 5;
+            this.chbSG.TabIndex = 6;
             this.chbSG.Text = "Savitzky-Golay Filtering";
             this.chbSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbSG.UseVisualStyleBackColor = true;
@@ -154,7 +154,7 @@
             this.gbSmoothParams.Location = new System.Drawing.Point(372, 48);
             this.gbSmoothParams.Name = "gbSmoothParams";
             this.gbSmoothParams.Size = new System.Drawing.Size(344, 173);
-            this.gbSmoothParams.TabIndex = 23;
+            this.gbSmoothParams.TabIndex = 7;
             this.gbSmoothParams.TabStop = false;
             this.gbSmoothParams.Text = "Smoothing Parameters";
             // 
@@ -190,7 +190,7 @@
             this.cbxDerivOrder.Location = new System.Drawing.Point(223, 130);
             this.cbxDerivOrder.Name = "cbxDerivOrder";
             this.cbxDerivOrder.Size = new System.Drawing.Size(103, 25);
-            this.cbxDerivOrder.TabIndex = 33;
+            this.cbxDerivOrder.TabIndex = 11;
             this.cbxDerivOrder.MouseLeave += new System.EventHandler(this.cbxDerivOrder_MouseLeave);
             this.cbxDerivOrder.MouseHover += new System.EventHandler(this.cbxDerivOrder_MouseHover);
             // 
@@ -210,7 +210,7 @@
             this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 68);
             this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
             this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
-            this.cbxBoundaryMethod.TabIndex = 31;
+            this.cbxBoundaryMethod.TabIndex = 9;
             this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
             this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
             // 
@@ -261,7 +261,7 @@
             this.cbxPolyOrder.Location = new System.Drawing.Point(223, 99);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
-            this.cbxPolyOrder.TabIndex = 29;
+            this.cbxPolyOrder.TabIndex = 10;
             this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
             this.cbxPolyOrder.MouseHover += new System.EventHandler(this.cbxPolyOrder_MouseHover);
             // 
@@ -304,7 +304,7 @@
             this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelRadius.Name = "cbxKernelRadius";
             this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
-            this.cbxKernelRadius.TabIndex = 28;
+            this.cbxKernelRadius.TabIndex = 8;
             this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
             this.cbxKernelRadius.MouseHover += new System.EventHandler(this.cbxKernelRadius_MouseHover);
             // 
@@ -332,7 +332,7 @@
             this.gbSmoothMtd.Location = new System.Drawing.Point(11, 48);
             this.gbSmoothMtd.Name = "gbSmoothMtd";
             this.gbSmoothMtd.Size = new System.Drawing.Size(344, 173);
-            this.gbSmoothMtd.TabIndex = 24;
+            this.gbSmoothMtd.TabIndex = 1;
             this.gbSmoothMtd.TabStop = false;
             this.gbSmoothMtd.Text = "Smoothing Methods";
             // 
@@ -342,7 +342,7 @@
             this.btnCancel.Location = new System.Drawing.Point(654, 318);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 24);
-            this.btnCancel.TabIndex = 12;
+            this.btnCancel.TabIndex = 17;
             this.btnCancel.Text = "";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -355,7 +355,7 @@
             this.btnSave.Location = new System.Drawing.Point(563, 318);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(85, 24);
-            this.btnSave.TabIndex = 11;
+            this.btnSave.TabIndex = 16;
             this.btnSave.Text = "";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -381,7 +381,7 @@
             this.gbExportOpts.Location = new System.Drawing.Point(11, 227);
             this.gbExportOpts.Name = "gbExportOpts";
             this.gbExportOpts.Size = new System.Drawing.Size(705, 85);
-            this.gbExportOpts.TabIndex = 32;
+            this.gbExportOpts.TabIndex = 12;
             this.gbExportOpts.TabStop = false;
             this.gbExportOpts.Text = "Data Export Options";
             // 
@@ -394,7 +394,7 @@
             this.chbOpenFile.Location = new System.Drawing.Point(208, 58);
             this.chbOpenFile.Name = "chbOpenFile";
             this.chbOpenFile.Size = new System.Drawing.Size(289, 21);
-            this.chbOpenFile.TabIndex = 10;
+            this.chbOpenFile.TabIndex = 15;
             this.chbOpenFile.Text = "Open the saved file automatically after saving.";
             this.chbOpenFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbOpenFile.UseVisualStyleBackColor = true;
@@ -408,7 +408,8 @@
             this.rbtnCSV.Location = new System.Drawing.Point(385, 21);
             this.rbtnCSV.Name = "rbtnCSV";
             this.rbtnCSV.Size = new System.Drawing.Size(163, 30);
-            this.rbtnCSV.TabIndex = 9;
+            this.rbtnCSV.TabIndex = 14;
+            this.rbtnCSV.TabStop = true;
             this.rbtnCSV.Text = "Export as CSV";
             this.rbtnCSV.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnCSV.UseVisualStyleBackColor = true;
@@ -423,7 +424,7 @@
             this.rbtnXLSX.Location = new System.Drawing.Point(157, 21);
             this.rbtnXLSX.Name = "rbtnXLSX";
             this.rbtnXLSX.Size = new System.Drawing.Size(163, 30);
-            this.rbtnXLSX.TabIndex = 8;
+            this.rbtnXLSX.TabIndex = 13;
             this.rbtnXLSX.TabStop = true;
             this.rbtnXLSX.Text = "Export as XLSX";
             this.rbtnXLSX.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;

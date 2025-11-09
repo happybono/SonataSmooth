@@ -166,7 +166,7 @@
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
             this.btnCalibrate.Size = new System.Drawing.Size(466, 30);
-            this.btnCalibrate.TabIndex = 22;
+            this.btnCalibrate.TabIndex = 24;
             this.btnCalibrate.Text = "";
             this.ttipMain.SetToolTip(this.btnCalibrate, "Start Smoothing");
             this.btnCalibrate.UseVisualStyleBackColor = true;
@@ -378,7 +378,7 @@
             this.btnRefSelectClr.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefSelectClr.Name = "btnRefSelectClr";
             this.btnRefSelectClr.Size = new System.Drawing.Size(30, 30);
-            this.btnRefSelectClr.TabIndex = 28;
+            this.btnRefSelectClr.TabIndex = 29;
             this.btnRefSelectClr.Text = "";
             this.ttipMain.SetToolTip(this.btnRefSelectClr, "Deselect All");
             this.btnRefSelectClr.UseVisualStyleBackColor = true;
@@ -392,7 +392,7 @@
             this.btnRefSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefSelectAll.Name = "btnRefSelectAll";
             this.btnRefSelectAll.Size = new System.Drawing.Size(30, 30);
-            this.btnRefSelectAll.TabIndex = 27;
+            this.btnRefSelectAll.TabIndex = 28;
             this.btnRefSelectAll.Text = "";
             this.ttipMain.SetToolTip(this.btnRefSelectAll, "Select All");
             this.btnRefSelectAll.UseVisualStyleBackColor = true;
@@ -407,7 +407,7 @@
             this.btnRefCopy.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefCopy.Name = "btnRefCopy";
             this.btnRefCopy.Size = new System.Drawing.Size(30, 30);
-            this.btnRefCopy.TabIndex = 26;
+            this.btnRefCopy.TabIndex = 27;
             this.btnRefCopy.Text = "";
             this.ttipMain.SetToolTip(this.btnRefCopy, "Copy");
             this.btnRefCopy.UseVisualStyleBackColor = true;
@@ -422,7 +422,7 @@
             this.btnRefClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefClear.Name = "btnRefClear";
             this.btnRefClear.Size = new System.Drawing.Size(30, 30);
-            this.btnRefClear.TabIndex = 25;
+            this.btnRefClear.TabIndex = 26;
             this.btnRefClear.Text = "";
             this.ttipMain.SetToolTip(this.btnRefClear, "Clear");
             this.btnRefClear.UseVisualStyleBackColor = true;
@@ -464,7 +464,7 @@
             this.cbxPolyOrder.Location = new System.Drawing.Point(223, 91);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
             this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
-            this.cbxPolyOrder.TabIndex = 21;
+            this.cbxPolyOrder.TabIndex = 22;
             this.cbxPolyOrder.SelectedIndexChanged += new System.EventHandler(this.cbxPolyOrder_SelectedIndexChanged);
             this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
             this.cbxPolyOrder.MouseHover += new System.EventHandler(this.cbxPolyOrder_MouseHover);
@@ -575,7 +575,7 @@
             this.btnRefSelectSync.Location = new System.Drawing.Point(306, 167);
             this.btnRefSelectSync.Name = "btnRefSelectSync";
             this.btnRefSelectSync.Size = new System.Drawing.Size(30, 30);
-            this.btnRefSelectSync.TabIndex = 29;
+            this.btnRefSelectSync.TabIndex = 30;
             this.btnRefSelectSync.Text = "";
             this.ttipMain.SetToolTip(this.btnRefSelectSync, "Match Selection \r\n( ◀ Initial Dataset )");
             this.btnRefSelectSync.UseVisualStyleBackColor = true;
@@ -674,7 +674,7 @@
             this.cbxDerivOrder.Location = new System.Drawing.Point(223, 122);
             this.cbxDerivOrder.Name = "cbxDerivOrder";
             this.cbxDerivOrder.Size = new System.Drawing.Size(103, 25);
-            this.cbxDerivOrder.TabIndex = 25;
+            this.cbxDerivOrder.TabIndex = 23;
             this.cbxDerivOrder.MouseLeave += new System.EventHandler(this.cbxDerivOrder_MouseLeave);
             this.cbxDerivOrder.MouseHover += new System.EventHandler(this.cbxDerivOrder_MouseHover);
             // 
@@ -694,7 +694,7 @@
             this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 60);
             this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
             this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
-            this.cbxBoundaryMethod.TabIndex = 23;
+            this.cbxBoundaryMethod.TabIndex = 21;
             this.cbxBoundaryMethod.SelectedIndexChanged += new System.EventHandler(this.cbxBoundaryMethod_SelectedIndexChanged);
             this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
             this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
@@ -717,7 +717,7 @@
             this.btnExportSettings.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportSettings.Name = "btnExportSettings";
             this.btnExportSettings.Size = new System.Drawing.Size(30, 30);
-            this.btnExportSettings.TabIndex = 31;
+            this.btnExportSettings.TabIndex = 32;
             this.btnExportSettings.Text = "";
             this.ttipMain.SetToolTip(this.btnExportSettings, "Export Settings");
             this.btnExportSettings.UseVisualStyleBackColor = true;
@@ -731,7 +731,7 @@
             this.btnExport.Location = new System.Drawing.Point(486, 807);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(234, 30);
-            this.btnExport.TabIndex = 32;
+            this.btnExport.TabIndex = 25;
             this.btnExport.Text = "";
             this.ttipMain.SetToolTip(this.btnExport, "Export");
             this.btnExport.UseVisualStyleBackColor = true;
@@ -760,7 +760,7 @@
             this.txtDatasetTitle.Location = new System.Drawing.Point(385, 16);
             this.txtDatasetTitle.Name = "txtDatasetTitle";
             this.txtDatasetTitle.Size = new System.Drawing.Size(265, 25);
-            this.txtDatasetTitle.TabIndex = 30;
+            this.txtDatasetTitle.TabIndex = 31;
             this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtDatasetTitle_TextChanged);
             this.txtDatasetTitle.Enter += new System.EventHandler(this.txtDatasetTitle_Enter);
