@@ -230,11 +230,15 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 > Added support for `Adaptive` mode in Boundary Handling Method configuration.<br><br>
 > `Derivative order` control is now available exclusively for the `Savitzky–Golay` smoothing method.<br><br>
 > Minor bug fixes, performance improvements, and user interface enhancements.
-</details>
 
 ### v5.0.1.0
 #### November 09, 2025
 > Revised and updated `README.md` documentation.<br><br>
+> Minor bugs fixed.
+</details>
+
+### v5.0.2.0
+#### November 10, 2025
 > Minor bugs fixed.
 
 ## Required Components & Setup
