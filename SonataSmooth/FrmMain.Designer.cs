@@ -453,6 +453,7 @@
             this.cbxPolyOrder.IntegralHeight = false;
             this.cbxPolyOrder.ItemHeight = 17;
             this.cbxPolyOrder.Items.AddRange(new object[] {
+            "1",
             "2",
             "3",
             "4",
