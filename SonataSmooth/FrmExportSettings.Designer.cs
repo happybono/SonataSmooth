@@ -186,12 +186,7 @@
             "2",
             "3",
             "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10"});
+            "5"});
             this.cbxDerivOrder.Location = new System.Drawing.Point(223, 130);
             this.cbxDerivOrder.Name = "cbxDerivOrder";
             this.cbxDerivOrder.Size = new System.Drawing.Size(103, 25);
@@ -253,6 +248,7 @@
             this.cbxPolyOrder.IntegralHeight = false;
             this.cbxPolyOrder.ItemHeight = 17;
             this.cbxPolyOrder.Items.AddRange(new object[] {
+            "1",
             "2",
             "3",
             "4",
