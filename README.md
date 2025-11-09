@@ -235,7 +235,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v5.0.1.0
 #### November 09, 2025
-> Revised and updated `README.md` documentation.
+> Revised and updated `README.md` documentation.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
