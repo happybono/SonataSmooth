@@ -188,7 +188,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ### v4.7.0.0
 #### August 27, 2025
-> Enhanced `InvertMatrix` by adding partial pivoting and a dynamic, scale-based tolerance to safeguard Gauss–Jordan inversion against division-by-zero and severe rounding errors.<br><br>
+> Enhanced `InvertMatrix` by adding partial pivoting and a dynamic, scale-based tolerance to safeguard Gauss-Jordan inversion against division-by-zero and severe rounding errors.<br><br>
 > Refined singular-matrix handling to detect sub-threshold pivots (using `maxRow × 1e - 12` vs. `Double.Epsilon`) and emit a controlled zero matrix or exception instead of propagating NaN / ∞.<br><br>
 > Retained mirror-padding in Savitzky-Golay filtering, ensuring exact central coefficients and smooth, distortion-free continuity at both ends.<br><br>
 > Refactored inversion routine for clarity : consolidated row-swap, pivot selection, scale calculation, and error handling into a single coherent block, removing hard-coded thresholds.<br><br>
@@ -228,7 +228,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 ### v5.0.0.0
 #### November 07, 2025
 > Added support for `Adaptive` mode in Boundary Handling Method configuration.<br><br>
-> `Derivative order` control is now available exclusively for the `Savitzky–Golay` smoothing method.<br><br>
+> `Derivative order` control is now available exclusively for the `Savitzky-Golay` smoothing method.<br><br>
 > Minor bug fixes, performance improvements, and user interface enhancements.
 
 ### v5.0.1.0
@@ -265,7 +265,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 The export title (Excel sheet name & metadata) is validated:
 - Max length : 31 characters
 - Disallowed characters : `: \ / ? * [ ]` and all OS-invalid filename characters
-- Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 – COM9, LPT1 – LPT9)
+- Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 - COM9, LPT1 - LPT9)
 
 Invalid input reverts to the placeholder and shows a warning dialog.
 The placeholder text "Click here to enter a title for your dataset." is restored whenever validation fails or the field is cleared.
@@ -303,7 +303,7 @@ Export Enablement Rules:
 - **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder`, `tlblBoundaryMethod`, `slblBoundaryMethod`, `slblDesc`, `tlblSeparator1`, `tlblSeparator2`, `tlblSeparator3`, `tlblSeparator4`
 - **Other Controls** : All controls use clear, descriptive names matching their function in the codebase.
 
-Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder` are only shown when Savitzky–Golay is active.
+Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder` are only shown when Savitzky-Golay is active.
 
 ## Noise Filter Comparison
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
@@ -453,7 +453,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 }
 ```
 
-Non‑Adaptive paths (Rect / Avg / Median / Gauss / SG) fetch samples via a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. In Adaptive mode, filters that shrink the window (Rect / Avg / Median / Gauss) access only in‑range samples directly, and Savitzky–Golay shifts an asymmetric window; both avoid padding and match the intended edge semantics. `WeightedMedianAt`'s non‑Adaptive path also uses the accessor for consistency.  
+Non‑Adaptive paths (Rect / Avg / Median / Gauss / SG) fetch samples via a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. In Adaptive mode, filters that shrink the window (Rect / Avg / Median / Gauss) access only in‑range samples directly, and Savitzky-Golay shifts an asymmetric window; both avoid padding and match the intended edge semantics. `WeightedMedianAt`'s non‑Adaptive path also uses the accessor for consistency.  
   
 Note : `GetIndex` remains only for compatibility; current code paths either use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
@@ -465,7 +465,7 @@ Note : `GetIndex` remains only for compatibility; current code paths either use 
 Auto-switching behavior :
 - Rectangular (when selected) → Boundary Method automatically set to Replicate
 - Binomial Average / Weighted Median / Gaussian (when selected) → Boundary Method automatically set to Symmetric
-- Savitzky–Golay (when selected) → Boundary Method automatically set to Adaptive
+- Savitzky-Golay (when selected) → Boundary Method automatically set to Adaptive
 
 ### Adaptive Mode
 Adaptive handling executes distinct logic per filter :
@@ -473,9 +473,9 @@ Adaptive handling executes distinct logic per filter :
 - Binomial Average : Recomputes a fresh binomial coefficient row for the truncated W (NOT a slice of the full 2r + 1 row) ensuring proper central weighting.
 - Weighted Median : Uses a recomputed binomial coefficient vector for truncated W, then performs weighted median over strictly in-range values.
 - Gaussian : Recomputes a Gaussian kernel of length W with σ = W / 6.0 and normalizes; avoids distortion from padding.
-- Savitzky–Golay (Smoothing or Derivative) : Attempts to retain full intended window size (2r + 1) by shifting window left / right when near boundaries. If the dataset cannot supply full support, effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Asymmetric coefficients are generated via least‑squares on the shifted grid (left / right adjusted so i + right ≤ n − 1) and cached for performance. 
+- Savitzky-Golay (Smoothing or Derivative) : Attempts to retain full intended window size (2r + 1) by shifting window left / right when near boundaries. If the dataset cannot supply full support, effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Asymmetric coefficients are generated via least‑squares on the shifted grid (left / right adjusted so i + right ≤ n − 1) and cached for performance. 
 
-When the Savitzky–Golay method is selected (radio button checked), the boundary method is automatically switched to Adaptive to enable asymmetric window logic and derivative edge stability.
+When the Savitzky-Golay method is selected (radio button checked), the boundary method is automatically switched to Adaptive to enable asymmetric window logic and derivative edge stability.
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
@@ -542,7 +542,7 @@ This means the filter will fit a 2nd-degree polynomial (a parabola) across each 
 - Constraint : `derivOrder ≤ polyOrder`
 - Effective clamp (Adaptive edges) : `effPoly = min(polyOrder, W - 1)`; runtime validation enforces `derivOrder ≤ effPoly`.
 - Scaling : coefficients multiplied by `factorial(derivOrder) / delta^derivOrder` (delta = 1.0).
-- Recommended range : 0 – 3 (higher orders amplify noise sharply).
+- Recommended range : 0 - 3 (higher orders amplify noise sharply).
 
 Typical uses:
 - 0 : Smoothing (baseline SG)
@@ -1064,7 +1064,7 @@ else if (useMed)
 }
 ```
 
-#### Weighted Median – Adaptive Note
+#### Weighted Median - Adaptive Note
 Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples - removing edge padding bias.
 (Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the truncated‑recompute strategy documented above.)
 
@@ -1098,7 +1098,7 @@ else if (useAvg)
 }
 ```
 
-#### Binomial (Weighted) Average – Adaptive Note
+#### Binomial (Weighted) Average - Adaptive Note
 In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of length W is computed (`CalcBinomialCoefficients(W)`), ensuring correct symmetric weighting rather than truncating the full-length coefficients.
 
 ### 6. Gaussian Filter
@@ -1128,7 +1128,7 @@ if (useGauss)
 }
 ```
 
-#### Gaussian Filter – Adaptive Note
+#### Gaussian Filter - Adaptive Note
 Adaptive recomputes a Gaussian kernel of length W with σ = W / 6.0. This keeps relative spread consistent across varying window sizes and avoids artificial flattening.
 Sigma recomputation uses σ = W / 6.0 (same formula used initially for full symmetric kernels), keeping relative spread consistent.
 
@@ -1172,7 +1172,7 @@ else if (useSG)
 Note : This snippet shows the non‑Adaptive, smoothing‑only path. Runtime uses the derivative‑capable overload and switches to asymmetric coefficients near edges when Adaptive is selected.
 
 #### Derivative Order (`derivOrder`)
-Used only when Savitzky–Golay is selected.
+Used only when Savitzky-Golay is selected.
 
 | Value | Meaning | Typical Use |
 |-------|---------|-------------|
@@ -1249,7 +1249,7 @@ Behavior :
 Status label displays a synchronized item count message.
 
 #### 8.2 Progressive Selection & Deselect Feedback
-- Select All : updates `pbMain` from 0% – 100% using dynamic intervals
+- Select All : updates `pbMain` from 0% - 100% using dynamic intervals
   - Report interval : `reportInterval = max(1, count / 100)`
   - UI yield interval : `yieldInterval = max(1, count / 1000)` with `await Task.Yield()`
   - Cancelable : a new Select All starts cancels the previous via `_ctsInitSelectAll` / `_ctsRefSelectAll`
@@ -1566,7 +1566,7 @@ private async Task ExportCsvAsync()
     //          (blank)
     //          CSV header row : Initial Dataset, then enabled filter column headers
     //      Data rows : ONLY numeric values per column (no index)
-    // 8. Progress reported (0 – 100) as rows flush.
+    // 8. Progress reported (0 - 100) as rows flush.
     // 9. Optional auto-open of generated file(s).
     // CSV export always prompts for a target file via a SaveFileDialog; the base file name is used for all parts when the dataset is split.
 }
@@ -1767,7 +1767,7 @@ When the user clicks **Calibrate** Button :
 - Kernel radius and polynomial order are parsed from combo-boxes.
 - The selected filter is applied via Parallel.For (falls back to serial for small datasets).
 - Results are added to the output list box in batches, with progress feedback.
-- ProgressBar (`pbMain`) is reused across smoothing and export operations (0 – 100), reset to 0 after completion or cancellation.
+- ProgressBar (`pbMain`) is reused across smoothing and export operations (0 - 100), reset to 0 after completion or cancellation.
 - If no items exist in the Initial Dataset, calibration / export handlers exit immediately after resetting progress.
 - During calibration the following controls are temporarily disabled and restored afterward : btnCalibrate, btnInitClear, btnInitEdit, btnInitPaste, btnInitDelete, btnInitSelectAll, btnInitSelectSync, btnRefClear, btnRefSelectSync, btnRefSelectAll.
 
