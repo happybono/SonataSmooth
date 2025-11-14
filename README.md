@@ -1844,7 +1844,8 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 ![SonataSmooth_EditEntries](Screenshots/SonataSmooth-EditEntries.png)<br><br>  
 ![SonataSmooth_MatchSelection](Screenshots/SonataSmooth-MatchSelection.png)<br><br>  
 ![SonataSmooth_ExportSettings](Screenshots/SonataSmooth-ExportSettings.png)<br><br>  
-![SonataSmooth_Calibrated Results](Screenshots/PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
+![SonataSmooth_Smoothing Results](Screenshots/PM10_Data_Before_and_After_Smoothing_with_SonataSmooth.png)
+![SonataSmooth_SG_Derivative_Smoothing](Screenshots/PM10_Data_Smoothing_SG_Derivative_with_SonataSmooth.png)
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
