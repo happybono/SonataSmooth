@@ -1839,6 +1839,7 @@ Beyond the choice of filter, the implementation harnesses Parallel.For for smoot
 Together, these design decisions ensure that noisy inputs are transformed into clearer, more consistent signals, empowering downstream analysis, visualization, or automated decision-making with higher confidence in the results.
 
 ## Demonstration
+![SonataSmooth_BinomialMedian](Screenshots/SonataSmooth-BinomialMedian.png)<br><br>
 ![SonataSmooth_Gaussian](Screenshots/SonataSmooth-GaussianFiltering.png)<br><br>  
 ![SonataSmooth SG](Screenshots/SonataSmooth-SGFiltering.png)<br><br>  
 ![SonataSmooth_EditEntries](Screenshots/SonataSmooth-EditEntries.png)<br><br>  
