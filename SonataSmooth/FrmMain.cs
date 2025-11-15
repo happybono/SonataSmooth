@@ -1019,7 +1019,7 @@ namespace SonataSmooth
         }
 
         /// <summary>
-        /// 비대칭 SG 계수 계산: 중심에서 좌측 left, 우측 right 범위 (총 W = left + right + 1) 를 가지는 창에 대해
+        /// 비대칭 SG 계수 계산 : 중심에서 좌측 left, 우측 right 범위 (총 W = left + right + 1) 를 가지는 창에 대해
         /// 0 차 미분 (스무딩) 계수 벡터를 생성. 합은 1 로 정규화. (캐시 사용)
         /// </summary>
         private static double[] ComputeSGCoefficientsAsymmetric(int left, int right, int polyOrder)
@@ -4056,4 +4056,5 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         }
     }
     #endregion
+
 }
