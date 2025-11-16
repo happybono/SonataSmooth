@@ -13,7 +13,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ## Use Cases
 SonataSmooth is specialized for **1D data smoothing and noise reduction**.  
-While limited to single‑dimension datasets, it can be applied across a wide range of domains where sequential numeric signals require preprocessing or refinement:
+While limited to single‑dimension datasets, it can be applied across a wide range of domains where sequential numeric signals require preprocessing or refinement :
 
 - **Machine Learning / Deep Learning Pre-processing**  
   - Clean raw training data by removing spikes, jitter, or irregular noise  
