@@ -9,8 +9,36 @@ SonataSmooth is a compound of "sonata" and "smooth". A sonata is a musical form 
 True to its name, SonataSmooth embodies the philosophy of applying multiple techniques in harmony to process data as smoothly and clearly as a piece of music.
 
 ## Project Overview
-**SonataSmooth** is a C# .NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.<br><br>
+**SonataSmooth** is a C# .NET Windows Forms application for efficient noise reduction and smoothing of numerical datasets. It supports multiple data input methods, including manual entry, clipboard paste, and drag-and-drop, with robust validation and parsing. Users can apply a variety of advanced filtering algorithms such as Rectangular Mean, Weighted Median, Binomial Average, Savitzky-Golay, and Gaussian filters, customizing parameters as needed. The application features a responsive, user-friendly interface with real-time progress feedback and batch editing capabilities. Designed for flexibility and performance.
 
+## Use Cases
+SonataSmooth is specialized for **1D data smoothing and noise reduction**.  
+While limited to single‑dimension datasets, it can be applied across a wide range of domains where sequential numeric signals require preprocessing or refinement:
+
+- **Machine Learning / Deep Learning Pre-processing**  
+  - Clean raw training data by removing spikes, jitter, or irregular noise  
+  - Improve model accuracy by stabilizing time‑series inputs such as sensor readings or financial signals
+
+- **IoT and Sensor Data Processing**  
+  - Smooth noisy sensor outputs (temperature, humidity, vibration, etc.) for reliable monitoring  
+  - Enhance anomaly detection by reducing false positives caused by random fluctuations
+
+- **Financial and Economic Time Series**  
+  - Filter out short‑term volatility in stock prices, currency exchange rates, or transaction volumes  
+  - Prepare stable datasets for forecasting models
+
+- **Scientific and Experimental Measurements**  
+  - Refine laboratory or field data (e.g., spectroscopy, environmental monitoring) to highlight meaningful trends  
+  - Reduce measurement noise without distorting underlying patterns
+
+- **Signal Processing (1D only)**  
+  - Smooth audio waveform amplitudes or other linear signals  
+  - Preserve essential features while reducing background noise
+
+- **Data Visualization & Reporting**  
+  - Generate clearer charts and plots by removing distracting noise  
+  - Provide stakeholders with more interpretable datasets
+<br><br>
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
 <img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
