@@ -38,7 +38,9 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - **Data Visualization & Reporting**  
   - Generate clearer charts and plots by removing distracting noise  
   - Provide stakeholders with more interpretable datasets
+  
 <br><br>
+
 <div align="center">
 <img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
 <img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
