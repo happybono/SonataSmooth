@@ -292,7 +292,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Run the application.
 
 #### Dataset Title Validation
-The export title (Excel sheet name & metadata) is validated:
+The export title (Excel sheet name & metadata) is validated :
 - Max length : 31 characters
 - Disallowed characters : `: \ / ? * [ ]` and all OS-invalid filename characters
 - Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 - COM9, LPT1 - LPT9)
