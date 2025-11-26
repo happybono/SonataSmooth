@@ -273,7 +273,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ## Required Components & Setup
 ### Prerequisites
-- [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481)(target build uses 4.8.1; ARM64-compatible; earlier versions are not tested)
+- [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481) (target build uses 4.8.1; ARM64-compatible; earlier versions are not tested)
 - Windows Operating System (Windows 10 or later recommended)
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
 - Development environment is recommended to use **Visual Studio 2022 or newer**
