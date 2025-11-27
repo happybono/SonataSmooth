@@ -10,6 +10,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -220,6 +221,32 @@ namespace SonataSmooth
             return OperationResult.OK();
         }
 
+        private static double ParseAlpha(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return 1.0;
+
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var a) ||
+                double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out a))
+            {
+                if (a < 0.0) return 0.0;
+                if (a > 1.0) return 1.0;
+                return a;
+            }
+            return 1.0;
+        }
+
+        private double GetAlphaFromCbx()
+        {
+            return ParseAlpha(cbxAlpha?.Text);
+        }
+
+        private void SetAlphaEnabled(bool enabled)
+        {
+            if (lblAlpha != null) lblAlpha.Enabled = enabled;
+            if (cbxAlpha != null) cbxAlpha.Enabled = enabled;
+        }
+
         /// <summary>
         /// "Calibrate" 버튼 클릭 시 호출되는 Event Handler 입니다.
         /// 초기 데이터를 기준으로 선택한 보정 필터를 적용해 각각의 값들을 보정하고, 결과를 Refined Dataset 에 표시합니다.
@@ -230,7 +257,7 @@ namespace SonataSmooth
             BoundaryMode boundaryMode = GetBoundaryMode();
 
             // Export 설정 폼에 현재 Kernel 반경 / 다항식 차수 값 동기화
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text);
 
             // ProgressBar 초기화
             pbMain.Style = ProgressBarStyle.Continuous;
@@ -264,6 +291,8 @@ namespace SonataSmooth
                 if (cbxDerivOrder != null && !int.TryParse(cbxDerivOrder.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out derivOrder))
                     derivOrder = 0;
 
+                double alpha = GetAlphaFromCbx();
+
                 // Parameters 유효성 검증 (윈도우 크기 및 다항식 차수) (실패 시 반환)
                 var validateResult = ValidateSmoothingParameters(lbInitData.Items.Count, r, polyOrder);
                 if (!validateResult.Success)
@@ -296,7 +325,6 @@ namespace SonataSmooth
                     results = await Task.Run(() =>
                     {
                         // 통합 ApplySmoothing 함수 호출
-                        // 다양한 방식을 동시에 계산 가능하지만, UX 상 선택된 하나만 사용
                         var multi = ApplySmoothing(
                             input,
                             r,
@@ -308,7 +336,9 @@ namespace SonataSmooth
                             useAvg,
                             useMed,
                             useGauss,
-                            useSG);
+                            useSG,
+                            alpha // pass alpha from ComboBox
+                        );
 
                         // 선택된 필터 결과만 반환
                         if (useRect) return multi.Rect;
@@ -369,8 +399,8 @@ namespace SonataSmooth
 
                     // 상태 표시줄에 적용된 보정 방식 표시
                     slblCalibratedType.Text = useRect ? "Rectangular Average"
-                                         : useMed ? "Weighted Median"
                                          : useAvg ? "Binomial Average"
+                                         : useMed ? "Binomial Median"
                                          : useSG ? "Savitzky-Golay Filter"
                                          : useGauss ? "Gaussian Filter"
                                                     : "Unknown";
@@ -404,6 +434,18 @@ namespace SonataSmooth
                         case BoundaryMode.ZeroPad: slblBoundaryMethod.Text = "Zero Padding"; break;
                         default: slblBoundaryMethod.Text = "Symmetric"; break;
                     }
+
+                    // Alpha Blend 표시 제어 : Gaussian, Binomial Average, Binomial Median 일 경우에만 표시
+                    bool showAlpha = useGauss || useAvg || useMed;
+                    tlblSeparator5.Visible = showAlpha;
+                    tlblAlphaBlend.Visible = showAlpha;
+                    slblAlphaBlend.Visible = showAlpha; 
+
+                    if (showAlpha)
+                    {
+                        double alphaforStatus = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
+                        slblAlphaBlend.Text = alphaforStatus.ToString("0.00", CultureInfo.InvariantCulture);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -436,10 +478,42 @@ namespace SonataSmooth
             pbMain.Value = 0;
         }
 
+        private static double ParseAlphaOrDefault(string text, double @default = 1.0)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return @default;
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var d))
+            {
+                if (d < 0.0) return 0.0;
+                if (d > 1.0) return 1.0;
+                return d;
+            }
+            // fallback to current culture if needed
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var d2))
+            {
+                if (d2 < 0.0) return 0.0;
+                if (d2 > 1.0) return 1.0;
+                return d2;
+            }
+            return @default;
+        }
+
+        private void UpdateAlphaEnablement()
+        {
+            bool alphaRelevant = rbtnAvg.Checked || rbtnMed.Checked || rbtnGauss.Checked;
+            lblAlpha.Enabled = alphaRelevant;
+            cbxAlpha.Enabled = alphaRelevant;
+
+            if (cbxAlpha.Enabled && string.IsNullOrWhiteSpace(cbxAlpha.Text))
+            {
+                cbxAlpha.Text = "1.00";
+            }
+        }
+
         // 입력된 데이터에 대해 다양한 보정 방식 (Smoothing Filter) 을 적용하는 메서드.
+        // Added alpha parameter (default 1.0). For Binomial Average, Weighted Median, Gaussian:
+        // Output[i] = alpha * Filtered[i] + (1 - alpha) * Original[i].
         private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
-           ApplySmoothing(double[] input, int r, int polyOrder, int derivOrder, double delta, BoundaryMode boundaryMode,
-                          bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG)
+        ApplySmoothing(double[] input, int r, int polyOrder, int derivOrder, double delta, BoundaryMode boundaryMode, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG, double alpha = 1.0)
         {
             var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
             if (!vr.Success)
@@ -473,7 +547,7 @@ namespace SonataSmooth
             var gauss = new double[n];
             var sg = new double[n];
 
-            // Rectangular, Binomial Average 의 나누기 / 합계 값 미리 계산
+            // 평균 계산을 위한 값 사전 계산
             double invRectDiv = (doRect && windowSize > 0) ? 1.0 / windowSize : 0.0;
             double binomSum = 0.0;
             if (doAvg && binom != null)
@@ -483,7 +557,11 @@ namespace SonataSmooth
 
             double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
-            // Adaptive mode : Rect / Binom / Median / Gauss 는 경계에서 창을 축소하여 in-range 만 사용.
+            // alpha 는 한 번만 제한 (Clamp)
+            double a = alpha;
+            if (a < 0.0) a = 0.0;
+            else if (a > 1.0) a = 1.0;
+
             void GetAdaptiveWindow(int center, out int left, out int right, out int start)
             {
                 left = Math.Min(r, center);
@@ -491,12 +569,11 @@ namespace SonataSmooth
                 start = center - left;
             }
 
-            // 데이터가 적을 경우 병렬 처리 OverHead 가 더 크므로 직렬로 실행
             bool useParallel = n >= 2000;
 
             Action<int> smoothingAction = i =>
             {
-                // Rectangular
+                // Rectangular (Blending 없음)
                 if (doRect)
                 {
                     if (boundaryMode == BoundaryMode.Adaptive)
@@ -517,14 +594,15 @@ namespace SonataSmooth
                     }
                 }
 
-                // Binomial Average
+                // Binomial Average (Blending 포함)
                 if (doAvg && binom != null)
                 {
+                    double filtered;
                     if (boundaryMode == BoundaryMode.Adaptive)
                     {
                         GetAdaptiveWindow(i, out int left, out int right, out int start);
                         int W = left + right + 1;
-                        if (W < 1) { binomAvg[i] = 0.0; }
+                        if (W < 1) { filtered = 0.0; }
                         else
                         {
                             long[] localBinom = CalcBinomialCoefficients(W);
@@ -533,7 +611,7 @@ namespace SonataSmooth
                             double sum = 0.0;
                             for (int pos = 0; pos < W; pos++)
                                 sum += input[start + pos] * localBinom[pos];
-                            binomAvg[i] = localSum > 0 ? sum / localSum : 0.0;
+                            filtered = localSum > 0 ? sum / localSum : 0.0;
                         }
                     }
                     else
@@ -541,49 +619,52 @@ namespace SonataSmooth
                         double sum = 0.0;
                         for (int k = -r; k <= r; k++)
                             sum += Sample(i + k) * binom[k + r];
-                        binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+                        filtered = binomSum > 0 ? sum / binomSum : 0.0;
                     }
+                    binomAvg[i] = a * filtered + (1.0 - a) * input[i];
                 }
 
-                // Weighted Median
+                // Binomial Median (Blending 포함)
                 if (doMed && binom != null)
                 {
+                    double filtered;
                     if (boundaryMode == BoundaryMode.Adaptive)
                     {
                         GetAdaptiveWindow(i, out int left, out int right, out int start);
                         int W = left + right + 1;
-                        if (W < 1) { median[i] = 0.0; }
+                        if (W < 1) { filtered = 0.0; }
                         else
                         {
                             long[] localBinom = CalcBinomialCoefficients(W);
                             var pairs = new List<(double Value, long Weight)>(W);
                             for (int pos = 0; pos < W; pos++)
                                 pairs.Add((input[start + pos], localBinom[pos]));
-                            if (pairs.Count == 0) { median[i] = 0.0; }
+                            if (pairs.Count == 0) { filtered = 0.0; }
                             else
                             {
-                                pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+                                pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
                                 long totalWeight = 0;
                                 for (int j = 0; j < pairs.Count; j++)
                                     totalWeight += pairs[j].Weight;
-                                if (totalWeight <= 0) { median[i] = 0.0; }
+                                if (totalWeight <= 0) { filtered = 0.0; }
                                 else
                                 {
                                     bool even = (totalWeight & 1L) == 0;
                                     long half = totalWeight / 2;
                                     long accum = 0;
+                                    filtered = pairs[pairs.Count - 1].Value;
                                     for (int j = 0; j < pairs.Count; j++)
                                     {
                                         accum += pairs[j].Weight;
                                         if (accum > half)
                                         {
-                                            median[i] = pairs[j].Value;
+                                            filtered = pairs[j].Value;
                                             break;
                                         }
                                         if (even && accum == half)
                                         {
                                             double nextVal = (j + 1 < pairs.Count) ? pairs[j + 1].Value : pairs[j].Value;
-                                            median[i] = (pairs[j].Value + nextVal) / 2.0;
+                                            filtered = (pairs[j].Value + nextVal) / 2.0;
                                             break;
                                         }
                                     }
@@ -593,26 +674,28 @@ namespace SonataSmooth
                     }
                     else
                     {
-                        median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+                        filtered = WeightedMedianAt(input, i, r, binom, boundaryMode, a);
                     }
+                    median[i] = a * filtered + (1.0 - a) * input[i];
                 }
 
-                // Gaussian
+                // Gaussian (Blending 포함)
                 if (doGauss && gaussCoeffs != null)
                 {
+                    double filtered;
                     if (boundaryMode == BoundaryMode.Adaptive)
                     {
                         GetAdaptiveWindow(i, out int left, out int right, out int start);
                         int W = left + right + 1;
-                        if (W < 1) { gauss[i] = 0.0; }
+                        if (W < 1) { filtered = 0.0; }
                         else
                         {
-                            double sigma = W / 6.0;
-                            double[] localGauss = ComputeGaussianCoefficients(W, sigma);
+                            double sigmaLocal = W / 6.0;
+                            double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
                             double sum = 0.0;
                             for (int pos = 0; pos < W; pos++)
                                 sum += localGauss[pos] * input[start + pos];
-                            gauss[i] = sum;
+                            filtered = sum;
                         }
                     }
                     else
@@ -620,11 +703,12 @@ namespace SonataSmooth
                         double sum = 0.0;
                         for (int k = -r; k <= r; k++)
                             sum += gaussCoeffs[k + r] * Sample(i + k);
-                        gauss[i] = sum;
+                        filtered = sum;
                     }
+                    gauss[i] = a * filtered + (1.0 - a) * input[i];
                 }
 
-                // Savitzky-Golay
+                // Savitzky-Golay (Blending 없음)
                 if (doSG)
                 {
                     if (boundaryMode == BoundaryMode.Adaptive)
@@ -654,7 +738,6 @@ namespace SonataSmooth
                             int effPoly = Math.Min(polyOrder, W - 1);
                             if (derivOrder > effPoly)
                             {
-                                // 요청된 미분 차수를 적용하기에 윈도우 크기가 너무 작을 경우 오류 처리
                                 throw new InvalidOperationException(
                                     $"Edge-adaptive window too small for derivative (W = {W}, effPoly = {effPoly}, derivative = {derivOrder}).");
                             }
@@ -691,9 +774,7 @@ namespace SonataSmooth
             else
             {
                 for (int i = 0; i < n; i++)
-                {
                     smoothingAction(i);
-                }
             }
 
             return (rect, binomAvg, median, gauss, sg);
@@ -781,11 +862,19 @@ namespace SonataSmooth
         ///   (예 : w = 2 → [1, 2, 1], w = 3 → [1, 3, 3, 1])
         /// - 중간 값 (median) 계산 시 각 샘플에 이항 계수 만큼의 가중 비율을 부여합니다.
         /// - BoundaryMode 에 따라 경계 밖의 Index 처리 방식을 결정합니다.
-        private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode boundaryMode)
+        /// <summary>
+        /// 이항 계수 가중 이동 중간 값 계산 메서드
+        /// 향후 확장을 위해 alpha 파라미터를 추가함
+        /// </summary>
+        private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode boundaryMode, double alpha = 1.0)
         {
+            // 내부적으로 사용될 경우 alpha 값을 로컬에서 제한 (Clamp) 처리
+            double a = alpha;
+            if (a < 0.0) a = 0.0;
+            else if (a > 1.0) a = 1.0;
+
             int desiredW = 2 * w + 1;
 
-            // Adaptive : 전체 길이 desiredW 를 유지한 채, 창을 데이터 범위 안으로 완전히 슬라이드.
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 int n = data.Length;
@@ -809,13 +898,16 @@ namespace SonataSmooth
                     pairsStd.Add((v, weight));
                 }
 
-                if (pairsStd.Count == 0) return 0.0;
-                pairsStd.Sort((a, b) => a.Value.CompareTo(b.Value));
+                if (pairsStd.Count == 0)
+                    return data[center]; // 원본으로 대체
+
+                pairsStd.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
                 long totalWeightStd = 0;
                 for (int i = 0; i < pairsStd.Count; i++)
                     totalWeightStd += pairsStd[i].Weight;
-                if (totalWeightStd <= 0) return 0.0;
+                if (totalWeightStd <= 0)
+                    return data[center];
 
                 bool evenStd = (totalWeightStd & 1L) == 0;
                 long halfStd = totalWeightStd / 2;
@@ -825,72 +917,67 @@ namespace SonataSmooth
                 {
                     accumStd += pairsStd[i].Weight;
                     if (accumStd > halfStd)
-                        return pairsStd[i].Value;
-
+                    {
+                        double filtered = pairsStd[i].Value;
+                        return filtered; // 호출자 (Caller) 에서 Blending 처리
+                    }
                     if (evenStd && accumStd == halfStd)
                     {
                         double nextVal = (i + 1 < pairsStd.Count) ? pairsStd[i + 1].Value : pairsStd[i].Value;
-                        return (pairsStd[i].Value + nextVal) / 2.0;
+                        double filtered = (pairsStd[i].Value + nextVal) / 2.0;
+                        return filtered;
                     }
                 }
                 return pairsStd[pairsStd.Count - 1].Value;
             }
 
-            // 기존 경로 (Symmetric, Replicate, ZeroPad)
             var pairs = new List<(double Value, long Weight)>(2 * w + 1);
 
             for (int k = -w; k <= w; k++)
             {
                 int idx = center + k;
-                // 경계 처리된 값 가져오기 (Symmetric, Replicate, ZeroPad)
                 double v = GetValueWithBoundary(data, idx, boundaryMode);
-
-                // 파스칼의 삼각형에서 가져온 이항계수 가중치 적용
-                // binom[k + w] 는 k 위치에 해당하는 가중치
                 long weight = binom[k + w];
                 pairs.Add((v, weight));
             }
 
-            if (pairs.Count == 0) return 0.0;
+            if (pairs.Count == 0)
+                return data[center];
 
-            // 중간 값 계산을 위한 오름차순 정렬
-            pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
+            pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
-            // 전체 가중치 합 계산
             long totalWeight = 0;
             for (int i = 0; i < pairs.Count; i++)
                 totalWeight += pairs[i].Weight;
 
-            if (totalWeight <= 0) return 0.0;
+            if (totalWeight <= 0)
+                return data[center];
 
-            // 전체 가중치 짝수 여부 확인
             bool even = (totalWeight & 1L) == 0;
             long half = totalWeight / 2;
 
-            // 누적 가중치 합을 이용해 중간 값 위치 찾기
             long accum = 0;
             for (int i = 0; i < pairs.Count; i++)
             {
                 accum += pairs[i].Weight;
 
-                // 누적 가중치가 절반을 초과하면 해당 값이 중간 값
                 if (accum > half)
                 {
-                    return pairs[i].Value;
+                    double filtered = pairs[i].Value;
+                    return filtered;
                 }
 
-                // 짝수 가중치 합이고 정확히 절반에 도달하면
-                // 다음 값과 평균을 내어 중간 값 결정
                 if (even && accum == half)
                 {
                     double nextVal = (i + 1 < pairs.Count) ? pairs[i + 1].Value : pairs[i].Value;
-                    return (pairs[i].Value + nextVal) / 2.0;
+                    double filtered = (pairs[i].Value + nextVal) / 2.0;
+                    return filtered;
                 }
             }
 
-            // 모든 경우를 통과하지 않은 경우 마지막 값 반환
             return pairs[pairs.Count - 1].Value;
         }
+
 
         /// <summary>
         /// 주어진 길이 (length) 에 해당하는 이항계수 (파스칼 삼각형의 한 행) 를 계산하여 반환합니다.
@@ -1499,12 +1586,13 @@ Are you sure you want to proceed?";
             txtInitAdd.Select();
         }
 
-        public void SetComboValues(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder)
+        public void SetComboValues(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder, string alpha)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
             cbxBoundaryMethod.Text = boundaryMethod;
             cbxDerivOrder.Text = derivOrder;
+            cbxAlpha.Text = alpha;
         }
 
 
@@ -2222,13 +2310,14 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 lblPolyOrder.Enabled = true;
                 cbxPolyOrder.Enabled = true;
 
-                // Savitzky-Golay 필터용 미분 차수 제어 기능을 활성화
                 if (lblDerivOrder != null) lblDerivOrder.Enabled = true;
                 if (cbxDerivOrder != null)
                 {
                     cbxDerivOrder.Enabled = true;
-                    if (cbxDerivOrder.SelectedIndex < 0) cbxDerivOrder.SelectedIndex = 0; // 기본값 d = 0
+                    if (cbxDerivOrder.SelectedIndex < 0) cbxDerivOrder.SelectedIndex = 0;
                 }
+
+                SetAlphaEnabled(false);
 
                 SetBoundaryMethod("Adaptive");
             }
@@ -2240,6 +2329,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 if (lblDerivOrder != null) lblDerivOrder.Enabled = false;
                 if (cbxDerivOrder != null) cbxDerivOrder.Enabled = false;
             }
+            UpdateAlphaEnablement();
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
@@ -2251,10 +2341,17 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             if (cbxDerivOrder != null)
             {
                 if (cbxDerivOrder.Items.Count > 0 && cbxDerivOrder.SelectedIndex < 0)
-                    cbxDerivOrder.SelectedIndex = 0; 
+                    cbxDerivOrder.SelectedIndex = 0;
                 cbxDerivOrder.Enabled = rbtnSG.Checked;
                 lblDerivOrder.Enabled = rbtnSG.Checked;
             }
+
+            // alpha 기본값을 1.00 으로 설정하여 기존 동작을 유지
+            if (cbxAlpha != null && cbxAlpha.Items.Count > 0 && cbxAlpha.SelectedIndex < 0)
+                cbxAlpha.SelectedIndex = cbxAlpha.Items.Count - 1; // "1.00"
+
+            // Alpha 는 Avg / Med / Gauss 에서만 활성화
+            SetAlphaEnabled(false);
 
             using (Graphics g = this.CreateGraphics())
             {
@@ -2354,6 +2451,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             var boundaryMode = GetBoundaryMode();
             string excelTitle = "";
             double[] initialData = null;
+            double alpha = GetAlphaFromCbx();
 
             // UI 에서 설정 값 및 데이터 읽기
             if (InvokeRequired)
@@ -2438,7 +2536,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 {
                     // 변수 shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 한 번만 호출하세요.
                     var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
+                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG, alpha);
 
                     // 결과를 내보내기 위해 배열에 값을 할당합니다.
                     if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
@@ -2503,9 +2601,10 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 1 + // "Smoothing Parameters"
                 1 + // Kernel Radius
                 1 + // Kernel Width
+                1 + // Boundary Method
+                (doAvg|| doMed || doGauss ? 1 : 0) + // Alpha
                 (doSG ? 1 : 0) + // Polynomial Order
                 (doSG ? 1 : 0) + // Derivative Order
-                1 + // Boundary Method
                 1 + // blank
                 1 + // Generated
                 1 + // blank
@@ -2552,6 +2651,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         await sw.WriteLineAsync($"Kernel Radius : {r}");
                         await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
                         await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
+                        if (doAvg || doMed || doGauss)
+                            await sw.WriteLineAsync($"Alpha Blend : {alpha}");
                         if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
                         if (doSG) await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
                         await sw.WriteLineAsync(string.Empty);
@@ -2781,6 +2882,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             bool doMed = settingsForm.chbMed.Checked;
             bool doGauss = settingsForm.chbGauss.Checked;
             bool doSG = settingsForm.chbSG.Checked;
+            double alpha = GetAlphaFromCbx();
 
             pbMain.Style = ProgressBarStyle.Continuous;
             pbMain.Minimum = 0;
@@ -2801,7 +2903,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 return;
             }
 
-            // Savitzky-Golay 필터에서 미분 차수는 설정된 다항식 차수보다 크면 안 됨.
             if (doSG && derivOrder > polyOrder)
             {
                 ShowError("Export Parameter Error",
@@ -2835,11 +2936,9 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             {
                 await Task.Run(() =>
                 {
-                    //  변수 Shadowing 을 방지하기 위해, ApplySmoothing() 은 Loop 밖에서 1 회만 호출.
                     var (rectAvgResult, binomAvgResult, medianResult, gaussResult, sgResult) =
-                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
+                        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG, alpha);
 
-                    // 결과를 내보내기 위해 배열에 값을 할당.
                     if (doRect) Array.Copy(rectAvgResult, rectAvg, n);
                     if (doAvg) Array.Copy(binomAvgResult, binomAvg, n);
                     if (doMed) Array.Copy(medianResult, binomMed, n);
@@ -2853,7 +2952,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 return;
             }
 
-            // COM 객체 추적 Stack
             var coms = new Stack<object>();
 
             Excel.Application excel = null;
@@ -2866,6 +2964,30 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             Excel.ChartObject chartObj = null;
             Excel.Chart chart = null;
             Excel.SeriesCollection seriesCollection = null;
+
+            string savePath = null;
+            bool promptForSave = settingsForm.chbOpenFile != null && !settingsForm.chbOpenFile.Checked;
+
+            if (promptForSave)
+            {
+                using (var sfd = new SaveFileDialog()
+                {
+                    Title = "Save Excel Workbook",
+                    Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                    FileName = $"{txtDatasetTitle.Text}.xlsx",
+                    AddExtension = true,
+                    DefaultExt = "xlsx",
+                    OverwritePrompt = true
+                })
+                {
+                    if (sfd.ShowDialog(this) == DialogResult.OK)
+                        savePath = sfd.FileName;
+                }
+            }
+
+            // 파일 저장 여부에 따라 Excel 표시 / 종료를 결정
+            bool willShowExcel = string.IsNullOrWhiteSpace(savePath);
+
 
             try
             {
@@ -2886,18 +3008,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     if (doMed) smoothingMethods.Add("Median");
                     if (doGauss) smoothingMethods.Add("Gaussian");
                     if (doSG) smoothingMethods.Add("Savitzky-Golay");
-
-                    //  Excel 파일의 Built-in 속성에 기록.
-                    //  wb.BuiltinDocumentProperties["Title"].Value = txtDatasetTitle.Text;
-                    //  wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Export";
-                    //  wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
-                    //  wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Export";
-                    //  string subject = smoothingMethods.Count > 0
-                    //     ? string.Join(", ", smoothingMethods) + " smoothing applied"
-                    //     : "No smoothing applied";
-
-                    //  wb.BuiltinDocumentProperties["Subject"].Value = subject;
-                    //  wb.BuiltinDocumentProperties["Comments"].Value = "Exported from SonataSmooth application";
 
                     wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {txtDatasetTitle.Text}";
                     wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Movement Score";
@@ -2929,7 +3039,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     string randomPhrase = musicalPhrases[rnd.Next(musicalPhrases.Length)];
 
                     string comments = $"Encore performed by the SonataSmooth Orchestra - \"{randomPhrase}\"";
-
                     if (smoothingMethods.Count == 4)
                     {
                         comments += Environment.NewLine + Environment.NewLine + "Hidden Movement Unlocked : The Quartet of Filters has performed in perfect harmony.";
@@ -2939,26 +3048,20 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 }
                 catch (Exception ex)
                 {
-                    // Excel Interop 에서 발생할 수 있는 주요 예외를 구분하여 처리
                     if (ex is System.Runtime.InteropServices.COMException comEx)
                     {
-                        // COM 예외 : Excel 이 설치되어 있지 않거나, 권한 문제, 속성 이름 오탈자 등
                         MessageBox.Show(
                             "Failed to set Excel document properties (COM error).\n\n" +
-                            "Excel may not be installed, the property name may be incorrect, or there may be a permissions issue.\n\n" +
                             $"Details : {comEx.Message}",
                             "Excel Property Error",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning
                         );
-                        // 필요 시 로그 : Debug.WriteLine(comEx);
                     }
                     else if (ex is ArgumentException argEx)
                     {
-                        // 잘못된 속성 이름 등
                         MessageBox.Show(
                             "Failed to set Excel document properties (Argument error).\n\n" +
-                            "The built-in property name is incorrect, or an unsupported value has been assigned.\n\n" +
                             $"Details : {argEx.Message}",
                             "Excel Property Error",
                             MessageBoxButtons.OK,
@@ -2967,10 +3070,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     }
                     else if (ex is InvalidCastException castEx)
                     {
-                        // 잘못된 타입으로 값 할당 시
                         MessageBox.Show(
                             "Failed to set Excel document properties (Type error).\n\n" +
-                            "The type of value assigned to the property is invalid.\n\n" +
                             $"Details : {castEx.Message}",
                             "Excel Property Error",
                             MessageBoxButtons.OK,
@@ -2979,10 +3080,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     }
                     else if (ex is System.UnauthorizedAccessException unauthEx)
                     {
-                        // 파일 또는 속성에 대한 권한 부족
                         MessageBox.Show(
                             "Failed to set Excel document properties (Access denied).\n\n" +
-                            "You do not have sufficient permissions for the Excel file or its properties.\n\n" +
                             $"Details : {unauthEx.Message}",
                             "Excel Property Error",
                             MessageBoxButtons.OK,
@@ -2991,7 +3090,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     }
                     else
                     {
-                        // 기타 예외 처리
                         MessageBox.Show(
                             "An unexpected error occurred while setting Excel document properties.\n\n" +
                             $"Details : {ex.Message}",
@@ -3000,9 +3098,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                             MessageBoxIcon.Warning
                         );
                     }
-
-                    // 필요 시 상세 로그 표시
-                    // System.Diagnostics.Debug.WriteLine(ex.ToString());
                 }
 
                 sheets = wb.Worksheets;
@@ -3012,17 +3107,18 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 ws.Name = txtDatasetTitle.Text;
                 coms.Push(ws);
 
-                //excel.Visible = true;
-
                 ws.Cells[1, 1] = txtDatasetTitle.Text;
                 ws.Cells[3, 1] = "Smoothing Parameters";
                 ws.Cells[4, 1] = $"Kernel Radius : {r}";
                 ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
                 ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
-                ws.Cells[7, 1] = doSG
+                ws.Cells[7, 1] = (doAvg || doMed || doGauss)
+                    ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
+                    : "Alpha Blend : N/A";
+                ws.Cells[8, 1] = doSG
                     ? $"Polynomial Order : {polyOrder}"
                     : "Polynomial Order : N/A";
-                ws.Cells[8, 1] = doSG
+                ws.Cells[9, 1] = doSG
                     ? $"Derivative Order : {derivOrder}"
                     : "Derivative Order : N/A";
 
@@ -3119,7 +3215,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 chart.ChartType = Excel.XlChartType.xlLine;
                 chart.HasTitle = true;
                 chart.ChartTitle.Text = txtDatasetTitle.Text;
-                //chart.ChartTitle.Text = "Refining Raw Signals with SonataSmooth";
 
                 chart.HasLegend = true;
                 chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
@@ -3156,7 +3251,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                                     unionRange = dataRange;
                                 else
                                 {
-                                    // Union 이 새로운 Range 를 반환하므로 이전 unionRange 는 그대로 두고 누적
                                     Excel.Range merged = null;
                                     try
                                     {
@@ -3164,13 +3258,10 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                                     }
                                     finally
                                     {
-                                        // 기존 unionRange 와 dataRange 의 RCW 를 해제,
-                                        // merged 를 새로운 unionRange 로 교체
                                         FinalRelease(unionRange);
                                         FinalRelease(dataRange);
                                     }
                                     unionRange = merged;
-                                    // merged 는 unionRange 로 승격되었으므로 여기서 해제하지 않음
                                     top = null; bottom = null; dataRange = null;
                                 }
                             }
@@ -3178,8 +3269,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                             {
                                 FinalRelease(bottom);
                                 FinalRelease(top);
-                                // dataRange 는 위에서 merged 교체 시 해제됨.
-                                // (첫 블록일 경우 unionRange 가 참조)
                             }
                         }
 
@@ -3193,8 +3282,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         {
                             FinalRelease(series);
                         }
-
-                        excel.Visible = true;
                     }
                     finally
                     {
@@ -3202,18 +3289,48 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     }
                 }
 
+                // 사용자가 저장 경로를 선택했다면 바로 저장
+                if (!string.IsNullOrWhiteSpace(savePath))
+                {
+                    try
+                    {
+                        excel.DisplayAlerts = false;
+                        wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
+                        wb.Saved = true;
+                    }
+                    catch (Exception sx)
+                    {
+                        MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    finally
+                    {
+                        excel.DisplayAlerts = true;
+                    }
+                }
+                else
+                {
+                    // 저장하지 않은 상태 유지 (사용자가 수동 저장 가능)
+                    wb.Saved = false;
+                }
+
                 pbMain.Value = 0;
 
-                // 창 유지 : 사용자에게 권한 이관
-                wb.Saved = false; // 닫기 시 저장 대화상자 표시
-                excel.Visible = true;
+                if (willShowExcel)
+                {
+                    // 저장 취소 / 실패 시에만 Excel UI 표시
+                    excel.Visible = true;
+                }
+                else
+                {
+                    // 저장 완료 : Excel 창 표시하지 않고 종료
+                    try { wb.Close(false); } catch { /* ignore */ }
+                    try { excel.Quit(); } catch { /* ignore */ }
+                }
             }
-
             catch (System.Runtime.InteropServices.COMException ex)
             {
                 string msg = "Excel interop error: " + ex.Message + Environment.NewLine + Environment.NewLine +
                     "Microsoft Excel does not appear to be installed, or there was a problem starting Excel." + Environment.NewLine +
-                    "If Excel is not installed, you can visit the Microsoft Office website to purchase or install Office." + Environment.NewLine + Environment.NewLine +
                     "Would you like to open the Microsoft Office download page now?";
 
                 var result = MessageBox.Show(
@@ -3264,7 +3381,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
             catch (System.BadImageFormatException)
             {
-                MessageBox.Show("Excel (Office) bitness (32-bit / 64-bit) or Interop DLL mismatch. Please check your Office installation.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Excel (Office) bitness mismatch. Please check your Office installation.", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (System.UnauthorizedAccessException)
             {
@@ -3276,10 +3393,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
             finally
             {
-                // 생성된 COM 참조 모두 해제 (Excel 창은 그대로 살아있음)
                 ReleaseAll(coms);
 
-                // RCW Finalizer 보장을 위해 2 회 GC
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -3313,7 +3428,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
         private void btnExportSettings_Click(object sender, EventArgs e)
         {
-            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
+            settingsForm.ApplyParameters(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text);
             settingsForm.ShowDialog();
         }
 
@@ -3488,32 +3603,43 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         {
             if (rbtnRect.Checked == true)
             {
+                SetAlphaEnabled(false);
                 SetBoundaryMethod("Replicate");
             }
+            UpdateAlphaEnablement();
         }
 
         private void rbtnAvg_CheckedChanged(object sender, EventArgs e)
         {
             if (rbtnAvg.Checked == true)
             {
+                // Binomial Average 계산 시 Alpha 값 적용
+                SetAlphaEnabled(true);
                 SetBoundaryMethod("Symmetric");
             }
+            UpdateAlphaEnablement();
         }
 
         private void rbtnMed_CheckedChanged(object sender, EventArgs e)
         {
             if (rbtnMed.Checked == true)
             {
+                // Binomial Median 계산 시 Alpha 값 적용
+                SetAlphaEnabled(true);
                 SetBoundaryMethod("Symmetric");
             }
+            UpdateAlphaEnablement();
         }
 
         private void rbtnGauss_CheckedChanged(object sender, EventArgs e)
         {
             if (rbtnGauss.Checked == true)
             {
+                // Gaussian 계산 시 Alpha 값 적용
+                SetAlphaEnabled(true);
                 SetBoundaryMethod("Symmetric");
             }
+            UpdateAlphaEnablement();
         }
 
         private void btnRefSelectSync_Click(object sender, EventArgs e)
@@ -4054,7 +4180,39 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         {
             MouseLeaveHandler(sender, e);
         }
+
+        private void lblAlpha_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Advanced setting for blending original and smoothed data. Original ← 0 … 1 → Smoothed (values in between mix both).";
+        }
+
+        private void lblAlpha_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxAlpha_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            double alpha = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
+
+            cbxAlpha.Text = alpha.ToString("0.00", CultureInfo.InvariantCulture);
+            if (settingsForm.cbxAlpha != null)
+                settingsForm.cbxAlpha.Text = cbxAlpha.Text;
+
+            UpdateAlphaEnablement();
+        }
+
+        private void cbxAlpha_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Visible = true;
+            slblDesc.Text = "Advanced setting for blending original and smoothed data. Original ← 0 … 1 → Smoothed (values in between mix both).";
+        }
+
+        private void cbxAlpha_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
     }
     #endregion
-
 }

@@ -16,6 +16,7 @@ namespace SonataSmooth
         public int PolyOrder { get; set; } = 3;
         public int BoundaryMethod { get; set; } = 1;
         public int DerivOrder { get; set; } = 0;
+        public int Alpha { get; set; } = 19;
 
         private const int RecommendedMinRadius = 3;
         private const int RecommendedMaxRadius = 7;
@@ -44,6 +45,12 @@ namespace SonataSmooth
             _mainForm = mainForm;
             this.btnSave.Click += btnSave_Click;
             this.btnCancel.Click += btnCancel_Click;
+
+            this.chbAvg.CheckedChanged += AlphaRelated_CheckedChanged;
+            this.chbMed.CheckedChanged += AlphaRelated_CheckedChanged;
+            this.chbGauss.CheckedChanged += AlphaRelated_CheckedChanged;
+
+            UpdateAlphaEnabled();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -79,7 +86,7 @@ namespace SonataSmooth
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
-            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text);
+            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -111,8 +118,26 @@ namespace SonataSmooth
 
             rbtnXLSX.Checked = DoExcelExport;
             rbtnCSV.Checked = DoCSVExport;
+
+            UpdateAlphaEnabled();
         }
 
+
+        private void UpdateAlphaEnabled()
+        {
+            bool enable =
+                (chbAvg != null && chbAvg.Checked) ||
+                (chbMed != null && chbMed.Checked) ||
+                (chbGauss != null && chbGauss.Checked);
+
+            if (lblAlpha != null) lblAlpha.Enabled = enable;
+            if (cbxAlpha != null) cbxAlpha.Enabled = enable;
+        }
+
+        private void AlphaRelated_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+        }
 
         private void FrmExportSettings_Load(object sender, EventArgs e)
         {
@@ -133,7 +158,7 @@ namespace SonataSmooth
             cbxDerivOrder.Enabled = chbSG.Checked;
         }
 
-        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder)
+        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder, string alpha)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
@@ -142,6 +167,7 @@ namespace SonataSmooth
             cbxBoundaryMethod.Text = boundaryMethod;
 
             cbxDerivOrder.Text = derivOrder;
+            cbxAlpha.Text = alpha;
 
             if (int.TryParse(kernelRadius, out var r)) this.KernelRadius = r;
             if (int.TryParse(polyOrder, out var p)) this.PolyOrder = p;
@@ -366,6 +392,26 @@ namespace SonataSmooth
         }
 
         private void cbxDerivOrder_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblAlpha_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Advanced setting for blending original and smoothed data. Original ← 0 … 1 → Smoothed (values in between mix both).";
+        }
+
+        private void lblAlpha_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxAlpha_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Advanced setting for blending original and smoothed data. Original ← 0 … 1 → Smoothed (values in between mix both).";
+        }
+
+        private void cbxAlpha_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
         }
