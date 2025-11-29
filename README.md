@@ -566,6 +566,12 @@ For example, if (`polyOrder` = 2) :
 
 This means the filter will fit a 2nd-degree polynomial (a parabola) across each window of data points.
 
+###### Tips for Choosing `polyOrder`
+- `polyOrder` must be less than the window length (2 × `r` + 1) to ensure a well-posed fitting problem.
+- Increasing `polyOrder` improves flexibility but risks ringing artifacts at the boundaries.
+- Common practice is to start with `polyOrder` = 2 or 3 and adjust based on how well features are preserved versus noise reduction.
+- Always validate smoothing performance on representative signal segments before batch processing.
+
 ##### Derivative Order (`derivOrder`)
 (Displayed only when Savitzky-Golay is selected.)
 
@@ -580,12 +586,6 @@ Typical uses:
 - 1 : Slope estimation
 - 2 : Curvature / peak detection
 - 3 : Inflection diagnostics (only with sufficiently wide windows)
-
-#### Tips for Choosing `polyOrder`
-- `polyOrder` must be less than the window length (2 × `r` + 1) to ensure a well-posed fitting problem.
-- Increasing `polyOrder` improves flexibility but risks ringing artifacts at the boundaries.
-- Common practice is to start with `polyOrder` = 2 or 3 and adjust based on how well features are preserved versus noise reduction.
-- Always validate smoothing performance on representative signal segments before batch processing.
 
 #### Validation Rules
 - Window size : `windowSize = 2 × radius + 1`
@@ -718,6 +718,103 @@ private OperationResult ValidateSmoothingParameters(int dataCount, int w, int po
     }
 
     return OperationResult.OK();
+}
+```
+
+##### Alpha Blend (Advanced)
+Alpha `α` blends the original sample with the filtered output for selected methods:
+- Applicable to: Binomial Averaging, Binomial Median, Gaussian
+- Not applied to: Rectangular, Savitzky-Golay (including derivatives)
+- Formula per element i: `output[i] = α * filtered[i] + (1 - α) * input[i]`
+- Range: 0.00–1.00 (clamped)
+- UI binding: `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`
+
+Runtime usage in smoothing :
+```csharp
+double a = alpha;
+
+if (a < 0.0)
+{
+    a = 0.0;
+}
+else if (a > 1.0)
+{
+    a = 1.0;
+}
+
+// Binomial Average (blended)
+binomAvg[i] = a * filtered + (1.0 - a) * input[i];
+
+// Binomial Median (blended)
+median[i] = a * filtered + (1.0 - a) * input[i];
+
+// Gaussian (blended)
+gauss[i] = a * filtered + (1.0 - a) * input[i];
+```
+
+Alpha enablement and synchronization with Export Settings :
+```csharp
+private void UpdateAlphaEnablement()
+{
+    bool alphaRelevant = rbtnAvg.Checked || rbtnMed.Checked || rbtnGauss.Checked;
+
+    lblAlpha.Enabled = alphaRelevant;
+    cbxAlpha.Enabled = alphaRelevant;
+
+    if (cbxAlpha.Enabled && string.IsNullOrWhiteSpace(cbxAlpha.Text))
+    {
+        cbxAlpha.Text = "1.00";
+    }
+}
+
+private void cbxAlpha_SelectedIndexChanged(object sender, EventArgs e)
+{
+    double alpha = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
+
+    cbxAlpha.Text = alpha.ToString("0.00", CultureInfo.InvariantCulture);
+
+    if (settingsForm.cbxAlpha != null)
+    {
+        settingsForm.cbxAlpha.Text = cbxAlpha.Text;
+    }
+
+    UpdateAlphaEnablement();
+}
+```
+
+Boundary-method auto-switching and Alpha enablement hooks :
+```csharp
+private void rbtnAvg_CheckedChanged(object sender, EventArgs e)
+{
+    if (rbtnAvg.Checked)
+    {
+        SetAlphaEnabled(true);
+        SetBoundaryMethod("Symmetric");
+    }
+
+    UpdateAlphaEnablement();
+}
+
+private void rbtnMed_CheckedChanged(object sender, EventArgs e)
+{
+    if (rbtnMed.Checked)
+    {
+        SetAlphaEnabled(true);
+        SetBoundaryMethod("Symmetric");
+    }
+
+    UpdateAlphaEnablement();
+}
+
+private void rbtnGauss_CheckedChanged(object sender, EventArgs e)
+{
+    if (rbtnGauss.Checked)
+    {
+        SetAlphaEnabled(true);
+        SetBoundaryMethod("Symmetric");
+    }
+
+    UpdateAlphaEnablement();
 }
 ```
 
@@ -1552,23 +1649,78 @@ private static double[,] InvertMatrixStrict(double[,] a)
 
 ### 12. CSV Export Functionality
 #### How it works
-When the user selects the CSV export option and clicks Export, the application :  
+When the user selects the CSV export option and clicks Export, the application:
 
-- Reads the initial dataset and selected smoothing parameters.
-- Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay).
-- Splits the output into multiple CSV files if the dataset exceeds Excel's row limit.
+- Reads the initial dataset and selected smoothing parameters (Radius, Polynomial/Derivative for SG, Boundary Method, Alpha).
+- Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky‑Golay) in a single `ApplySmoothing` pass that includes the `alpha` parameter for blending.
+- Splits the output into multiple CSV files if the dataset exceeds Excel’s row limit.
 - Writes metadata, parameters, and results to each file in a structured format.
-- When output is split, files are named using the pattern : {baseName}_Part{X}.csv.
-- The SaveFileDialog defaults the file name to the dataset title : "{DatasetTitle}.csv"
- 
-All enabled filter outputs are computed in a single ApplySmoothing pass (no per-filter recomputation), then written to the file / worksheet.
+- When output is split, files are named using the pattern: {baseName}_Part{X}.csv.
+- The SaveFileDialog defaults the file name to the dataset title: "{DatasetTitle}.csv".
+- While the SaveFileDialog is open, the main progress bar switches to marquee mode; it is restored afterward.
+
+All enabled filter outputs are computed in one `ApplySmoothing` call (no per‑filter recomputation), then written.
+
+- Alpha blend usage: applied only to Binomial Averaging, Binomial Median, and Gaussian; not applied to Rectangular or Savitzky‑Golay.
+  - Formula per element i: output[i] = α × filtered[i] + (1 − α) × input[i]
 
 #### Principle
-- **Modular Export** : Each filter result is stored in a separate column.
-- **Scalable Output** : Automatically splits large datasets across multiple files.
-- **Metadata Embedding** : Includes kernel radius, polynomial order, and timestamp for reproducibility.
+- Modular columns per filter, scalable multi‑part output, and embedded metadata for reproducibility.
+- Conditional header rows include "Alpha Blend" only when it is relevant (Avg/Med/Gauss selected).
 
-#### Code Implementation
+#### Code Implementation (exact runtime)
+Compute with Alpha (single pass) :
+```csharp
+var (rectAvgResult,
+     binomAvgResult,
+     medianResult,
+     gaussResult,
+     sgResult) = ApplySmoothing(
+        initialData,
+        r,
+        polyOrder,
+        derivOrder,
+        delta,
+        boundaryMode,
+        doRect,
+        doAvg,
+        doMed,
+        doGauss,
+        doSG,
+        alpha
+    );
+```
+
+Header layout per part (Alpha row is conditional) :
+```
+await sw.WriteLineAsync(excelTitle);
+await sw.WriteLineAsync($"Part {part + 1} of {partCount}");
+await sw.WriteLineAsync(string.Empty);
+
+await sw.WriteLineAsync("Smoothing Parameters");
+await sw.WriteLineAsync($"Kernel Radius : {r}");
+await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
+await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
+
+if (doAvg || doMed || doGauss)
+{
+    await sw.WriteLineAsync($"Alpha Blend : {alpha}");
+}
+
+if (doSG)
+{
+    await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+    await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
+}
+
+await sw.WriteLineAsync(string.Empty);
+await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
+await sw.WriteLineAsync(string.Empty);
+
+// Column headers
+await sw.WriteLineAsync(string.Join(",", columns.Select(c => c.Header)));
+```
+
 ```csharp
 // Internal CSV export (collects UI state; no external parameters)
 private async Task ExportCsvAsync()
@@ -1590,6 +1742,7 @@ private async Task ExportCsvAsync()
     //          Kernel Radius : r
     //          Kernel Width : (2 * r + 1)
     //          Boundary Method : {Adaptive|Symmetric|Replicate|Zero Padding}
+    // 	        [Alpha Blend : alpha] (if Avg / Med / Gauss)
     //          [Polynomial Order : polyOrder] (if SG)
     //          [Derivative Order : derivOrder] (if SG)
     //          (blank)
@@ -1603,22 +1756,35 @@ private async Task ExportCsvAsync()
 }
 ```
 
+Columns include :
+- Initial Dataset
+- Rectangular Averaging
+- Binomial Averaging (alpha‑blended)
+- Binomial Median Filtering (alpha‑blended)
+- Gaussian Filtering (alpha‑blended)
+- Savitzky–Golay Filtering (no alpha blend)
+
+Progress is reported 0-100 as rows are written; the bar resets to 0 when done. Optional auto‑open for generated file(s) is supported.
+
+
 ### 13. Excel Export Functionality
 #### How it works
-When the user selects Excel export and clicks Export, the application :  
+When the user selects Excel export and clicks Export, the application :
 
--	Reads the initial dataset and all selected smoothing parameters from the UI.
--	Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky-Golay) in parallel.
--	Writes each filter result to a separate column in a new Excel worksheet.
--   Embeds metadata at the top of the sheet : dataset title, kernel radius, kernel width, boundary method, and polynomial / derivative (for SG).
--	Sets musical-themed document properties (Title, Category, Author, Keywords, Subject, Comments) for the exported file.
--	Automatically generates a line chart visualizing all filter results.
--	Handles large datasets by splitting across multiple columns if needed.
--	Cleans up all COM objects and forces garbage collection to prevent lingering Excel processes.  
-  
-All enabled filter outputs are computed in a single ApplySmoothing pass (no per-filter recomputation), then written to the file / worksheet.
+- Reads the initial dataset and all selected parameters from the UI.
+- Applies all enabled filters in one pass with `ApplySmoothing` (Alpha is applied only to Avg/Med/Gauss).
+- Writes each filter result to its own column in a new worksheet.
+- Embeds metadata at the top: title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial/derivative (for SG).
+- Automatically generates a line chart across the written columns.
+- Cleans up all COM objects and runs GC to avoid lingering Excel processes.
 
-Additional details:
+Save behavior and progress :
+- If "Open file after save" is unchecked, a SaveFileDialog is shown. While it is open, the main progress bar switches to marquee mode (restored afterward).
+- If a path is chosen, SaveAs is executed. During SaveAs, the progress bar is simulated to 95% using a timer, then set to 100% on completion, and the workbook is closed without showing Excel.
+- If no path is chosen (or saving is skipped), Excel is shown with the unsaved workbook (`excel.Visible = true`) so the user can save manually.
+- A previously considered "open as temporary file" path is currently commented out; the active behavior is "open in Excel without saving."
+
+Additional details :
 - Worksheet name is set to the dataset title (txtDatasetTitle.Text).
 - Line chart axes are titled "Value" (Y) and "Sequence Number" (X) for clearer interpretation.
 - Excel export opens an interactive Excel instance with the new workbook; the application does not auto‑save a .xlsx file. Save the workbook from Excel when ready.
@@ -1629,10 +1795,156 @@ Additional details:
 -	**Musical Metadata** : Excel document properties and comments are dynamically set with musical phrases and filter info for a unique, playful touch.
 -	**Chart Generation** : A line chart is automatically created to compare all filter outputs visually.
 -	**Robust COM Cleanup** : All Excel interop objects are released and garbage collected to avoid memory leaks.
--   **Metadata Rows** : A1 Title, A3 label, A4 Radius, A5 Width, A6 Boundary, A7 Polynomial (or N/A), A8 Derivative (or N/A). (Note : The "Generated" timestamp row is written in CSV export; it is not written as a worksheet row in Excel export.)
+-   **Metadata Rows** : A1 Title, A3 label, A4 Radius, A5 Width, A6 Boundary, A7 Alpha Blend, A8 Polynomial (or N/A), A9 Derivative (or N/A). (Note : The "Generated" timestamp row is written in CSV export; it is not written as a worksheet row in Excel export.)
 -   **Excel Built-in Document Properties set** : Title, Category, Author, Last Author, Keywords, Subject, Comments (random musical phrase + quartet Easter egg when exactly four methods are enabled).
     
-#### Code Implemenation
+#### Code Implementation
+Alpha metadata row :
+```csharp
+ws.Cells[7, 1] = (doAvg || doMed || doGauss)
+    ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
+    : "Alpha Blend : N/A";
+
+ws.Cells[8, 1] = doSG
+    ? $"Polynomial Order : {polyOrder}"
+    : "Polynomial Order : N/A";
+
+ws.Cells[9, 1] = doSG
+    ? $"Derivative Order : {derivOrder}"
+    : "Derivative Order : N/A";
+```
+
+SaveFileDialog with marquee while open :
+```csharp
+var prevStyle = pbMain.Style;
+var prevValue = pbMain.Value;
+int prevMarquee = pbMain.MarqueeAnimationSpeed;
+
+pbMain.Style = ProgressBarStyle.Marquee;
+pbMain.MarqueeAnimationSpeed = 30;
+
+try
+{
+    using (var sfd = new SaveFileDialog()
+    {
+        Title = "Save Excel Workbook",
+        Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+        FileName = $"{txtDatasetTitle.Text}.xlsx",
+        AddExtension = true,
+        DefaultExt = "xlsx",
+        OverwritePrompt = true
+    })
+    {
+        if (sfd.ShowDialog(this) == DialogResult.OK)
+        {
+            savePath = sfd.FileName;
+        }
+    }
+}
+finally
+{
+    pbMain.MarqueeAnimationSpeed = prevMarquee;
+    pbMain.Style = prevStyle;
+    pbMain.Value = prevValue;
+}
+```
+
+Save‑or‑open workflow :
+```csharp
+bool promptForSave = settingsForm.chbOpenFile != null 
+                     && !settingsForm.chbOpenFile.Checked;
+
+string savePath = null;
+
+// SaveFileDialog (marquee) shown only when promptForSave is true…
+bool willShowExcel = string.IsNullOrWhiteSpace(savePath);
+
+if (!string.IsNullOrWhiteSpace(savePath))
+{
+    var prevStyle = pbMain.Style;
+    var prevValue = pbMain.Value;
+
+    pbMain.Style = ProgressBarStyle.Continuous;
+    pbMain.Minimum = 0;
+    pbMain.Maximum = 100;
+    pbMain.Value = 0;
+
+    var saveProgressTimer = new System.Windows.Forms.Timer { Interval = 120 };
+    saveProgressTimer.Tick += (s, e) =>
+    {
+        try
+        {
+            if (pbMain.Value < 95)
+            {
+                pbMain.Value = Math.Min(95, pbMain.Value + 3);
+            }
+        }
+        catch
+        {
+            // Ignore UI race
+        }
+    };
+    saveProgressTimer.Start();
+
+    try
+    {
+        excel.DisplayAlerts = false;
+        wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
+        wb.Saved = true;
+
+        saveProgressTimer.Stop();
+        pbMain.Value = 100;
+        willShowExcel = false;
+    }
+    catch (Exception sx)
+    {
+        saveProgressTimer.Stop();
+        MessageBox.Show(
+            $"Failed to save workbook:\n{sx.Message}",
+            "Save Error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning
+        );
+
+        pbMain.Value = 0;
+        // Previously considered: willShowExcel = true; (currently commented out)
+    }
+    finally
+    {
+        excel.DisplayAlerts = true;
+        await Task.Delay(150);
+
+        pbMain.Style = prevStyle;
+        pbMain.Value = 0;
+    }
+}
+
+if (willShowExcel)
+{
+    excel.Visible = true; // user saves manually
+}
+else
+{
+    try
+    {
+        wb.Close(false);
+    }
+    catch
+    {
+        // ignore
+    }
+
+    try
+    {
+        excel.Quit();
+    }
+    catch
+    {
+        // ignore
+    }
+}
+```
+
 (Note : The code sample omits the BuiltinDocumentProperties musical metadata and Easter egg block for brevity; runtime sets Title, Category, Author, Subject, Keywords, Comments with randomized phrases and quartet unlock message when exactly four methods are enabled.)
 ```csharp
 private async void ExportExcelAsync()
@@ -1695,8 +2007,15 @@ private async void ExportExcelAsync()
         ws.Cells[4, 1] = $"Kernel Radius : {r}";
         ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
         ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
-        ws.Cells[7, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
-        ws.Cells[8, 1] = doSG ? $"Derivative Order : {derivOrder}" : "Derivative Order : N/A";
+        ws.Cells[7, 1] = (doAvg || doMed || doGauss)
+            ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
+            : "Alpha Blend : N/A";
+        ws.Cells[8, 1] = doSG
+            ? $"Polynomial Order : {polyOrder}"
+            : "Polynomial Order : N/A";
+        ws.Cells[9, 1] = doSG
+            ? $"Derivative Order : {derivOrder}"
+            : "Derivative Order : N/A";
 
         // Sections (C column base)
         int col = 3;
@@ -1763,6 +2082,17 @@ private async void ExportExcelAsync()
     }
 }
 ```
+
+COM cleanup and Office guidance (unchanged):
+- All COM RCWs released via `FinalReleaseComObject` + double GC waits.
+- On `COMException`, the user is prompted to open the Microsoft 365 download page.
+
+This behavior ensures:
+- Alpha is calculated and documented consistently in both CSV and Excel exports.
+- The SaveFileDialog uses marquee mode while open; SaveAs simulates progress deterministically.
+- If not saved, Excel opens interactively with the unsaved workbook.
+- The temporary‑file open path is noted as currently commented out in the code.
+
 
 #### Export Metadata Enhancements
 Both CSV and Excel exports now include :  
