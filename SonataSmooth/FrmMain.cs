@@ -2558,25 +2558,61 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             {
                 Invoke(new Action(() =>
                 {
+                    // 대화 상자가 표시되는 동안 ProgressBar 를 Marquee 모드로 전환
+                    var prevStyle = pbMain.Style;
+                    var prevValue = pbMain.Value;
+                    int prevMarquee = pbMain.MarqueeAnimationSpeed;
+                    pbMain.Style = ProgressBarStyle.Marquee;
+                    pbMain.MarqueeAnimationSpeed = 30;
+
+                    try
+                    {
+                        using (var dlg = new SaveFileDialog())
+                        {
+                            dlg.FileName = $"{excelTitle}.csv";
+                            dlg.Filter = "CSV files (*.csv)|*.csv";
+                            dlg.DefaultExt = "csv";
+                            dlg.AddExtension = true;
+                            if (dlg.ShowDialog(this) == DialogResult.OK)
+                                basePath = dlg.FileName;
+                        }
+                    }
+                    finally
+                    {
+                        // ProgressBar 상태 복원
+                        pbMain.MarqueeAnimationSpeed = prevMarquee;
+                        pbMain.Style = prevStyle;
+                        pbMain.Value = prevValue;
+                    }
+                }));
+            }
+            else
+            {
+                // 대화 상자가 표시되는 동안 ProgressBar 를 Marquee 모드로 전환
+                var prevStyle = pbMain.Style;
+                var prevValue = pbMain.Value;
+                int prevMarquee = pbMain.MarqueeAnimationSpeed;
+                pbMain.Style = ProgressBarStyle.Marquee;
+                pbMain.MarqueeAnimationSpeed = 30;
+
+                try
+                {
                     using (var dlg = new SaveFileDialog())
                     {
                         dlg.FileName = $"{excelTitle}.csv";
                         dlg.Filter = "CSV files (*.csv)|*.csv";
                         dlg.DefaultExt = "csv";
                         dlg.AddExtension = true;
-                        if (dlg.ShowDialog(this) == DialogResult.OK) basePath = dlg.FileName;
+                        if (dlg.ShowDialog(this) == DialogResult.OK)
+                            basePath = dlg.FileName;
                     }
-                }));
-            }
-            else
-            {
-                using (var dlg = new SaveFileDialog())
+                }
+                finally
                 {
-                    dlg.FileName = $"{excelTitle}.csv";
-                    dlg.Filter = "CSV files (*.csv)|*.csv";
-                    dlg.DefaultExt = "csv";
-                    dlg.AddExtension = true;
-                    if (dlg.ShowDialog(this) == DialogResult.OK) basePath = dlg.FileName;
+                    // ProgressBar 상태 복원
+                    pbMain.MarqueeAnimationSpeed = prevMarquee;
+                    pbMain.Style = prevStyle;
+                    pbMain.Value = prevValue;
                 }
             }
 
@@ -2970,18 +3006,34 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
             if (promptForSave)
             {
-                using (var sfd = new SaveFileDialog()
+                var prevStyle = pbMain.Style;
+                var prevValue = pbMain.Value;
+                int prevMarquee = pbMain.MarqueeAnimationSpeed;
+                pbMain.Style = ProgressBarStyle.Marquee;
+                pbMain.MarqueeAnimationSpeed = 30;
+
+                try
                 {
-                    Title = "Save Excel Workbook",
-                    Filter = "Excel Workbook (*.xlsx)|*.xlsx",
-                    FileName = $"{txtDatasetTitle.Text}.xlsx",
-                    AddExtension = true,
-                    DefaultExt = "xlsx",
-                    OverwritePrompt = true
-                })
+                    using (var sfd = new SaveFileDialog()
+                    {
+                        Title = "Save Excel Workbook",
+                        Filter = "Excel Workbook (*.xlsx)|*.xlsx",
+                        FileName = $"{txtDatasetTitle.Text}.xlsx",
+                        AddExtension = true,
+                        DefaultExt = "xlsx",
+                        OverwritePrompt = true
+                    })
+                    {
+                        if (sfd.ShowDialog(this) == DialogResult.OK)
+                            savePath = sfd.FileName;
+                    }
+                }
+                finally
                 {
-                    if (sfd.ShowDialog(this) == DialogResult.OK)
-                        savePath = sfd.FileName;
+                    // 파일 저장 대화 상자가 닫힌 후 ProgressBar 상태 복원
+                    pbMain.MarqueeAnimationSpeed = prevMarquee;
+                    pbMain.Style = prevStyle;
+                    pbMain.Value = prevValue;
                 }
             }
 
@@ -3292,19 +3344,57 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 // 사용자가 저장 경로를 선택했다면 바로 저장
                 if (!string.IsNullOrWhiteSpace(savePath))
                 {
+                    // SaveAs 실행 중에 진행률을 결정형 (determinate) 방식으로 시뮬레이션
+                    var prevStyle = pbMain.Style;
+                    var prevValue = pbMain.Value;
+
+                    pbMain.Style = ProgressBarStyle.Continuous;
+                    pbMain.Minimum = 0;
+                    pbMain.Maximum = 100;
+                    pbMain.Value = 0;
+
+                    // SaveAs 실행 중에는 타이머로 진행률을 95% 까지 증가
+                    var saveProgressTimer = new System.Windows.Forms.Timer { Interval = 120 };
+                    saveProgressTimer.Tick += (s, e) =>
+                    {
+                        try
+                        {
+                            if (pbMain.Value < 95)
+                                pbMain.Value = Math.Min(95, pbMain.Value + 3);
+                        }
+                        catch
+                        { 
+                            /* Ignore UI race */
+                        }
+                    };
+                    saveProgressTimer.Start();
+
                     try
                     {
                         excel.DisplayAlerts = false;
                         wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
                         wb.Saved = true;
+
+                        // Complete progress
+                        saveProgressTimer.Stop();
+                        pbMain.Value = 100;
+                        willShowExcel = false;
                     }
                     catch (Exception sx)
                     {
+                        saveProgressTimer.Stop();
                         MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        willShowExcel = true; // 저장 실패 시 Excel 표시
+                        pbMain.Value = 0;
                     }
                     finally
                     {
                         excel.DisplayAlerts = true;
+                        // 완료 상태를 사용자가 볼 수 있도록 짧은 지연 추가
+                        await Task.Delay(150);
+                        // 이전 스타일 복원 (값은 0 으로 유지)
+                        pbMain.Style = prevStyle;
+                        pbMain.Value = 0;
                     }
                 }
                 else
@@ -3323,8 +3413,23 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 else
                 {
                     // 저장 완료 : Excel 창 표시하지 않고 종료
-                    try { wb.Close(false); } catch { /* ignore */ }
-                    try { excel.Quit(); } catch { /* ignore */ }
+                    try 
+                    { 
+                        wb.Close(false); 
+                    } 
+                    catch 
+                    { 
+                        /* ignore */ 
+                    }
+                    
+                    try 
+                    { 
+                        excel.Quit(); 
+                    } 
+                    catch 
+                    {
+                        /* ignore */ 
+                    }
                 }
             }
             catch (System.Runtime.InteropServices.COMException ex)
