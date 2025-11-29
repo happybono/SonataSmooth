@@ -3344,7 +3344,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 // 사용자가 저장 경로를 선택했다면 바로 저장
                 if (!string.IsNullOrWhiteSpace(savePath))
                 {
-                    // SaveAs 실행 중에 진행률을 결정형 (determinate) 방식으로 시뮬레이션
+                    // SaveAs 실행 중에 진행률을 결정형 (Determinate) 방식으로 시뮬레이션
                     var prevStyle = pbMain.Style;
                     var prevValue = pbMain.Value;
 
@@ -3384,7 +3384,10 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     {
                         saveProgressTimer.Stop();
                         MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        willShowExcel = true; // 저장 실패 시 Excel 표시
+
+                        // 저장 실패 시 Excel 표시
+                        // willShowExcel = true; 
+
                         pbMain.Value = 0;
                     }
                     finally
