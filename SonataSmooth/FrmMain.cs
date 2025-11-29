@@ -3375,7 +3375,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
                         wb.Saved = true;
 
-                        // Complete progress
+                        // 저장 작업 완료
                         saveProgressTimer.Stop();
                         pbMain.Value = 100;
                         willShowExcel = false;
