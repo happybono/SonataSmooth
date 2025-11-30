@@ -600,7 +600,7 @@ Typical uses:
 - Constraint : `windowSize ≤ dataCount`
 - Polynomial constraint (SG only) : `polyOrder < windowSize`
 - Derivative constraint (SG only) : `derivOrder ≤ polyOrder`
-- Adaptive SG edge constraint: if effPoly = min(polyOrder, W - 1) then `derivOrder ≤ effPoly`  
+- Adaptive SG edge constraint : if effPoly = min(polyOrder, W - 1) then `derivOrder ≤ effPoly`  
   
 Failure triggers explicit error dialogs matching runtime validation.  
 Caution : If the dataset count is smaller than the required window size ((2 × radius) + 1), calibration / export is aborted with a dialog instead of attempting partial smoothing.
