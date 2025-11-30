@@ -1675,7 +1675,7 @@ All enabled filter outputs are computed in one `ApplySmoothing` call (no per‑f
 
 #### Principle
 - Modular columns per filter, scalable multi‑part output, and embedded metadata for reproducibility.
-- Conditional header rows include "Alpha Blend" only when it is relevant (Avg/Med/Gauss selected).
+- Conditional header rows include "Alpha Blend" only when it is relevant (Avg / Med / Gauss selected).
 
 #### Code Implementation (exact runtime)
 Compute with Alpha (single pass) :
