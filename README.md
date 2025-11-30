@@ -723,11 +723,11 @@ private OperationResult ValidateSmoothingParameters(int dataCount, int w, int po
 
 ##### Alpha Blend (Advanced)
 Alpha `α` blends the original sample with the filtered output for selected methods:
-- Applicable to: Binomial Averaging, Binomial Median, Gaussian
-- Not applied to: Rectangular, Savitzky-Golay (including derivatives)
-- Formula per element i: `output[i] = α * filtered[i] + (1 - α) * input[i]`
-- Range: 0.00–1.00 (clamped)
-- UI binding: `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`
+- Applicable to : Binomial Averaging, Binomial Median, Gaussian
+- Not applied to : Rectangular, Savitzky-Golay (including derivatives)
+- Formula per element i : `output[i] = α * filtered[i] + (1 - α) * input[i]`
+- Range : 0.00 – 1.00 (clamped)
+- UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`
 
 Runtime usage in smoothing :
 ```csharp
@@ -1764,7 +1764,7 @@ Columns include :
 - Gaussian Filtering (alpha‑blended)
 - Savitzky–Golay Filtering (no alpha blend)
 
-Progress is reported 0-100 as rows are written; the bar resets to 0 when done. Optional auto‑open for generated file(s) is supported.
+Progress is reported 0 - 100 as rows are written; the bar resets to 0 when done. Optional auto‑open for generated file(s) is supported.
 
 
 ### 13. Excel Export Functionality
@@ -1774,7 +1774,7 @@ When the user selects Excel export and clicks Export, the application :
 - Reads the initial dataset and all selected parameters from the UI.
 - Applies all enabled filters in one pass with `ApplySmoothing` (Alpha is applied only to Avg/Med/Gauss).
 - Writes each filter result to its own column in a new worksheet.
-- Embeds metadata at the top: title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial/derivative (for SG).
+- Embeds metadata at the top: title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial / derivative (for SG).
 - Automatically generates a line chart across the written columns.
 - Cleans up all COM objects and runs GC to avoid lingering Excel processes.
 
