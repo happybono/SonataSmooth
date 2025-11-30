@@ -277,8 +277,8 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > CSV / Excel exports updated : conditional "Alpha Blend" metadata, unified single‑pass filtering, large dataset segmentation, and chart generation preserved.<br><br>
 > Excel export UX improved : progress bar switches to marquee while the Save dialog is open; SaveAs simulates progress to 95% and completes at 100%; opens an unsaved workbook for manual save when no path is chosen.<br><br>
 > Ensured consistent Excel SaveFileDialog filter string : "Excel Workbook (*.xlsx)|*.xlsx".<br><br>
-> Minor performance and UI responsiveness improvements
-> Minor bugs fixed
+> Minor performance and UI responsiveness improvements.<br><br>
+> Minor bugs fixed.
 
 ## Required Components & Setup
 ### Prerequisites
