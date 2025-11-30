@@ -1774,7 +1774,7 @@ When the user selects Excel export and clicks Export, the application :
 - Reads the initial dataset and all selected parameters from the UI.
 - Applies all enabled filters in one pass with `ApplySmoothing` (Alpha is applied only to Avg/Med/Gauss).
 - Writes each filter result to its own column in a new worksheet.
-- Embeds metadata at the top: title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial / derivative (for SG).
+- Embeds metadata at the top : title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial / derivative (for SG).
 - Automatically generates a line chart across the written columns.
 - Cleans up all COM objects and runs GC to avoid lingering Excel processes.
 
