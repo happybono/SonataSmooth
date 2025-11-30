@@ -13,7 +13,7 @@ True to its name, SonataSmooth embodies the philosophy of applying multiple tech
 
 ## Use Cases
 SonataSmooth is specialized for **1D data smoothing and noise reduction**.  
-While limited to single‑dimension datasets, it can be applied across a wide range of domains where sequential numeric signals require pre-processing or refinement :
+While limited to single‑dimension datasets, it can be applied across a wide range of domains where sequential numeric signals require pre-processing or refinement : 
 
 - **Machine Learning / Deep Learning Pre-processing**  
   - Clean raw training data by removing spikes, jitter, or irregular noise  
@@ -42,10 +42,10 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 <br>
 
 <div align="center">
-<img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
-<img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
-<img alt="GitHub Repo Languages" src="https://img.shields.io/github/languages/count/happybono/SonataSmooth">
-<img alt="GitHub Top Languages" src="https://img.shields.io/github/languages/top/happybono/SonataSmooth">
+<img alt="GitHub Last Commit" src="https : //img.shields.io/github/last-commit/happybono/SonataSmooth"> 
+<img alt="GitHub Repo Size" src="https : //img.shields.io/github/repo-size/happybono/SonataSmooth">
+<img alt="GitHub Repo Languages" src="https : //img.shields.io/github/languages/count/happybono/SonataSmooth">
+<img alt="GitHub Top Languages" src="https : //img.shields.io/github/languages/top/happybono/SonataSmooth">
 </div>
 
 ## What's New
@@ -94,7 +94,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v3.1.0.0
 #### July 19, 2025
 > Added Gaussian Filter mode that computes and applies a normalized 1D Gaussian kernel with mirror-mode boundary handling in parallel.<br><br>
-> Improved tooltips and labels: clarified filter options and renamed "Clear Selection" to "Deselect All".<br><br>
+> Improved tooltips and labels : clarified filter options and renamed "Clear Selection" to "Deselect All".<br><br>
 > Fixed ListBox2 update to clear old items before adding new results, ensuring the correct order and smooth refresh.<br><br>
 > Repositioned the listbox control buttons and added descriptive icons to each button.<br><br>
 > Added required font files to the Resources / Fonts directory.
@@ -273,9 +273,10 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ### v5.1.3.0
 #### November 30, 2025
-> Added `Alpha Blend` to runtime smoothing and export pipelines (applies to Binomial Averaging, Binomial Median, Gaussian; excluded for Rectangular / Savitzky‑Golay). Alpha clamped to 0.00 – 1.00 and synchronized with Export Settings.<br><br>
+> Added `Alpha Blend` to runtime smoothing and export pipelines (applies to Binomial Averaging, Binomial Median, Gaussian; excluded for Rectangular / Savitzky‑Golay). Alpha clamped to 0.00 - 1.00 and synchronized with Export Settings.<br><br>
 > CSV / Excel exports updated : conditional "Alpha Blend" metadata, unified single‑pass filtering, large dataset segmentation, and chart generation preserved.<br><br>
 > Excel export UX improved : progress bar switches to marquee while the Save dialog is open; SaveAs simulates progress to 95% and completes at 100%; opens an unsaved workbook for manual save when no path is chosen.<br><br>
+> Ensured consistent Excel SaveFileDialog filter string : "Excel Workbook (*.xlsx)|*.xlsx".<br><br>
 > Minor performance and UI responsiveness improvements.<br><br>
 > Minor bugs fixed.
 
@@ -301,7 +302,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Run the application.
 
 #### Dataset Title Validation
-The export title (Excel sheet name & metadata) is validated :
+The export title (Excel sheet name & metadata) is validated : 
 - Max length : 31 characters
 - Disallowed characters : `: \ / ? * [ ]` and all OS-invalid filename characters
 - Reserved DOS names rejected (CON, PRN, AUX, NUL, COM1 - COM9, LPT1 - LPT9)
@@ -310,7 +311,7 @@ Invalid input reverts to the placeholder and shows a warning dialog.
 The placeholder text "Click here to enter a title for your dataset." is restored whenever validation fails or the field is cleared.
 On invalid or cleared input the placeholder is restored with centered alignment and gray foreground; valid titles display left-aligned with normal system text color.
 
-Export Enablement Rules:
+Export Enablement Rules : 
 - Export button is enabled when the Initial Dataset contains at least one entry AND the title field is non‑placeholder. Full title validation runs when the field loses focus; invalid titles are reverted to the placeholder and export becomes disabled.
 - Clearing all Initial Dataset items or reverting the title to the placeholder immediately disables export.
 
@@ -370,13 +371,13 @@ This guide explains how different noise filters work with different types of sig
 - **Savitzky‑Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
 
 ## What Is Pascal's Triangle?
-Pascal's Triangle is a triangle of numbers built like this :
+Pascal's Triangle is a triangle of numbers built like this : 
 
 - Start with `1` at the top.
 - Each new row adds two numbers from the row above to get a new one.
 - The edges of each row are always `1`.
 
-### Example :
+### Example : 
 Row 1 :　　　　　　1<br>
 Row 2 :　　　　　1　 1<br>
 Row 3 :　　　　1　 2　 1<br>
@@ -425,7 +426,7 @@ Edge handling determines which values are used when the kernel window extends be
 | Adaptive    | Edge-aware    | Window dynamically trimmed or shifted; index sampling in SG may be asymmetric | Uses only in-range samples (non-SG) or shifts asymmetric SG window to keep length | Removes artificial padding; minimizes bias; accurate near edges | Varies window support; derivative order may be limited at extreme edges |
 | Zero Padding| Constant 0    | i < 0 or i ≥ n → 0                  | Outside treated as zero | Highlights decay / boundary contrast | Artificial dips; energy loss |
 
-Display names in exports :
+Display names in exports : 
 - Symmetric → "Symmetric (Mirror)"
 - Replicate → "Replicate (Nearest)"
 - ZeroPad → "Zero Padding"
@@ -441,7 +442,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 
     switch (mode)
     {
-        case BoundaryMode.Symmetric:
+        case BoundaryMode.Symmetric : 
             if (idx < 0)
                 idx = -idx - 1;
             else if (idx >= n)
@@ -452,7 +453,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 
             return data[idx];
 
-        case BoundaryMode.Replicate:
+        case BoundaryMode.Replicate : 
             if (idx < 0)
                 idx = 0;
             else if (idx >= n)
@@ -460,13 +461,13 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 
             return data[idx];
 
-        case BoundaryMode.ZeroPad:
+        case BoundaryMode.ZeroPad : 
             if (idx < 0 || idx >= n)
                 return 0.0;
 
             return data[idx];
 
-        case BoundaryMode.Adaptive:
+        case BoundaryMode.Adaptive : 
             // Single-sample access : treat like symmetric (window logic handled separately)
             if (idx < 0)
                 idx = -idx - 1;
@@ -478,7 +479,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 
             return data[idx];
 
-        default:
+        default : 
             if (idx < 0)
                 idx = -idx - 1;
             else if (idx >= n)
@@ -501,13 +502,13 @@ Note : `GetIndex` remains only for compatibility; current code paths either use 
 - Use **Replicate** for stepwise / plateau sensor data.
 - Use **ZeroPad** when emphasizing decay or isolating interior structure.
 
-Auto-switching behavior :
+Auto-switching behavior : 
 - Rectangular (when selected) → Boundary Method automatically set to Replicate
 - Binomial Average / Weighted Median / Gaussian (when selected) → Boundary Method automatically set to Symmetric
 - Savitzky-Golay (when selected) → Boundary Method automatically set to Adaptive
 
 ### Adaptive Mode
-Adaptive handling executes distinct logic per filter :
+Adaptive handling executes distinct logic per filter : 
 - Rectangular (Moving Average) : At edges, window size W shrinks (W = left + right + 1) and only available samples are averaged (no zero / replicate bias).
 - Binomial Average : Recomputes a fresh binomial coefficient row for the truncated W (NOT a slice of the full 2r + 1 row) ensuring proper central weighting.
 - Weighted Median : Uses a recomputed binomial coefficient vector for truncated W, then performs weighted median over strictly in-range values.
@@ -528,7 +529,7 @@ SonataSmooth provides a robust, user-friendly interface for entering and managin
 -	**Selection & Editing** : Items can be selected, deselected, edited (single or multiple), deleted, or copied to the clipboard. Selection operations are optimized for large lists.
 -   **Copy Behavior** : If no items (or all items) are selected, copying exports the entire list; if a partial selection exists, only the selected items are copied. (Applies to both Initial and Refined datasets.)
 -   **Clear All Behavior** : Clearing all items in the Initial Dataset also clears the Refined Dataset and resets related status labels and placeholders.
--   **Delete Selected Behavior** : When deleting only selected items, the Initial Dataset removes those items and the Refined Dataset is preserved. If all items are selected (i.e., selected count equals total count), the operation behaves like Clear All: the Refined Dataset is cleared and the dataset title is reset to the placeholder (centered, gray).
+-   **Delete Selected Behavior** : When deleting only selected items, the Initial Dataset removes those items and the Refined Dataset is preserved. If all items are selected (i.e., selected count equals total count), the operation behaves like Clear All : the Refined Dataset is cleared and the dataset title is reset to the placeholder (centered, gray).
 -   **Selection Operation Cancellation** : "Select All" uses internal `CancellationTokenSource` instances (`_ctsInitSelectAll`, `_ctsRefSelectAll`) so starting a new selection immediately cancels any in‑progress selection. The UI remains responsive and can be retriggered to interrupt long operations.
 
 When large batches are added (paste / drag-drop / bulk append), the list auto-scrolls to the newest appended item (TopIndex set to last) to provide immediate visual confirmation.
@@ -542,7 +543,7 @@ When large batches are added (paste / drag-drop / bulk append), the list auto-sc
 
 Kernel radius specifies how many data points on each side of the center element are included in the filtering window. The total window length (kernel width) is calculated as `2 × r + 1`.
 
-The total window length (kernel width) is calculated as :
+The total window length (kernel width) is calculated as : 
 
 $$
 \[
@@ -566,7 +567,7 @@ This means your median (or any other sliding-window) filter will span 5 consecut
 -	Must be strictly less than the kernel window size; otherwise, an error is shown.
 
 Polynomial order `polyOrder` specifies the highest degree of the polynomial fitted to the data within each smoothing window. A higher order can capture more complex curvature but may also overfit noise.
-The polynomial order is defined as :
+The polynomial order is defined as : 
 
 `polyOrder` = degree of the polynomial
 
@@ -589,7 +590,7 @@ This means the filter will fit a 2nd-degree polynomial (a parabola) across each 
 - Scaling : coefficients multiplied by `factorial(derivOrder) / delta^derivOrder` (delta = 1.0).
 - Recommended range : 0 - 3 (higher orders amplify noise sharply).
 
-Typical uses:
+Typical uses : 
 - 0 : Smoothing (baseline SG)
 - 1 : Slope estimation
 - 2 : Curvature / peak detection
@@ -730,14 +731,14 @@ private OperationResult ValidateSmoothingParameters(int dataCount, int w, int po
 ```
 
 ##### Alpha Blend (Advanced)
-Alpha `α` blends the original sample with the filtered output for selected methods:
+Alpha `α` blends the original sample with the filtered output for selected methods : 
 - Applicable to : Binomial Averaging, Binomial Median, Gaussian
 - Not applied to : Rectangular, Savitzky-Golay (including derivatives)
 - Formula per element i : `output[i] = α * filtered[i] + (1 - α) * input[i]`
 - Range : 0.00 – 1.00 (clamped)
 - UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`
 
-Runtime usage in smoothing :
+Runtime usage in smoothing : 
 ```csharp
 double a = alpha;
 
@@ -760,7 +761,7 @@ median[i] = a * filtered + (1.0 - a) * input[i];
 gauss[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
-Alpha enablement and synchronization with Export Settings :
+Alpha enablement and synchronization with Export Settings : 
 ```csharp
 private void UpdateAlphaEnablement()
 {
@@ -790,7 +791,7 @@ private void cbxAlpha_SelectedIndexChanged(object sender, EventArgs e)
 }
 ```
 
-Boundary-method auto-switching and Alpha enablement hooks :
+Boundary-method auto-switching and Alpha enablement hooks : 
 ```csharp
 private void rbtnAvg_CheckedChanged(object sender, EventArgs e)
 {
@@ -1272,7 +1273,7 @@ Sigma recomputation uses σ = W / 6.0 (same formula used initially for full symm
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
 
-At each position :
+At each position : 
 
 1. Out‑of‑bounds indices are handled according to the selected Boundary Mode. With Adaptive (auto‑selected when SG is chosen), the window is shifted asymmetrically near edges to maintain length without artificial padding; non‑Adaptive modes map indices using Mirror (Symmetric), Replicate (Nearest), or Zero‑Pad.
 2. Each sample in the window is multiplied by its **precomputed Savitzky‑Golay coefficient** (derived from polynomial least‑squares fitting), and the weighted sum gives the smoothed output at the central point. (When Adaptive is selected, the window is shifted asymmetrically near edges and coefficients are recomputed from edge-specific least‑squares fits with caching.)
@@ -1290,7 +1291,7 @@ Unlike Gaussian filtering, the weights are **not** based on a bell‑shaped curv
 ```csharp
 else if (useSG)
 {
-    double[] sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder, derivOrder: 0, delta: 1.0);
+    double[] sgCoeffs = ComputeSavitzkyGolayCoefficients(2 * r + 1, polyOrder, derivOrder : 0, delta : 1.0);
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
     
     for (int i = 0; i < input.Length; i++)
@@ -1314,28 +1315,28 @@ Used only when Savitzky-Golay is selected.
 |-------|---------|-------------|
 | 0     | Smoothing (original SG) | Noise reduction while preserving shape |
 | 1     | First derivative (slope) | Trend / rate-of-change detection |
-| 2     | Second derivative (curvature) | Peak / inflection / acceleration analysis |
+| 2     | Second derivative (curvature) | Peak / inflectioN/Acceleration analysis |
 | 3     | Third derivative | Specialized scientific diagnostics (use cautiously) |
 
-Rules & Validation:
+Rules & Validation : 
 - `derivOrder ≤ polyOrder` (enforced during calibration & export).
 - In adaptive edge windows : effective polynomial `effPoly = min(polyOrder, W - 1)`; if `derivOrder > effPoly`, an error is raised.
 - Coefficient scaling : derivative coefficients are multiplied by `factorial(derivOrder) / delta^derivOrder` (`delta = 1.0` in current implementation).
 - For `derivOrder == 0`, coefficients are normalized to sum to 1 (DC preservation). For `derivOrder > 0`, no DC normalization (derivative sums ≠ 1 by design).
 
-Guidance:
+Guidance : 
 - Start with 0 (smoothing) or 1 (slope).  
 - Higher orders rapidly amplify noise - ensure sufficient radius (larger window) before using 2 or 3.  
 - Avoid derivative orders close to polyOrder when the dataset is short or radius is minimal.
 - For Adaptive edge windows, the effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Derivative coefficients are scaled by factorial(derivOrder) / delta^derivOrder after construction, matching the symmetric path.
 
 #### Asymmetric Savitzky-Golay Coefficient Caching
-To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory caches are maintained:
+To avoid recomputing edge-specific polynomial fits repeatedly, two in-memory caches are maintained : 
 
 - `_sgAsymCoeffCache` keyed by `(left, right, effectivePolyOrder)` for smoothing (derivOrder = 0)
 - `_sgAsymDerivCoeffCache` keyed by `(left, right, effectivePolyOrder, derivOrder, deltaBits)` for derivatives
 
-Cache keys :
+Cache keys : 
 - Smoothing : (left, right, effPoly)
 - Derivative : (left, right, effPoly, derivOrder, deltaBits) where deltaBits = BitConverter.DoubleToInt64Bits(delta)
 
@@ -1374,11 +1375,11 @@ slblKernelRadius.Text = r.ToString();
 ### 8.1 Selection Synchronization
 Buttons `btnInitSelectSync` and `btnRefSelectSync` synchronize selected indices and scroll positions between Initial and Refined datasets.
   
-Enablement rule :
+Enablement rule : 
 - Both listboxes must contain the same number of items.
 - At least one item is selected in the source listbox.  
    
-Behavior :
+Behavior : 
 - Clears target selection.
 - Copies all selected indices.
 - Sets `TopIndex` of target to match source for scroll alignment.
@@ -1398,7 +1399,7 @@ Status label displays a synchronized item count message.
 This keeps very large list operations smooth and clearly communicated without blocking the UI thread.
 
 #### 8.3 Refined Clear Behavior
-Clicking "Clear Refined" removes all entries from the Refined Dataset and resets status indicators:
+Clicking "Clear Refined" removes all entries from the Refined Dataset and resets status indicators : 
 - `slblCalibratedType` → "--"
 - `slblKernelRadius` → "--"
 - SG parameter labels hidden : `tlblPolyOrder`, `slblPolyOrder`, and the separator label; `slblPolyOrder` text is set to "--"  
@@ -1657,24 +1658,24 @@ private static double[,] InvertMatrixStrict(double[,] a)
 
 ### 12. CSV Export Functionality
 #### How it works
-When the user selects the CSV export option and clicks Export, the application:
+When the user selects the CSV export option and clicks Export, the application : 
 
-- Reads the initial dataset and selected smoothing parameters (Radius, Polynomial/Derivative for SG, Boundary Method, Alpha).
+- Reads the initial dataset and selected smoothing parameters (Radius, Polynomial / Derivative for SG, Boundary Method, Alpha).
 - Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky‑Golay) in a single `ApplySmoothing` pass that includes the `alpha` parameter for blending.
 - Splits the output into multiple CSV files if the dataset exceeds Excel’s row limit.
 - Writes metadata, parameters, and results to each file in a structured format.
-- When output is split, files are named using the pattern: {baseName}_Part{X}.csv.
-- The SaveFileDialog defaults the file name to the dataset title: "{DatasetTitle}.csv".
+- When output is split, files are named using the pattern : {baseName}_Part{X}.csv.
+- The SaveFileDialog defaults the file name to the dataset title : "{DatasetTitle}.csv".
 - While the SaveFileDialog is open, the main progress bar switches to marquee mode; it is restored afterward.
 
 All enabled filter outputs are computed in one `ApplySmoothing` call (no per‑filter recomputation), then written.
 
-- Alpha blend usage: applied only to Binomial Averaging, Binomial Median, and Gaussian; not applied to Rectangular or Savitzky‑Golay.
-  - Formula per element i: output[i] = α × filtered[i] + (1 − α) × input[i]
+- Alpha blend usage : applied only to Binomial Averaging, Binomial Median, and Gaussian; not applied to Rectangular or Savitzky‑Golay.
+  - Formula per element i : output[i] = α × filtered[i] + (1 − α) × input[i]
 
 #### Principle
 - Modular columns per filter, scalable multi‑part output, and embedded metadata for reproducibility.
-- Conditional header rows include "Alpha Blend" only when it is relevant (Avg / Med / Gauss selected).
+- Conditional header rows include "Alpha Blend" only when it is relevant (Binomial Average / Binomial Median / Gaussian selected).
 
 #### Code Implementation (exact runtime)
 Compute with Alpha (single pass) :
@@ -1737,12 +1738,12 @@ private async Task ExportCsvAsync()
     // 2. Parse UI values : radius (r), polyOrder, derivOrder (if SG), boundaryMode.
     // 3. Validate with ValidateSmoothingParameters (OperationResult).
     // 4. Enforce derivative rule (derivOrder ≤ polyOrder if SG).
-    // 5. Compute all enabled filters in one pass:
+    // 5. Compute all enabled filters in one pass : 
     //      var (rect, binomAvg, median, gauss, sg) = ApplySmoothing(...);
-    // 6. Prepare columns list:
+    // 6. Prepare columns list : 
     //      ("Initial Dataset"), plus each enabled filter.
     // 7. Multi-part writing logic (splits if row threshold exceeded):
-    //      Header layout per part:
+    //      Header layout per part : 
     //          Title
     //          Part X of Y
     //          (blank)
@@ -1750,7 +1751,7 @@ private async Task ExportCsvAsync()
     //          Kernel Radius : r
     //          Kernel Width : (2 * r + 1)
     //          Boundary Method : {Adaptive|Symmetric|Replicate|Zero Padding}
-    // 	        [Alpha Blend : alpha] (if Avg / Med / Gauss)
+    // 	        [Alpha Blend : alpha] (if Binomial Average / Binomial Median / Gaussian)
     //          [Polynomial Order : polyOrder] (if SG)
     //          [Derivative Order : derivOrder] (if SG)
     //          (blank)
@@ -1764,7 +1765,7 @@ private async Task ExportCsvAsync()
 }
 ```
 
-Columns include :
+Columns include : 
 - Initial Dataset
 - Rectangular Averaging
 - Binomial Averaging (alpha‑blended)
@@ -1777,22 +1778,22 @@ Progress is reported 0 - 100 as rows are written; the bar resets to 0 when done.
 
 ### 13. Excel Export Functionality
 #### How it works
-When the user selects Excel export and clicks Export, the application :
+When the user selects Excel export and clicks Export, the application : 
 
 - Reads the initial dataset and all selected parameters from the UI.
-- Applies all enabled filters in one pass with `ApplySmoothing` (Alpha is applied only to Avg/Med/Gauss).
+- Applies all enabled filters in one pass with `ApplySmoothing` (Alpha is applied only to Binomial Average / Binomial Median / Gaussian).
 - Writes each filter result to its own column in a new worksheet.
 - Embeds metadata at the top : title, kernel radius, kernel width, boundary method, alpha (conditional), polynomial / derivative (for SG).
 - Automatically generates a line chart across the written columns.
 - Cleans up all COM objects and runs GC to avoid lingering Excel processes.
 
-Save behavior and progress :
+Save behavior and progress : 
 - If "Open file after save" is unchecked, a SaveFileDialog is shown. While it is open, the main progress bar switches to marquee mode (restored afterward).
 - If a path is chosen, SaveAs is executed. During SaveAs, the progress bar is simulated to 95% using a timer, then set to 100% on completion, and the workbook is closed without showing Excel.
 - If no path is chosen (or saving is skipped), Excel is shown with the unsaved workbook (`excel.Visible = true`) so the user can save manually.
 - A previously considered "open as temporary file" path is currently commented out; the active behavior is "open in Excel without saving."
 
-Additional details :
+Additional details : 
 - Worksheet name is set to the dataset title (txtDatasetTitle.Text).
 - Line chart axes are titled "Value" (Y) and "Sequence Number" (X) for clearer interpretation.
 - Excel export opens an interactive Excel instance with the new workbook; the application does not auto‑save a .xlsx file. Save the workbook from Excel when ready.
@@ -1807,7 +1808,7 @@ Additional details :
 -   **Excel Built-in Document Properties set** : Title, Category, Author, Last Author, Keywords, Subject, Comments (random musical phrase + quartet Easter egg when exactly four methods are enabled).
     
 #### Code Implementation
-Alpha metadata row :
+Alpha metadata row : 
 ```csharp
 ws.Cells[7, 1] = (doAvg || doMed || doGauss)
     ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
@@ -1822,7 +1823,7 @@ ws.Cells[9, 1] = doSG
     : "Derivative Order : N/A";
 ```
 
-SaveFileDialog with marquee while open :
+SaveFileDialog with marquee while open : 
 ```csharp
 var prevStyle = pbMain.Style;
 var prevValue = pbMain.Value;
@@ -1857,7 +1858,7 @@ finally
 }
 ```
 
-Save‑or‑open workflow :
+Save‑or‑open workflow : 
 ```csharp
 bool promptForSave = settingsForm.chbOpenFile != null 
                      && !settingsForm.chbOpenFile.Checked;
@@ -1908,14 +1909,14 @@ if (!string.IsNullOrWhiteSpace(savePath))
     {
         saveProgressTimer.Stop();
         MessageBox.Show(
-            $"Failed to save workbook:\n{sx.Message}",
+            $"Failed to save workbook : \n{sx.Message}",
             "Save Error",
             MessageBoxButtons.OK,
             MessageBoxIcon.Warning
         );
 
         pbMain.Value = 0;
-        // Previously considered: willShowExcel = true; (currently commented out)
+        // Previously considered : willShowExcel = true; (currently commented out)
     }
     finally
     {
@@ -2095,7 +2096,7 @@ COM cleanup and Office guidance (unchanged):
 - All COM RCWs released via `FinalReleaseComObject` + double GC waits.
 - On `COMException`, the user is prompted to open the Microsoft 365 download page.
 
-This behavior ensures:
+This behavior ensures : 
 - Alpha is calculated and documented consistently in both CSV and Excel exports.
 - The SaveFileDialog uses marquee mode while open; SaveAs simulates progress deterministically.
 - If not saved, Excel opens interactively with the unsaved workbook.
@@ -2131,7 +2132,7 @@ All COM RCWs are released via FinalRelease and followed by dual GC cycles to pre
 - **Regex-Based Filtering** : Regular expressions are used to clean HTML tags and extract numbers, allowing flexible input formats.
 
 #### Smoothing Workflow
-When the user clicks **Calibrate** Button :
+When the user clicks **Calibrate** Button : 
 - All input values are converted to a double[] array.
 - Kernel radius and polynomial order are parsed from combo-boxes.
 - The selected filter is applied via Parallel.For (falls back to serial for small datasets).
@@ -2197,7 +2198,7 @@ When the user clicks **Calibrate** Button :
 ### Conclusion
 This application provides a robust and user-friendly environment for noise reduction analysis on numerical datasets. By combining flexible data input methods, a responsive and informative user interface, and efficient parallel processing of advanced filtering algorithms, it enables users to quickly and accurately process their data. The use of Pascal's Triangle for binomial weighting, along with support for a variety of filters, ensures both mathematical rigor and practical versatility. 
 
-In particular :
+In particular : 
 - Uniform mean filtering provides a fast, simple way to suppress random fluctuations.  
 - Weighted median filtering adds robustness against outliers by privileging central values.  
 - Binomial averaging approximates a Gaussian blur, yielding gentle, natural-looking smoothing.  
