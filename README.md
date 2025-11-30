@@ -265,11 +265,20 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 #### November 09, 2025
 > Revised and updated `README.md` documentation.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v5.0.2.0
 #### November 10, 2025
 > Minor bugs fixed.
+</details>
+
+### v5.1.3.0
+#### November 30, 2025
+> Added `Alpha Blend` to runtime smoothing and export pipelines (applies to Binomial Averaging, Binomial Median, Gaussian; excluded for Rectangular / Savitzky‑Golay). Alpha clamped to 0.00 – 1.00 and synchronized with Export Settings.<br><br>
+> CSV / Excel exports updated : conditional "Alpha Blend" metadata, unified single‑pass filtering, large dataset segmentation, and chart generation preserved.<br><br>
+> Excel export UX improved : progress bar switches to marquee while the Save dialog is open; SaveAs simulates progress to 95% and completes at 100%; opens an unsaved workbook for manual save when no path is chosen.<br><br>
+> Ensured consistent Excel SaveFileDialog filter string: "Excel Workbook (*.xlsx)|*.xlsx".<br><br>
+> Minor performance and UI responsiveness improvements
+> Minor bugs fixed
 
 ## Required Components & Setup
 ### Prerequisites
