@@ -27,7 +27,6 @@ E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe.config
 E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe
 E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.pdb
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.exe.config
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
 E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
