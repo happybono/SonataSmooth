@@ -269,7 +269,6 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.0.2.0
 #### November 10, 2025
 > Minor bugs fixed.
-</details>
 
 ### v5.1.3.0
 #### November 30, 2025
@@ -279,6 +278,13 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Ensured consistent Excel SaveFileDialog filter string : "Excel Workbook (*.xlsx)|*.xlsx".<br><br>
 > Minor performance and UI responsiveness improvements.<br><br>
 > Minor bugs fixed.
+</details>
+
+### v5.2.0.0  
+#### December 01, 2025  
+> Newly introduced `.slnx` format: enhanced scalability and compatibility compared to the traditional `.sln`, supporting large‑scale project management and multi‑platform build environments.<br><br>
+> Motivation : to maintain a consistent project structure across diverse runtime / plugin environments and minimize format conflicts during team collaboration.<br><br> 
+> Purpose : to unify solution definitions under a single format, improving maintenance efficiency and enabling smoother integration with future automation pipelines and cloud workflows.  
 
 ## Required Components & Setup
 ### Prerequisites
