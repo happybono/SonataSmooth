@@ -36,7 +36,7 @@ namespace SonataSmooth
 
         public bool DoExcelExport { get; set; } = false;
         public bool DoCSVExport { get; set; } = true;
-        public bool DoAutoSave { get; set; } = true;
+        public bool DoAutoOpen { get; set; } = true;
 
 
         public FrmExportSettings(FrmMain mainForm)
@@ -81,7 +81,7 @@ namespace SonataSmooth
             DoBinomMed = chbMed.Checked;
             DoGauss = chbGauss.Checked;
             DoSavitzky = chbSG.Checked;
-            DoAutoSave = chbOpenFile.Checked;
+            DoAutoOpen = chbOpenFile.Checked;
 
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
@@ -114,7 +114,7 @@ namespace SonataSmooth
             chbMed.Checked = DoBinomMed;
             chbGauss.Checked = DoGauss;
             chbSG.Checked = DoSavitzky;
-            chbOpenFile.Checked = DoAutoSave;
+            chbOpenFile.Checked = DoAutoOpen;
 
             rbtnXLSX.Checked = DoExcelExport;
             rbtnCSV.Checked = DoCSVExport;

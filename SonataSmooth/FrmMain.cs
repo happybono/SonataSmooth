@@ -2383,7 +2383,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             settingsForm.chbSG.Checked = true;
 
             settingsForm.rbtnCSV.Checked = true;
-            settingsForm.DoAutoSave = true;
+            settingsForm.DoAutoOpen = true;
 
             // ComboBox 등 동기화
             settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
