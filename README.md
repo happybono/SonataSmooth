@@ -282,7 +282,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ### v5.2.0.0  
 #### December 01, 2025  
-> Newly introduced `.slnx` format: enhanced scalability and compatibility compared to the traditional `.sln`, supporting large‑scale project management and multi‑platform build environments.<br><br>
+> Newly introduced `.slnx` format : enhanced scalability and compatibility compared to the traditional `.sln`, supporting large‑scale project management and multi‑platform build environments.<br><br>
 > Motivation : to maintain a consistent project structure across diverse runtime / plugin environments and minimize format conflicts during team collaboration.<br><br> 
 > Purpose : to unify solution definitions under a single format, improving maintenance efficiency and enabling smoother integration with future automation pipelines and cloud workflows.  
 
