@@ -289,7 +289,12 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ## Required Components & Setup
 ### Prerequisites
 - Windows Operating System ([**Windows 11**](https://www.microsoft.com/en-us/d/windows-11-home/dg7gmgf0krt0?msockid=3c879b53720a6995028b8dcc732368c0) recommended, compatible with Windows 10)
-- [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481) (target build uses 4.8.1; ARM64-compatible; earlier versions are not tested)
+- [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481)
+  - Runtime : .NET Framework 4.8.1 (native ARM64 supported on Windows 11)
+  - Architectures : ARM64 (native), x64 (native)
+  - Tested on ARM64 devices (native build)
+  - Note : Any native dependencies (P / Invoke / COM) require ARM64 builds
+
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
   - Development environment is recommended to use **Visual Studio 2022 or newer**
 - [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/)
