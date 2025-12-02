@@ -295,7 +295,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/)
   - Excel 2013 Service Pack 1 (clean install) verified to work without additional configuration.
   - Later versions (Excel 2016, 2019, 2021, Microsoft 365) also confirmed stable.
-  - Minimum recommended version: **Excel 2019 or later** for long-term support and reliability.
+  - Minimum recommended version : **Excel 2019 or later** for long-term support and reliability.
   - Bitness must match : **x86 app with 32‑bit Office, or x64 app with 64‑bit** Office.
   - CSV export does not require Microsoft Office.
 
