@@ -293,8 +293,9 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
   - Development environment is recommended to use **Visual Studio 2022 or newer**
 - [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/)
-  - **Excel 2019 or later (including Microsoft 365) is required** for Excel export via Interop.
+  - **Microsoft Excel 2019 or later (including Microsoft 365) is required** for Excel export via Interop.
   - Bitness must match : **x86 app with 32‑bit Office, or x64 app with 64‑bit** Office.
+  - CSV export does not require Microsoft Office.
 
 ### Dependencies
 - `System.Windows.Forms`
