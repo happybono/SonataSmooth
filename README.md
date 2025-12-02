@@ -291,8 +291,8 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Windows Operating System ([**Windows 11**](https://www.microsoft.com/en-us/d/windows-11-home/dg7gmgf0krt0?msockid=3c879b53720a6995028b8dcc732368c0) recommended, compatible with Windows 10)
 - [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481)
   - Runtime : .NET Framework 4.8.1 (native ARM64 supported on Windows 11)
-  - Architectures : ARM64 (native), x64 (native)
-  - Tested on ARM64 devices (native build)
+  - Architectures : ARM64 (native), x64 (native), x86 (native)
+  - Tested on ARM64 / x64 devices (native build)
   - Note : Any native dependencies (P / Invoke / COM) require ARM64 builds
 
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
