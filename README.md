@@ -42,10 +42,10 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 <br>
 
 <div align="center">
-<img alt="GitHub Last Commit" src="https : //img.shields.io/github/last-commit/happybono/SonataSmooth"> 
-<img alt="GitHub Repo Size" src="https : //img.shields.io/github/repo-size/happybono/SonataSmooth">
-<img alt="GitHub Repo Languages" src="https : //img.shields.io/github/languages/count/happybono/SonataSmooth">
-<img alt="GitHub Top Languages" src="https : //img.shields.io/github/languages/top/happybono/SonataSmooth">
+<img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/happybono/SonataSmooth"> 
+<img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
+<img alt="GitHub Repo Languages" src="https://img.shields.io/github/languages/count/happybono/SonataSmooth">
+<img alt="GitHub Top Languages" src="https://img.shields.io/github/languages/top/happybono/SonataSmooth">
 </div>
 
 ## What's New
