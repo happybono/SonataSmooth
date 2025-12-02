@@ -292,7 +292,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Windows Operating System (Windows 10 or later recommended)
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
 - Development environment is recommended to use **Visual Studio 2022 or newer**
-- [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) - **Required for Microsoft Excel export functionality** via `Interop`
+- [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/) - **Excel 2019 or later (including Microsoft 365) is required for Excel export via Interop**. Bitness must match (x86 app with 32‑bit Office, or x64 app with 64‑bit Office).
 
 ### Dependencies
 - `System.Windows.Forms`
@@ -302,7 +302,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ### Initial Setup
 - Clone or download the repository.
-- Open the solution file (`.sln`) in Visual Studio.
+- Open the solution file (`.slnx`) in Visual Studio.
 - Add necessary references if required.
 - Build the project.
 - Run the application.
