@@ -163,7 +163,7 @@ namespace SonataSmooth
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
 
-            // 화면에 보이는 텍스트를 기준으로 선택 (예: "Standard")
+            // 화면에 보이는 텍스트를 기준으로 선택 (예 : "Standard")
             cbxBoundaryMethod.Text = boundaryMethod;
 
             cbxDerivOrder.Text = derivOrder;
