@@ -122,7 +122,7 @@ namespace SonataSmooth
             // ComboBox 에서 선택된 경계 처리 방식을 BoundaryMode 열거형으로 변환
             switch (cbxBoundaryMethod.SelectedItem?.ToString())
             {
-                // 기본값은 Symmetric
+                // 기본 값은 Symmetric
                 case "Symmetric": return BoundaryMode.Symmetric;
 
                 // Adaptive
@@ -134,7 +134,7 @@ namespace SonataSmooth
                 // Zero Padding
                 case "Zero Padding": return BoundaryMode.ZeroPad;
 
-                // 그 외의 값은 기본값으로 처리
+                // 그 외의 값은 기본 값으로 처리
                 default: return BoundaryMode.Symmetric;
             }
         }
@@ -337,7 +337,7 @@ namespace SonataSmooth
                             useMed,
                             useGauss,
                             useSG,
-                            alpha // pass alpha from ComboBox
+                            alpha 
                         );
 
                         // 선택된 필터 결과만 반환
@@ -510,7 +510,7 @@ namespace SonataSmooth
         }
 
         // 입력된 데이터에 대해 다양한 보정 방식 (Smoothing Filter) 을 적용하는 메서드.
-        // Added alpha parameter (default 1.0). For Binomial Average, Weighted Median, Gaussian:
+        // 알파 (alpha) 매개변수를 추가했습니다 (기본 값 1.0). 이항 평균 (Binomial Average), 가중 중앙 값 (Weighted Median), 가우시안 (Gaussian) 보정 방식에 한해서만 적용됩니다 :
         // Output[i] = alpha * Filtered[i] + (1 - alpha) * Original[i].
         private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG)
         ApplySmoothing(double[] input, int r, int polyOrder, int derivOrder, double delta, BoundaryMode boundaryMode, bool doRect, bool doAvg, bool doMed, bool doGauss, bool doSG, double alpha = 1.0)
@@ -2346,7 +2346,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 lblDerivOrder.Enabled = rbtnSG.Checked;
             }
 
-            // alpha 기본값을 1.00 으로 설정하여 기존 동작을 유지
+            // alpha 기본 값을 1.00 으로 설정하여 기존 동작을 유지
             if (cbxAlpha != null && cbxAlpha.Items.Count > 0 && cbxAlpha.SelectedIndex < 0)
                 cbxAlpha.SelectedIndex = cbxAlpha.Items.Count - 1; // "1.00"
 
