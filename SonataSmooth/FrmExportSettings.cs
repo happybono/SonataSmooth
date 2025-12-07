@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace SonataSmooth
         public bool DoRectAvg { get; set; } = true;
         public bool DoBinomAvg { get; set; } = true;
         public bool DoBinomMed { get; set; } = true;
+        public bool doGaussMed { get; set; } = true;
         public bool DoGauss { get; set; } = true;
         public bool DoSavitzky { get; set; } = true;
 
@@ -59,6 +61,7 @@ namespace SonataSmooth
             this.Close();
         }
 
+        // 저장 버튼을 눌렀을 때 설정 값 저장
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (int.TryParse(cbxKernelRadius.Text, out var r))
@@ -79,6 +82,7 @@ namespace SonataSmooth
             DoRectAvg = chbRect.Checked;
             DoBinomAvg = chbAvg.Checked;
             DoBinomMed = chbMed.Checked;
+            doGaussMed = chbGaussMed.Checked;
             DoGauss = chbGauss.Checked;
             DoSavitzky = chbSG.Checked;
             DoAutoOpen = chbOpenFile.Checked;
@@ -86,17 +90,49 @@ namespace SonataSmooth
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
+            // Properties.Settings에 설정 값 저장
+            var s = SonataSmooth.Properties.Settings.Default;
+            s.ExportSmoothingMethods = BuildExportMethodsString(DoRectAvg, DoBinomAvg, DoBinomMed, chbGaussMed.Checked, DoGauss, DoSavitzky);
+            s.ExportFileFormat = rbtnCSV.Checked ? "CSV" : "XLSX";
+            s.AutoOpenAfterSaved = chbOpenFile.Checked;
+
+            // 동기화를 위해 매개변수들과 alpha 값도 함께 저장
+            s.KernelRadius = KernelRadius;
+            s.PolyOrder = PolyOrder;
+            s.BoundaryMethod = BoundaryMethod;
+            s.DerivOrder = DerivOrder;
+
+            // FrmMain.cs 의 alpha 는 double 형식이므로 cbxAlpha 에서 Parsing 하여 적용한다"
+            if (double.TryParse(cbxAlpha.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var alpha))
+                s.AlphaBlend = Math.Max(0.0, Math.Min(1.0, alpha));
+
+            s.Save();
+
             _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text);
+
 
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
+        // ExportSmoothingMethods 문자열을 빌드하기 위한 함수 추가
+        private static string BuildExportMethodsString(bool rect, bool avg, bool med, bool gaussMed, bool gauss, bool sg)
+        {
+            var list = new List<string>(6);
+            if (rect) list.Add("Rect");
+            if (avg) list.Add("Avg");
+            if (med) list.Add("Med");
+            if (gaussMed) list.Add("GaussMed");
+            if (gauss) list.Add("Gauss");
+            if (sg) list.Add("SG");
+            return string.Join(", ", list);
+        }
 
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
 
+            // Restore parameter combos
             cbxKernelRadius.Text = KernelRadius.ToString();
             cbxPolyOrder.Text = PolyOrder.ToString();
 
@@ -109,15 +145,22 @@ namespace SonataSmooth
 
             cbxDerivOrder.Text = DerivOrder.ToString();
 
-            chbRect.Checked = DoRectAvg;
-            chbAvg.Checked = DoBinomAvg;
-            chbMed.Checked = DoBinomMed;
-            chbGauss.Checked = DoGauss;
-            chbSG.Checked = DoSavitzky;
-            chbOpenFile.Checked = DoAutoOpen;
+            // Properties.Settings 에 저장된 환경설정 반영.
+            var s = SonataSmooth.Properties.Settings.Default;
+            var methods = (s.ExportSmoothingMethods ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(m => m.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            rbtnXLSX.Checked = DoExcelExport;
-            rbtnCSV.Checked = DoCSVExport;
+            chbRect.Checked = methods.Contains("Rect");
+            chbAvg.Checked = methods.Contains("Avg");
+            chbMed.Checked = methods.Contains("Med");
+            chbGaussMed.Checked = methods.Contains("GaussMed");
+            chbGauss.Checked = methods.Contains("Gauss");
+            chbSG.Checked = methods.Contains("SG");
+
+            rbtnCSV.Checked = string.Equals(s.ExportFileFormat, "CSV", StringComparison.OrdinalIgnoreCase);
+            rbtnXLSX.Checked = string.Equals(s.ExportFileFormat, "XLSX", StringComparison.OrdinalIgnoreCase);
+
+            chbOpenFile.Checked = s.AutoOpenAfterSaved;
 
             UpdateAlphaEnabled();
         }
@@ -412,6 +455,44 @@ namespace SonataSmooth
         }
 
         private void cbxAlpha_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void chbGaussMed_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Reduces noise by computing a median with Gaussian weights in the kernel window, robust to spikes while emphasizing central values.";
+        }
+
+        private void chbGaussMed_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void btnSetDefault_Click(object sender, EventArgs e)
+        {
+            cbxKernelRadius.Text = "4";
+            cbxPolyOrder.Text = "2";
+            cbxDerivOrder.Text = "0";
+            cbxBoundaryMethod.SelectedIndex = 0;
+            cbxAlpha.Text = "1.00";
+
+            chbRect.Checked = true;
+            chbAvg.Checked = true;
+            chbMed.Checked = true;
+            chbGaussMed.Checked = true;
+            chbGauss.Checked = true;
+            chbSG.Checked = true;
+
+            chbOpenFile.Checked = true;
+        }
+
+        private void btnSetDefault_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Click to reset all settings to their default recommended values.";
+        }
+
+        private void btnSetDefault_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
         }

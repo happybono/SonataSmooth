@@ -89,6 +89,7 @@
             this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
             this.lblKernelRadius = new System.Windows.Forms.Label();
             this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
+            this.rbtnGaussMed = new System.Windows.Forms.RadioButton();
             this.rbtnGauss = new System.Windows.Forms.RadioButton();
             this.rbtnSG = new System.Windows.Forms.RadioButton();
             this.rbtnRect = new System.Windows.Forms.RadioButton();
@@ -923,6 +924,7 @@
             // 
             // gbSmoothMtd
             // 
+            this.gbSmoothMtd.Controls.Add(this.rbtnGaussMed);
             this.gbSmoothMtd.Controls.Add(this.rbtnGauss);
             this.gbSmoothMtd.Controls.Add(this.rbtnSG);
             this.gbSmoothMtd.Controls.Add(this.rbtnRect);
@@ -935,6 +937,22 @@
             this.gbSmoothMtd.TabIndex = 35;
             this.gbSmoothMtd.TabStop = false;
             this.gbSmoothMtd.Text = "Smoothing Methods";
+            // 
+            // rbtnGaussMed
+            // 
+            this.rbtnGaussMed.Appearance = System.Windows.Forms.Appearance.Button;
+            this.rbtnGaussMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.rbtnGaussMed.Location = new System.Drawing.Point(175, 84);
+            this.rbtnGaussMed.Name = "rbtnGaussMed";
+            this.rbtnGaussMed.Size = new System.Drawing.Size(163, 40);
+            this.rbtnGaussMed.TabIndex = 20;
+            this.rbtnGaussMed.TabStop = true;
+            this.rbtnGaussMed.Text = "Gaussian Median";
+            this.rbtnGaussMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.rbtnGaussMed.UseVisualStyleBackColor = true;
+            this.rbtnGaussMed.CheckedChanged += new System.EventHandler(this.rbtnGaussMed_CheckedChanged);
+            this.rbtnGaussMed.MouseLeave += new System.EventHandler(this.rbtnGaussMed_MouseLeave);
+            this.rbtnGaussMed.MouseHover += new System.EventHandler(this.rbtnGaussMed_MouseHover);
             // 
             // rbtnGauss
             // 
@@ -1009,9 +1027,9 @@
             this.rbtnMed.Location = new System.Drawing.Point(7, 84);
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
-            this.rbtnMed.Size = new System.Drawing.Size(331, 40);
+            this.rbtnMed.Size = new System.Drawing.Size(163, 40);
             this.rbtnMed.TabIndex = 16;
-            this.rbtnMed.Text = "Binomial Median Filtering";
+            this.rbtnMed.Text = "Binomial Median";
             this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rbtnMed.UseVisualStyleBackColor = true;
             this.rbtnMed.CheckedChanged += new System.EventHandler(this.rbtnMed_CheckedChanged);
@@ -1044,6 +1062,7 @@
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SonataSmooth";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FrmMain_FormClosed);
             this.Load += new System.EventHandler(this.FrmMain_Load);
             this.gbInitData.ResumeLayout(false);
             this.gbInitData.PerformLayout();
@@ -1123,6 +1142,7 @@
         private System.Windows.Forms.ToolStripStatusLabel tlblSeparator5;
         private System.Windows.Forms.ToolStripStatusLabel tlblAlphaBlend;
         private System.Windows.Forms.ToolStripStatusLabel slblAlphaBlend;
+        private System.Windows.Forms.RadioButton rbtnGaussMed;
     }
 }
 

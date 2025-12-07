@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmExportSettings));
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.btnSave = new System.Windows.Forms.Button();
             this.lblExportConfigTtl = new System.Windows.Forms.Label();
             this.gbExportOpts = new System.Windows.Forms.GroupBox();
             this.chbOpenFile = new System.Windows.Forms.CheckBox();
@@ -50,42 +48,20 @@
             this.cbxKernelRadius = new System.Windows.Forms.ComboBox();
             this.lblKernelRadius = new System.Windows.Forms.Label();
             this.gbSmoothMtd = new System.Windows.Forms.GroupBox();
+            this.chbGaussMed = new System.Windows.Forms.CheckBox();
             this.chbRect = new System.Windows.Forms.CheckBox();
             this.chbAvg = new System.Windows.Forms.CheckBox();
             this.chbSG = new System.Windows.Forms.CheckBox();
             this.chbMed = new System.Windows.Forms.CheckBox();
             this.chbGauss = new System.Windows.Forms.CheckBox();
+            this.btnSetDefault = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.gbExportOpts.SuspendLayout();
             this.statStripExportConfig.SuspendLayout();
             this.gbSmoothParams.SuspendLayout();
             this.gbSmoothMtd.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(654, 337);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(62, 24);
-            this.btnCancel.TabIndex = 17;
-            this.btnCancel.Text = "";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            this.btnCancel.MouseLeave += new System.EventHandler(this.btnCancel_MouseLeave);
-            this.btnCancel.MouseHover += new System.EventHandler(this.btnCancel_MouseHover);
-            // 
-            // btnSave
-            // 
-            this.btnSave.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(563, 337);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(85, 24);
-            this.btnSave.TabIndex = 16;
-            this.btnSave.Text = "";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            this.btnSave.MouseLeave += new System.EventHandler(this.btnSave_MouseLeave);
-            this.btnSave.MouseHover += new System.EventHandler(this.btnSave_MouseHover);
             // 
             // lblExportConfigTtl
             // 
@@ -163,7 +139,7 @@
             this.statStripExportConfig.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
             this.statStripExportConfig.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.slblDesc});
-            this.statStripExportConfig.Location = new System.Drawing.Point(0, 368);
+            this.statStripExportConfig.Location = new System.Drawing.Point(0, 372);
             this.statStripExportConfig.Name = "statStripExportConfig";
             this.statStripExportConfig.Size = new System.Drawing.Size(726, 24);
             this.statStripExportConfig.SizingGrip = false;
@@ -416,6 +392,7 @@
             // 
             // gbSmoothMtd
             // 
+            this.gbSmoothMtd.Controls.Add(this.chbGaussMed);
             this.gbSmoothMtd.Controls.Add(this.chbRect);
             this.gbSmoothMtd.Controls.Add(this.chbAvg);
             this.gbSmoothMtd.Controls.Add(this.chbSG);
@@ -428,6 +405,22 @@
             this.gbSmoothMtd.TabIndex = 35;
             this.gbSmoothMtd.TabStop = false;
             this.gbSmoothMtd.Text = "Smoothing Methods";
+            // 
+            // chbGaussMed
+            // 
+            this.chbGaussMed.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chbGaussMed.Checked = true;
+            this.chbGaussMed.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chbGaussMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.chbGaussMed.Location = new System.Drawing.Point(175, 84);
+            this.chbGaussMed.Name = "chbGaussMed";
+            this.chbGaussMed.Size = new System.Drawing.Size(163, 40);
+            this.chbGaussMed.TabIndex = 8;
+            this.chbGaussMed.Text = "Gaussian Median";
+            this.chbGaussMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chbGaussMed.UseVisualStyleBackColor = true;
+            this.chbGaussMed.MouseLeave += new System.EventHandler(this.chbGaussMed_MouseLeave);
+            this.chbGaussMed.MouseHover += new System.EventHandler(this.chbGaussMed_MouseHover);
             // 
             // chbRect
             // 
@@ -486,9 +479,9 @@
             this.chbMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
             this.chbMed.Location = new System.Drawing.Point(7, 84);
             this.chbMed.Name = "chbMed";
-            this.chbMed.Size = new System.Drawing.Size(331, 40);
+            this.chbMed.Size = new System.Drawing.Size(163, 40);
             this.chbMed.TabIndex = 4;
-            this.chbMed.Text = "Binomial Median Filtering";
+            this.chbMed.Text = "Binomial Median";
             this.chbMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbMed.UseVisualStyleBackColor = true;
             this.chbMed.MouseLeave += new System.EventHandler(this.chbMed_MouseLeave);
@@ -510,19 +503,59 @@
             this.chbGauss.MouseLeave += new System.EventHandler(this.chbGauss_MouseLeave);
             this.chbGauss.MouseHover += new System.EventHandler(this.chbGauss_MouseHover);
             // 
+            // btnSetDefault
+            // 
+            this.btnSetDefault.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSetDefault.Location = new System.Drawing.Point(10, 337);
+            this.btnSetDefault.Name = "btnSetDefault";
+            this.btnSetDefault.Size = new System.Drawing.Size(85, 28);
+            this.btnSetDefault.TabIndex = 38;
+            this.btnSetDefault.Text = "";
+            this.btnSetDefault.UseVisualStyleBackColor = true;
+            this.btnSetDefault.Click += new System.EventHandler(this.btnSetDefault_Click);
+            this.btnSetDefault.MouseLeave += new System.EventHandler(this.btnSetDefault_MouseLeave);
+            this.btnSetDefault.MouseHover += new System.EventHandler(this.btnSetDefault_MouseHover);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSave.Location = new System.Drawing.Point(564, 337);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(85, 28);
+            this.btnSave.TabIndex = 36;
+            this.btnSave.Text = "";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.MouseLeave += new System.EventHandler(this.btnSave_MouseLeave);
+            this.btnSave.MouseHover += new System.EventHandler(this.btnSave_MouseHover);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCancel.Location = new System.Drawing.Point(655, 337);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(62, 28);
+            this.btnCancel.TabIndex = 37;
+            this.btnCancel.Text = "";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.MouseLeave += new System.EventHandler(this.btnCancel_MouseLeave);
+            this.btnCancel.MouseHover += new System.EventHandler(this.btnCancel_MouseHover);
+            // 
             // FrmExportSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(726, 392);
+            this.ClientSize = new System.Drawing.Size(726, 396);
+            this.Controls.Add(this.btnSetDefault);
+            this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.gbSmoothMtd);
             this.Controls.Add(this.gbSmoothParams);
             this.Controls.Add(this.statStripExportConfig);
             this.Controls.Add(this.gbExportOpts);
             this.Controls.Add(this.lblExportConfigTtl);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.btnCancel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
@@ -546,8 +579,6 @@
         }
 
         #endregion
-        internal System.Windows.Forms.Button btnCancel;
-        internal System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Label lblExportConfigTtl;
         private System.Windows.Forms.GroupBox gbExportOpts;
         public System.Windows.Forms.RadioButton rbtnCSV;
@@ -572,5 +603,9 @@
         public System.Windows.Forms.CheckBox chbSG;
         public System.Windows.Forms.CheckBox chbMed;
         public System.Windows.Forms.CheckBox chbGauss;
+        public System.Windows.Forms.CheckBox chbGaussMed;
+        internal System.Windows.Forms.Button btnSetDefault;
+        internal System.Windows.Forms.Button btnSave;
+        internal System.Windows.Forms.Button btnCancel;
     }
 }

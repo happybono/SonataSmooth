@@ -22,5 +22,113 @@ namespace SonataSmooth.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int KernelRadius {
+            get {
+                return ((int)(this["KernelRadius"]));
+            }
+            set {
+                this["KernelRadius"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int BoundaryMethod {
+            get {
+                return ((int)(this["BoundaryMethod"]));
+            }
+            set {
+                this["BoundaryMethod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double AlphaBlend {
+            get {
+                return ((double)(this["AlphaBlend"]));
+            }
+            set {
+                this["AlphaBlend"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int PolyOrder {
+            get {
+                return ((int)(this["PolyOrder"]));
+            }
+            set {
+                this["PolyOrder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int DerivOrder {
+            get {
+                return ((int)(this["DerivOrder"]));
+            }
+            set {
+                this["DerivOrder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Rect, Avg, Med, GaussMed, Gauss, SG")]
+        public string ExportSmoothingMethods {
+            get {
+                return ((string)(this["ExportSmoothingMethods"]));
+            }
+            set {
+                this["ExportSmoothingMethods"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CSV")]
+        public string ExportFileFormat {
+            get {
+                return ((string)(this["ExportFileFormat"]));
+            }
+            set {
+                this["ExportFileFormat"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoOpenAfterSaved {
+            get {
+                return ((bool)(this["AutoOpenAfterSaved"]));
+            }
+            set {
+                this["AutoOpenAfterSaved"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Rect")]
+        public string SmoothingMethod {
+            get {
+                return ((string)(this["SmoothingMethod"]));
+            }
+            set {
+                this["SmoothingMethod"] = value;
+            }
+        }
     }
 }
