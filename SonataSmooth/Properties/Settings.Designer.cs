@@ -37,10 +37,10 @@ namespace SonataSmooth.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int BoundaryMethod {
+        [global::System.Configuration.DefaultSettingValueAttribute("Symmetric")]
+        public string BoundaryMethod {
             get {
-                return ((int)(this["BoundaryMethod"]));
+                return ((string)(this["BoundaryMethod"]));
             }
             set {
                 this["BoundaryMethod"] = value;
@@ -128,6 +128,18 @@ namespace SonataSmooth.Properties {
             }
             set {
                 this["SmoothingMethod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HasUpgradedSettings {
+            get {
+                return ((bool)(this["HasUpgradedSettings"]));
+            }
+            set {
+                this["HasUpgradedSettings"] = value;
             }
         }
     }

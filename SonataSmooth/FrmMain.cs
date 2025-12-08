@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
@@ -75,7 +76,7 @@ namespace SonataSmooth
 
         private bool _suppressAutoBoundary = false;
         private bool _userSelectedBoundary = false;
- 
+
         private volatile bool _settingsSaving;
 
         private string _lastInvalidTitle;
@@ -95,7 +96,11 @@ namespace SonataSmooth
         {
             InitializeComponent();
 
+            UpgradeSettingsIfNeeded();
+
             this.KeyPreview = true;
+
+            EnsureBoundaryItems();
 
             UpdatelbInitDataBtnsState(null, EventArgs.Empty);
             UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
@@ -122,8 +127,26 @@ namespace SonataSmooth
             }
         }
 
+        private static BoundaryMode ParseBoundaryModeFromText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return BoundaryMode.Symmetric;
+            switch (text.Trim())
+            {
+                case "Symmetric": return BoundaryMode.Symmetric;
+                case "Replicate": return BoundaryMode.Replicate;
+                case "Adaptive": return BoundaryMode.Adaptive;
+                case "Zero Padding": return BoundaryMode.ZeroPad;
+                default: return BoundaryMode.Symmetric;
+            }
+        }
+
         private BoundaryMode GetBoundaryMode()
         {
+            var txt = cbxBoundaryMethod.Text;
+            var mode = ParseBoundaryModeFromText(txt);
+            if (mode != BoundaryMode.Symmetric || cbxBoundaryMethod.SelectedIndex >= 0)
+                return mode;
+
             switch (cbxBoundaryMethod.SelectedIndex)
             {
                 case 0: return BoundaryMode.Symmetric;
@@ -131,6 +154,215 @@ namespace SonataSmooth
                 case 2: return BoundaryMode.Adaptive;
                 case 3: return BoundaryMode.ZeroPad;
                 default: return BoundaryMode.Symmetric;
+            }
+        }
+
+        private static void UpgradeSettingsIfNeeded()
+        {
+            var s = SonataSmooth.Properties.Settings.Default;
+
+            // 이미 설정 파일 Migration 이 완료되었다면 생략.
+            if (s.HasUpgradedSettings)
+                return;
+
+            try
+            {
+                // 이전 버전에서 값이 존재하는지 감지
+                bool hasPrev = false;
+                foreach (SettingsProperty p in s.Properties)
+                {
+                    try
+                    {
+                        var prev = s.GetPreviousVersion(p.Name);
+                        if (prev != null) { hasPrev = true; break; }
+                    }
+                    catch
+                    {
+                        // 설정별 문제는 무시.
+
+                    }
+                }
+
+                if (!hasPrev)
+                {
+                    // Migration 할 항목이 없으면 완료로 표시하여 중복 검사 방지
+                    s.HasUpgradedSettings = true;
+                    s.Save();
+                    return;
+                }
+
+                // 호환 가능한 값만 설정 적용
+                foreach (SettingsProperty p in s.Properties)
+                {
+                    object prev = null;
+                    try { prev = s.GetPreviousVersion(p.Name); } catch { prev = null; }
+                    if (prev == null) continue;
+
+                    if (TryConvertSetting(p.Name, prev, p.PropertyType, out var converted))
+                    {
+                        try { s[p.Name] = converted; } catch { /* 할당에 실패하면 기본 값 유지 */ }
+                    }
+                }
+
+                // 알려진 범위 / 형식을 정규화
+                s.AlphaBlend = Math.Max(0.0, Math.Min(1.0, s.AlphaBlend));
+                if (s.DerivOrder < 0) s.DerivOrder = 0;
+                if (s.DerivOrder > 10) s.DerivOrder = 10;
+
+                if (!string.IsNullOrWhiteSpace(s.BoundaryMethod))
+                    s.BoundaryMethod = NormalizeBoundaryMethodString(s.BoundaryMethod);
+
+                // 완료 표시 후 저장
+                s.HasUpgradedSettings = true;
+                s.Save();
+            }
+            catch (Exception ex)
+            {
+                // 실패 시 다음 실행에서 재시도할 수 있도록 HasUpgradedSettings 플래그는 설정하지 않음.
+                try { Debug.WriteLine("[Settings Upgrade] " + ex); } catch { /* ignore */ }
+            }
+        }
+
+        private static bool TryConvertSetting(string name, object value, Type targetType, out object result)
+        {
+            result = null;
+            if (value == null) return false;
+
+            var vType = value.GetType();
+            if (targetType.IsAssignableFrom(vType))
+            {
+                result = value;
+                return true;
+            }
+
+            try
+            {
+                if (targetType == typeof(string))
+                {
+                    var str = Convert.ToString(value, CultureInfo.InvariantCulture);
+                    if (string.Equals(name, "BoundaryMethod", StringComparison.Ordinal))
+                        result = NormalizeBoundaryMethodString(str);
+                    else if (string.Equals(name, "ExportFileFormat", StringComparison.Ordinal))
+                    {
+                        var fmt = (str ?? string.Empty).Trim().ToUpperInvariant();
+                        if (fmt != "CSV" && fmt != "XLSX") return false;
+                        result = fmt;
+                    }
+                    else
+                    {
+                        result = str;
+                    }
+                    return true;
+                }
+
+                if (targetType == typeof(int))
+                {
+                    int iv;
+                    if (value is IConvertible)
+                        iv = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                    else if (!int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Integer, CultureInfo.InvariantCulture, out iv))
+                        return false;
+
+                    if (string.Equals(name, "DerivOrder", StringComparison.Ordinal))
+                    {
+                        if (iv < 0) iv = 0;
+                        if (iv > 10) iv = 10;
+                    }
+                    result = iv;
+                    return true;
+                }
+
+                if (targetType == typeof(double))
+                {
+                    double dv;
+                    if (value is IConvertible)
+                        dv = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                    else if (!double.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out dv))
+                        return false;
+
+                    if (string.Equals(name, "AlphaBlend", StringComparison.Ordinal))
+                    {
+                        if (dv < 0.0) dv = 0.0;
+                        if (dv > 1.0) dv = 1.0;
+                    }
+                    result = dv;
+                    return true;
+                }
+
+                if (targetType == typeof(bool))
+                {
+                    bool bv;
+                    var str = Convert.ToString(value, CultureInfo.InvariantCulture);
+                    if (value is IConvertible)
+                    {
+                        try
+                        {
+                            bv = Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+                        }
+                        catch
+                        {
+                            // 0/1 문자열 지원.
+                            int tmp;
+                            if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out tmp))
+                                bv = tmp != 0;
+                            else if (!bool.TryParse(str, out bv))
+                                return false;
+                        }
+                    }
+                    else
+                    {
+                        int tmp;
+                        if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out tmp))
+                            bv = tmp != 0;
+                        else if (!bool.TryParse(str, out bv))
+                            return false;
+                    }
+                    result = bv;
+                    return true;
+                }
+
+                if (string.Equals(name, "BoundaryMethod", StringComparison.Ordinal) && targetType == typeof(string))
+                {
+                    int idx;
+                    if (int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Integer, CultureInfo.InvariantCulture, out idx))
+                    {
+                        result = NormalizeBoundaryMethodString(IndexToBoundaryText(idx));
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        private static string NormalizeBoundaryMethodString(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return "Symmetric";
+            var t = text.Trim();
+            switch (t)
+            {
+                case "Symmetric": return "Symmetric";
+                case "Replicate": return "Replicate";
+                case "Adaptive": return "Adaptive";
+                case "ZeroPad": return "ZeroPad";
+                case "Zero Padding": return "ZeroPad";
+                default: return "Symmetric";
+            }
+        }
+
+        private static string IndexToBoundaryText(int index)
+        {
+            switch (index)
+            {
+                case 0: return "Symmetric";
+                case 1: return "Replicate";
+                case 2: return "Adaptive";
+                case 3: return "ZeroPad";
+                default: return "Symmetric";
             }
         }
 
@@ -155,8 +387,26 @@ namespace SonataSmooth
             _suppressAutoBoundary = true;
             try
             {
-                int bm = Math.Max(0, Math.Min(3, s.BoundaryMethod));
-                cbxBoundaryMethod.SelectedIndex = bm; // 직접 설정
+                EnsureBoundaryItems();
+
+                var bmText = string.IsNullOrWhiteSpace(s.BoundaryMethod) ? "Symmetric" : s.BoundaryMethod.Trim();
+                // 표시된 텍스트로 항목을 선택하고, 없으면 텍스트 직접 지정.
+          
+                int matchIndex = -1;
+                for (int i = 0; i < cbxBoundaryMethod.Items.Count; i++)
+                {
+                    var txt = cbxBoundaryMethod.Items[i]?.ToString();
+                    if (string.Equals(txt, bmText, StringComparison.Ordinal))
+                    {
+                        matchIndex = i;
+                        break;
+                    }
+                }
+                if (matchIndex >= 0)
+                    cbxBoundaryMethod.SelectedIndex = matchIndex;
+                else
+                    cbxBoundaryMethod.Text = bmText; 
+
                 _userSelectedBoundary = true;
             }
             finally
@@ -164,7 +414,6 @@ namespace SonataSmooth
                 _suppressAutoBoundary = false;
             }
 
-            // Smoothing Method 문자열을 라디오 버튼 선택으로 Mapping
             _suppressAutoBoundary = true;
             try
             {
@@ -186,7 +435,6 @@ namespace SonataSmooth
             }
 
             ApplyExportPersistedToSettingsForm(s);
-
             UpdateAlphaEnablement();
         }
 
@@ -207,9 +455,20 @@ namespace SonataSmooth
             s.AlphaBlend = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
 
             // BoundaryMethod 를 index 값으로 저장 (0 : Symmetric, 1 : Replicate, 2 : Adaptive, 3 : ZeroPad)
-            var idx = cbxBoundaryMethod.SelectedIndex;
-            if (idx < 0 || idx > 3) idx = 0;
-            s.BoundaryMethod = idx;
+            var bmText = cbxBoundaryMethod.Text;
+            if (string.IsNullOrWhiteSpace(bmText))
+            {
+                // 텍스트가 없는 경우 인덱스를 이용해 값을 유추
+                switch (cbxBoundaryMethod.SelectedIndex)
+                {
+                    case 0: bmText = "Symmetric"; break;
+                    case 1: bmText = "Replicate"; break;
+                    case 2: bmText = "Adaptive"; break;
+                    case 3: bmText = "ZeroPad"; break;
+                    default: bmText = "Symmetric"; break;
+                }
+            }
+            s.BoundaryMethod = bmText.Trim();
 
             // SmoothingMethod 를 Radio Button 선택 상태로 저장
             s.SmoothingMethod =
@@ -2560,6 +2819,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
+            EnsureBoundaryItems();
             LoadUserSettings_Main();
 
             if (cbxDerivOrder != null)
@@ -2641,7 +2901,11 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             // 이미 로드된 값을 기준으로, 매개변수 Combo Box 를 메인 설정과 동기화.
             settingsForm.cbxKernelRadius.Text = cbxKernelRadius.Text;
             settingsForm.cbxPolyOrder.Text = cbxPolyOrder.Text;
-            settingsForm.cbxBoundaryMethod.Text = cbxBoundaryMethod.Text;
+
+            // 경계 모드 동기화를 인덱스 대신 텍스트 기준으로 수행한다
+            var bmText = string.IsNullOrWhiteSpace(s.BoundaryMethod) ? cbxBoundaryMethod.Text : s.BoundaryMethod.Trim();
+            settingsForm.cbxBoundaryMethod.Text = bmText;
+
             settingsForm.cbxDerivOrder.Text = cbxDerivOrder?.Text ?? "0";
             settingsForm.cbxAlpha.Text = cbxAlpha.Text;
         }
@@ -3783,7 +4047,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
         private void cbxBoundaryMethod_SelectedIndexChanged(object sender, EventArgs e)
         {
             _userSelectedBoundary = true;
-            settingsForm.BoundaryMethod = cbxBoundaryMethod.SelectedIndex;
+
             settingsForm.cbxBoundaryMethod.Text = cbxBoundaryMethod.Text;
         }
 
@@ -3900,6 +4164,19 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
         }
 
+        private void EnsureBoundaryItems()
+        {
+            if (cbxBoundaryMethod == null) return;
+
+            if (cbxBoundaryMethod.Items.Count == 0)
+            {
+                cbxBoundaryMethod.Items.Add("Symmetric");
+                cbxBoundaryMethod.Items.Add("Replicate");
+                cbxBoundaryMethod.Items.Add("Adaptive");
+                cbxBoundaryMethod.Items.Add("Zero Padding");
+            }
+        }
+
         private void UpdateExportExcelButtonState()
         {
             bool hasItems = lbInitData.Items.Count > 0;
@@ -3938,10 +4215,20 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
         }
 
-
         private void SetBoundaryMethod(string target)
         {
-            if (cbxBoundaryMethod.Items.Count == 0) return;
+            if (_userSelectedBoundary)
+                return;
+
+            if (cbxBoundaryMethod.Items.Count == 0)
+            {
+                cbxBoundaryMethod.Text = target;
+                if (settingsForm != null)
+                {
+                    settingsForm.cbxBoundaryMethod.Text = target;
+                }
+                return;
+            }
 
             for (int i = 0; i < cbxBoundaryMethod.Items.Count; i++)
             {
@@ -3951,11 +4238,17 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     cbxBoundaryMethod.SelectedIndex = i;
                     if (settingsForm != null)
                     {
-                        settingsForm.BoundaryMethod = i;
                         settingsForm.cbxBoundaryMethod.Text = txt;
                     }
                     return;
                 }
+            }
+
+            // 해당 항목을 찾지 못하면 텍스트를 직접 지정
+            cbxBoundaryMethod.Text = target;
+            if (settingsForm != null)
+            {
+                settingsForm.cbxBoundaryMethod.Text = target;
             }
         }
 

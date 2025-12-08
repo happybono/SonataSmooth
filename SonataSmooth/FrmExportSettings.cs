@@ -99,7 +99,7 @@ namespace SonataSmooth
             // 동기화를 위해 매개변수들과 alpha 값도 함께 저장
             s.KernelRadius = KernelRadius;
             s.PolyOrder = PolyOrder;
-            s.BoundaryMethod = BoundaryMethod;
+            s.BoundaryMethod = cbxBoundaryMethod.Text;
             s.DerivOrder = DerivOrder;
 
             // FrmMain.cs 의 alpha 는 double 형식이므로 cbxAlpha 에서 Parsing 하여 적용한다"
@@ -171,6 +171,7 @@ namespace SonataSmooth
             bool enable =
                 (chbAvg != null && chbAvg.Checked) ||
                 (chbMed != null && chbMed.Checked) ||
+                (chbGaussMed != null && chbGaussMed.Checked) ||
                 (chbGauss != null && chbGauss.Checked);
 
             if (lblAlpha != null) lblAlpha.Enabled = enable;

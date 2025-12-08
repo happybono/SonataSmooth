@@ -5,8 +5,8 @@
     <Setting Name="KernelRadius" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
-    <Setting Name="BoundaryMethod" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="BoundaryMethod" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Symmetric</Value>
     </Setting>
     <Setting Name="AlphaBlend" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
@@ -28,6 +28,9 @@
     </Setting>
     <Setting Name="SmoothingMethod" Type="System.String" Scope="User">
       <Value Profile="(Default)">Rect</Value>
+    </Setting>
+    <Setting Name="HasUpgradedSettings" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
