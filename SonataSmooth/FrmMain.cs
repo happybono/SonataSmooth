@@ -3949,6 +3949,16 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     {
                         /* ignore */ 
                     }
+
+                    bool openAfter = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
+                    if (!openAfter)
+                    {
+                        MessageBox.Show(this,
+                            "Excel export completed.",
+                            "Export Excel",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
                 }
             }
             catch (System.Runtime.InteropServices.COMException ex)
