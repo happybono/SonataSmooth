@@ -546,49 +546,49 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 
 ### Boundary Handling Method
 Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.  
-Adaptive paths differ per filter:
+Adaptive paths differ per filter :
 - `Rect`, `Avg`, `Med`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per shape.
 
-Note: `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
+Note : `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
 ### Choosing a Mode
-- Symmetric: recommended default for smooth analytical signals (mirror mapping).
-- Replicate: suitable for stepwise/plateau sensor data (nearest endpoint).
-- ZeroPad: emphasizes decay/contrast at boundaries.
-- Adaptive: edge‑aware; window trimming or shifting per filter (see below).
+- Symmetric : recommended default for smooth analytical signals (mirror mapping).
+- Replicate : suitable for stepwise / plateau sensor data (nearest endpoint).
+- ZeroPad : emphasizes decay / contrast at boundaries.
+- Adaptive : edge‑aware; window trimming or shifting per filter (see below).
 
 Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_suppressAutoBoundary` prevents feedback loops):
-- Rectangular selected → Boundary Method set to “Replicate”
-- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median selected → Boundary Method set to “Symmetric”
-- Savitzky‑Golay selected → Boundary Method set to “Adaptive”
+- Rectangular selected → Boundary Method set to "Replicate"
+- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median selected → Boundary Method set to "Symmetric"
+- Savitzky‑Golay selected → Boundary Method set to "Adaptive"
 
 ### Adaptive Mode (per‑filter logic)
-- Rectangular (Moving Average):
-  - Window shrinks at edges: `W = left + right + 1`
+- Rectangular (Moving Average) :
+  - Window shrinks at edges : `W = left + right + 1`
   - Averages only in‑range samples (no zero/replicate bias)
 
-- Binomial Average:
+- Binomial Average :
   - Computes a fresh binomial row for the truncated `W` using `CalcBinomialCoefficients(W)`
   - Normalizes by the local sum; does not slice the full `2r + 1` row
 
-- Binomial Median (Weighted Median with binomial weights):
+- Binomial Median (Weighted Median with binomial weights) :
   - Recomputes local binomial weights for truncated `W`
   - Performs weighted median over strictly in‑range values sorted by value
 
-- Gaussian:
+- Gaussian :
   - Recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`
   - Coefficients are normalized (sum = 1); no padding distortions
 
-- Gaussian Weighted Median:
+- Gaussian Weighted Median :
   - Recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
 
-- Savitzky‑Golay (Smoothing or Derivative):
-  - Attempts to retain window length `2r + 1` by shifting left/right near edges
+- Savitzky‑Golay (Smoothing or Derivative) :
+  - Attempts to retain window length `2r + 1` by shifting left / right near edges
   - Effective polynomial order: `effPoly = min(polyOrder, W - 1)`
   - Throws `InvalidOperationException` if `derivOrder > effPoly`
-  - Uses asymmetric coefficients from least‑squares on the shifted grid (recomputed for each `(left,right)` shape)
+  - Uses asymmetric coefficients from least‑squares on the shifted grid (recomputed for each `(left, right)` shape)
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
