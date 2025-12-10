@@ -886,19 +886,19 @@ namespace SonataSmooth
         // Output[i] = alpha * Filtered[i] + (1 - alpha) * Original[i].
         private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, double[] Gauss, double[] SG)
        ApplySmoothing(
-    double[] input,
-    int r,
-    int polyOrder,
-    int derivOrder,
-    double delta,
-    BoundaryMode boundaryMode,
-    bool doRect,
-    bool doAvg,
-    bool doMed,
-    bool doGaussMed,
-    bool doGauss,
-    bool doSG,
-    double alpha = 1.0)
+            double[] input,
+            int r,
+            int polyOrder,
+            int derivOrder,
+            double delta,
+            BoundaryMode boundaryMode,
+            bool doRect,
+            bool doAvg,
+            bool doMed,
+            bool doGaussMed,
+            bool doGauss,
+            bool doSG,
+            double alpha = 1.0)
         {
             var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
             if (!vr.Success)
@@ -3150,7 +3150,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 1 + // Kernel Radius
                 1 + // Kernel Width
                 1 + // Boundary Method
-                ((doAvg || doMed || doGauss || doGaussMed) ? 1 : 0) + // Alpha
+                ((doAvg || doMed || doGaussMed || doGauss) ? 1 : 0) + // Alpha
                 (doSG ? 1 : 0) + // Polynomial Order
                 (doSG ? 1 : 0) + // Derivative Order
                 1 + // blank
@@ -3199,7 +3199,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         await sw.WriteLineAsync($"Kernel Radius : {r}");
                         await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
                         await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
-                        if (doAvg || doMed || doGauss)
+                        if (doAvg || doMed || doGaussMed || doGauss)
                             await sw.WriteLineAsync($"Alpha Blend : {alpha}");
                         if (doSG) await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
                         if (doSG) await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
