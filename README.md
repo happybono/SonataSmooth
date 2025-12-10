@@ -380,20 +380,20 @@ Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDeriv
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
 
 ### Filter Comparison Table
-| Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Weighted Median Filtering | Gaussian Filtering | Savitzky‑Golay Filtering |
-|:--------------------------------------------------------|:---------------------:|:------------------:|:------------------------:|:---------------------------------:|:------------------:|:------------------------:|
-| Occasional random noise                                 | OK                    | Good               | Very Good                | **Excellent**                      | Good               | **Very Good**            |
-| Frequent random noise                                   | Poor                  | Fair               | **Excellent**            | Fair                               | Fair               | Fair                     |
-| Large slow trend changes                                | Poor                  | Good               | Good                     | Good                               | Good               | **Excellent**            |
-| Sudden spikes (sharp single jumps, occasional)          | Poor                  | Fair               | **Excellent**            | Very Good                          | Fair               | Fair                     |
-| Sudden spikes (sharp single jumps, frequent/consecutive)| Poor                  | Fair               | Fair                     | **Excellent**                      | Fair               | Fair                     |
-| Regular large-amplitude waves                           | Poor                  | Fair               | Fair                     | Good                               | Fair               | **Excellent**            |
-| Step changes (sudden level shifts)                      | Poor                  | Fair               | **Excellent**            | Very Good                          | Fair               | Fair                     |
-| Mixed-frequency oscillations                            | Poor                  | Good               | Fair                     | Good                               | Good               | **Excellent**            |
-| Periodic high-frequency noise (steady tone)             | **Excellent**         | Fair               | Fair                     | Good                               | Good               | Good                     |
-| Slowly drifting baseline with tiny jitter               | Good                  | Good               | **Excellent**            | Very Good                          | Good               | Very Good                |
-| Natural signal flow with smooth curves & gentle noise   | Fair                  | Good               | Good                     | **Excellent**                      | **Excellent**      | Very Good                |
-| Stable periodic signal with moderate high-frequency noise | Fair                 | **Excellent**      | Fair                     | Good                               | Good               | Good                     |
+| Signal Pattern                                            | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Weighted Median Filtering | Gaussian Filtering | Savitzky‑Golay Filtering |
+|:----------------------------------------------------------|:---------------------:|:------------------:|:-------------------------:|:----------------------------------:|:------------------:|:------------------------:|
+| Occasional random noise                                   | OK                    | Good               | Very Good                 | **Excellent**                      | Good               | Very Good                |
+| Frequent random noise                                     | Poor                  | Fair               | **Excellent**             | Fair                               | Fair               | Fair                     |
+| Large slow trend changes                                  | Poor                  | Good               | Good                      | Good                               | Good               | **Excellent**            |
+| Sudden spikes (sharp single jumps, occasional)            | Poor                  | Fair               | **Excellent**             | Very Good                          | Fair               | Fair                     |
+| Sudden spikes (sharp single jumps, frequent/consecutive)  | Poor                  | Fair               | Fair                      | **Excellent**                      | Fair               | Fair                     |
+| Regular large-amplitude waves                             | Poor                  | Fair               | Fair                      | Good                               | Fair               | **Excellent**            |
+| Step changes (sudden level shifts)                        | Poor                  | Fair               | **Excellent**             | Very Good                          | Fair               | Fair                     |
+| Mixed-frequency oscillations                              | Poor                  | Good               | Fair                      | Good                               | Good               | **Excellent**            |
+| Periodic high-frequency noise (steady tone)               | **Excellent**         | Fair               | Fair                      | Good                               | Good               | Good                     |
+| Slowly drifting baseline with tiny jitter                 | Good                  | Good               | **Excellent**             | Very Good                          | Good               | Very Good                |
+| Natural signal flow with smooth curves & gentle noise     | Fair                  | Good               | Good                      | **Excellent**                      | **Excellent**      | Very Good                |
+| Stable periodic signal with moderate high-frequency noise | Fair                  | **Excellent**      | Fair                      | Good                               | Good               | Good                     |
 
 ---
 
