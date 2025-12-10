@@ -544,7 +544,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 }
 ```
 
-### Boundary Handling Method (revised to match FrmMain.cs)
+### Boundary Handling Method
 Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.
 
 Adaptive paths differ per filter :
