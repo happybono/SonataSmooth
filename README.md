@@ -284,7 +284,6 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Newly introduced `.slnx` format : enhanced scalability and compatibility compared to the traditional `.sln`, supporting large‑scale project management and multi‑platform build environments.<br><br>
 > Motivation : to maintain a consistent project structure across diverse runtime / plugin environments and minimize format conflicts during team collaboration.<br><br> 
 > Purpose : to unify solution definitions under a single format, improving maintenance efficiency and enabling smoother integration with future automation pipelines and cloud workflows.
-</details>
 
 ### v5.3.0.0
 #### December 08, 2025
@@ -292,6 +291,14 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Introduced the **Gaussian Weighted Median Filter (GMMF)**, providing advanced smoothing and correction capabilities. This method enhances data fidelity by reducing noise while preserving critical signal characteristics, offering more accurate results for complex workflows.<br><br>
 > A new `Restore to Default` button has been added to the settings interface, enabling users to quickly revert configurations to their original baseline values. This improves usability and reduces friction when experimenting with different settings.<br><br>
 > Various minor bugs have been fixed, and overall usability has been refined to deliver a smoother, more reliable user experience.
+</details>
+
+### v5.3.1.0
+#### December 10, 2025
+> Store and restore `BoundaryMethod` using text values to ensure consistent display across sessions.<br><br>
+> When "Open after save" is unchecked, a "Excel export completed." message box is shown after successful Excel (.xlsx) export, consistent with the existing CSV export completion behavior.<br><br>
+> On first launch after upgrade, compatible settings are migrated once via `HasUpgradedSettings`, and subsequent launches preserve user‑modified values through normal save / load.<br><br>
+> Minor bugs fixed.
 
 ## Required Components & Setup
 ### Prerequisites
@@ -373,26 +380,32 @@ Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDeriv
 This guide explains how different noise filters work with different types of signals. It also simply introduces Pascal's Triangle.
 
 ### Filter Comparison Table
-| Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Filtering | Savitzky‑Golay Filtering |
-|:--------------------------------------------------------|:---------------------:|:------------------:|:------------------------:|:------------------:|:------------------------:|
-| Occasional random noise                                 | OK                    | Good               | **Very Good**                 | Good               | **Very Good**                |
-| Frequent random noise                                   | Poor                  | Fair               | **Excellent**                 | Fair               | Fair                     |
-| Large slow trend changes                                | Poor                  | Good               | Good                      | Good               | **Excellent**                |
-| Sudden spikes (sharp single jumps)                      | Poor                  | Fair               | **Excellent**                 | Fair               | Fair                     |
-| Regular large-amplitude waves                           | Poor                  | Fair               | Fair                      | Fair               | **Excellent**                |
-| Step changes (sudden level shifts)                      | Poor                  | Fair               | **Good**                      | Fair               | Fair                     |
-| Mixed-frequency oscillations                            | Poor                  | Good               | Fair                      | Good               | **Excellent**                |
-| Periodic high-frequency noise (steady tone)             | **Excellent**             | Fair               | Fair                      | Good               | Good                     |
-| Slowly drifting baseline with tiny jitter               | Good                  | Good               | **Very Good**                 | Good               | **Very Good**                |
-| Natural signal flow with smooth curves & gentle noise   | Fair                  | Good               | Good                      | **Excellent**      | Very Good                |
-| Stable periodic signal with moderate high-frequency noise | Fair           | **Excellent**      | Fair                      | Good               | Good                     |
+| Signal Pattern                                          | Rectangular Averaging | Binomial Averaging | Binomial Median Filtering | Gaussian Weighted Median Filtering | Gaussian Filtering | Savitzky‑Golay Filtering |
+|:--------------------------------------------------------|:---------------------:|:------------------:|:------------------------:|:---------------------------------:|:------------------:|:------------------------:|
+| Occasional random noise                                 | OK                    | Good               | Very Good                | **Excellent**                      | Good               | **Very Good**            |
+| Frequent random noise                                   | Poor                  | Fair               | **Excellent**            | Fair                               | Fair               | Fair                     |
+| Large slow trend changes                                | Poor                  | Good               | Good                     | Good                               | Good               | **Excellent**            |
+| Sudden spikes (sharp single jumps, occasional)          | Poor                  | Fair               | **Excellent**            | Very Good                          | Fair               | Fair                     |
+| Sudden spikes (sharp single jumps, frequent/consecutive)| Poor                  | Fair               | Fair                     | **Excellent**                      | Fair               | Fair                     |
+| Regular large-amplitude waves                           | Poor                  | Fair               | Fair                     | Good                               | Fair               | **Excellent**            |
+| Step changes (sudden level shifts)                      | Poor                  | Fair               | **Excellent**            | Very Good                          | Fair               | Fair                     |
+| Mixed-frequency oscillations                            | Poor                  | Good               | Fair                     | Good                               | Good               | **Excellent**            |
+| Periodic high-frequency noise (steady tone)             | **Excellent**         | Fair               | Fair                     | Good                               | Good               | Good                     |
+| Slowly drifting baseline with tiny jitter               | Good                  | Good               | **Excellent**            | Very Good                          | Good               | Very Good                |
+| Natural signal flow with smooth curves & gentle noise   | Fair                  | Good               | Good                     | **Excellent**                      | **Excellent**      | Very Good                |
+| Stable periodic signal with moderate high-frequency noise | Fair                 | **Excellent**      | Fair                     | Good                               | Good               | Good                     |
+
+---
 
 ### Verdict
-- **Rectangular Averaging** is simple, but surprisingly effective for steady high-frequency noise.
-- **Binomial Averaging** is a good middle ground : especially for periodic signals with moderate noise.
-- **Binomial Median Filtering** is a powerhouse for handling spikes, frequent noise, and step changes : great for robustness.
-- **Gaussian Filtering** offers smooth results but may not handle abrupt changes well.
-- **Savitzky‑Golay Filtering** excels in preserving wave shapes, trends, and mixed frequencies : ideal for scientific data or smooth curves.
+- **Rectangular Averaging**: Simple but effective for steady high‑frequency noise suppression.  
+- **Binomial Averaging**: A balanced middle ground, especially strong for periodic signals with moderate noise.  
+- **Binomial Median Filtering**: The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
+- **Gaussian Weighted Median Filtering (GWMF)**: A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
+- **Gaussian Filtering**: Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
+- **Savitzky‑Golay Filtering**: Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
+
+**Overall:** Binomial Median Filtering demonstrates the highest aggregate performance across diverse signal types and evaluation metrics. GWMF provides a versatile alternative, especially strong for occasional spikes and noisy smooth‑curve scenarios, while other filters retain niche strengths in specific contexts.
 
 ## What Is Pascal's Triangle?
 Pascal's Triangle is a triangle of numbers built like this : 
