@@ -544,31 +544,51 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 }
 ```
 
-Non‑Adaptive paths (Rect / Avg / Median / Gauss / SG) fetch samples via a unified accessor (`Sample(i + k)`) that calls `GetValueWithBoundary`. In Adaptive mode, filters that shrink the window (Rect / Avg / Median / Gauss) access only in‑range samples directly, and Savitzky-Golay shifts an asymmetric window; both avoid padding and match the intended edge semantics. `WeightedMedianAt`'s non‑Adaptive path also uses the accessor for consistency.  
-  
-Note : `GetIndex` remains only for compatibility; current code paths either use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
+### Boundary Handling Method
+Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.  
+Adaptive paths differ per filter:
+- `Rect`, `Avg`, `Med`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
+- `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per shape.
+
+Note: `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
 ### Choosing a Mode
-- Use **Symmetric** for smooth analytical signals (recommended default).
-- Use **Replicate** for stepwise / plateau sensor data.
-- Use **ZeroPad** when emphasizing decay or isolating interior structure.
+- Symmetric: recommended default for smooth analytical signals (mirror mapping).
+- Replicate: suitable for stepwise/plateau sensor data (nearest endpoint).
+- ZeroPad: emphasizes decay/contrast at boundaries.
+- Adaptive: edge‑aware; window trimming or shifting per filter (see below).
 
-Auto-switching behavior : 
-- Rectangular (when selected) → Boundary Method automatically set to Replicate
-- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median (when selected) → Boundary Method automatically set to Symmetric
-- Savitzky-Golay (when selected) → Boundary Method automatically set to Adaptive
+Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_suppressAutoBoundary` prevents feedback loops):
+- Rectangular selected → Boundary Method set to “Replicate”
+- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median selected → Boundary Method set to “Symmetric”
+- Savitzky‑Golay selected → Boundary Method set to “Adaptive”
 
-Note : Auto-switching is suppressed if the user already chose a boundary (via `_userSelectedBoundary`), and internally `_suppressAutoBoundary` avoids feedback loops during programmatic changes.
+### Adaptive Mode (per‑filter logic)
+- Rectangular (Moving Average):
+  - Window shrinks at edges: `W = left + right + 1`
+  - Averages only in‑range samples (no zero/replicate bias)
 
-### Adaptive Mode
-Adaptive handling executes distinct logic per filter : 
-- Rectangular (Moving Average) : At edges, window size W shrinks (W = left + right + 1) and only available samples are averaged (no zero / replicate bias).
-- Binomial Average : Recomputes a fresh binomial coefficient row for the truncated W (NOT a slice of the full 2r + 1 row) ensuring proper central weighting.
-- Weighted Median : Uses a recomputed binomial coefficient vector for truncated W, then performs weighted median over strictly in-range values.
-- Gaussian : Recomputes a Gaussian kernel of length W with σ = W / 6.0 and normalizes; avoids distortion from padding.
-- Savitzky-Golay (Smoothing or Derivative) : Attempts to retain full intended window size (2r + 1) by shifting window left / right when near boundaries. If the dataset cannot supply full support, effective polynomial order is clamped : effPoly = min(polyOrder, W - 1). Asymmetric coefficients are generated via least‑squares on the shifted grid (left / right adjusted so i + right ≤ n − 1) and cached for performance. 
+- Binomial Average:
+  - Computes a fresh binomial row for the truncated `W` using `CalcBinomialCoefficients(W)`
+  - Normalizes by the local sum; does not slice the full `2r + 1` row
 
-When the Savitzky-Golay method is selected (radio button checked), the boundary method is automatically switched to Adaptive to enable asymmetric window logic and derivative edge stability.
+- Binomial Median (Weighted Median with binomial weights):
+  - Recomputes local binomial weights for truncated `W`
+  - Performs weighted median over strictly in‑range values sorted by value
+
+- Gaussian:
+  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`
+  - Coefficients are normalized (sum = 1); no padding distortions
+
+- Gaussian Weighted Median:
+  - Recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`
+  - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
+
+- Savitzky‑Golay (Smoothing or Derivative):
+  - Attempts to retain window length `2r + 1` by shifting left/right near edges
+  - Effective polynomial order: `effPoly = min(polyOrder, W - 1)`
+  - Throws `InvalidOperationException` if `derivOrder > effPoly`
+  - Uses asymmetric coefficients from least‑squares on the shifted grid (recomputed for each `(left,right)` shape)
 
 ## Features & Algorithms
 ### 1. Initialization & Input Processing
