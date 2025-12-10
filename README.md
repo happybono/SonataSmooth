@@ -909,60 +909,77 @@ Note : The smoothing pass uses only `Parallel.For`; PLINQ is used solely for inp
 
 #### Code Implementation
 ```csharp
-private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, double[] Gauss, double[] SG) ApplySmoothing(
-    double[] input,
-    int r,
-    int polyOrder,
-    int derivOrder,
-    double delta,
-    BoundaryMode boundaryMode,
-    bool doRect,
-    bool doAvg,
-    bool doMed,
-    bool doGaussMed,
-    bool doGauss,
-    bool doSG,
-    double alpha = 1.0)
-    {
+private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, double[] Gauss, double[] SG)
+    ApplySmoothing(
+        double[] input,
+        int r,
+        int polyOrder,
+        int derivOrder,
+        double delta,
+        BoundaryMode boundaryMode,
+        bool doRect,
+        bool doAvg,
+        bool doMed,
+        bool doGaussMed,
+        bool doGauss,
+        bool doSG,
+        double alpha = 1.0)
+{
     var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
     if (!vr.Success)
         throw new InvalidOperationException(vr.Error);
 
+    // Savitzky-Golay constraint : derivative order must not exceed polynomial order
     if (doSG && derivOrder > polyOrder)
-        throw new InvalidOperationException($"Derivative order must be ≤ polynomial order.");
+    {
+        throw new InvalidOperationException(
+            $"Derivative order must be ≤ polynomial order.\n\n" +
+            $"Current derivativeOrder : {derivOrder}\n" +
+            $"Current polyOrder : {polyOrder}");
+    }
 
     int n = input.Length;
     int windowSize = 2 * r + 1;
 
+    // Precompute weight vectors where applicable
     long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
+    double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
     double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
 
-    // SG symmetric coefficients only when NOT Adaptive
+    // SG symmetric coefficients (used only when not in Adaptive boundary mode)
     double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
-        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, 0, 1.0)
+        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder: 0, delta: 1.0)
         : null;
 
     double[] sgDerivCoeffs = (doSG && derivOrder > 0 && boundaryMode != BoundaryMode.Adaptive)
-        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder, 1.0)
+        ? ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder, delta)
         : null;
 
     var rect = new double[n];
     var binomAvg = new double[n];
     var median = new double[n];
+    var gaussMedian = new double[n];
     var gauss = new double[n];
     var sg = new double[n];
 
+    // Precompute constants for averaging
     double invRectDiv = (doRect && windowSize > 0) ? 1.0 / windowSize : 0.0;
     double binomSum = 0.0;
-
     if (doAvg && binom != null)
     {
         for (int i = 0; i < binom.Length; i++)
             binomSum += binom[i];
     }
 
+    // Unified boundary-aware sample accessor
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
+    // Clamp alpha once for the entire pass
+    double a = alpha;
+    if (a < 0.0) a = 0.0;
+    else if (a > 1.0) a = 1.0;
+
+    // Adaptive window helper (trim to available samples)
     void GetAdaptiveWindow(int center, out int left, out int right, out int start)
     {
         left = Math.Min(r, center);
@@ -972,111 +989,120 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
 
     bool useParallel = n >= 2000;
 
-    Action<int> act = i =>
+    Action<int> smoothingAction = i =>
     {
-        // Rectangular
+        // Rectangular (no blending)
         if (doRect)
         {
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 GetAdaptiveWindow(i, out int left, out int right, out int start);
                 int W = left + right + 1;
-                double sum = 0;
-                for (int p = 0; p < W; p++)
-                    sum += input[start + p];
+                double sum = 0.0;
+                for (int pos = 0; pos < W; pos++)
+                    sum += input[start + pos];
                 rect[i] = W > 0 ? sum / W : 0.0;
             }
             else
             {
-                double sum = 0;
+                double sum = 0.0;
                 for (int k = -r; k <= r; k++)
                     sum += Sample(i + k);
                 rect[i] = sum * invRectDiv;
             }
         }
 
-        // Binomial Average
+        // Binomial Average (with blending)
         if (doAvg && binom != null)
         {
+            double filtered;
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 GetAdaptiveWindow(i, out int left, out int right, out int start);
                 int W = left + right + 1;
                 if (W < 1)
                 {
-                    binomAvg[i] = 0.0;
+                    filtered = 0.0;
                 }
                 else
                 {
-                    var localBinom = CalcBinomialCoefficients(W);
-                    long localSum = 0;
-                    for (int p = 0; p < W; p++)
-                        localSum += localBinom[p];
+                    long[] localBinom = CalcBinomialCoefficients(W);
+                    double localSum = 0.0;
+                    for (int j = 0; j < W; j++) localSum += localBinom[j];
 
-                    double sum = 0;
-                    for (int p = 0; p < W; p++)
-                        sum += input[start + p] * localBinom[p];
+                    double sum = 0.0;
+                    for (int pos = 0; pos < W; pos++)
+                        sum += input[start + pos] * localBinom[pos];
 
-                    binomAvg[i] = localSum > 0 ? sum / localSum : 0.0;
+                    filtered = localSum > 0 ? sum / localSum : 0.0;
                 }
             }
             else
             {
-                double sum = 0;
+                double sum = 0.0;
                 for (int k = -r; k <= r; k++)
                     sum += Sample(i + k) * binom[k + r];
-                binomAvg[i] = binomSum > 0 ? sum / binomSum : 0.0;
+                filtered = binomSum > 0 ? sum / binomSum : 0.0;
             }
+            binomAvg[i] = a * filtered + (1.0 - a) * input[i];
         }
 
-        // Weighted Median
+        // Binomial Median (with blending)
         if (doMed && binom != null)
         {
+            double filtered;
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 GetAdaptiveWindow(i, out int left, out int right, out int start);
                 int W = left + right + 1;
                 if (W < 1)
                 {
-                    median[i] = 0.0;
+                    filtered = 0.0;
                 }
                 else
                 {
-                    var localBinom = CalcBinomialCoefficients(W);
-                    var pairs = new List<(double v, long w)>(W);
-                    for (int p = 0; p < W; p++)
-                        pairs.Add((input[start + p], localBinom[p]));
+                    long[] localBinom = CalcBinomialCoefficients(W);
+                    var pairs = new List<(double Value, long Weight)>(W);
+                    for (int pos = 0; pos < W; pos++)
+                        pairs.Add((input[start + pos], localBinom[pos]));
 
-                    pairs.Sort((a, b) => a.v.CompareTo(b.v));
-
-                    long total = 0;
-                    foreach (var t in pairs)
-                        total += t.w;
-
-                    if (total <= 0)
+                    if (pairs.Count == 0)
                     {
-                        median[i] = 0.0;
+                        filtered = 0.0;
                     }
                     else
                     {
-                        bool even = (total & 1L) == 0;
-                        long half = total / 2;
-                        long acc = 0;
+                        pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
-                        for (int q = 0; q < pairs.Count; q++)
+                        long totalWeight = 0;
+                        for (int j = 0; j < pairs.Count; j++)
+                            totalWeight += pairs[j].Weight;
+
+                        if (totalWeight <= 0)
                         {
-                            acc += pairs[q].w;
-                            if (acc > half)
-                            {
-                                median[i] = pairs[q].v;
-                                break;
-                            }
+                            filtered = 0.0;
+                        }
+                        else
+                        {
+                            bool even = (totalWeight & 1L) == 0;
+                            long half = totalWeight / 2;
+                            long accum = 0;
+                            filtered = pairs[pairs.Count - 1].Value;
 
-                            if (even && acc == half)
+                            for (int j = 0; j < pairs.Count; j++)
                             {
-                                double next = (q + 1 < pairs.Count) ? pairs[q + 1].v : pairs[q].v;
-                                median[i] = (pairs[q].v + next) / 2.0;
-                                break;
+                                accum += pairs[j].Weight;
+                                if (accum > half)
+                                {
+                                    filtered = pairs[j].Value;
+                                    break;
+                                }
+                                if (even && accum == half)
+                                {
+                                    double nextVal = (j + 1 < pairs.Count) ? pairs[j + 1].Value : pairs[j].Value;
+                                    filtered = (pairs[j].Value + nextVal) / 2.0;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -1084,41 +1110,134 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
             }
             else
             {
-                median[i] = WeightedMedianAt(input, i, r, binom, boundaryMode);
+                filtered = WeightedMedianAt(input, i, r, binom, boundaryMode, a);
             }
+            median[i] = a * filtered + (1.0 - a) * input[i];
         }
 
-        // Gaussian
+        // Gaussian Weighted Median (with blending)
+        if (doGaussMed && gaussCoeffsForMedian != null)
+        {
+            double filtered;
+            if (boundaryMode == BoundaryMode.Adaptive)
+            {
+                int left = Math.Min(r, i);
+                int right = Math.Min(r, n - 1 - i);
+                int start = i - left;
+                int W = left + right + 1;
+
+                if (W < 1)
+                {
+                    filtered = 0.0;
+                }
+                else
+                {
+                    double sigmaLocal = W / 6.0;
+                    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+
+                    var values = new double[W];
+                    var wts = new double[W];
+                    for (int pos = 0; pos < W; pos++)
+                    {
+                        int absIdx = start + pos;
+                        values[pos] = input[absIdx];
+                        wts[pos] = localGauss[pos]; // weights centered in the local window
+                    }
+
+                    Array.Sort(values, wts);
+
+                    double total = 0.0;
+                    for (int j = 0; j < W; j++) total += wts[j];
+
+                    if (total > 0.0)
+                    {
+                        double half = total / 2.0;
+                        double accum = 0.0;
+                        int sel = W - 1;
+                        for (int j = 0; j < W; j++)
+                        {
+                            accum += wts[j];
+                            if (accum >= half) { sel = j; break; }
+                        }
+                        filtered = values[sel];
+                    }
+                    else
+                    {
+                        filtered = 0.0;
+                    }
+                }
+            }
+            else
+            {
+                int W = 2 * r + 1;
+                var values = new double[W];
+                var wts = new double[W];
+
+                for (int k = -r; k <= r; k++)
+                {
+                    int idx = i + k;
+                    values[k + r] = Sample(idx);
+                    wts[k + r] = gaussCoeffsForMedian[k + r];
+                }
+
+                Array.Sort(values, wts);
+
+                double total = 0.0;
+                for (int j = 0; j < W; j++) total += wts[j];
+
+                if (total > 0.0)
+                {
+                    double half = total / 2.0;
+                    double accum = 0.0;
+                    int sel = W - 1;
+                    for (int j = 0; j < W; j++)
+                    {
+                        accum += wts[j];
+                        if (accum >= half) { sel = j; break; }
+                    }
+                    filtered = values[sel];
+                }
+                else
+                {
+                    filtered = Sample(i);
+                }
+            }
+            gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
+        }
+
+        // Gaussian (with blending)
         if (doGauss && gaussCoeffs != null)
         {
+            double filtered;
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 GetAdaptiveWindow(i, out int left, out int right, out int start);
                 int W = left + right + 1;
                 if (W < 1)
                 {
-                    gauss[i] = 0.0;
+                    filtered = 0.0;
                 }
                 else
                 {
-                    double sigma = W / 6.0;
-                    var local = ComputeGaussianCoefficients(W, sigma);
-                    double sum = 0;
-                    for (int p = 0; p < W; p++)
-                        sum += local[p] * input[start + p];
-                    gauss[i] = sum;
+                    double sigmaLocal = W / 6.0;
+                    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+                    double sum = 0.0;
+                    for (int pos = 0; pos < W; pos++)
+                        sum += localGauss[pos] * input[start + pos];
+                    filtered = sum;
                 }
             }
             else
             {
-                double sum = 0;
+                double sum = 0.0;
                 for (int k = -r; k <= r; k++)
                     sum += gaussCoeffs[k + r] * Sample(i + k);
-                gauss[i] = sum;
+                filtered = sum;
             }
+            gauss[i] = a * filtered + (1.0 - a) * input[i];
         }
 
-        // Savitzky-Golay (smoothing or derivative)
+        // Savitzky-Golay (no blending)
         if (doSG)
         {
             if (boundaryMode == BoundaryMode.Adaptive)
@@ -1127,6 +1246,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 int left = Math.Min(r, i);
                 int right = desiredW - 1 - left;
 
+                // Shift window to stay within bounds
                 if (i + right > n - 1)
                 {
                     int shift = (i + right) - (n - 1);
@@ -1137,46 +1257,63 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 if (left < 0) left = 0;
                 if (right < 0) right = 0;
 
-                double sum = 0;
+                double sum = 0.0;
                 if (derivOrder == 0)
                 {
                     var coeffs = ComputeSGCoefficientsAsymmetric(left, right, polyOrder);
                     for (int k = -left; k <= right; k++)
                         sum += coeffs[k + left] * input[i + k];
-                    sg[i] = sum;
                 }
                 else
                 {
                     int W = left + right + 1;
                     int effPoly = Math.Min(polyOrder, W - 1);
                     if (derivOrder > effPoly)
+                    {
                         throw new InvalidOperationException(
-                            $"Edge-adaptive window too small for derivative (W={W}, effPoly={effPoly}, d={derivOrder}).");
+                            $"Edge-adaptive window too small for derivative (W = {W}, effPoly = {effPoly}, derivative = {derivOrder}).");
+                    }
 
                     var coeffs = ComputeSGCoefficientsAsymmetricDerivative(left, right, effPoly, derivOrder, delta);
                     for (int k = -left; k <= right; k++)
                         sum += coeffs[k + left] * input[i + k];
+                }
+                sg[i] = sum;
+            }
+            else
+            {
+                if (derivOrder == 0 && sgSmoothCoeffs != null)
+                {
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += sgSmoothCoeffs[k + r] * Sample(i + k);
+                    sg[i] = sum;
+                }
+                else if (derivOrder > 0 && sgDerivCoeffs != null)
+                {
+                    double sum = 0.0;
+                    for (int k = -r; k <= r; k++)
+                        sum += sgDerivCoeffs[k + r] * Sample(i + k);
                     sg[i] = sum;
                 }
             }
         }
     };
 
-    // Dispatch
+    // Dispatch : parallel for large arrays; serial for small to avoid overhead
     if (useParallel)
     {
-        Parallel.For(0, n, act);
+        Parallel.For(0, n, smoothingAction);
     }
     else
     {
         for (int i = 0; i < n; i++)
-            act(i);
+            smoothingAction(i);
     }
 
-    // Return results
     return (rect, binomAvg, median, gaussMedian, gauss, sg);
+}
 ```
-
 Note : Derivative support and adaptive asymmetric SG handling are integrated into this unified pass. Parallelization is skipped for very small arrays (`n < 2000`) to avoid overhead.
 
 ### 3. Rectangular (Uniform) Mean Filter
