@@ -544,11 +544,16 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 }
 ```
 
-### Boundary Handling Method
-Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.  
+### Boundary Handling Method (revised to match FrmMain.cs)
+Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.
+
 Adaptive paths differ per filter :
-- `Rect`, `Avg`, `Med`, `Gauss`, `GaussMed` : the window is trimmed to in‑range samples and processed directly without padding. For `GaussMed`, local Gaussian weights are recomputed for the truncated window length W with `σ = W / 6.0` and normalized; the weighted median is selected by accumulating sorted weights to ≥ 1 / 2.
-- `SG` : keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per (left, right) shape and cached.
+- `Rect`, `Avg`, `Med`, `Gauss`, `GaussMed`: the window is trimmed to in‑range samples and processed directly without padding.
+  - `Avg`: recomputes a local binomial row for truncated `W`, normalizes by its sum, and averages (no sort).
+  - `Med`: recomputes local binomial weights for truncated `W`, sorts by value, and selects the weighted median (handles even / odd total weight).
+  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`, normalizes, then computes a weighted average (convolution‑like sum, no sort).
+  - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`, normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1/2.
+- `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
 Note : `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
