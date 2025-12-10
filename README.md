@@ -561,12 +561,12 @@ Note : `GetIndex` exists for compatibility; current code paths use `GetValueWith
 Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_suppressAutoBoundary` prevents feedback loops):
 - Rectangular selected → Boundary Method set to "Replicate"
 - Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median selected → Boundary Method set to "Symmetric"
-- Savitzky‑Golay selected → Boundary Method set to "Adaptive"
+- Savitzky-Golay selected → Boundary Method set to "Adaptive"
 
 ### Adaptive Mode (per‑filter logic)
 - Rectangular (Moving Average) :
   - Window shrinks at edges : `W = left + right + 1`
-  - Averages only in‑range samples (no zero/replicate bias)
+  - Averages only in‑range samples (no zero / replicate bias)
 
 - Binomial Average :
   - Computes a fresh binomial row for the truncated `W` using `CalcBinomialCoefficients(W)`
@@ -584,7 +584,7 @@ Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_supp
   - Recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
 
-- Savitzky‑Golay (Smoothing or Derivative) :
+- Savitzky-Golay (Smoothing or Derivative) :
   - Attempts to retain window length `2r + 1` by shifting left / right near edges
   - Effective polynomial order: `effPoly = min(polyOrder, W - 1)`
   - Throws `InvalidOperationException` if `derivOrder > effPoly`
