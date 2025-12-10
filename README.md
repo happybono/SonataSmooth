@@ -332,6 +332,17 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Build the project.
 - Run the application.
 
+#### Settings Upgrade & Persistence
+On first launch after an application upgrade, compatible settings are migrated and normalized once. Subsequent launches use normal save/load persistence.
+
+Key points:
+- One‑time migration flag: `HasUpgradedSettings`
+- Boundary Method stored and restored by text (e.g., “Symmetric”, “Replicate”, “Adaptive”, “ZeroPad”); normalized strings ensure consistent display (aliases like “Zero Padding” → “ZeroPad”)
+- Clamping/normalization:
+  - `AlphaBlend` clamped to [0.0, 1.0]
+  - `DerivOrder` clamped to [0, 10]
+- Settings are saved automatically on app close and when pressing the Save button in the settings panel.
+
 #### Dataset Title Validation
 The export title (Excel sheet name & metadata) is validated : 
 - Max length : 31 characters
@@ -349,7 +360,7 @@ Export Enablement Rules :
 ## Execution Instructions
 1. **Launch the Application** : Run the compiled `.exe` file or start the project from Visual Studio.
 2. **Input Data** : Enter numeric values manually, paste from clipboard, or drag-and-drop text / HTML.
-3. **Select Filter** : Choose exactly one smoothing method for calibration using the radio buttons (`rbtnRect`, `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnSG`). In the Export Settings dialog you can enable multiple methods (`chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`) for batch export.
+3. **Select Filter** : Choose exactly one smoothing method for calibration using the radio buttons (`rbtnRect`, `rbtnAvg`, `rbtnMed`, `rbtnGaussMed`, `rbtnGauss`, `rbtnSG`). In the Export Settings dialog you can enable multiple methods (`chbRect`, `chbAvg`, `chbMed`, `chbGaussMed`, `chbGauss`, `chbSG`) for batch export.
 4. **Calibrate** : Click the 'Calibrate' button (`btnCalibrate`) to apply the selected filter(s).
 5. **Review Results** : View the smoothed output in the "Refined Dataset" listbox (`lbRefinedData`).
 6. **Edit Data** : Use the "Modify Selected Entries" dialog (`btnInitEdit`) to batch-edit selected items in the initial dataset.
@@ -364,14 +375,14 @@ Export Enablement Rules :
 - **Polynomial Order ComboBox** : `cbxPolyOrder`
 - **Derivative Order ComboBox** : `cbxDerivOrder`
 - **Boundary Method ComboBox** : `cbxBoundaryMethod`
-- **Calibration Method CheckBoxes** : `chbRect`, `chbAvg`, `chbMed`, `chbGauss`, `chbSG`
+- **Calibration Method CheckBoxes** : `chbRect`, `chbAvg`, `chbMed`, `chbGaussMed`, `chbGauss`, `chbSG`
 - **Edit Button** : `btnInitEdit`
 - **Initial ↔ Refined Selection Sync Buttons** : `btnInitSelectSync`, `btnRefSelectSync`
 - **Dataset Title TextBox** : `txtDatasetTitle`
 - **Export Buttons** : `btnExport`, `btnExportSettings`
 - **ProgressBar** : `pbMain`, `pbModify`
 - **Count Labels** : `lblInitCnt`, `lblRefCnt`
-- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder`, `tlblBoundaryMethod`, `slblBoundaryMethod`, `slblDesc`, `tlblSeparator1`, `tlblSeparator2`, `tlblSeparator3`, `tlblSeparator4`
+- **StatusStrip & Labels** : `statStripMain`, `slblCalibratedType`, `slblKernelRadius`, `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder`, `tlblBoundaryMethod`, `slblBoundaryMethod`, `tlblAlphaBlend`, `slblAlphaBlend`, `slblDesc`, `tlblSeparator1`, `tlblSeparator2`, `tlblSeparator3`, `tlblSeparator4`, `tlblSeparator5` 
 - **Other Controls** : All controls use clear, descriptive names matching their function in the codebase.
 
 Visibility : `tlblPolyOrder`, `slblPolyOrder`, `tlblDerivativeOrder`, `slblDerivativeOrder` are only shown when Savitzky-Golay is active.
@@ -386,7 +397,7 @@ This guide explains how different noise filters work with different types of sig
 | Frequent random noise                                     | Poor                  | Fair               | **Excellent**             | Fair                               | Fair               | Fair                     |
 | Large slow trend changes                                  | Poor                  | Good               | Good                      | Good                               | Good               | **Excellent**            |
 | Sudden spikes (sharp single jumps, occasional)            | Poor                  | Fair               | **Excellent**             | Very Good                          | Fair               | Fair                     |
-| Sudden spikes (sharp single jumps, frequent / consecutive)| Poor                  | Fair               | Fair                      | **Excellent**                      | Fair               | Fair                     |
+| Sudden spikes (sharp single jumps, frequent/consecutive)  | Poor                  | Fair               | Fair                      | **Excellent**                      | Fair               | Fair                     |
 | Regular large-amplitude waves                             | Poor                  | Fair               | Fair                      | Good                               | Fair               | **Excellent**            |
 | Step changes (sudden level shifts)                        | Poor                  | Fair               | **Excellent**             | Very Good                          | Fair               | Fair                     |
 | Mixed-frequency oscillations                              | Poor                  | Good               | Fair                      | Good                               | Good               | **Excellent**            |
@@ -398,14 +409,14 @@ This guide explains how different noise filters work with different types of sig
 ---
 
 ### Verdict
-- **Rectangular Averaging** : Simple but effective for steady high‑frequency noise suppression.  
-- **Binomial Averaging** : A balanced middle ground, especially strong for periodic signals with moderate noise.  
-- **Binomial Median Filtering** : The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
-- **Gaussian Weighted Median Filtering (GWMF)** : A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
-- **Gaussian Filtering** : Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
-- **Savitzky‑Golay Filtering** : Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
+- **Rectangular Averaging**: Simple but effective for steady high‑frequency noise suppression.  
+- **Binomial Averaging**: A balanced middle ground, especially strong for periodic signals with moderate noise.  
+- **Binomial Median Filtering**: The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
+- **Gaussian Weighted Median Filtering (GWMF)**: A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
+- **Gaussian Filtering**: Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
+- **Savitzky‑Golay Filtering**: Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
 
-**Overall** : Binomial Median Filtering demonstrates the highest aggregate performance across diverse signal types and evaluation metrics. GWMF provides a versatile alternative, especially strong for occasional spikes and noisy smooth‑curve scenarios, while other filters retain niche strengths in specific contexts.
+**Overall:** Binomial Median Filtering demonstrates the highest aggregate performance across diverse signal types and evaluation metrics. GWMF provides a versatile alternative, especially strong for occasional spikes and noisy smooth‑curve scenarios, while other filters retain niche strengths in specific contexts.
 
 ## What Is Pascal's Triangle?
 Pascal's Triangle is a triangle of numbers built like this : 
@@ -438,6 +449,9 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
 
 - **Savitzky‑Golay Filtering**<br>
   Fits tiny curves to chunks of data. Keeps wave shapes and slow changes almost perfectly, but not as strong for sudden spikes.
+
+- **Gaussian Weighted Median Filtering (GWMF)**<br>
+  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / 6.0`, and weights are normalized; alpha blending applies at runtime.
 
 ### Example of Using Pascal's Triangle in Filtering
 Let's say we use the 5th row : `1 4 6 4 1`
@@ -541,8 +555,10 @@ Note : `GetIndex` remains only for compatibility; current code paths either use 
 
 Auto-switching behavior : 
 - Rectangular (when selected) → Boundary Method automatically set to Replicate
-- Binomial Average / Weighted Median / Gaussian (when selected) → Boundary Method automatically set to Symmetric
+- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median (when selected) → Boundary Method automatically set to Symmetric
 - Savitzky-Golay (when selected) → Boundary Method automatically set to Adaptive
+
+Note : Auto-switching is suppressed if the user already chose a boundary (via `_userSelectedBoundary`), and internally `_suppressAutoBoundary` avoids feedback loops during programmatic changes.
 
 ### Adaptive Mode
 Adaptive handling executes distinct logic per filter : 
@@ -769,13 +785,13 @@ private OperationResult ValidateSmoothingParameters(int dataCount, int w, int po
 
 ##### Alpha Blend (Advanced)
 Alpha `α` blends the original sample with the filtered output for selected methods : 
-- Applicable to : Binomial Averaging, Binomial Median, Gaussian
-- Not applied to : Rectangular, Savitzky-Golay (including derivatives)
+- Applicable to: Binomial Averaging, Binomial Median, Gaussian, Gaussian Weighted Median Filtering (GWMF)
+- Not applied to: Rectangular, Savitzky‑Golay (including derivatives)
 - Formula per element i : `output[i] = α * filtered[i] + (1 - α) * input[i]`
 - Range : 0.00 – 1.00 (clamped)
-- UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`
+- UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnGaussMed`
 
-Runtime usage in smoothing : 
+Runtime usage in smoothing (extended to GWMF):
 ```csharp
 double a = alpha;
 
@@ -794,15 +810,19 @@ binomAvg[i] = a * filtered + (1.0 - a) * input[i];
 // Binomial Median (blended)
 median[i] = a * filtered + (1.0 - a) * input[i];
 
+// Gaussian Weighted Median (blended)
+gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
+
 // Gaussian (blended)
 gauss[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
 Alpha enablement and synchronization with Export Settings : 
+- UI binding : `cbxAlpha` and `lblAlpha` are enabled for `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnGaussMed`.  
 ```csharp
 private void UpdateAlphaEnablement()
 {
-    bool alphaRelevant = rbtnAvg.Checked || rbtnMed.Checked || rbtnGauss.Checked;
+    bool alphaRelevant = rbtnAvg.Checked || rbtnMed.Checked || rbtnGaussMed.Checked || rbtnGauss.Checked;
 
     lblAlpha.Enabled = alphaRelevant;
     cbxAlpha.Enabled = alphaRelevant;
@@ -889,7 +909,7 @@ Note : The smoothing pass uses only `Parallel.For`; PLINQ is used solely for inp
 
 #### Code Implementation
 ```csharp
-private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[] SG) ApplySmoothing(
+private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, double[] Gauss, double[] SG) ApplySmoothing(
     double[] input,
     int r,
     int polyOrder,
@@ -899,8 +919,10 @@ private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[
     bool doRect,
     bool doAvg,
     bool doMed,
+    bool doGaussMed,
     bool doGauss,
-    bool doSG)
+    bool doSG,
+    double alpha = 1.0)
     {
     var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
     if (!vr.Success)
@@ -1152,7 +1174,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] Gauss, double[
     }
 
     // Return results
-    return (rect, binomAvg, median, gauss, sg);
+    return (rect, binomAvg, median, gaussMedian, gauss, sg);
 ```
 
 Note : Derivative support and adaptive asymmetric SG handling are integrated into this unified pass. Parallelization is skipped for very small arrays (`n < 2000`) to avoid overhead.
@@ -1186,7 +1208,41 @@ if (useRect)
 }
 ```
 
-### 4. Binomial (Weighted) Median Filter
+### 4. Binomial (Weighted) Average Filter
+#### How it works
+Averages values in the window, but each value is weighted according to binomial coefficients, giving more importance to central values.
+
+#### Principle
+A discrete approximation of Gaussian smoothing (binomial coefficients approximate a normal distribution).
+
+-	**Binomial Weights** : Central values have higher influence.
+-	**Smoother Output** : Reduces noise while maintaining signal shape.
+
+#### Code Implementation
+```csharp
+else if (useAvg)
+{
+    long[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double binomSum = binom.Sum();
+    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
+    
+    for (int i = 0; i < input.Length; i++)
+    {
+        double sum = 0.0;
+        for (int k = -r; k <= r; k++)
+        {
+            sum += Sample(i + k) * binom[k + r];
+        }
+        binomFiltered[i] = sum / binomSum;
+    }
+}
+```
+
+#### Binomial (Weighted) Average - Adaptive Note
+In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of length W is computed (`CalcBinomialCoefficients(W)`), ensuring correct symmetric weighting rather than truncating the full-length coefficients.
+
+
+### 5. Binomial (Weighted) Median Filter
 #### How it works
 Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.  
   
@@ -1242,40 +1298,166 @@ else if (useMed)
 Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples - removing edge padding bias.
 (Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the truncated‑recompute strategy documented above.)
 
-### 5. Binomial (Weighted) Average Filter
+
+### 6. Gaussian Weighted Median Filtering (GWMF)
 #### How it works
-Averages values in the window, but each value is weighted according to binomial coefficients, giving more importance to central values.
+Computes the median within the kernel window using Gaussian weights centered at the target index. Unlike a mean filter, the median is robust to outliers; the Gaussian weights emphasize values closer to the center, improving fidelity on smooth curves while suppressing occasional spikes.
+
+- Window length: W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
+- Weights: Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
+  - Symmetric mode: σ = (2r + 1) / 6.0
+  - Adaptive mode: σ = W / 6.0 (recomputed per index i)
+- Weighted median selection:
+  - Sort pairs `(value, weight)` by value ascending
+  - Accumulate weights until reaching at least half of the total (≥ Σw / 2)
+  - The value at that position is the weighted median
+- Boundary handling:
+  - Non-Adaptive: `Sample(i + k)` uses `GetValueWithBoundary` for Symmetric / Replicate / ZeroPad
+  - Adaptive: window truncates to available samples; weights are recomputed for W, and only in-range samples are used (no padding)
+- Alpha blend (runtime, if enabled): `output[i] = α × filtered[i] + (1 − α) × input[i]` with α ∈ [0.00, 1.00]
 
 #### Principle
-A discrete approximation of Gaussian smoothing (binomial coefficients approximate a normal distribution).
+GWMF combines the robustness of median filtering with the smoothness bias of Gaussian weighting :
+- Robustness : The median is insensitive to extreme outliers compared to means.
+- Locality : Gaussian weights peak at the center, ensuring nearby samples dominate.
+- Edge correctness : Adaptive recomputes σ and weights for truncated windows, avoiding artificial padding biases.
+- Stability : In symmetric mode weights are centered; in Adaptive mode weights remain centered in the local truncated window.
 
--	**Binomial Weights** : Central values have higher influence.
--	**Smoother Output** : Reduces noise while maintaining signal shape.
+Mathematically :
+- Kernel positions k ∈ [−r, …, r] (symmetric) or k ∈ [−left, …, right] (adaptive shift / truncate)
+- Unnormalized weights: w(k) = exp(−k² / (2σ²))
+- Normalization: g(k) = w(k) / Σ_j w(j)
+- Weighted median v* solves min over threshold: find smallest index in sorted values s.t. Σ_{j ≤ *} g_sorted(j) ≥ 1 / 2
+
+Alpha blend preserves a tunable fraction of the original signal, preventing over-smoothing :
+- α = 0 → original
+- α = 1 → fully filtered
+- 0 < α < 1 → convex combination
 
 #### Code Implementation
+Symmetric window (uses boundary accessor and precomputed Gaussian weights) :
 ```csharp
-else if (useAvg)
+// Symmetric GWMF inside ApplySmoothing (FrmMain.cs)
+int W = 2 * r + 1;
+var values = new double[W];
+var wts = new double[W];
+
+for (int k = -r; k <= r; k++)
 {
-    long[] binom = CalcBinomialCoefficients(2 * r + 1);
-    double binomSum = binom.Sum();
-    double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
-    
-    for (int i = 0; i < input.Length; i++)
-    {
-        double sum = 0.0;
-        for (int k = -r; k <= r; k++)
-        {
-            sum += Sample(i + k) * binom[k + r];
-        }
-        binomFiltered[i] = sum / binomSum;
-    }
+    int idx = i + k;
+    values[k + r] = Sample(idx); // GetValueWithBoundary
+    wts[k + r] = gaussCoeffsForMedian[k + r]; // normalized Gaussian weights (σ = (2r+1)/6.0)
 }
+
+// Sort by value ascending, carrying weights alongside
+Array.Sort(values, wts);
+
+// Select weighted median: cumulative weight crosses half
+double total = 0.0;
+for (int j = 0; j < W; j++)
+{
+    total += wts[j];
+}
+
+double filtered;
+if (total > 0.0)
+{
+    double half = total / 2.0;
+    double accum = 0.0;
+    int sel = W - 1;
+
+    for (int j = 0; j < W; j++)
+    {
+        accum += wts[j];
+        if (accum >= half)
+        {
+            sel = j;
+            break;
+        }
+    }
+
+    filtered = values[sel];
+}
+else
+{
+    filtered = Sample(i); // fallback: original (degenerate weights)
+}
+
+// Alpha blend (applies when GWMF is enabled)
+gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
-#### Binomial (Weighted) Average - Adaptive Note
-In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of length W is computed (`CalcBinomialCoefficients(W)`), ensuring correct symmetric weighting rather than truncating the full-length coefficients.
+Adaptive window (recomputes σ and weights for truncated window W at each index) :
+```csharp
+// Adaptive GWMF inside ApplySmoothing (FrmMain.cs)
+int left = Math.Min(r, i);
+int right = Math.Min(r, n - 1 - i);
+int start = i - left;
+int W = left + right + 1;
 
-### 6. Gaussian Filter
+double filtered;
+if (W < 1)
+{
+    filtered = 0.0;
+}
+else
+{
+    double sigmaLocal = W / 6.0;
+    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal); // normalized per-window
+
+    var values = new double[W];
+    var wts = new double[W];
+
+    for (int pos = 0; pos < W; pos++)
+    {
+        int absIdx = start + pos;
+        values[pos] = input[absIdx]; // direct in-range access (Adaptive avoids padding)
+        wts[pos] = localGauss[pos];
+    }
+
+    Array.Sort(values, wts);
+
+    double total = 0.0;
+    for (int j = 0; j < W; j++)
+    {
+        total += wts[j];
+    }
+
+    if (total > 0.0)
+    {
+        double half = total / 2.0;
+        double accum = 0.0;
+        int sel = W - 1;
+
+        for (int j = 0; j < W; j++)
+        {
+            accum += wts[j];
+            if (accum >= half)
+            {
+                sel = j;
+                break;
+            }
+        }
+
+        filtered = values[sel];
+    }
+    else
+    {
+        filtered = 0.0;
+    }
+}
+
+// Alpha blend (applies when GWMF is enabled)
+gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
+```
+
+Notes :
+- Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).
+- BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.
+- Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.
+- Export metadata includes “Alpha Blend” when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGauss || doGaussMed)`; in CSV, the header row uses the same condition.
+
+### 7. Gaussian Filter
 #### How it works
 Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode the kernel length W shrinks and σ = W / 6.0 is recomputed.
 
@@ -1306,7 +1488,7 @@ if (useGauss)
 Adaptive recomputes a Gaussian kernel of length W with σ = W / 6.0. This keeps relative spread consistent across varying window sizes and avoids artificial flattening.
 Sigma recomputation uses σ = W / 6.0 (same formula used initially for full symmetric kernels), keeping relative spread consistent.
 
-### 7. Savitzky‑Golay Filter
+### 8. Savitzky‑Golay Filter
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
 
@@ -1379,7 +1561,7 @@ Cache keys :
 
 These caches drastically reduce overhead on large datasets with repeated edge window shapes.
 
-### 8. Results Aggregation & UI Update
+### 9. Results Aggregation & UI Update
 #### How it works
 After filtering, the results array is handed to `AddItemsInBatches`, which inserts items into lbRefinedData in chunks. This avoids freezing the UI and allows incremental progress updates. Finally, controls are reset.
 
@@ -1409,7 +1591,7 @@ slblCalibratedType.Text = useRect ? "Rectangular Average"
 
 slblKernelRadius.Text = r.ToString();
 ```
-### 8.1 Selection Synchronization
+### 9.1 Selection Synchronization
 Buttons `btnInitSelectSync` and `btnRefSelectSync` synchronize selected indices and scroll positions between Initial and Refined datasets.
   
 Enablement rule : 
@@ -1422,7 +1604,7 @@ Behavior :
 - Sets `TopIndex` of target to match source for scroll alignment.
 Status label displays a synchronized item count message.
 
-#### 8.2 Progressive Selection & Deselect Feedback
+#### 9.2 Progressive Selection & Deselect Feedback
 - Select All : updates `pbMain` from 0% - 100% using dynamic intervals
   - Report interval : `reportInterval = max(1, count / 100)`
   - UI yield interval : `yieldInterval = max(1, count / 1000)` with `await Task.Yield()`
@@ -1435,7 +1617,7 @@ Status label displays a synchronized item count message.
 
 This keeps very large list operations smooth and clearly communicated without blocking the UI thread.
 
-#### 8.3 Refined Clear Behavior
+#### 9.3 Refined Clear Behavior
 Clicking "Clear Refined" removes all entries from the Refined Dataset and resets status indicators : 
 - `slblCalibratedType` → "--"
 - `slblKernelRadius` → "--"
@@ -1443,7 +1625,7 @@ Clicking "Clear Refined" removes all entries from the Refined Dataset and resets
   
 The progress bar briefly shows 100% and then returns to 0% to signal completion.
 
-### 9. Pascal's Triangle (Binomial Coefficient Calculation)
+### 10. Pascal's Triangle (Binomial Coefficient Calculation)
 #### How it works
 Calculates binomial coefficients for a given window size, which are used as weights in the binomial average and weighted median filters.
 
@@ -1486,7 +1668,7 @@ private static long[] CalcBinomialCoefficients(int length)
 - This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters. 
 - Maximum supported window length for binomial weighting is 63 (length ≤ 63) to prevent 64‑bit overflow of the cumulative weight (2^(length − 1) ≤ 2^62). Attempts above this throw an exception.
 
-### 10. Savitzky-Golay Coefficients Computation
+### 11. Savitzky-Golay Coefficients Computation
 #### How it works
 Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
 
@@ -1602,7 +1784,7 @@ private static double[] ComputeSavitzkyGolayCoefficients(
 (Implementation uses InvertMatrixStrict with partial pivoting and a dynamic tolerance 1e - 14 × rowScale for stability.)
 (Derivative-capable version in runtime adds derivOrder & delta parameters; see full adaptive + derivative implementation in the unified ApplySmoothing section above.)
 
-### 11. Numerical Pivot Calculation (Matrix Inversion)
+### 12. Numerical Pivot Calculation (Matrix Inversion)
 #### How it Works
 SonataSmooth uses a robust numerical matrix inversion routine for Savitzky-Golay filter coefficient calculation.  
 This routine applies **Gauss-Jordan elimination with partial pivoting** and a **dynamic, scale-based tolerance** to ensure numerical stability and prevent division-by-zero or propagation of NaN / Infinity values.
@@ -1693,7 +1875,7 @@ private static double[,] InvertMatrixStrict(double[,] a)
 - All UI updates and COM object accesses are performed on the UI thread for safety.
 - Status messages and tooltips are dynamically updated to guide the user through each operation.
 
-### 12. CSV Export Functionality
+### 13. CSV Export Functionality
 #### How it works
 When the user selects the CSV export option and clicks Export, the application : 
 
@@ -1720,6 +1902,7 @@ Compute with Alpha (single pass) :
 var (rectAvgResult,
      binomAvgResult,
      medianResult,
+     gaussMedResult,
      gaussResult,
      sgResult) = ApplySmoothing(
         initialData,
@@ -1731,6 +1914,7 @@ var (rectAvgResult,
         doRect,
         doAvg,
         doMed,
+        doGaussMed,
         doGauss,
         doSG,
         alpha
@@ -1748,7 +1932,7 @@ await sw.WriteLineAsync($"Kernel Radius : {r}");
 await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
 await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
 
-if (doAvg || doMed || doGauss)
+if (doAvg || doMed || doGaussMed || doGauss)
 {
     await sw.WriteLineAsync($"Alpha Blend : {alpha}");
 }
@@ -1776,7 +1960,7 @@ private async Task ExportCsvAsync()
     // 3. Validate with ValidateSmoothingParameters (OperationResult).
     // 4. Enforce derivative rule (derivOrder ≤ polyOrder if SG).
     // 5. Compute all enabled filters in one pass : 
-    //      var (rect, binomAvg, median, gauss, sg) = ApplySmoothing(...);
+    //      var (rect, binomAvg, median, gaussMed, gauss, sg) = ApplySmoothing(...);
     // 6. Prepare columns list : 
     //      ("Initial Dataset"), plus each enabled filter.
     // 7. Multi-part writing logic (splits if row threshold exceeded):
@@ -1788,7 +1972,7 @@ private async Task ExportCsvAsync()
     //          Kernel Radius : r
     //          Kernel Width : (2 * r + 1)
     //          Boundary Method : {Adaptive|Symmetric|Replicate|Zero Padding}
-    // 	        [Alpha Blend : alpha] (if Binomial Average / Binomial Median / Gaussian)
+    // 	        [Alpha Blend : alpha] (if Binomial Average / Binomial Median / Gaussian Weighted Median / Gaussian)
     //          [Polynomial Order : polyOrder] (if SG)
     //          [Derivative Order : derivOrder] (if SG)
     //          (blank)
@@ -1813,7 +1997,7 @@ Columns include :
 Progress is reported 0 - 100 as rows are written; the bar resets to 0 when done. Optional auto‑open for generated file(s) is supported.
 
 
-### 13. Excel Export Functionality
+### 14. Excel Export Functionality
 #### How it works
 When the user selects Excel export and clicks Export, the application : 
 
@@ -1847,7 +2031,7 @@ Additional details :
 #### Code Implementation
 Alpha metadata row : 
 ```csharp
-ws.Cells[7, 1] = (doAvg || doMed || doGauss)
+ws.Cells[7, 1] = (doAvg || doMed || doGauss || doGaussMed)
     ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
     : "Alpha Blend : N/A";
 
@@ -1897,7 +2081,7 @@ finally
 
 Save‑or‑open workflow : 
 ```csharp
-bool promptForSave = settingsForm.chbOpenFile != null 
+bool promptForSave = settingsForm.chbOpenFile != null
                      && !settingsForm.chbOpenFile.Checked;
 
 string savePath = null;
@@ -1988,8 +2172,26 @@ else
     {
         // ignore
     }
+
+    bool openAfter = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
+    if (!openAfter)
+    {
+        MessageBox.Show(
+            this,
+            "Excel export completed.",
+            "Export Excel",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information
+        );
+    }
 }
 ```
+Completion message:
+- When "Open after save" is unchecked in Export Settings, a completion dialog is shown after a successful `.xlsx` export:
+  - Message: "Excel export completed."
+- CSV export already shows a similar completion message.
+
+This ensures consistent UX between CSV and Excel modes.
 
 (Note : The code sample omits the BuiltinDocumentProperties musical metadata and Easter egg block for brevity; runtime sets Title, Category, Author, Subject, Keywords, Comments with randomized phrases and quartet unlock message when exactly four methods are enabled.)
 ```csharp
@@ -2004,6 +2206,7 @@ private async void ExportExcelAsync()
     bool doRect = settingsForm.chbRect.Checked;
     bool doAvg = settingsForm.chbAvg.Checked;
     bool doMed = settingsForm.chbMed.Checked;
+    bool doGaussMed = settingsForm.chbGaussMed.Checked;
     bool doGauss = settingsForm.chbGauss.Checked;
     bool doSG = settingsForm.chbSG.Checked;
 
@@ -2027,8 +2230,8 @@ private async void ExportExcelAsync()
     }
 
     // Compute filters
-    var (rect, binomAvg, median, gauss, sg) =
-        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGauss, doSG);
+    var (rect, binomAvg, median, gaussMed, gauss, sg) =
+        ApplySmoothing(initialData, r, polyOrder, derivOrder, delta, boundaryMode, doRect, doAvg, doMed, doGaussMed, doGauss, doSG);
 
     // Start Excel
     Excel.Application excel = null;
@@ -2053,7 +2256,7 @@ private async void ExportExcelAsync()
         ws.Cells[4, 1] = $"Kernel Radius : {r}";
         ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
         ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
-        ws.Cells[7, 1] = (doAvg || doMed || doGauss)
+        ws.Cells[7, 1] = (doAvg || doMed || doGauss || doGaussMed)
             ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
             : "Alpha Blend : N/A";
         ws.Cells[8, 1] = doSG
