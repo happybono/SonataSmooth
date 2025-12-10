@@ -333,12 +333,12 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - Run the application.
 
 #### Settings Upgrade & Persistence
-On first launch after an application upgrade, compatible settings are migrated and normalized once. Subsequent launches use normal save/load persistence.
+On first launch after an application upgrade, compatible settings are migrated and normalized once. Subsequent launches use normal save / load persistence.
 
-Key points:
-- One‑time migration flag: `HasUpgradedSettings`
-- Boundary Method stored and restored by text (e.g., “Symmetric”, “Replicate”, “Adaptive”, “ZeroPad”); normalized strings ensure consistent display (aliases like “Zero Padding” → “ZeroPad”)
-- Clamping/normalization:
+Key points :
+- One‑time migration flag : `HasUpgradedSettings`
+- Boundary Method stored and restored by text (e.g., "Symmetric", "Replicate", "Adaptive", "ZeroPad"); normalized strings ensure consistent display (aliases like "Zero Padding" → "ZeroPad")
+- Clamping / normalization :
   - `AlphaBlend` clamped to [0.0, 1.0]
   - `DerivOrder` clamped to [0, 10]
 - Settings are saved automatically on app close and when pressing the Save button in the settings panel.
@@ -409,14 +409,14 @@ This guide explains how different noise filters work with different types of sig
 ---
 
 ### Verdict
-- **Rectangular Averaging**: Simple but effective for steady high‑frequency noise suppression.  
-- **Binomial Averaging**: A balanced middle ground, especially strong for periodic signals with moderate noise.  
-- **Binomial Median Filtering**: The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
-- **Gaussian Weighted Median Filtering (GWMF)**: A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
-- **Gaussian Filtering**: Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
-- **Savitzky‑Golay Filtering**: Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
+- **Rectangular Averaging** : Simple but effective for steady high‑frequency noise suppression.  
+- **Binomial Averaging** : A balanced middle ground, especially strong for periodic signals with moderate noise.  
+- **Binomial Median Filtering** : The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
+- **Gaussian Weighted Median Filtering (GWMF )** :A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
+- **Gaussian Filtering** : Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
+- **Savitzky‑Golay Filtering** : Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
 
-**Overall:** Binomial Median Filtering demonstrates the highest aggregate performance across diverse signal types and evaluation metrics. GWMF provides a versatile alternative, especially strong for occasional spikes and noisy smooth‑curve scenarios, while other filters retain niche strengths in specific contexts.
+**Overall** : Binomial Median Filtering demonstrates the highest aggregate performance across diverse signal types and evaluation metrics. GWMF provides a versatile alternative, especially strong for occasional spikes and noisy smooth‑curve scenarios, while other filters retain niche strengths in specific contexts.
 
 ## What Is Pascal's Triangle?
 Pascal's Triangle is a triangle of numbers built like this : 
@@ -791,7 +791,7 @@ Alpha `α` blends the original sample with the filtered output for selected meth
 - Range : 0.00 – 1.00 (clamped)
 - UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnGaussMed`
 
-Runtime usage in smoothing (extended to GWMF):
+Runtime usage in smoothing (extended to GWMF) :
 ```csharp
 double a = alpha;
 
@@ -1303,17 +1303,17 @@ Adaptive recalculates local binomial weights for truncated W and performs weight
 #### How it works
 Computes the median within the kernel window using Gaussian weights centered at the target index. Unlike a mean filter, the median is robust to outliers; the Gaussian weights emphasize values closer to the center, improving fidelity on smooth curves while suppressing occasional spikes.
 
-- Window length: W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
-- Weights: Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
-  - Symmetric mode: σ = (2r + 1) / 6.0
-  - Adaptive mode: σ = W / 6.0 (recomputed per index i)
-- Weighted median selection:
+- Window length : W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
+- Weights : Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
+  - Symmetric mode : σ = (2r + 1) / 6.0
+  - Adaptive mode : σ = W / 6.0 (recomputed per index i)
+- Weighted median selection :
   - Sort pairs `(value, weight)` by value ascending
   - Accumulate weights until reaching at least half of the total (≥ Σw / 2)
   - The value at that position is the weighted median
-- Boundary handling:
-  - Non-Adaptive: `Sample(i + k)` uses `GetValueWithBoundary` for Symmetric / Replicate / ZeroPad
-  - Adaptive: window truncates to available samples; weights are recomputed for W, and only in-range samples are used (no padding)
+- Boundary handling :
+  - Non-Adaptive : `Sample(i + k)` uses `GetValueWithBoundary` for Symmetric / Replicate / ZeroPad
+  - Adaptive : window truncates to available samples; weights are recomputed for W, and only in-range samples are used (no padding)
 - Alpha blend (runtime, if enabled): `output[i] = α × filtered[i] + (1 − α) × input[i]` with α ∈ [0.00, 1.00]
 
 #### Principle
@@ -1325,9 +1325,9 @@ GWMF combines the robustness of median filtering with the smoothness bias of Gau
 
 Mathematically :
 - Kernel positions k ∈ [−r, …, r] (symmetric) or k ∈ [−left, …, right] (adaptive shift / truncate)
-- Unnormalized weights: w(k) = exp(−k² / (2σ²))
-- Normalization: g(k) = w(k) / Σ_j w(j)
-- Weighted median v* solves min over threshold: find smallest index in sorted values s.t. Σ_{j ≤ *} g_sorted(j) ≥ 1 / 2
+- Unnormalized weights : w(k) = exp(−k² / (2σ²))
+- Normalization : g(k) = w(k) / Σ_j w(j)
+- Weighted median v* solves min over threshold : find smallest index in sorted values s.t. Σ_{j ≤ *} g_sorted(j) ≥ 1 / 2
 
 Alpha blend preserves a tunable fraction of the original signal, preventing over-smoothing :
 - α = 0 → original
@@ -1346,13 +1346,13 @@ for (int k = -r; k <= r; k++)
 {
     int idx = i + k;
     values[k + r] = Sample(idx); // GetValueWithBoundary
-    wts[k + r] = gaussCoeffsForMedian[k + r]; // normalized Gaussian weights (σ = (2r+1)/6.0)
+    wts[k + r] = gaussCoeffsForMedian[k + r]; // normalized Gaussian weights (σ = (2r + 1)/6.0)
 }
 
 // Sort by value ascending, carrying weights alongside
 Array.Sort(values, wts);
 
-// Select weighted median: cumulative weight crosses half
+// Select weighted median : cumulative weight crosses half
 double total = 0.0;
 for (int j = 0; j < W; j++)
 {
@@ -1455,7 +1455,7 @@ Notes :
 - Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).
 - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.
 - Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.
-- Export metadata includes “Alpha Blend” when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGauss || doGaussMed)`; in CSV, the header row uses the same condition.
+- Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGauss || doGaussMed)`; in CSV, the header row uses the same condition.
 
 ### 7. Gaussian Filter
 #### How it works
@@ -2186,9 +2186,9 @@ else
     }
 }
 ```
-Completion message:
-- When "Open after save" is unchecked in Export Settings, a completion dialog is shown after a successful `.xlsx` export:
-  - Message: "Excel export completed."
+Completion message :
+- When "Open after save" is unchecked in Export Settings, a completion dialog is shown after a successful `.xlsx` export :
+  - Message : "Excel export completed."
 - CSV export already shows a similar completion message.
 
 This ensures consistent UX between CSV and Excel modes.
