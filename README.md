@@ -291,13 +291,17 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Introduced the **Gaussian Weighted Median Filter (GMMF)**, providing advanced smoothing and correction capabilities. This method enhances data fidelity by reducing noise while preserving critical signal characteristics, offering more accurate results for complex workflows.<br><br>
 > A new `Restore to Default` button has been added to the settings interface, enabling users to quickly revert configurations to their original baseline values. This improves usability and reduces friction when experimenting with different settings.<br><br>
 > Various minor bugs have been fixed, and overall usability has been refined to deliver a smoother, more reliable user experience.
-</details>
 
 ### v5.3.1.0
 #### December 10, 2025
 > Store and restore `BoundaryMethod` using text values to ensure consistent display across sessions.<br><br>
 > When "Open after save" is unchecked, a "Excel export completed." message box is shown after successful Excel (.xlsx) export, consistent with the existing CSV export completion behavior.<br><br>
 > On first launch after upgrade, compatible settings are migrated once via `HasUpgradedSettings`, and subsequent launches preserve user‑modified values through normal save / load.<br><br>
+> Minor bugs fixed.
+</details>
+
+### v5.3.2.0
+#### December 10, 2025
 > Minor bugs fixed.
 
 ## Required Components & Setup
