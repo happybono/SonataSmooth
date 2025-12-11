@@ -2507,7 +2507,6 @@ This behavior ensures :
 
 #### Export Metadata Enhancements
 Both CSV and Excel exports now include :  
-  
 - Kernel Radius and computed Kernel Width
 - Polynomial Order (if SG selected)
 - Derivative Order (if SG selected)
