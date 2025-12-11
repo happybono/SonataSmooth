@@ -485,6 +485,7 @@ namespace SonataSmooth
             chbGauss.Checked = true;
             chbSG.Checked = true;
 
+            rbtnCSV.Checked = true;
             chbOpenFile.Checked = true;
         }
 
