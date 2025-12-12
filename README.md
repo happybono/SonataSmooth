@@ -300,8 +300,10 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Minor bugs fixed.
 </details>
 
-### v5.3.2.0
-#### December 12, 2025
+### v5.4.0.0
+#### December 13, 2025
+> Introduced more hidden Easter eggs.
+> Refined `AssemblyDescription` to emphasize SonataSmooth's advanced filtering and key features.
 > Minor bugs fixed.
 
 ## Required Components & Setup
@@ -2047,7 +2049,7 @@ When the user selects the CSV export option and clicks Export, the application :
 
 - Reads the initial dataset and selected smoothing parameters (Radius, Polynomial / Derivative for SG, Boundary Method, Alpha).
 - Applies all enabled filters (Rectangular, Binomial Average, Weighted Median, Gaussian, Savitzky‑Golay) in a single `ApplySmoothing` pass that includes the `alpha` parameter for blending.
-- Splits the output into multiple CSV files if the dataset exceeds Excel’s row limit.
+- Splits the output into multiple CSV files if the dataset exceeds Excel's row limit.
 - Writes metadata, parameters, and results to each file in a structured format.
 - When output is split, files are named using the pattern : {baseName}_Part{X}.csv.
 - The SaveFileDialog defaults the file name to the dataset title : "{DatasetTitle}.csv".
