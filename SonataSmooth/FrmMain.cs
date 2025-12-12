@@ -3570,10 +3570,10 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 try
                 {
                     var smoothingMethods = new List<string>();
-                    if (doRect) smoothingMethods.Add("Rectangular");
-                    if (doAvg) smoothingMethods.Add("Binomial");
-                    if (doMed) smoothingMethods.Add("Median");
-                    if (doGaussMed) smoothingMethods.Add("Gaussian Median");
+                    if (doRect) smoothingMethods.Add("Rectangular Average");
+                    if (doAvg) smoothingMethods.Add("Binomial Average");
+                    if (doMed) smoothingMethods.Add("Binomial Median");
+                    if (doGaussMed) smoothingMethods.Add("Gaussian Weighted Median");
                     if (doGauss) smoothingMethods.Add("Gaussian");
                     if (doSG) smoothingMethods.Add("Savitzky-Golay");
 
