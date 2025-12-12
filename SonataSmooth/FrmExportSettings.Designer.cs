@@ -368,7 +368,12 @@
             "22",
             "23",
             "24",
-            "25"});
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30"});
             this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
             this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelRadius.Name = "cbxKernelRadius";
