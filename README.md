@@ -448,14 +448,14 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
 - **Binomial Median Filtering**<br>
   Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
   
+- **Gaussian Weighted Median Filtering (GWMF)**<br>
+  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / 6.0`, and weights are normalized; alpha blending applies at runtime.
+
 - **Gaussian Filtering**<br>
   Uses a bell-shaped curve for weights. Very smooth, but may let sharp jumps stay.
 
 - **Savitzky‑Golay Filtering**<br>
   Fits tiny curves to chunks of data. Keeps wave shapes and slow changes almost perfectly, but not as strong for sudden spikes.
-
-- **Gaussian Weighted Median Filtering (GWMF)**<br>
-  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / 6.0`, and weights are normalized; alpha blending applies at runtime.
 
 ### Example of Using Pascal's Triangle in Filtering
 Let's say we use the 5th row : `1 4 6 4 1`
@@ -555,8 +555,8 @@ Adaptive paths differ per filter :
 - `Rect`, `Avg`, `Med`, `Gauss`, `GaussMed`: the window is trimmed to in‑range samples and processed directly without padding.
   - `Avg`: recomputes a local binomial row for truncated `W`, normalizes by its sum, and averages (no sort).
   - `Med`: recomputes local binomial weights for truncated `W`, sorts by value, and selects the weighted median (handles even / odd total weight).
-  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`, normalizes, then computes a weighted average (convolution‑like sum, no sort).
   - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`, normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
+  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`, normalizes, then computes a weighted average (convolution‑like sum, no sort).
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
 Note : `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
@@ -569,7 +569,7 @@ Note : `GetIndex` exists for compatibility; current code paths use `GetValueWith
 
 Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_suppressAutoBoundary` prevents feedback loops):
 - Rectangular selected → Boundary Method set to "Replicate"
-- Binomial Average / Binomial Median / Gaussian / Gaussian Weighted Median selected → Boundary Method set to "Symmetric"
+- Binomial Average / Binomial Median / Gaussian Weighted Median / Gaussian selected → Boundary Method set to "Symmetric"
 - Savitzky-Golay selected → Boundary Method set to "Adaptive"
 
 ### Adaptive Mode (per‑filter logic)
@@ -585,13 +585,13 @@ Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_supp
   - Recomputes local binomial weights for truncated `W`
   - Performs weighted median over strictly in‑range values sorted by value
 
-- Gaussian :
-  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`
-  - Coefficients are normalized (sum = 1); no padding distortions
-
 - Gaussian Weighted Median :
   - Recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
+
+- Gaussian :
+  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`
+  - Coefficients are normalized (sum = 1); no padding distortions
 
 - Savitzky-Golay (Smoothing or Derivative) :
   - Attempts to retain window length `2r + 1` by shifting left / right near edges
@@ -814,7 +814,7 @@ private OperationResult ValidateSmoothingParameters(int dataCount, int w, int po
 
 ##### Alpha Blend (Advanced)
 Alpha `α` blends the original sample with the filtered output for selected methods : 
-- Applicable to: Binomial Averaging, Binomial Median, Gaussian, Gaussian Weighted Median Filtering (GWMF)
+- Applicable to: Binomial Averaging, Binomial Median, Gaussian Weighted Median Filtering (GWMF), Gaussian
 - Not applied to: Rectangular, Savitzky‑Golay (including derivatives)
 - Formula per element i : `output[i] = α * filtered[i] + (1 - α) * input[i]`
 - Range : 0.00 – 1.00 (clamped)
@@ -1621,7 +1621,7 @@ Notes :
 - Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).
 - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.
 - Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.
-- Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGauss || doGaussMed)`; in CSV, the header row uses the same condition.
+- Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGaussMed || doGauss)`; in CSV, the header row uses the same condition.
 
 ### 7. Gaussian Filter
 #### How it works
@@ -2154,9 +2154,10 @@ private async Task ExportCsvAsync()
 
 Columns include : 
 - Initial Dataset
-- Rectangular Averaging
+- Rectangular Averaging (no alpha blend)
 - Binomial Averaging (alpha‑blended)
 - Binomial Median Filtering (alpha‑blended)
+- Gaussian Weighted Median Filtering (alpha‑blended)
 - Gaussian Filtering (alpha‑blended)
 - Savitzky–Golay Filtering (no alpha blend)
 
