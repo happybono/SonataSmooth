@@ -307,7 +307,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 </details>
 
 ### v5.4.1.6
-#### December 13, 2025
+#### December 14, 2025
 > Minor bugs fixed.
 
 ## Required Components & Setup
