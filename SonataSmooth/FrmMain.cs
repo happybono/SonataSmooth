@@ -3610,32 +3610,32 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     if (smoothingMethods.Count == 1)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : A Solo Performance of Smoothing Excellence.";
+                            "Hidden Movement Unlocked : A Solo Performance of Smoothing Excellence, a Lone Violin Singing in the Silence.";
                     }
                     else if (smoothingMethods.Count == 2)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : A Duet of Filters, a Couple in Perfect Balance, United by Their Love of Refinement.";
+                            "Hidden Movement Unlocked : A Duet of Filters, a Couple in Perfect Balance, United by Their Love of Refinement, Like Two Dancers Entwined Beneath the Spotlight.";
                     }
                     else if (smoothingMethods.Count == 3)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Trio of Techniques Creates a Harmonious Blend.";
+                            "Hidden Movement Unlocked : The Trio of Techniques Creates a Harmonious Blend, Weaving Threads of Harmony into a Tapestry of Sound.";
                     }
                     else if (smoothingMethods.Count == 4)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Quartet of Filters has performed in perfect harmony.";
+                            "Hidden Movement Unlocked : The Quartet of Filters Has Performed in Perfect Harmony, Four Voices Rising Together in Resonance.";
                     }
                     else if (smoothingMethods.Count == 5)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Full Ensemble of Smoothing Techniques Delivers a Masterful Performance.";
+                            "Hidden Movement Unlocked : The Full Ensemble of Smoothing Techniques Delivers a Masterful Performance, a Grand Orchestra Filling the Hall with Brilliance.";
                     }
                     else if (smoothingMethods.Count >= 6)
                     {
                         comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Grand Symphony of Smoothing Techniques Reaches its Crescendo.";
+                            "Hidden Movement Unlocked : The Grand Symphony of Smoothing Techniques Reaches Its Crescendo, a Tidal Wave of Sound Embracing the Listener.";
                     }
 
                     wb.BuiltinDocumentProperties["Comments"].Value = comments;
