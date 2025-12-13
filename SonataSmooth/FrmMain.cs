@@ -773,7 +773,7 @@ namespace SonataSmooth
                                          : useAvg ? "Binomial Average"
                                          : useMed && !useGaussMedian ? "Binomial Median"
                                          : useGaussMedian ? "Gaussian Weighted Median" 
-                                         : useSG ? "Savitzky-Golay Filter"
+                                         : useSG ? "Savitzky-Golay"
                                          : useGauss ? "Gaussian Filter"
                                          : "Unknown";
 
