@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static SonataSmooth.FrmMain;
 using static System.Net.WebRequestMethods;
+using static System.Windows.Forms.LinkLabel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using Excel = Microsoft.Office.Interop.Excel;
@@ -3399,6 +3400,44 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
         }
 
+        private async Task RunExcelInteropOnStaThread(Func<IProgress<int>, string> work)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            var uiCtx = SynchronizationContext.Current;
+            var progress = new Progress<int>(p =>
+            {
+                // UI 스레드로 진행률 보고
+                if (uiCtx != null) uiCtx.Post(_ =>
+                {
+                    pbMain.Style = ProgressBarStyle.Continuous;
+                    pbMain.Value = Math.Max(0, Math.Min(100, p));
+                }, null);
+                else
+                {
+                    pbMain.Value = Math.Max(0, Math.Min(100, p));
+                }
+            });
+
+            Thread sta = new Thread(() =>
+            {
+                try
+                {
+                    work(progress);
+                    tcs.SetResult(true);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+            sta.IsBackground = true;
+            sta.SetApartmentState(ApartmentState.STA);
+            sta.Start();
+
+            await tcs.Task;
+        }
+
+
         private async void ExportExcelAsync()
         {
             // COM 해제 유틸 (로컬 함수) 
@@ -3433,6 +3472,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             bool doSG = settingsForm.chbSG.Checked;
             double alpha = GetAlphaFromCbx();
 
+            // UI 스레드에서 진행 표시줄 초기화
             pbMain.Style = ProgressBarStyle.Continuous;
             pbMain.Minimum = 0;
             pbMain.Maximum = 100;
@@ -3462,8 +3502,6 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
 
             const int maxRows = 1_048_573;
-            double sigma = (2.0 * r + 1) / 6.0;
-            long[] binom = CalcBinomialCoefficients(2 * r + 1);
 
             if (n == 0)
             {
@@ -3521,6 +3559,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
             if (promptForSave)
             {
+                // UI 스레드에서 SaveFileDialog 표시
                 var prevStyle = pbMain.Style;
                 var prevValue = pbMain.Value;
                 int prevMarquee = pbMain.MarqueeAnimationSpeed;
@@ -3539,453 +3578,493 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         OverwritePrompt = true
                     })
                     {
-                        if (sfd.ShowDialog(this) == DialogResult.OK)
+                        var dialogResult = sfd.ShowDialog(this);
+                        if (dialogResult == DialogResult.OK)
+                        {
                             savePath = sfd.FileName;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                 }
                 finally
                 {
-                    // 파일 저장 대화 상자가 닫힌 후 ProgressBar 상태 복원
                     pbMain.MarqueeAnimationSpeed = prevMarquee;
                     pbMain.Style = prevStyle;
                     pbMain.Value = prevValue;
                 }
             }
 
-            // 파일 저장 여부에 따라 Excel 표시 / 종료를 결정
             bool willShowExcel = string.IsNullOrWhiteSpace(savePath);
-
 
             try
             {
-                excel = new Excel.Application();
-                coms.Push(excel);
+                // STA Worker 내부에서 교차 스레드 접근을 피하기 위해 UI 값 캡쳐
+                var titleText = txtDatasetTitle.Text;
+                var boundaryText = GetBoundaryMethodText(boundaryMode);
+                var openAfter = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
 
-                workbooks = excel.Workbooks;
-                coms.Push(workbooks);
-
-                wb = workbooks.Add();
-                coms.Push(wb);
-
-                try
+                await RunExcelInteropOnStaThread(progress =>
                 {
-                    var smoothingMethods = new List<string>();
-                    if (doRect) smoothingMethods.Add("Rectangular Average");
-                    if (doAvg) smoothingMethods.Add("Binomial Average");
-                    if (doMed) smoothingMethods.Add("Binomial Median");
-                    if (doGaussMed) smoothingMethods.Add("Gaussian Weighted Median");
-                    if (doGauss) smoothingMethods.Add("Gaussian");
-                    if (doSG) smoothingMethods.Add("Savitzky-Golay");
+                    // Excel.Application
+                    excel = new Excel.Application();
+                    coms.Push(excel);
+                    progress.Report(5);
 
-                    wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {txtDatasetTitle.Text}";
-                    wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Movement Score";
-                    wb.BuiltinDocumentProperties["Author"].Value = "Maestro SonataSmooth";
-                    wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
-                    wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Movements, Harmony, Export";
+                    // Workbooks / Workbook
+                    workbooks = excel.Workbooks;
+                    coms.Push(workbooks);
+                    progress.Report(8);
 
-                    string subject = smoothingMethods.Count > 0
-                        ? $"Concerto of {string.Join(" & ", smoothingMethods)} smoothing movements"
-                        : "Cadenza of Silence : No smoothing applied";
+                    wb = workbooks.Add();
+                    coms.Push(wb);
+                    progress.Report(12);
 
-                    wb.BuiltinDocumentProperties["Subject"].Value = subject;
-
-                    string[] musicalPhrases = new[]
-                    {
-                        "Adagio in Data Minor",
-                        "Presto Noise Reduction",
-                        "Allegro of Algorithms",
-                        "Nocturne for Numeric Streams",
-                        "Fugue of Filters",
-                        "Symphony of Smoothness",
-                        "Etude in Error Suppression",
-                        "Rhapsody of Regression",
-                        "Minuet of Median Magic",
-                        "Cantata of Clean Curves"
-                    };
-
-                    Random rnd = new Random();
-                    string randomPhrase = musicalPhrases[rnd.Next(musicalPhrases.Length)];
-
-                    string comments = $"Encore performed by the SonataSmooth Orchestra - \"{randomPhrase}\"";
-                    if (smoothingMethods.Count == 1)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : A Solo Performance of Smoothing Excellence, a Lone Violin Singing in the Silence.";
-                    }
-                    else if (smoothingMethods.Count == 2)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : A Duet of Filters, a Couple in Perfect Balance, United by Their Love of Refinement, Like Two Dancers Entwined Beneath the Spotlight.";
-                    }
-                    else if (smoothingMethods.Count == 3)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Trio of Techniques Creates a Harmonious Blend, Weaving Threads of Harmony into a Tapestry of Sound.";
-                    }
-                    else if (smoothingMethods.Count == 4)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Quartet of Filters Has Performed in Perfect Harmony, Four Voices Rising Together in Resonance.";
-                    }
-                    else if (smoothingMethods.Count == 5)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Full Ensemble of Smoothing Techniques Delivers a Masterful Performance, a Grand Orchestra Filling the Hall with Brilliance.";
-                    }
-                    else if (smoothingMethods.Count >= 6)
-                    {
-                        comments += Environment.NewLine + Environment.NewLine +
-                            "Hidden Movement Unlocked : The Grand Symphony of Smoothing Techniques Reaches Its Crescendo, a Tidal Wave of Sound Embracing the Listener.";
-                    }
-
-                    wb.BuiltinDocumentProperties["Comments"].Value = comments;
-                }
-                catch (Exception ex)
-                {
-                    if (ex is System.Runtime.InteropServices.COMException comEx)
-                    {
-                        MessageBox.Show(
-                            "Failed to set Excel document properties (COM error).\n\n" +
-                            $"Details : {comEx.Message}",
-                            "Excel Property Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-                    }
-                    else if (ex is ArgumentException argEx)
-                    {
-                        MessageBox.Show(
-                            "Failed to set Excel document properties (Argument error).\n\n" +
-                            $"Details : {argEx.Message}",
-                            "Excel Property Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-                    }
-                    else if (ex is InvalidCastException castEx)
-                    {
-                        MessageBox.Show(
-                            "Failed to set Excel document properties (Type error).\n\n" +
-                            $"Details : {castEx.Message}",
-                            "Excel Property Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-                    }
-                    else if (ex is System.UnauthorizedAccessException unauthEx)
-                    {
-                        MessageBox.Show(
-                            "Failed to set Excel document properties (Access denied).\n\n" +
-                            $"Details : {unauthEx.Message}",
-                            "Excel Property Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            "An unexpected error occurred while setting Excel document properties.\n\n" +
-                            $"Details : {ex.Message}",
-                            "Excel Property Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning
-                        );
-                    }
-                }
-
-                sheets = wb.Worksheets;
-                coms.Push(sheets);
-
-                ws = (Excel.Worksheet)sheets[1];
-                ws.Name = txtDatasetTitle.Text;
-                coms.Push(ws);
-
-                ws.Cells[1, 1] = txtDatasetTitle.Text;
-                ws.Cells[3, 1] = "Smoothing Parameters";
-                ws.Cells[4, 1] = $"Kernel Radius : {r}";
-                ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
-                ws.Cells[6, 1] = $"Boundary Method : {GetBoundaryMethodText(boundaryMode)}";
-                ws.Cells[7, 1] = (doAvg || doMed || doGauss || doGaussMed)
-                    ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
-                    : "Alpha Blend : N/A";
-                ws.Cells[8, 1] = doSG
-                    ? $"Polynomial Order : {polyOrder}"
-                    : "Polynomial Order : N/A";
-                ws.Cells[9, 1] = doSG
-                    ? $"Derivative Order : {derivOrder}"
-                    : "Derivative Order : N/A";
-
-                async Task<int> FillData(double[] data, int startCol)
-                {
-                    int total = data.Length;
-                    int curCol = startCol;
-                    int idx = 0;
-
-                    while (idx < total)
-                    {
-                        int chunk = Math.Min(maxRows, total - idx);
-                        var arr = new double[chunk, 1];
-
-                        for (int row = 0; row < chunk; row++, idx++)
-                            arr[row, 0] = data[idx];
-
-                        Excel.Range topCell = null, bottomCell = null, range = null;
-                        try
-                        {
-                            topCell = (Excel.Range)ws.Cells[4, curCol];
-                            bottomCell = (Excel.Range)ws.Cells[4 + chunk - 1, curCol];
-                            range = ws.Range[topCell, bottomCell];
-                            range.Value2 = arr;
-                        }
-                        finally
-                        {
-                            FinalRelease(range);
-                            FinalRelease(bottomCell);
-                            FinalRelease(topCell);
-                        }
-
-                        pbMain.Value = Math.Min(100, (int)(100.0 * idx / total));
-                        await Task.Yield();
-
-                        curCol++;
-                    }
-
-                    pbMain.Value = 100;
-                    return curCol - 1;
-                }
-
-                async Task<int> FillSection(string title, double[] data, int startCol)
-                {
-                    ws.Cells[3, startCol] = title;
-                    int lastCol = await FillData(data, startCol);
-                    return lastCol + 2;
-                }
-
-                var sections = new List<(string Title, int StartCol, int EndCol)>();
-                int col = 3;
-
-                async Task AddSection(string title, double[] data, bool enabled)
-                {
-                    if (!enabled) return;
-                    int start = col;
-                    col = await FillSection(title, data, col);
-                    sections.Add((title, start, col - 2));
-                }
-
-                await AddSection("Initial Dataset", initialData, true);
-                await AddSection("Rectangular Averaging", rectAvg, doRect);
-                await AddSection("Binomial Averaging", binomAvg, doAvg);
-                await AddSection("Binomial Median Filtering", binomMed, doMed);
-                await AddSection("Gaussian Weighted Median Filtering", gaussMedFilt, doGaussMed);
-                await AddSection("Gaussian Filtering", gaussFilt, doGauss);
-                await AddSection("Savitzky-Golay Filtering", sgFilt, doSG);
-
-                int lastSectionEnd = sections.Last().EndCol;
-                int chartColBase = lastSectionEnd + 4;
-                int chartRowBase = 4;
-
-                chartObjects = (Excel.ChartObjects)ws.ChartObjects();
-                coms.Push(chartObjects);
-
-                double chartLeft, chartTop;
-                Excel.Range anchorCell = null;
-                try
-                {
-                    anchorCell = (Excel.Range)ws.Cells[chartRowBase, chartColBase];
-                    chartLeft = anchorCell.Left;
-                    chartTop = anchorCell.Top;
-                }
-                finally
-                {
-                    FinalRelease(anchorCell);
-                }
-
-                chartObj = chartObjects.Add(chartLeft, chartTop, 900, 600);
-                coms.Push(chartObj);
-
-                chart = chartObj.Chart;
-                coms.Push(chart);
-
-                chart.ChartType = Excel.XlChartType.xlLine;
-                chart.HasTitle = true;
-                chart.ChartTitle.Text = txtDatasetTitle.Text;
-
-                chart.HasLegend = true;
-                chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
-
-                chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
-                chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
-                chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
-                chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
-
-                seriesCollection = chart.SeriesCollection();
-                coms.Push(seriesCollection);
-
-                foreach (var (Title, StartCol, EndCol) in sections)
-                {
-                    Excel.Range unionRange = null;
+                    // 엑셀 문서 속성 (Easter Egg)
                     try
                     {
-                        for (int c = StartCol; c <= EndCol; c++)
-                        {
-                            int fullCols = n / maxRows;
-                            int rowsInCol = (c - StartCol < fullCols)
-                                ? maxRows
-                                : n - fullCols * maxRows;
-                            if (rowsInCol <= 0) break;
+                        var smoothingMethods = new List<string>();
+                        if (doRect) smoothingMethods.Add("Rectangular Average");
+                        if (doAvg) smoothingMethods.Add("Binomial Average");
+                        if (doMed) smoothingMethods.Add("Binomial Median");
+                        if (doGaussMed) smoothingMethods.Add("Gaussian Weighted Median");
+                        if (doGauss) smoothingMethods.Add("Gaussian");
+                        if (doSG) smoothingMethods.Add("Savitzky-Golay");
 
-                            Excel.Range top = null, bottom = null, dataRange = null;
+                        wb.BuiltinDocumentProperties["Title"].Value = $"SonataSmooth Overture : {titleText}";
+                        wb.BuiltinDocumentProperties["Category"].Value = "SonataSmooth Movement Score";
+                        wb.BuiltinDocumentProperties["Author"].Value = "Maestro SonataSmooth";
+                        wb.BuiltinDocumentProperties["Last Author"].Value = Environment.UserName;
+                        wb.BuiltinDocumentProperties["Keywords"].Value = "SonataSmooth, Smoothing, Movements, Harmony, Export";
+
+                        string subject = smoothingMethods.Count > 0
+                            ? $"Concerto of {string.Join(" & ", smoothingMethods)} smoothing movements"
+                            : "Cadenza of Silence : No smoothing applied";
+
+                        wb.BuiltinDocumentProperties["Subject"].Value = subject;
+
+                        string[] musicalPhrases = new[]
+                        {
+                            "Adagio in Data Minor",
+                            "Presto Noise Reduction",
+                            "Allegro of Algorithms",
+                            "Nocturne for Numeric Streams",
+                            "Fugue of Filters",
+                            "Symphony of Smoothness",
+                            "Etude in Error Suppression",
+                            "Rhapsody of Regression",
+                            "Minuet of Median Magic",
+                            "Cantata of Clean Curves"
+                        };
+
+                        Random rnd = new Random();
+                        string randomPhrase = musicalPhrases[rnd.Next(musicalPhrases.Length)];
+
+                        string comments = $"Encore performed by the SonataSmooth Orchestra - \"{randomPhrase}\"";
+                        if (smoothingMethods.Count == 1)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : A Solo Performance of Smoothing Excellence, a Lone Violin Singing in the Silence.";
+                        }
+                        else if (smoothingMethods.Count == 2)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : A Duet of Filters, a Couple in Perfect Balance, United by Their Love of Refinement, Like Two Dancers Entwined Beneath the Spotlight.";
+                        }
+                        else if (smoothingMethods.Count == 3)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : The Trio of Techniques Creates a Harmonious Blend, Weaving Threads of Harmony into a Tapestry of Sound.";
+                        }
+                        else if (smoothingMethods.Count == 4)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : The Quartet of Filters Has Performed in Perfect Harmony, Four Voices Rising Together in Resonance.";
+                        }
+                        else if (smoothingMethods.Count == 5)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : The Full Ensemble of Smoothing Techniques Delivers a Masterful Performance, a Grand Orchestra Filling the Hall with Brilliance.";
+                        }
+                        else if (smoothingMethods.Count >= 6)
+                        {
+                            comments += Environment.NewLine + Environment.NewLine +
+                                "Hidden Movement Unlocked : The Grand Symphony of Smoothing Techniques Reaches Its Crescendo, a Tidal Wave of Sound Embracing the Listener.";
+                        }
+
+                        wb.BuiltinDocumentProperties["Comments"].Value = comments;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is System.Runtime.InteropServices.COMException comEx)
+                        {
+                            MessageBox.Show(
+                                "Failed to set Excel document properties (COM error).\n\n" +
+                                $"Details : {comEx.Message}",
+                                "Excel Property Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning
+                            );
+                        }
+                        else if (ex is ArgumentException argEx)
+                        {
+                            MessageBox.Show(
+                                "Failed to set Excel document properties (Argument error).\n\n" +
+                                $"Details : {argEx.Message}",
+                                "Excel Property Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning
+                            );
+                        }
+                        else if (ex is InvalidCastException castEx)
+                        {
+                            MessageBox.Show(
+                                "Failed to set Excel document properties (Type error).\n\n" +
+                                $"Details : {castEx.Message}",
+                                "Excel Property Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning
+                            );
+                        }
+                        else if (ex is System.UnauthorizedAccessException unauthEx)
+                        {
+                            MessageBox.Show(
+                                "Failed to set Excel document properties (Access denied).\n\n" +
+                                $"Details : {unauthEx.Message}",
+                                "Excel Property Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning
+                            );
+                        }
+                        else
+                        {
+                            MessageBox.Show(
+                                "An unexpected error occurred while setting Excel document properties.\n\n" +
+                                $"Details : {ex.Message}",
+                                "Excel Property Error",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning
+                            );
+                        }
+                    }
+
+                    progress.Report(15);
+
+                    // Worksheet
+                    sheets = wb.Worksheets;
+                    coms.Push(sheets);
+                    ws = (Excel.Worksheet)sheets[1];
+                    ws.Name = titleText;
+                    coms.Push(ws);
+
+                    // Header / parameters (캡쳐된 값 사용)
+                    ws.Cells[1, 1] = titleText;
+                    ws.Cells[3, 1] = "Smoothing Parameters";
+                    ws.Cells[4, 1] = $"Kernel Radius : {r}";
+                    ws.Cells[5, 1] = $"Kernel Width : {2 * r + 1}";
+                    ws.Cells[6, 1] = $"Boundary Method : {boundaryText}";
+                    ws.Cells[7, 1] = (doAvg || doMed || doGauss || doGaussMed)
+                        ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
+                        : "Alpha Blend : N/A";
+                    ws.Cells[8, 1] = doSG ? $"Polynomial Order : {polyOrder}" : "Polynomial Order : N/A";
+                    ws.Cells[9, 1] = doSG ? $"Derivative Order : {derivOrder}" : "Derivative Order : N/A";
+
+                    progress.Report(18);
+
+                    // Data helper 채우기
+                    async Task<int> FillData(string title, double[] data, int startCol, int baseProgress, int endProgress)
+                    {
+                        ws.Cells[3, startCol] = title;
+
+                        int total = data.Length;
+                        int curCol = startCol;
+                        int idx = 0;
+
+                        while (idx < total)
+                        {
+                            int chunk = Math.Min(maxRows, total - idx);
+                            var arr = new double[chunk, 1];
+
+                            for (int row = 0; row < chunk; row++, idx++)
+                                arr[row, 0] = data[idx];
+
+                            Excel.Range topCell = null, bottomCell = null, range = null;
                             try
                             {
-                                top = (Excel.Range)ws.Cells[4, c];
-                                bottom = (Excel.Range)ws.Cells[4 + rowsInCol - 1, c];
-                                dataRange = ws.Range[top, bottom];
-
-                                if (unionRange == null)
-                                    unionRange = dataRange;
-                                else
-                                {
-                                    Excel.Range merged = null;
-                                    try
-                                    {
-                                        merged = excel.Union(unionRange, dataRange);
-                                    }
-                                    finally
-                                    {
-                                        FinalRelease(unionRange);
-                                        FinalRelease(dataRange);
-                                    }
-                                    unionRange = merged;
-                                    top = null; bottom = null; dataRange = null;
-                                }
+                                topCell = (Excel.Range)ws.Cells[4, curCol];
+                                bottomCell = (Excel.Range)ws.Cells[4 + chunk - 1, curCol];
+                                range = ws.Range[topCell, bottomCell];
+                                range.Value2 = arr;
                             }
                             finally
                             {
-                                FinalRelease(bottom);
-                                FinalRelease(top);
+                                FinalRelease(range);
+                                FinalRelease(bottomCell);
+                                FinalRelease(topCell);
                             }
+
+                            double localRatio = (double)idx / total;
+                            int mapped = baseProgress + (int)Math.Round(localRatio * (endProgress - baseProgress));
+                            progress.Report(Math.Max(baseProgress, Math.Min(endProgress, mapped)));
+
+                            await Task.Yield();
+                            curCol++;
                         }
 
-                        var series = seriesCollection.NewSeries();
+                        progress.Report(endProgress);
+                        return curCol - 1;
+                    }
+
+                    // 섹션 헤더
+                    var sections = new List<(string Title, int StartCol, int EndCol)>();
+                    int col = 3;
+
+                    int segmentStart = 20;
+                    int segmentWidth = 8;
+
+                    int start = col;
+                    col = FillData("Initial Dataset", initialData, col, segmentStart, segmentStart + segmentWidth)
+                        .GetAwaiter().GetResult() + 2;
+                    sections.Add(("Initial Dataset", start, col - 2));
+                    segmentStart += segmentWidth;
+
+                    if (doRect)
+                    {
+                        start = col;
+                        col = FillData("Rectangular Averaging", rectAvg, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Rectangular Averaging", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+                    if (doAvg)
+                    {
+                        start = col;
+                        col = FillData("Binomial Averaging", binomAvg, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Binomial Averaging", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+                    if (doMed)
+                    {
+                        start = col;
+                        col = FillData("Binomial Median Filtering", binomMed, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Binomial Median Filtering", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+                    if (doGaussMed)
+                    {
+                        start = col;
+                        col = FillData("Gaussian Weighted Median Filtering", gaussMedFilt, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Gaussian Weighted Median Filtering", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+                    if (doGauss)
+                    {
+                        start = col;
+                        col = FillData("Gaussian Filtering", gaussFilt, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Gaussian Filtering", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+                    if (doSG)
+                    {
+                        start = col;
+                        col = FillData("Savitzky-Golay Filtering", sgFilt, col, segmentStart, segmentStart + segmentWidth)
+                            .GetAwaiter().GetResult() + 2;
+                        sections.Add(("Savitzky-Golay Filtering", start, col - 2));
+                        segmentStart += segmentWidth;
+                    }
+
+                    progress.Report(Math.Min(85, segmentStart));
+
+                    // 차트 영역
+                    int lastSectionEnd = sections.Last().EndCol;
+                    int chartColBase = lastSectionEnd + 4;
+                    int chartRowBase = 4;
+
+                    chartObjects = (Excel.ChartObjects)ws.ChartObjects();
+                    coms.Push(chartObjects);
+
+                    double chartLeft, chartTop;
+                    Excel.Range anchorCell = null;
+                    try
+                    {
+                        anchorCell = (Excel.Range)ws.Cells[chartRowBase, chartColBase];
+                        chartLeft = anchorCell.Left;
+                        chartTop = anchorCell.Top;
+                    }
+                    finally
+                    {
+                        FinalRelease(anchorCell);
+                    }
+
+                    chartObj = chartObjects.Add(chartLeft, chartTop, 900, 600);
+                    coms.Push(chartObj);
+
+                    chart = chartObj.Chart;
+                    coms.Push(chart);
+
+                    chart.ChartType = Excel.XlChartType.xlLine;
+                    chart.HasTitle = true;
+                    chart.ChartTitle.Text = titleText;
+
+                    chart.HasLegend = true;
+                    chart.Legend.Position = Excel.XlLegendPosition.xlLegendPositionRight;
+
+                    chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
+                    chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Text = "Value";
+                    chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
+                    chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Text = "Sequence Number";
+
+                    progress.Report(88);
+
+                    seriesCollection = chart.SeriesCollection();
+                    coms.Push(seriesCollection);
+
+                    int seriesAdded = 0;
+                    foreach (var (Title, StartCol, EndCol) in sections)
+                    {
+                        Excel.Range unionRange = null;
                         try
                         {
-                            series.Name = Title;
-                            series.Values = unionRange;
+                            for (int c = StartCol; c <= EndCol; c++)
+                            {
+                                int fullCols = n / maxRows;
+                                int rowsInCol = (c - StartCol < fullCols)
+                                    ? maxRows
+                                    : n - fullCols * maxRows;
+                                if (rowsInCol <= 0) break;
+
+                                Excel.Range top = null, bottom = null, dataRange = null;
+                                try
+                                {
+                                    top = (Excel.Range)ws.Cells[4, c];
+                                    bottom = (Excel.Range)ws.Cells[4 + rowsInCol - 1, c];
+                                    dataRange = ws.Range[top, bottom];
+
+                                    if (unionRange == null)
+                                        unionRange = dataRange;
+                                    else
+                                    {
+                                        Excel.Range merged = null;
+                                        try
+                                        {
+                                            merged = excel.Union(unionRange, dataRange);
+                                        }
+                                        finally
+                                        {
+                                            FinalRelease(unionRange);
+                                            FinalRelease(dataRange);
+                                        }
+                                        unionRange = merged;
+                                        top = null; bottom = null; dataRange = null;
+                                    }
+                                }
+                                finally
+                                {
+                                    FinalRelease(bottom);
+                                    FinalRelease(top);
+                                }
+                            }
+
+                            var series = seriesCollection.NewSeries();
+                            try
+                            {
+                                series.Name = Title;
+                                series.Values = unionRange;
+                            }
+                            finally
+                            {
+                                FinalRelease(series);
+                            }
+
+                            seriesAdded++;
+                            progress.Report(88 + Math.Min(4, seriesAdded));
                         }
                         finally
                         {
-                            FinalRelease(series);
+                            FinalRelease(unionRange);
                         }
                     }
-                    finally
-                    {
-                        FinalRelease(unionRange);
-                    }
-                }
 
-                // 사용자가 저장 경로를 선택했다면 바로 저장
-                if (!string.IsNullOrWhiteSpace(savePath))
-                {
-                    // SaveAs 실행 중에 진행률을 결정형 (Determinate) 방식으로 시뮬레이션
-                    var prevStyle = pbMain.Style;
-                    var prevValue = pbMain.Value;
+                    progress.Report(92);
 
-                    pbMain.Style = ProgressBarStyle.Continuous;
-                    pbMain.Minimum = 0;
-                    pbMain.Maximum = 100;
-                    pbMain.Value = 0;
-
-                    // SaveAs 실행 중에는 타이머로 진행률을 95% 까지 증가
-                    var saveProgressTimer = new System.Windows.Forms.Timer { Interval = 120 };
-                    saveProgressTimer.Tick += (s, e) =>
+                    // SaveAs (진행 상황은 progress.Report 로만 전달)
+                    if (!string.IsNullOrWhiteSpace(savePath))
                     {
                         try
                         {
-                            if (pbMain.Value < 95)
-                                pbMain.Value = Math.Min(95, pbMain.Value + 3);
+                            excel.DisplayAlerts = false;
+
+                            progress.Report(95); // 저장 완료 직전
+                            wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
+                            wb.Saved = true;
+
+                            progress.Report(100);
+                            willShowExcel = false;
                         }
-                        catch
-                        { 
-                            /* Ignore UI race */
+                        catch (Exception sx)
+                        {
+                            MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            progress.Report(0);
                         }
-                    };
-                    saveProgressTimer.Start();
-
-                    try
-                    {
-                        excel.DisplayAlerts = false;
-                        wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
-                        wb.Saved = true;
-
-                        // 저장 작업 완료
-                        saveProgressTimer.Stop();
-                        pbMain.Value = 100;
-                        willShowExcel = false;
+                        finally
+                        {
+                            excel.DisplayAlerts = true;
+                        }
                     }
-                    catch (Exception sx)
+                    else
                     {
-                        saveProgressTimer.Stop();
-                        MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        wb.Saved = false;
+                        progress.Report(95);
+                    }
 
-                        // 저장 실패 시 Excel 표시
-                        // willShowExcel = true; 
+                    progress.Report(100);
 
+                    if (willShowExcel)
+                    {
+                        excel.Visible = true;
+                    }
+                    else
+                    {
+                        try { wb.Close(false); } catch { /* ignore */ }
+                        try { excel.Quit(); } catch { /* ignore */ }
+
+                        if (!openAfter)
+                            try
+                            {
+                                this.BeginInvoke(new Action(() =>
+                                {
+                                    MessageBox.Show(this, "Excel export completed.", "Export Excel", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }));
+                            }
+                            catch
+                            {
+                                // 폼 종료 중이라면 무시
+                            }
+                    }
+
+                    return "OK";
+                });
+                await Task.Delay(150);
+                if (pbMain.InvokeRequired)
+                {
+                    pbMain.Invoke(new Action(() =>
+                    {
                         pbMain.Value = 0;
-                    }
-                    finally
-                    {
-                        excel.DisplayAlerts = true;
-                        // 완료 상태를 사용자가 볼 수 있도록 짧은 지연 추가
-                        await Task.Delay(150);
-                        // 이전 스타일 복원 (값은 0 으로 유지)
-                        pbMain.Style = prevStyle;
-                        pbMain.Value = 0;
-                    }
+                        pbMain.Style = ProgressBarStyle.Continuous;
+                        pbMain.Refresh();
+                    }));
                 }
                 else
                 {
-                    // 저장하지 않은 상태 유지 (사용자가 수동 저장 가능)
-                    wb.Saved = false;
-                }
-
-                pbMain.Value = 0;
-
-                if (willShowExcel)
-                {
-                    // 저장 취소 / 실패 시에만 Excel UI 표시
-                    excel.Visible = true;
-                }
-                else
-                {
-                    // 저장 완료 : Excel 창 표시하지 않고 종료
-                    try 
-                    { 
-                        wb.Close(false); 
-                    } 
-                    catch 
-                    { 
-                        /* ignore */ 
-                    }
-                    
-                    try 
-                    { 
-                        excel.Quit(); 
-                    } 
-                    catch 
-                    {
-                        /* ignore */ 
-                    }
-
-                    bool openAfter = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
-                    if (!openAfter)
-                    {
-                        MessageBox.Show(this,
-                            "Excel export completed.",
-                            "Export Excel",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                    }
+                    pbMain.Value = 0;
+                    pbMain.Style = ProgressBarStyle.Continuous;
+                    pbMain.Refresh();
                 }
             }
             catch (System.Runtime.InteropServices.COMException ex)
@@ -4054,6 +4133,26 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
             finally
             {
+                try
+                {
+                    if (pbMain.InvokeRequired)
+                    {
+                        pbMain.Invoke(new Action(() =>
+                        {
+                            pbMain.Value = 0;
+                            pbMain.Style = ProgressBarStyle.Continuous;
+                            pbMain.Refresh();
+                        }));
+                    }
+                    else
+                    {
+                        pbMain.Value = 0;
+                        pbMain.Style = ProgressBarStyle.Continuous;
+                        pbMain.Refresh();
+                    }
+                }
+                catch { /* 폼이 종료 중인 경우 무시 */ }
+
                 ReleaseAll(coms);
 
                 GC.Collect();
@@ -4128,10 +4227,11 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             string invalidChars = ":\\/?*[";
             char[] winInvalidChars = System.IO.Path.GetInvalidFileNameChars();
             string[] reservedNames = {
-        "CON","PRN","AUX","NUL",
-        "COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
-        "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9"
-    };
+                "CON","PRN","AUX","NUL",
+                "COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
+                "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9"
+            };
+            
             string titleUpper = title.ToUpperInvariant();
 
             var errors = new List<string>();
