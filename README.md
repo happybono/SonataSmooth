@@ -298,12 +298,16 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > When "Open after save" is unchecked, a "Excel export completed." message box is shown after successful Excel (.xlsx) export, consistent with the existing CSV export completion behavior.<br><br>
 > On first launch after upgrade, compatible settings are migrated once via `HasUpgradedSettings`, and subsequent launches preserve user‑modified values through normal save / load.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v5.4.0.0
 #### December 13, 2025
 > Introduced more hidden Easter eggs.<br><br>
 > Refined `AssemblyDescription` to emphasize SonataSmooth's advanced filtering and key features.<br><br>
+> Minor bugs fixed.
+</details>
+
+### v5.4.1.6
+#### December 13, 2025
 > Minor bugs fixed.
 
 ## Required Components & Setup
