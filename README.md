@@ -2618,7 +2618,7 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 
 ## Demonstration
 ![SonataSmooth_BinomialMedian](Screenshots/SonataSmooth-BinomialMedian.png)<br><br>
-![SonataSmooth_Gaussian](Screenshots/SonataSmooth-GaussianFiltering.png)<br><br>  
+![SonataSmooth_GaussianWeightedMedian](Screenshots/SonataSmooth-GaussianWeightedMedian.png)<br><br>  
 ![SonataSmooth SG](Screenshots/SonataSmooth-SGFiltering.png)<br><br>  
 ![SonataSmooth_EditEntries](Screenshots/SonataSmooth-EditEntries.png)<br><br>  
 ![SonataSmooth_MatchSelection](Screenshots/SonataSmooth-MatchSelection.png)<br><br>  
