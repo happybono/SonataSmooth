@@ -554,7 +554,7 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.
 
 Adaptive paths differ per filter :
-- `Rect`, `Avg`, `Med`, `Gauss`, `GaussMed`: the window is trimmed to in‑range samples and processed directly without padding.
+- `Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
   - `Avg`: recomputes a local binomial row for truncated `W`, normalizes by its sum, and averages (no sort).
   - `Med`: recomputes local binomial weights for truncated `W`, sorts by value, and selects the weighted median (handles even / odd total weight).
   - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`, normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
@@ -2618,7 +2618,7 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 
 ## Demonstration
 ![SonataSmooth_BinomialMedian](Screenshots/SonataSmooth-BinomialMedian.png)<br><br>
-![SonataSmooth_GaussianWeightedMedian](Screenshots/SonataSmooth-GaussianWeightedMedian.png)<br><br>  
+![SonataSmooth_Gaussian](Screenshots/SonataSmooth-GaussianFiltering.png)<br><br>  
 ![SonataSmooth SG](Screenshots/SonataSmooth-SGFiltering.png)<br><br>  
 ![SonataSmooth_EditEntries](Screenshots/SonataSmooth-EditEntries.png)<br><br>  
 ![SonataSmooth_MatchSelection](Screenshots/SonataSmooth-MatchSelection.png)<br><br>  
