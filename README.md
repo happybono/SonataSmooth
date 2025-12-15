@@ -288,7 +288,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.3.0.0
 #### December 08, 2025
 > Application preferences are now automatically saved when the `SonataSmooth` application `closes` or when the user presses the `Save button` in the settings panel. These values are seamlessly reloaded at startup, allowing users to continue their work without interruption and ensuring a consistent environment across sessions.<br><br>
-> Introduced the **Gaussian Weighted Median Filter (GMMF)**, providing advanced smoothing and correction capabilities. This method enhances data fidelity by reducing noise while preserving critical signal characteristics, offering more accurate results for complex workflows.<br><br>
+> Introduced the **Gaussian Weighted Median Filter (GWMF)**, providing advanced smoothing and correction capabilities. This method enhances data fidelity by reducing noise while preserving critical signal characteristics, offering more accurate results for complex workflows.<br><br>
 > A new `Restore to Default` button has been added to the settings interface, enabling users to quickly revert configurations to their original baseline values. This improves usability and reduces friction when experimenting with different settings.<br><br>
 > Various minor bugs have been fixed, and overall usability has been refined to deliver a smoother, more reliable user experience.
 
@@ -422,7 +422,7 @@ This guide explains how different noise filters work with different types of sig
 - **Rectangular Averaging** : Simple but effective for steady high‑frequency noise suppression.  
 - **Binomial Averaging** : A balanced middle ground, especially strong for periodic signals with moderate noise.  
 - **Binomial Median Filtering** : The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
-- **Gaussian Weighted Median Filtering (GWMF )** :A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
+- **Gaussian Weighted Median Filtering (GWMF)** : A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
 - **Gaussian Filtering** : Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
 - **Savitzky‑Golay Filtering** : Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
 
@@ -454,7 +454,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
 - **Binomial Median Filtering**<br>
   Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
   
-- **Gaussian Weighted Median Filtering (GWMF)**<br>
+- **Gaussian Weighted Median Filtering (GWMF)** <br>
   Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / 6.0`, and weights are normalized; alpha blending applies at runtime.
 
 - **Gaussian Filtering**<br>
