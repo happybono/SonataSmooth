@@ -3470,6 +3470,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             bool doGaussMed = settingsForm.chbGaussMed.Checked;
             bool doGauss = settingsForm.chbGauss.Checked;
             bool doSG = settingsForm.chbSG.Checked;
+
             double alpha = GetAlphaFromCbx();
 
             // UI 스레드에서 진행 표시줄 초기화
@@ -3605,6 +3606,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 var titleText = txtDatasetTitle.Text;
                 var boundaryText = GetBoundaryMethodText(boundaryMode);
                 var openAfter = settingsForm.chbOpenFile != null && settingsForm.chbOpenFile.Checked;
+
+                bool exportSaved = false;
 
                 await RunExcelInteropOnStaThread(progress =>
                 {
@@ -4004,13 +4007,14 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                             wb.SaveAs(savePath, Excel.XlFileFormat.xlOpenXMLWorkbook);
                             wb.Saved = true;
 
+                            exportSaved = true; // 저장 성공
                             progress.Report(100);
                             willShowExcel = false;
                         }
-                        catch (Exception sx)
+                        catch (Exception ex)
                         {
-                            MessageBox.Show($"Failed to save workbook:\n{sx.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            progress.Report(0);
+                            MessageBox.Show($"Failed to save workbook:\n{ex.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            progress.Report(0);   
                         }
                         finally
                         {
@@ -4034,7 +4038,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                         try { wb.Close(false); } catch { /* ignore */ }
                         try { excel.Quit(); } catch { /* ignore */ }
 
-                        if (!openAfter)
+                        if (!openAfter && exportSaved)
                             try
                             {
                                 this.BeginInvoke(new Action(() =>
