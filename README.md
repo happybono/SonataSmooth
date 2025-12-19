@@ -304,10 +304,14 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Introduced more hidden Easter eggs.<br><br>
 > Refined `AssemblyDescription` to emphasize SonataSmooth's advanced filtering and key features.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v5.4.1.6
 #### December 14, 2025
+> Minor bugs fixed.
+</details>
+
+### v5.4.2.0
+#### December 20, 2025
 > Minor bugs fixed.
 
 ## Required Components & Setup
