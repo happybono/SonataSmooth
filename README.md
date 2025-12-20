@@ -425,8 +425,8 @@ This guide explains how different noise filters work with different types of sig
 ### Verdict
 - **Rectangular Averaging** : Simple but effective for steady high‑frequency noise suppression.  
 - **Binomial Averaging** : A balanced middle ground, especially strong for periodic signals with moderate noise.  
-- **Binomial Median Filtering** : The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer.  
-- **Gaussian Weighted Median Filtering (GWMF)** : A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation, but less consistent for consecutive spikes.  
+- **Binomial Median Filtering** : The most robust across datasets and metrics; excels at handling spikes (both occasional and frequent), frequent noise, and step changes, making it the overall best performer, but less consistent for consecutive spikes.   
+- **Gaussian Weighted Median Filtering (GWMF)** : A hybrid combining Gaussian smoothness with median robustness; excellent for occasional spikes and smooth‑curve preservation. 
 - **Gaussian Filtering** : Produces smooth curves and natural signal flow, but struggles with abrupt changes and extreme outliers.  
 - **Savitzky‑Golay Filtering** : Excels at preserving waveforms, trends, and mixed frequencies; ideal for scientific data and smooth curve analysis.  
 
