@@ -308,10 +308,15 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.4.1.6
 #### December 14, 2025
 > Minor bugs fixed.
-</details>
 
 ### v5.4.2.0
 #### December 20, 2025
+> Minor bugs fixed.
+</details>
+
+### v5.5.0.0
+#### December 22, 2025
+> Improved Excel export error handling: now distinguishes between Excel not installed, COM activation failure, and other interop errors, providing more specific user guidance.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
