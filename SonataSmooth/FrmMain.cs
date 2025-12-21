@@ -4011,10 +4011,57 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                             progress.Report(100);
                             willShowExcel = false;
                         }
+                        catch (System.Runtime.InteropServices.COMException comEx)
+                        {
+                            const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+                            const int CO_E_ACTIVATIONFAILED = unchecked((int)0x8004E021);
+
+                            string msg;
+                            if (comEx.HResult == REGDB_E_CLASSNOTREG)
+                            {
+                                // Excel 미설치 또는 COM 등록 누락
+                                msg = "Microsoft Excel is not installed (or its COM registration is missing).\n\n" +
+                                      "Would you like to open the Microsoft Office download page now?";
+                                var result = MessageBox.Show(
+                                    this,
+                                    msg,
+                                    "Excel Not Installed",
+                                    MessageBoxButtons.YesNo,
+                                    MessageBoxIcon.Warning,
+                                    MessageBoxDefaultButton.Button2);
+
+                                if (result == DialogResult.Yes)
+                                    OpenOfficeDownloadPage();
+                            }
+                            else if (comEx.HResult == CO_E_ACTIVATIONFAILED)
+                            {
+                                // COM 활성화 실패 (예 : Office 비트 불일치, Add-in 충돌 등)
+                                msg = "Excel export failed because Excel could not be activated via COM. " +
+                                      "Please check Office installation, add-ins, and bitness compatibility.";
+                                MessageBox.Show(
+                                    this,
+                                    msg,
+                                    "Export Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                // 기타 알 수 없는 COM 예외
+                                msg = "Excel export failed due to an Excel interop error.\n\n" + comEx.Message;
+                                MessageBox.Show(
+                                    this,
+                                    msg,
+                                    "Export Error",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                            }                        
+                        progress.Report(0);
+                        }
                         catch (Exception ex)
                         {
                             MessageBox.Show($"Failed to save workbook:\n{ex.Message}", "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            progress.Report(0);   
+                            progress.Report(0);
                         }
                         finally
                         {
@@ -4052,7 +4099,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                             }
                     }
 
-                    return "OK";
+                    return "Success";
                 });
                 await Task.Delay(150);
                 if (pbMain.InvokeRequired)
@@ -4073,28 +4120,29 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
-                string msg = "Excel interop error: " + ex.Message + Environment.NewLine + Environment.NewLine +
-                    "Microsoft Excel does not appear to be installed, or there was a problem starting Excel." + Environment.NewLine +
-                    "Would you like to open the Microsoft Office download page now?";
-
-                var result = MessageBox.Show(
-                    msg,
-                    "Export Error",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Error,
-                    MessageBoxDefaultButton.Button2
-                    );
-
-                if (result == DialogResult.Yes)
+                // Excel 설치 여부 및 COM 예외 분기
+              if (IsExcelNotInstalled(ex))
                 {
-                    try
-                    {
-                        Process.Start(new ProcessStartInfo("https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products") { UseShellExecute = true });
-                    }
-                    catch
-                    {
-                        return;
-                    }
+                    var result = MessageBox.Show(
+                        this,
+                        "Microsoft Excel is not installed (or its COM registration is missing).\n\n" +
+                        "Would you like to open the Microsoft Office download page now?",
+                        "Excel Not Installed",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button2);
+
+                    if (result == DialogResult.Yes)
+                        OpenOfficeDownloadPage();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        this,
+                        "Excel export failed due to an Excel interop error.\n\n" + ex.Message,
+                        "Export Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                 }
             }
             catch (AggregateException ex)
@@ -4163,6 +4211,24 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
+            }
+        }
+
+        private static bool IsExcelNotInstalled(System.Runtime.InteropServices.COMException ex)
+        {
+            const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
+            return ex.HResult == REGDB_E_CLASSNOTREG;
+        }
+
+        private static void OpenOfficeDownloadPage()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("https://www.microsoft.com/microsoft-365/buy/compare-all-microsoft-365-products") { UseShellExecute = true });
+            }
+            catch
+            {
+                // ignore
             }
         }
 
