@@ -322,7 +322,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.6.0.0
 #### December 28, 2025
 > Overhauled the graphical user interface.<br><br>
-> Gaussian filters (Gaussian Weighted Median / Gaussian Filters) now use user‑selected `Sigma Factor` (1.0 - 12.0) for flexible smoothing.<br><br>
+> Gaussian filters (Gaussian Weighted Median / Gaussian Filters) now use user‑selected `Sigma Factor` ((2r + 1) / 1.0 … 12.0) for flexible smoothing.<br><br>
 > CSV / Excel export metadata now correctly reflects the actual Sigma Factor used in calculations.<br><br>
 > Exported data for Gaussian Weighted Median and Gaussian filters is always computed using the selected `Sigma Factor` value.<br><br>
 > Settings load / save unified for all smoothing parameters, with safe defaults on errors.<br><br>
