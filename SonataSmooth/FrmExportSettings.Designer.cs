@@ -37,6 +37,9 @@
             this.statStripExportConfig = new System.Windows.Forms.StatusStrip();
             this.slblDesc = new System.Windows.Forms.ToolStripStatusLabel();
             this.gbSmoothParams = new System.Windows.Forms.GroupBox();
+            this.lblKernelWidth = new System.Windows.Forms.Label();
+            this.cbxSigmaFactor = new System.Windows.Forms.ComboBox();
+            this.lblSigmaFactor = new System.Windows.Forms.Label();
             this.lblAlpha = new System.Windows.Forms.Label();
             this.cbxAlpha = new System.Windows.Forms.ComboBox();
             this.lblDerivOrder = new System.Windows.Forms.Label();
@@ -79,9 +82,9 @@
             this.gbExportOpts.Controls.Add(this.rbtnCSV);
             this.gbExportOpts.Controls.Add(this.rbtnXLSX);
             this.gbExportOpts.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gbExportOpts.Location = new System.Drawing.Point(11, 246);
+            this.gbExportOpts.Location = new System.Drawing.Point(11, 281);
             this.gbExportOpts.Name = "gbExportOpts";
-            this.gbExportOpts.Size = new System.Drawing.Size(705, 85);
+            this.gbExportOpts.Size = new System.Drawing.Size(783, 85);
             this.gbExportOpts.TabIndex = 12;
             this.gbExportOpts.TabStop = false;
             this.gbExportOpts.Text = "Data Export Options";
@@ -92,7 +95,7 @@
             this.chbOpenFile.Checked = true;
             this.chbOpenFile.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbOpenFile.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chbOpenFile.Location = new System.Drawing.Point(208, 58);
+            this.chbOpenFile.Location = new System.Drawing.Point(247, 58);
             this.chbOpenFile.Name = "chbOpenFile";
             this.chbOpenFile.Size = new System.Drawing.Size(289, 21);
             this.chbOpenFile.TabIndex = 15;
@@ -106,9 +109,9 @@
             // 
             this.rbtnCSV.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnCSV.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnCSV.Location = new System.Drawing.Point(385, 21);
+            this.rbtnCSV.Location = new System.Drawing.Point(404, 21);
             this.rbtnCSV.Name = "rbtnCSV";
-            this.rbtnCSV.Size = new System.Drawing.Size(163, 30);
+            this.rbtnCSV.Size = new System.Drawing.Size(203, 30);
             this.rbtnCSV.TabIndex = 14;
             this.rbtnCSV.TabStop = true;
             this.rbtnCSV.Text = "Export as CSV";
@@ -122,9 +125,9 @@
             this.rbtnXLSX.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnXLSX.Checked = true;
             this.rbtnXLSX.Font = new System.Drawing.Font("Segoe UI Variable Display", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnXLSX.Location = new System.Drawing.Point(157, 21);
+            this.rbtnXLSX.Location = new System.Drawing.Point(176, 21);
             this.rbtnXLSX.Name = "rbtnXLSX";
-            this.rbtnXLSX.Size = new System.Drawing.Size(163, 30);
+            this.rbtnXLSX.Size = new System.Drawing.Size(203, 30);
             this.rbtnXLSX.TabIndex = 13;
             this.rbtnXLSX.TabStop = true;
             this.rbtnXLSX.Text = "Export as XLSX";
@@ -139,9 +142,9 @@
             this.statStripExportConfig.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(223)))));
             this.statStripExportConfig.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.slblDesc});
-            this.statStripExportConfig.Location = new System.Drawing.Point(0, 372);
+            this.statStripExportConfig.Location = new System.Drawing.Point(0, 412);
             this.statStripExportConfig.Name = "statStripExportConfig";
-            this.statStripExportConfig.Size = new System.Drawing.Size(726, 24);
+            this.statStripExportConfig.Size = new System.Drawing.Size(806, 24);
             this.statStripExportConfig.SizingGrip = false;
             this.statStripExportConfig.TabIndex = 34;
             this.statStripExportConfig.Text = "statusStrip1";
@@ -152,12 +155,15 @@
             this.slblDesc.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblDesc.ForeColor = System.Drawing.Color.White;
             this.slblDesc.Name = "slblDesc";
-            this.slblDesc.Size = new System.Drawing.Size(724, 19);
+            this.slblDesc.Size = new System.Drawing.Size(804, 19);
             this.slblDesc.Text = "To save the settings, please select the desired options and click the \'Save\' butt" +
     "on.";
             // 
             // gbSmoothParams
             // 
+            this.gbSmoothParams.Controls.Add(this.lblKernelWidth);
+            this.gbSmoothParams.Controls.Add(this.cbxSigmaFactor);
+            this.gbSmoothParams.Controls.Add(this.lblSigmaFactor);
             this.gbSmoothParams.Controls.Add(this.lblAlpha);
             this.gbSmoothParams.Controls.Add(this.cbxAlpha);
             this.gbSmoothParams.Controls.Add(this.lblDerivOrder);
@@ -169,18 +175,70 @@
             this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
             this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
             this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gbSmoothParams.Location = new System.Drawing.Point(372, 48);
+            this.gbSmoothParams.Location = new System.Drawing.Point(410, 48);
             this.gbSmoothParams.Name = "gbSmoothParams";
-            this.gbSmoothParams.Size = new System.Drawing.Size(344, 192);
+            this.gbSmoothParams.Size = new System.Drawing.Size(384, 219);
             this.gbSmoothParams.TabIndex = 35;
             this.gbSmoothParams.TabStop = false;
             this.gbSmoothParams.Text = "Smoothing Parameters";
+            // 
+            // lblKernelWidth
+            // 
+            this.lblKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKernelWidth.Location = new System.Drawing.Point(225, 123);
+            this.lblKernelWidth.Name = "lblKernelWidth";
+            this.lblKernelWidth.Size = new System.Drawing.Size(40, 19);
+            this.lblKernelWidth.TabIndex = 40;
+            this.lblKernelWidth.Text = "w ÷";
+            this.lblKernelWidth.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblKernelWidth.MouseLeave += new System.EventHandler(this.lblKernelWidth_MouseLeave);
+            this.lblKernelWidth.MouseHover += new System.EventHandler(this.lblKernelWidth_MouseHover);
+            // 
+            // cbxSigmaFactor
+            // 
+            this.cbxSigmaFactor.DropDownHeight = 150;
+            this.cbxSigmaFactor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxSigmaFactor.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxSigmaFactor.FormattingEnabled = true;
+            this.cbxSigmaFactor.IntegralHeight = false;
+            this.cbxSigmaFactor.ItemHeight = 17;
+            this.cbxSigmaFactor.Items.AddRange(new object[] {
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0",
+            "6.0",
+            "7.0",
+            "8.0",
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0"});
+            this.cbxSigmaFactor.Location = new System.Drawing.Point(269, 122);
+            this.cbxSigmaFactor.Name = "cbxSigmaFactor";
+            this.cbxSigmaFactor.Size = new System.Drawing.Size(87, 25);
+            this.cbxSigmaFactor.TabIndex = 39;
+            this.cbxSigmaFactor.MouseLeave += new System.EventHandler(this.cbxSigmaFactor_MouseLeave);
+            this.cbxSigmaFactor.MouseHover += new System.EventHandler(this.cbxSigmaFactor_MouseHover);
+            // 
+            // lblSigmaFactor
+            // 
+            this.lblSigmaFactor.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblSigmaFactor.Location = new System.Drawing.Point(28, 123);
+            this.lblSigmaFactor.Name = "lblSigmaFactor";
+            this.lblSigmaFactor.Size = new System.Drawing.Size(183, 19);
+            this.lblSigmaFactor.TabIndex = 38;
+            this.lblSigmaFactor.Text = "Sigma Factor :";
+            this.lblSigmaFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSigmaFactor.MouseLeave += new System.EventHandler(this.lblSigmaFactor_MouseLeave);
+            this.lblSigmaFactor.MouseHover += new System.EventHandler(this.lblSigmaFactor_MouseHover);
             // 
             // lblAlpha
             // 
             this.lblAlpha.Enabled = false;
             this.lblAlpha.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblAlpha.Location = new System.Drawing.Point(18, 93);
+            this.lblAlpha.Location = new System.Drawing.Point(28, 93);
             this.lblAlpha.Name = "lblAlpha";
             this.lblAlpha.Size = new System.Drawing.Size(183, 19);
             this.lblAlpha.TabIndex = 33;
@@ -220,9 +278,9 @@
             "0.90",
             "0.95",
             "1.00"});
-            this.cbxAlpha.Location = new System.Drawing.Point(223, 91);
+            this.cbxAlpha.Location = new System.Drawing.Point(233, 91);
             this.cbxAlpha.Name = "cbxAlpha";
-            this.cbxAlpha.Size = new System.Drawing.Size(103, 25);
+            this.cbxAlpha.Size = new System.Drawing.Size(123, 25);
             this.cbxAlpha.TabIndex = 34;
             this.cbxAlpha.MouseLeave += new System.EventHandler(this.cbxAlpha_MouseLeave);
             this.cbxAlpha.MouseHover += new System.EventHandler(this.cbxAlpha_MouseHover);
@@ -231,7 +289,7 @@
             // 
             this.lblDerivOrder.Enabled = false;
             this.lblDerivOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblDerivOrder.Location = new System.Drawing.Point(18, 155);
+            this.lblDerivOrder.Location = new System.Drawing.Point(28, 185);
             this.lblDerivOrder.Name = "lblDerivOrder";
             this.lblDerivOrder.Size = new System.Drawing.Size(183, 19);
             this.lblDerivOrder.TabIndex = 32;
@@ -256,9 +314,9 @@
             "3",
             "4",
             "5"});
-            this.cbxDerivOrder.Location = new System.Drawing.Point(223, 153);
+            this.cbxDerivOrder.Location = new System.Drawing.Point(233, 183);
             this.cbxDerivOrder.Name = "cbxDerivOrder";
-            this.cbxDerivOrder.Size = new System.Drawing.Size(103, 25);
+            this.cbxDerivOrder.Size = new System.Drawing.Size(123, 25);
             this.cbxDerivOrder.TabIndex = 11;
             this.cbxDerivOrder.MouseLeave += new System.EventHandler(this.cbxDerivOrder_MouseLeave);
             this.cbxDerivOrder.MouseHover += new System.EventHandler(this.cbxDerivOrder_MouseHover);
@@ -276,9 +334,9 @@
             "Adaptive",
             "Replicate",
             "Zero Padding"});
-            this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 60);
+            this.cbxBoundaryMethod.Location = new System.Drawing.Point(233, 60);
             this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
-            this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
+            this.cbxBoundaryMethod.Size = new System.Drawing.Size(123, 25);
             this.cbxBoundaryMethod.TabIndex = 9;
             this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
             this.cbxBoundaryMethod.MouseHover += new System.EventHandler(this.cbxBoundaryMethod_MouseHover);
@@ -286,7 +344,7 @@
             // lblBoundaryMethod
             // 
             this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 63);
+            this.lblBoundaryMethod.Location = new System.Drawing.Point(28, 63);
             this.lblBoundaryMethod.Name = "lblBoundaryMethod";
             this.lblBoundaryMethod.Size = new System.Drawing.Size(183, 19);
             this.lblBoundaryMethod.TabIndex = 30;
@@ -298,7 +356,7 @@
             // 
             this.lblPolyOrder.Enabled = false;
             this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(18, 124);
+            this.lblPolyOrder.Location = new System.Drawing.Point(28, 154);
             this.lblPolyOrder.Name = "lblPolyOrder";
             this.lblPolyOrder.Size = new System.Drawing.Size(183, 19);
             this.lblPolyOrder.TabIndex = 27;
@@ -327,9 +385,9 @@
             "8",
             "9",
             "10"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(223, 122);
+            this.cbxPolyOrder.Location = new System.Drawing.Point(233, 152);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
-            this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
+            this.cbxPolyOrder.Size = new System.Drawing.Size(123, 25);
             this.cbxPolyOrder.TabIndex = 10;
             this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
             this.cbxPolyOrder.MouseHover += new System.EventHandler(this.cbxPolyOrder_MouseHover);
@@ -374,18 +432,19 @@
             "28",
             "29",
             "30"});
-            this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
+            this.cbxKernelRadius.Location = new System.Drawing.Point(233, 29);
             this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelRadius.Name = "cbxKernelRadius";
-            this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
+            this.cbxKernelRadius.Size = new System.Drawing.Size(123, 25);
             this.cbxKernelRadius.TabIndex = 8;
+            this.cbxKernelRadius.SelectedIndexChanged += new System.EventHandler(this.cbxKernelRadius_SelectedIndexChanged);
             this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
             this.cbxKernelRadius.MouseHover += new System.EventHandler(this.cbxKernelRadius_MouseHover);
             // 
             // lblKernelRadius
             // 
             this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblKernelRadius.Location = new System.Drawing.Point(18, 31);
+            this.lblKernelRadius.Location = new System.Drawing.Point(28, 31);
             this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblKernelRadius.Name = "lblKernelRadius";
             this.lblKernelRadius.Size = new System.Drawing.Size(183, 19);
@@ -406,7 +465,7 @@
             this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gbSmoothMtd.Location = new System.Drawing.Point(11, 48);
             this.gbSmoothMtd.Name = "gbSmoothMtd";
-            this.gbSmoothMtd.Size = new System.Drawing.Size(344, 192);
+            this.gbSmoothMtd.Size = new System.Drawing.Size(384, 219);
             this.gbSmoothMtd.TabIndex = 35;
             this.gbSmoothMtd.TabStop = false;
             this.gbSmoothMtd.Text = "Smoothing Methods";
@@ -417,13 +476,14 @@
             this.chbGaussMed.Checked = true;
             this.chbGaussMed.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbGaussMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbGaussMed.Location = new System.Drawing.Point(175, 84);
+            this.chbGaussMed.Location = new System.Drawing.Point(196, 95);
             this.chbGaussMed.Name = "chbGaussMed";
-            this.chbGaussMed.Size = new System.Drawing.Size(163, 40);
+            this.chbGaussMed.Size = new System.Drawing.Size(176, 40);
             this.chbGaussMed.TabIndex = 8;
             this.chbGaussMed.Text = "Gaussian Median";
             this.chbGaussMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbGaussMed.UseVisualStyleBackColor = true;
+            this.chbGaussMed.CheckedChanged += new System.EventHandler(this.chbGaussMed_CheckedChanged);
             this.chbGaussMed.MouseLeave += new System.EventHandler(this.chbGaussMed_MouseLeave);
             this.chbGaussMed.MouseHover += new System.EventHandler(this.chbGaussMed_MouseHover);
             // 
@@ -433,13 +493,14 @@
             this.chbRect.Checked = true;
             this.chbRect.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbRect.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbRect.Location = new System.Drawing.Point(7, 40);
+            this.chbRect.Location = new System.Drawing.Point(13, 48);
             this.chbRect.Name = "chbRect";
-            this.chbRect.Size = new System.Drawing.Size(163, 40);
+            this.chbRect.Size = new System.Drawing.Size(176, 40);
             this.chbRect.TabIndex = 2;
             this.chbRect.Text = "Rectangular Averaging";
             this.chbRect.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbRect.UseVisualStyleBackColor = true;
+            this.chbRect.CheckedChanged += new System.EventHandler(this.chbRect_CheckedChanged);
             this.chbRect.MouseLeave += new System.EventHandler(this.chbRect_MouseLeave);
             this.chbRect.MouseHover += new System.EventHandler(this.chbRect_MouseHover);
             // 
@@ -449,13 +510,14 @@
             this.chbAvg.Checked = true;
             this.chbAvg.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbAvg.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbAvg.Location = new System.Drawing.Point(175, 40);
+            this.chbAvg.Location = new System.Drawing.Point(196, 48);
             this.chbAvg.Name = "chbAvg";
-            this.chbAvg.Size = new System.Drawing.Size(163, 40);
+            this.chbAvg.Size = new System.Drawing.Size(176, 40);
             this.chbAvg.TabIndex = 3;
             this.chbAvg.Text = "Binomial Averaging";
             this.chbAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbAvg.UseVisualStyleBackColor = true;
+            this.chbAvg.CheckedChanged += new System.EventHandler(this.chbAvg_CheckedChanged);
             this.chbAvg.MouseLeave += new System.EventHandler(this.chbAvg_MouseLeave);
             this.chbAvg.MouseHover += new System.EventHandler(this.chbAvg_MouseHover);
             // 
@@ -465,9 +527,9 @@
             this.chbSG.Checked = true;
             this.chbSG.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbSG.Location = new System.Drawing.Point(175, 129);
+            this.chbSG.Location = new System.Drawing.Point(196, 142);
             this.chbSG.Name = "chbSG";
-            this.chbSG.Size = new System.Drawing.Size(163, 40);
+            this.chbSG.Size = new System.Drawing.Size(176, 40);
             this.chbSG.TabIndex = 6;
             this.chbSG.Text = "Savitzky-Golay Filtering";
             this.chbSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -482,13 +544,14 @@
             this.chbMed.Checked = true;
             this.chbMed.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbMed.Location = new System.Drawing.Point(7, 84);
+            this.chbMed.Location = new System.Drawing.Point(13, 95);
             this.chbMed.Name = "chbMed";
-            this.chbMed.Size = new System.Drawing.Size(163, 40);
+            this.chbMed.Size = new System.Drawing.Size(176, 40);
             this.chbMed.TabIndex = 4;
             this.chbMed.Text = "Binomial Median";
             this.chbMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbMed.UseVisualStyleBackColor = true;
+            this.chbMed.CheckedChanged += new System.EventHandler(this.chbMed_CheckedChanged);
             this.chbMed.MouseLeave += new System.EventHandler(this.chbMed_MouseLeave);
             this.chbMed.MouseHover += new System.EventHandler(this.chbMed_MouseHover);
             // 
@@ -498,20 +561,21 @@
             this.chbGauss.Checked = true;
             this.chbGauss.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chbGauss.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.chbGauss.Location = new System.Drawing.Point(7, 129);
+            this.chbGauss.Location = new System.Drawing.Point(13, 142);
             this.chbGauss.Name = "chbGauss";
-            this.chbGauss.Size = new System.Drawing.Size(163, 40);
+            this.chbGauss.Size = new System.Drawing.Size(176, 40);
             this.chbGauss.TabIndex = 5;
             this.chbGauss.Text = "Gaussian Filtering";
             this.chbGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.chbGauss.UseVisualStyleBackColor = true;
+            this.chbGauss.CheckedChanged += new System.EventHandler(this.chbGauss_CheckedChanged);
             this.chbGauss.MouseLeave += new System.EventHandler(this.chbGauss_MouseLeave);
             this.chbGauss.MouseHover += new System.EventHandler(this.chbGauss_MouseHover);
             // 
             // btnSetDefault
             // 
             this.btnSetDefault.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSetDefault.Location = new System.Drawing.Point(10, 337);
+            this.btnSetDefault.Location = new System.Drawing.Point(10, 374);
             this.btnSetDefault.Name = "btnSetDefault";
             this.btnSetDefault.Size = new System.Drawing.Size(85, 28);
             this.btnSetDefault.TabIndex = 38;
@@ -524,7 +588,7 @@
             // btnSave
             // 
             this.btnSave.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(564, 337);
+            this.btnSave.Location = new System.Drawing.Point(641, 374);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(85, 28);
             this.btnSave.TabIndex = 36;
@@ -537,7 +601,7 @@
             // btnCancel
             // 
             this.btnCancel.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(655, 337);
+            this.btnCancel.Location = new System.Drawing.Point(732, 374);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 28);
             this.btnCancel.TabIndex = 37;
@@ -552,7 +616,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(726, 396);
+            this.ClientSize = new System.Drawing.Size(806, 436);
             this.Controls.Add(this.btnSetDefault);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnCancel);
@@ -612,5 +676,8 @@
         internal System.Windows.Forms.Button btnSetDefault;
         internal System.Windows.Forms.Button btnSave;
         internal System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblKernelWidth;
+        public System.Windows.Forms.ComboBox cbxSigmaFactor;
+        private System.Windows.Forms.Label lblSigmaFactor;
     }
 }

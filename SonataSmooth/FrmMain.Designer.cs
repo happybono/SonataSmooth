@@ -78,6 +78,9 @@
             this.tlblAlphaBlend = new System.Windows.Forms.ToolStripStatusLabel();
             this.slblAlphaBlend = new System.Windows.Forms.ToolStripStatusLabel();
             this.gbSmoothParams = new System.Windows.Forms.GroupBox();
+            this.lblKernelWidth = new System.Windows.Forms.Label();
+            this.cbxSigmaFactor = new System.Windows.Forms.ComboBox();
+            this.lblSigmaFactor = new System.Windows.Forms.Label();
             this.lblAlpha = new System.Windows.Forms.Label();
             this.cbxAlpha = new System.Windows.Forms.ComboBox();
             this.lblDerivOrder = new System.Windows.Forms.Label();
@@ -95,6 +98,9 @@
             this.rbtnRect = new System.Windows.Forms.RadioButton();
             this.rbtnAvg = new System.Windows.Forms.RadioButton();
             this.rbtnMed = new System.Windows.Forms.RadioButton();
+            this.tlblSeparator6 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tlblSigmaFactor = new System.Windows.Forms.ToolStripStatusLabel();
+            this.slblSigmaFactor = new System.Windows.Forms.ToolStripStatusLabel();
             this.gbInitData.SuspendLayout();
             this.gbRefinedData.SuspendLayout();
             this.statStripMain.SuspendLayout();
@@ -112,8 +118,8 @@
             this.lbInitData.Margin = new System.Windows.Forms.Padding(2);
             this.lbInitData.Name = "lbInitData";
             this.lbInitData.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbInitData.Size = new System.Drawing.Size(294, 480);
-            this.lbInitData.TabIndex = 4;
+            this.lbInitData.Size = new System.Drawing.Size(334, 412);
+            this.lbInitData.TabIndex = 0;
             this.lbInitData.SelectedIndexChanged += new System.EventHandler(this.lbInitData_SelectedIndexChanged);
             this.lbInitData.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragDrop);
             this.lbInitData.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbInitData_DragEnter);
@@ -128,7 +134,7 @@
             this.lbRefinedData.Margin = new System.Windows.Forms.Padding(2);
             this.lbRefinedData.Name = "lbRefinedData";
             this.lbRefinedData.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbRefinedData.Size = new System.Drawing.Size(294, 480);
+            this.lbRefinedData.Size = new System.Drawing.Size(334, 412);
             this.lbRefinedData.TabIndex = 24;
             this.lbRefinedData.SelectedIndexChanged += new System.EventHandler(this.lbRefinedData_SelectedIndexChanged);
             this.lbRefinedData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lbRefinedData_KeyDown);
@@ -136,10 +142,10 @@
             // btnCalibrate
             // 
             this.btnCalibrate.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCalibrate.Location = new System.Drawing.Point(14, 807);
+            this.btnCalibrate.Location = new System.Drawing.Point(15, 760);
             this.btnCalibrate.Margin = new System.Windows.Forms.Padding(2);
             this.btnCalibrate.Name = "btnCalibrate";
-            this.btnCalibrate.Size = new System.Drawing.Size(466, 30);
+            this.btnCalibrate.Size = new System.Drawing.Size(506, 30);
             this.btnCalibrate.TabIndex = 24;
             this.btnCalibrate.Text = "";
             this.ttipMain.SetToolTip(this.btnCalibrate, "Start Smoothing");
@@ -151,11 +157,11 @@
             // btnInitAdd
             // 
             this.btnInitAdd.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitAdd.Location = new System.Drawing.Point(292, 14);
+            this.btnInitAdd.Location = new System.Drawing.Point(332, 14);
             this.btnInitAdd.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitAdd.Name = "btnInitAdd";
             this.btnInitAdd.Size = new System.Drawing.Size(67, 30);
-            this.btnInitAdd.TabIndex = 2;
+            this.btnInitAdd.TabIndex = 1;
             this.btnInitAdd.Text = "";
             this.ttipMain.SetToolTip(this.btnInitAdd, "Add");
             this.btnInitAdd.UseVisualStyleBackColor = true;
@@ -169,8 +175,8 @@
             this.txtInitAdd.Location = new System.Drawing.Point(26, 16);
             this.txtInitAdd.Margin = new System.Windows.Forms.Padding(2);
             this.txtInitAdd.Name = "txtInitAdd";
-            this.txtInitAdd.Size = new System.Drawing.Size(262, 25);
-            this.txtInitAdd.TabIndex = 1;
+            this.txtInitAdd.Size = new System.Drawing.Size(302, 25);
+            this.txtInitAdd.TabIndex = 0;
             this.txtInitAdd.TextChanged += new System.EventHandler(this.txtInitAdd_TextChanged);
             this.txtInitAdd.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtInitAdd_KeyDown);
             this.txtInitAdd.MouseLeave += new System.EventHandler(this.txtInitAdd_MouseLeave);
@@ -179,11 +185,11 @@
             // btnInitClear
             // 
             this.btnInitClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitClear.Location = new System.Drawing.Point(306, 31);
+            this.btnInitClear.Location = new System.Drawing.Point(347, 31);
             this.btnInitClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitClear.Name = "btnInitClear";
             this.btnInitClear.Size = new System.Drawing.Size(30, 30);
-            this.btnInitClear.TabIndex = 5;
+            this.btnInitClear.TabIndex = 1;
             this.btnInitClear.Text = "";
             this.ttipMain.SetToolTip(this.btnInitClear, "Clear");
             this.btnInitClear.UseVisualStyleBackColor = true;
@@ -194,11 +200,11 @@
             // btnInitDelete
             // 
             this.btnInitDelete.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitDelete.Location = new System.Drawing.Point(306, 167);
+            this.btnInitDelete.Location = new System.Drawing.Point(347, 167);
             this.btnInitDelete.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitDelete.Name = "btnInitDelete";
             this.btnInitDelete.Size = new System.Drawing.Size(30, 30);
-            this.btnInitDelete.TabIndex = 9;
+            this.btnInitDelete.TabIndex = 5;
             this.btnInitDelete.Text = "";
             this.ttipMain.SetToolTip(this.btnInitDelete, "Delete");
             this.btnInitDelete.UseVisualStyleBackColor = true;
@@ -209,11 +215,11 @@
             // btnInitCopy
             // 
             this.btnInitCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitCopy.Location = new System.Drawing.Point(306, 65);
+            this.btnInitCopy.Location = new System.Drawing.Point(347, 65);
             this.btnInitCopy.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitCopy.Name = "btnInitCopy";
             this.btnInitCopy.Size = new System.Drawing.Size(30, 30);
-            this.btnInitCopy.TabIndex = 6;
+            this.btnInitCopy.TabIndex = 2;
             this.btnInitCopy.Text = "";
             this.ttipMain.SetToolTip(this.btnInitCopy, "Copy");
             this.btnInitCopy.UseVisualStyleBackColor = true;
@@ -224,11 +230,11 @@
             // btnInitPaste
             // 
             this.btnInitPaste.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitPaste.Location = new System.Drawing.Point(306, 99);
+            this.btnInitPaste.Location = new System.Drawing.Point(347, 99);
             this.btnInitPaste.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitPaste.Name = "btnInitPaste";
             this.btnInitPaste.Size = new System.Drawing.Size(30, 30);
-            this.btnInitPaste.TabIndex = 7;
+            this.btnInitPaste.TabIndex = 3;
             this.btnInitPaste.Text = "";
             this.ttipMain.SetToolTip(this.btnInitPaste, "Paste");
             this.btnInitPaste.UseVisualStyleBackColor = true;
@@ -239,11 +245,11 @@
             // btnInitSelectAll
             // 
             this.btnInitSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitSelectAll.Location = new System.Drawing.Point(306, 201);
+            this.btnInitSelectAll.Location = new System.Drawing.Point(347, 201);
             this.btnInitSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitSelectAll.Name = "btnInitSelectAll";
             this.btnInitSelectAll.Size = new System.Drawing.Size(30, 30);
-            this.btnInitSelectAll.TabIndex = 10;
+            this.btnInitSelectAll.TabIndex = 6;
             this.btnInitSelectAll.Text = "";
             this.ttipMain.SetToolTip(this.btnInitSelectAll, "Select All");
             this.btnInitSelectAll.UseVisualStyleBackColor = true;
@@ -254,11 +260,11 @@
             // btnInitSelectClr
             // 
             this.btnInitSelectClr.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitSelectClr.Location = new System.Drawing.Point(306, 235);
+            this.btnInitSelectClr.Location = new System.Drawing.Point(347, 235);
             this.btnInitSelectClr.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitSelectClr.Name = "btnInitSelectClr";
             this.btnInitSelectClr.Size = new System.Drawing.Size(30, 30);
-            this.btnInitSelectClr.TabIndex = 11;
+            this.btnInitSelectClr.TabIndex = 7;
             this.btnInitSelectClr.Text = "";
             this.ttipMain.SetToolTip(this.btnInitSelectClr, "Deselect All");
             this.btnInitSelectClr.UseVisualStyleBackColor = true;
@@ -268,7 +274,7 @@
             // btnRefSelectClr
             // 
             this.btnRefSelectClr.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRefSelectClr.Location = new System.Drawing.Point(306, 133);
+            this.btnRefSelectClr.Location = new System.Drawing.Point(347, 133);
             this.btnRefSelectClr.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefSelectClr.Name = "btnRefSelectClr";
             this.btnRefSelectClr.Size = new System.Drawing.Size(30, 30);
@@ -282,7 +288,7 @@
             // btnRefSelectAll
             // 
             this.btnRefSelectAll.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRefSelectAll.Location = new System.Drawing.Point(306, 99);
+            this.btnRefSelectAll.Location = new System.Drawing.Point(347, 99);
             this.btnRefSelectAll.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefSelectAll.Name = "btnRefSelectAll";
             this.btnRefSelectAll.Size = new System.Drawing.Size(30, 30);
@@ -297,7 +303,7 @@
             // btnRefCopy
             // 
             this.btnRefCopy.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRefCopy.Location = new System.Drawing.Point(306, 65);
+            this.btnRefCopy.Location = new System.Drawing.Point(347, 65);
             this.btnRefCopy.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefCopy.Name = "btnRefCopy";
             this.btnRefCopy.Size = new System.Drawing.Size(30, 30);
@@ -312,7 +318,7 @@
             // btnRefClear
             // 
             this.btnRefClear.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRefClear.Location = new System.Drawing.Point(306, 31);
+            this.btnRefClear.Location = new System.Drawing.Point(347, 31);
             this.btnRefClear.Margin = new System.Windows.Forms.Padding(2);
             this.btnRefClear.Name = "btnRefClear";
             this.btnRefClear.Size = new System.Drawing.Size(30, 30);
@@ -339,18 +345,18 @@
             this.gbInitData.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gbInitData.Location = new System.Drawing.Point(15, 52);
             this.gbInitData.Name = "gbInitData";
-            this.gbInitData.Size = new System.Drawing.Size(344, 551);
-            this.gbInitData.TabIndex = 3;
+            this.gbInitData.Size = new System.Drawing.Size(384, 477);
+            this.gbInitData.TabIndex = 2;
             this.gbInitData.TabStop = false;
             this.gbInitData.Text = "Initial Dataset";
             // 
             // btnInitSelectSync
             // 
             this.btnInitSelectSync.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
-            this.btnInitSelectSync.Location = new System.Drawing.Point(306, 269);
+            this.btnInitSelectSync.Location = new System.Drawing.Point(347, 269);
             this.btnInitSelectSync.Name = "btnInitSelectSync";
             this.btnInitSelectSync.Size = new System.Drawing.Size(30, 30);
-            this.btnInitSelectSync.TabIndex = 12;
+            this.btnInitSelectSync.TabIndex = 8;
             this.btnInitSelectSync.Text = "";
             this.ttipMain.SetToolTip(this.btnInitSelectSync, "Match Selection\r\n( ▶ Refined Dataset )");
             this.btnInitSelectSync.UseVisualStyleBackColor = true;
@@ -361,11 +367,11 @@
             // 
             this.btnInitEdit.Enabled = false;
             this.btnInitEdit.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnInitEdit.Location = new System.Drawing.Point(306, 133);
+            this.btnInitEdit.Location = new System.Drawing.Point(347, 133);
             this.btnInitEdit.Margin = new System.Windows.Forms.Padding(2);
             this.btnInitEdit.Name = "btnInitEdit";
             this.btnInitEdit.Size = new System.Drawing.Size(30, 30);
-            this.btnInitEdit.TabIndex = 8;
+            this.btnInitEdit.TabIndex = 4;
             this.btnInitEdit.Text = "";
             this.ttipMain.SetToolTip(this.btnInitEdit, "Edit");
             this.btnInitEdit.UseVisualStyleBackColor = true;
@@ -377,7 +383,7 @@
             // 
             this.lblInitCnt.AutoSize = true;
             this.lblInitCnt.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblInitCnt.Location = new System.Drawing.Point(7, 519);
+            this.lblInitCnt.Location = new System.Drawing.Point(7, 449);
             this.lblInitCnt.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblInitCnt.Name = "lblInitCnt";
             this.lblInitCnt.Size = new System.Drawing.Size(65, 19);
@@ -386,9 +392,9 @@
             // 
             // pbMain
             // 
-            this.pbMain.Location = new System.Drawing.Point(0, 842);
+            this.pbMain.Location = new System.Drawing.Point(0, 796);
             this.pbMain.Name = "pbMain";
-            this.pbMain.Size = new System.Drawing.Size(734, 5);
+            this.pbMain.Size = new System.Drawing.Size(814, 5);
             this.pbMain.TabIndex = 16;
             // 
             // gbRefinedData
@@ -401,9 +407,9 @@
             this.gbRefinedData.Controls.Add(this.btnRefCopy);
             this.gbRefinedData.Controls.Add(this.btnRefSelectAll);
             this.gbRefinedData.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gbRefinedData.Location = new System.Drawing.Point(376, 52);
+            this.gbRefinedData.Location = new System.Drawing.Point(416, 52);
             this.gbRefinedData.Name = "gbRefinedData";
-            this.gbRefinedData.Size = new System.Drawing.Size(344, 551);
+            this.gbRefinedData.Size = new System.Drawing.Size(384, 477);
             this.gbRefinedData.TabIndex = 23;
             this.gbRefinedData.TabStop = false;
             this.gbRefinedData.Text = "Refined Dataset";
@@ -411,7 +417,7 @@
             // btnRefSelectSync
             // 
             this.btnRefSelectSync.Font = new System.Drawing.Font("Segoe Fluent Icons", 11.25F);
-            this.btnRefSelectSync.Location = new System.Drawing.Point(306, 167);
+            this.btnRefSelectSync.Location = new System.Drawing.Point(347, 167);
             this.btnRefSelectSync.Name = "btnRefSelectSync";
             this.btnRefSelectSync.Size = new System.Drawing.Size(30, 30);
             this.btnRefSelectSync.TabIndex = 30;
@@ -425,7 +431,7 @@
             // 
             this.lblRefCnt.AutoSize = true;
             this.lblRefCnt.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.lblRefCnt.Location = new System.Drawing.Point(7, 519);
+            this.lblRefCnt.Location = new System.Drawing.Point(7, 449);
             this.lblRefCnt.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblRefCnt.Name = "lblRefCnt";
             this.lblRefCnt.Size = new System.Drawing.Size(65, 19);
@@ -435,7 +441,7 @@
             // btnExportSettings
             // 
             this.btnExportSettings.Font = new System.Drawing.Font("Segoe Fluent Icons", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExportSettings.Location = new System.Drawing.Point(655, 14);
+            this.btnExportSettings.Location = new System.Drawing.Point(736, 14);
             this.btnExportSettings.Margin = new System.Windows.Forms.Padding(2);
             this.btnExportSettings.Name = "btnExportSettings";
             this.btnExportSettings.Size = new System.Drawing.Size(30, 30);
@@ -450,9 +456,9 @@
             // btnExport
             // 
             this.btnExport.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExport.Location = new System.Drawing.Point(486, 807);
+            this.btnExport.Location = new System.Drawing.Point(526, 760);
             this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(234, 30);
+            this.btnExport.Size = new System.Drawing.Size(274, 30);
             this.btnExport.TabIndex = 25;
             this.btnExport.Text = "";
             this.ttipMain.SetToolTip(this.btnExport, "Export");
@@ -464,7 +470,7 @@
             // 
             this.btnInfo.Font = new System.Drawing.Font("Segoe Fluent Icons", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnInfo.ForeColor = System.Drawing.Color.MediumSlateBlue;
-            this.btnInfo.Location = new System.Drawing.Point(689, 14);
+            this.btnInfo.Location = new System.Drawing.Point(770, 14);
             this.btnInfo.Margin = new System.Windows.Forms.Padding(2);
             this.btnInfo.Name = "btnInfo";
             this.btnInfo.Size = new System.Drawing.Size(30, 30);
@@ -479,9 +485,9 @@
             // txtDatasetTitle
             // 
             this.txtDatasetTitle.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
-            this.txtDatasetTitle.Location = new System.Drawing.Point(385, 16);
+            this.txtDatasetTitle.Location = new System.Drawing.Point(416, 16);
             this.txtDatasetTitle.Name = "txtDatasetTitle";
-            this.txtDatasetTitle.Size = new System.Drawing.Size(265, 25);
+            this.txtDatasetTitle.Size = new System.Drawing.Size(315, 25);
             this.txtDatasetTitle.TabIndex = 31;
             this.txtDatasetTitle.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtDatasetTitle.TextChanged += new System.EventHandler(this.txtDatasetTitle_TextChanged);
@@ -498,7 +504,7 @@
             this.slblDesc.ForeColor = System.Drawing.Color.White;
             this.slblDesc.Name = "slblDesc";
             this.slblDesc.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
-            this.slblDesc.Size = new System.Drawing.Size(732, 19);
+            this.slblDesc.Size = new System.Drawing.Size(812, 19);
             this.slblDesc.Text = "To start smoothing, add data to the Initial Dataset, choose a Smoothing Method, a" +
     "nd set Smoothing Parameters.";
             // 
@@ -515,7 +521,7 @@
             this.slblCalibratedType.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblCalibratedType.ForeColor = System.Drawing.Color.White;
             this.slblCalibratedType.Name = "slblCalibratedType";
-            this.slblCalibratedType.Size = new System.Drawing.Size(17, 16);
+            this.slblCalibratedType.Size = new System.Drawing.Size(17, 19);
             this.slblCalibratedType.Text = "--";
             // 
             // tlblKernelRadius
@@ -523,7 +529,7 @@
             this.tlblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblKernelRadius.ForeColor = System.Drawing.Color.White;
             this.tlblKernelRadius.Name = "tlblKernelRadius";
-            this.tlblKernelRadius.Size = new System.Drawing.Size(86, 16);
+            this.tlblKernelRadius.Size = new System.Drawing.Size(86, 19);
             this.tlblKernelRadius.Text = "Kernel Radius : ";
             // 
             // slblKernelRadius
@@ -531,7 +537,7 @@
             this.slblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblKernelRadius.ForeColor = System.Drawing.Color.White;
             this.slblKernelRadius.Name = "slblKernelRadius";
-            this.slblKernelRadius.Size = new System.Drawing.Size(17, 16);
+            this.slblKernelRadius.Size = new System.Drawing.Size(17, 19);
             this.slblKernelRadius.Text = "--";
             // 
             // tlblPolyOrder
@@ -539,7 +545,7 @@
             this.tlblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblPolyOrder.ForeColor = System.Drawing.Color.White;
             this.tlblPolyOrder.Name = "tlblPolyOrder";
-            this.tlblPolyOrder.Size = new System.Drawing.Size(74, 16);
+            this.tlblPolyOrder.Size = new System.Drawing.Size(74, 19);
             this.tlblPolyOrder.Text = "Poly. Order : ";
             this.tlblPolyOrder.Visible = false;
             // 
@@ -548,7 +554,7 @@
             this.slblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblPolyOrder.ForeColor = System.Drawing.Color.White;
             this.slblPolyOrder.Name = "slblPolyOrder";
-            this.slblPolyOrder.Size = new System.Drawing.Size(17, 16);
+            this.slblPolyOrder.Size = new System.Drawing.Size(17, 19);
             this.slblPolyOrder.Text = "--";
             this.slblPolyOrder.Visible = false;
             // 
@@ -557,7 +563,7 @@
             this.tlblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblBoundaryMethod.ForeColor = System.Drawing.Color.White;
             this.tlblBoundaryMethod.Name = "tlblBoundaryMethod";
-            this.tlblBoundaryMethod.Size = new System.Drawing.Size(111, 16);
+            this.tlblBoundaryMethod.Size = new System.Drawing.Size(111, 19);
             this.tlblBoundaryMethod.Text = "Boundary Method : ";
             this.tlblBoundaryMethod.Visible = false;
             // 
@@ -584,10 +590,13 @@
             this.slblDerivativeOrder,
             this.tlblSeparator5,
             this.tlblAlphaBlend,
-            this.slblAlphaBlend});
-            this.statStripMain.Location = new System.Drawing.Point(0, 847);
+            this.slblAlphaBlend,
+            this.tlblSeparator6,
+            this.tlblSigmaFactor,
+            this.slblSigmaFactor});
+            this.statStripMain.Location = new System.Drawing.Point(0, 801);
             this.statStripMain.Name = "statStripMain";
-            this.statStripMain.Size = new System.Drawing.Size(734, 24);
+            this.statStripMain.Size = new System.Drawing.Size(814, 24);
             this.statStripMain.SizingGrip = false;
             this.statStripMain.TabIndex = 27;
             this.statStripMain.Text = "statusStrip1";
@@ -597,7 +606,7 @@
             this.tlblSeparator1.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblSeparator1.ForeColor = System.Drawing.Color.White;
             this.tlblSeparator1.Name = "tlblSeparator1";
-            this.tlblSeparator1.Size = new System.Drawing.Size(10, 16);
+            this.tlblSeparator1.Size = new System.Drawing.Size(10, 19);
             this.tlblSeparator1.Text = " ";
             // 
             // tlblSeparator2
@@ -605,7 +614,7 @@
             this.tlblSeparator2.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblSeparator2.ForeColor = System.Drawing.Color.White;
             this.tlblSeparator2.Name = "tlblSeparator2";
-            this.tlblSeparator2.Size = new System.Drawing.Size(10, 16);
+            this.tlblSeparator2.Size = new System.Drawing.Size(10, 19);
             this.tlblSeparator2.Text = " ";
             this.tlblSeparator2.Visible = false;
             // 
@@ -614,7 +623,7 @@
             this.tlblSeparator3.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblSeparator3.ForeColor = System.Drawing.Color.White;
             this.tlblSeparator3.Name = "tlblSeparator3";
-            this.tlblSeparator3.Size = new System.Drawing.Size(10, 16);
+            this.tlblSeparator3.Size = new System.Drawing.Size(10, 19);
             this.tlblSeparator3.Text = " ";
             this.tlblSeparator3.Visible = false;
             // 
@@ -623,7 +632,7 @@
             this.slblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblBoundaryMethod.ForeColor = System.Drawing.Color.White;
             this.slblBoundaryMethod.Name = "slblBoundaryMethod";
-            this.slblBoundaryMethod.Size = new System.Drawing.Size(17, 16);
+            this.slblBoundaryMethod.Size = new System.Drawing.Size(17, 19);
             this.slblBoundaryMethod.Text = "--";
             this.slblBoundaryMethod.Visible = false;
             // 
@@ -632,7 +641,7 @@
             this.tlblSeparator4.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblSeparator4.ForeColor = System.Drawing.Color.White;
             this.tlblSeparator4.Name = "tlblSeparator4";
-            this.tlblSeparator4.Size = new System.Drawing.Size(10, 16);
+            this.tlblSeparator4.Size = new System.Drawing.Size(10, 19);
             this.tlblSeparator4.Text = " ";
             this.tlblSeparator4.Visible = false;
             // 
@@ -641,7 +650,7 @@
             this.tlblDerivativeOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblDerivativeOrder.ForeColor = System.Drawing.Color.White;
             this.tlblDerivativeOrder.Name = "tlblDerivativeOrder";
-            this.tlblDerivativeOrder.Size = new System.Drawing.Size(78, 16);
+            this.tlblDerivativeOrder.Size = new System.Drawing.Size(78, 19);
             this.tlblDerivativeOrder.Text = "Deriv. Order : ";
             this.tlblDerivativeOrder.Visible = false;
             // 
@@ -650,7 +659,7 @@
             this.slblDerivativeOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblDerivativeOrder.ForeColor = System.Drawing.Color.White;
             this.slblDerivativeOrder.Name = "slblDerivativeOrder";
-            this.slblDerivativeOrder.Size = new System.Drawing.Size(17, 16);
+            this.slblDerivativeOrder.Size = new System.Drawing.Size(17, 19);
             this.slblDerivativeOrder.Text = "--";
             this.slblDerivativeOrder.Visible = false;
             // 
@@ -659,7 +668,7 @@
             this.tlblSeparator5.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblSeparator5.ForeColor = System.Drawing.Color.White;
             this.tlblSeparator5.Name = "tlblSeparator5";
-            this.tlblSeparator5.Size = new System.Drawing.Size(10, 16);
+            this.tlblSeparator5.Size = new System.Drawing.Size(10, 19);
             this.tlblSeparator5.Text = " ";
             this.tlblSeparator5.Visible = false;
             // 
@@ -668,7 +677,7 @@
             this.tlblAlphaBlend.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlblAlphaBlend.ForeColor = System.Drawing.Color.White;
             this.tlblAlphaBlend.Name = "tlblAlphaBlend";
-            this.tlblAlphaBlend.Size = new System.Drawing.Size(79, 16);
+            this.tlblAlphaBlend.Size = new System.Drawing.Size(79, 19);
             this.tlblAlphaBlend.Text = "Alpha Blend : ";
             this.tlblAlphaBlend.Visible = false;
             // 
@@ -677,12 +686,15 @@
             this.slblAlphaBlend.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.slblAlphaBlend.ForeColor = System.Drawing.Color.White;
             this.slblAlphaBlend.Name = "slblAlphaBlend";
-            this.slblAlphaBlend.Size = new System.Drawing.Size(17, 16);
+            this.slblAlphaBlend.Size = new System.Drawing.Size(17, 19);
             this.slblAlphaBlend.Text = "--";
             this.slblAlphaBlend.Visible = false;
             // 
             // gbSmoothParams
             // 
+            this.gbSmoothParams.Controls.Add(this.lblKernelWidth);
+            this.gbSmoothParams.Controls.Add(this.cbxSigmaFactor);
+            this.gbSmoothParams.Controls.Add(this.lblSigmaFactor);
             this.gbSmoothParams.Controls.Add(this.lblAlpha);
             this.gbSmoothParams.Controls.Add(this.cbxAlpha);
             this.gbSmoothParams.Controls.Add(this.lblDerivOrder);
@@ -694,18 +706,70 @@
             this.gbSmoothParams.Controls.Add(this.cbxKernelRadius);
             this.gbSmoothParams.Controls.Add(this.lblKernelRadius);
             this.gbSmoothParams.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gbSmoothParams.Location = new System.Drawing.Point(376, 609);
+            this.gbSmoothParams.Location = new System.Drawing.Point(416, 535);
             this.gbSmoothParams.Name = "gbSmoothParams";
-            this.gbSmoothParams.Size = new System.Drawing.Size(344, 192);
+            this.gbSmoothParams.Size = new System.Drawing.Size(384, 219);
             this.gbSmoothParams.TabIndex = 34;
             this.gbSmoothParams.TabStop = false;
             this.gbSmoothParams.Text = "Smoothing Parameters";
+            // 
+            // lblKernelWidth
+            // 
+            this.lblKernelWidth.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKernelWidth.Location = new System.Drawing.Point(225, 123);
+            this.lblKernelWidth.Name = "lblKernelWidth";
+            this.lblKernelWidth.Size = new System.Drawing.Size(40, 19);
+            this.lblKernelWidth.TabIndex = 32;
+            this.lblKernelWidth.Text = "w ÷";
+            this.lblKernelWidth.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblKernelWidth.MouseLeave += new System.EventHandler(this.lblKernelWidth_MouseLeave);
+            this.lblKernelWidth.MouseHover += new System.EventHandler(this.lblKernelWidth_MouseHover);
+            // 
+            // cbxSigmaFactor
+            // 
+            this.cbxSigmaFactor.DropDownHeight = 150;
+            this.cbxSigmaFactor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxSigmaFactor.Font = new System.Drawing.Font("Segoe UI Variable Display Semib", 10.125F, System.Drawing.FontStyle.Bold);
+            this.cbxSigmaFactor.FormattingEnabled = true;
+            this.cbxSigmaFactor.IntegralHeight = false;
+            this.cbxSigmaFactor.ItemHeight = 17;
+            this.cbxSigmaFactor.Items.AddRange(new object[] {
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0",
+            "6.0",
+            "7.0",
+            "8.0",
+            "9.0",
+            "10.0",
+            "11.0",
+            "12.0"});
+            this.cbxSigmaFactor.Location = new System.Drawing.Point(269, 122);
+            this.cbxSigmaFactor.Name = "cbxSigmaFactor";
+            this.cbxSigmaFactor.Size = new System.Drawing.Size(87, 25);
+            this.cbxSigmaFactor.TabIndex = 31;
+            this.cbxSigmaFactor.MouseLeave += new System.EventHandler(this.cbxSigmaFactor_MouseLeave);
+            this.cbxSigmaFactor.MouseHover += new System.EventHandler(this.cbxSigmaFactor_MouseHover);
+            // 
+            // lblSigmaFactor
+            // 
+            this.lblSigmaFactor.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
+            this.lblSigmaFactor.Location = new System.Drawing.Point(28, 123);
+            this.lblSigmaFactor.Name = "lblSigmaFactor";
+            this.lblSigmaFactor.Size = new System.Drawing.Size(183, 19);
+            this.lblSigmaFactor.TabIndex = 30;
+            this.lblSigmaFactor.Text = "Sigma Factor :";
+            this.lblSigmaFactor.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSigmaFactor.MouseLeave += new System.EventHandler(this.lblSigmaFactor_MouseLeave);
+            this.lblSigmaFactor.MouseHover += new System.EventHandler(this.lblSigmaFactor_MouseHover);
             // 
             // lblAlpha
             // 
             this.lblAlpha.Enabled = false;
             this.lblAlpha.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblAlpha.Location = new System.Drawing.Point(18, 93);
+            this.lblAlpha.Location = new System.Drawing.Point(28, 93);
             this.lblAlpha.Name = "lblAlpha";
             this.lblAlpha.Size = new System.Drawing.Size(183, 19);
             this.lblAlpha.TabIndex = 25;
@@ -745,9 +809,9 @@
             "0.90",
             "0.95",
             "1.00"});
-            this.cbxAlpha.Location = new System.Drawing.Point(223, 91);
+            this.cbxAlpha.Location = new System.Drawing.Point(233, 91);
             this.cbxAlpha.Name = "cbxAlpha";
-            this.cbxAlpha.Size = new System.Drawing.Size(103, 25);
+            this.cbxAlpha.Size = new System.Drawing.Size(123, 25);
             this.cbxAlpha.TabIndex = 26;
             this.cbxAlpha.SelectedIndexChanged += new System.EventHandler(this.cbxAlpha_SelectedIndexChanged);
             this.cbxAlpha.MouseLeave += new System.EventHandler(this.cbxAlpha_MouseLeave);
@@ -757,7 +821,7 @@
             // 
             this.lblDerivOrder.Enabled = false;
             this.lblDerivOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblDerivOrder.Location = new System.Drawing.Point(18, 155);
+            this.lblDerivOrder.Location = new System.Drawing.Point(28, 186);
             this.lblDerivOrder.Name = "lblDerivOrder";
             this.lblDerivOrder.Size = new System.Drawing.Size(183, 19);
             this.lblDerivOrder.TabIndex = 24;
@@ -782,9 +846,9 @@
             "3",
             "4",
             "5"});
-            this.cbxDerivOrder.Location = new System.Drawing.Point(223, 153);
+            this.cbxDerivOrder.Location = new System.Drawing.Point(233, 184);
             this.cbxDerivOrder.Name = "cbxDerivOrder";
-            this.cbxDerivOrder.Size = new System.Drawing.Size(103, 25);
+            this.cbxDerivOrder.Size = new System.Drawing.Size(123, 25);
             this.cbxDerivOrder.TabIndex = 23;
             this.cbxDerivOrder.SelectedIndexChanged += new System.EventHandler(this.cbxDerivOrder_MouseHover);
             this.cbxDerivOrder.SelectedValueChanged += new System.EventHandler(this.cbxDerivOrder_MouseLeave);
@@ -802,9 +866,9 @@
             "Adaptive",
             "Replicate",
             "Zero Padding"});
-            this.cbxBoundaryMethod.Location = new System.Drawing.Point(223, 60);
+            this.cbxBoundaryMethod.Location = new System.Drawing.Point(233, 60);
             this.cbxBoundaryMethod.Name = "cbxBoundaryMethod";
-            this.cbxBoundaryMethod.Size = new System.Drawing.Size(103, 25);
+            this.cbxBoundaryMethod.Size = new System.Drawing.Size(123, 25);
             this.cbxBoundaryMethod.TabIndex = 21;
             this.cbxBoundaryMethod.SelectedIndexChanged += new System.EventHandler(this.cbxBoundaryMethod_SelectedIndexChanged);
             this.cbxBoundaryMethod.MouseLeave += new System.EventHandler(this.cbxBoundaryMethod_MouseLeave);
@@ -813,7 +877,7 @@
             // lblBoundaryMethod
             // 
             this.lblBoundaryMethod.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblBoundaryMethod.Location = new System.Drawing.Point(18, 63);
+            this.lblBoundaryMethod.Location = new System.Drawing.Point(28, 63);
             this.lblBoundaryMethod.Name = "lblBoundaryMethod";
             this.lblBoundaryMethod.Size = new System.Drawing.Size(183, 19);
             this.lblBoundaryMethod.TabIndex = 22;
@@ -825,7 +889,7 @@
             // 
             this.lblPolyOrder.Enabled = false;
             this.lblPolyOrder.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.lblPolyOrder.Location = new System.Drawing.Point(18, 124);
+            this.lblPolyOrder.Location = new System.Drawing.Point(28, 155);
             this.lblPolyOrder.Name = "lblPolyOrder";
             this.lblPolyOrder.Size = new System.Drawing.Size(183, 19);
             this.lblPolyOrder.TabIndex = 20;
@@ -852,9 +916,9 @@
             "6",
             "7",
             "8"});
-            this.cbxPolyOrder.Location = new System.Drawing.Point(223, 122);
+            this.cbxPolyOrder.Location = new System.Drawing.Point(233, 153);
             this.cbxPolyOrder.Name = "cbxPolyOrder";
-            this.cbxPolyOrder.Size = new System.Drawing.Size(103, 25);
+            this.cbxPolyOrder.Size = new System.Drawing.Size(123, 25);
             this.cbxPolyOrder.TabIndex = 22;
             this.cbxPolyOrder.SelectedIndexChanged += new System.EventHandler(this.cbxPolyOrder_SelectedIndexChanged);
             this.cbxPolyOrder.MouseLeave += new System.EventHandler(this.cbxPolyOrder_MouseLeave);
@@ -900,10 +964,10 @@
             "28",
             "29",
             "30"});
-            this.cbxKernelRadius.Location = new System.Drawing.Point(223, 29);
+            this.cbxKernelRadius.Location = new System.Drawing.Point(233, 29);
             this.cbxKernelRadius.Margin = new System.Windows.Forms.Padding(2);
             this.cbxKernelRadius.Name = "cbxKernelRadius";
-            this.cbxKernelRadius.Size = new System.Drawing.Size(103, 25);
+            this.cbxKernelRadius.Size = new System.Drawing.Size(123, 25);
             this.cbxKernelRadius.TabIndex = 20;
             this.cbxKernelRadius.SelectedIndexChanged += new System.EventHandler(this.cbxKernelRadius_SelectedIndexChanged);
             this.cbxKernelRadius.MouseLeave += new System.EventHandler(this.cbxKernelRadius_MouseLeave);
@@ -912,7 +976,7 @@
             // lblKernelRadius
             // 
             this.lblKernelRadius.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblKernelRadius.Location = new System.Drawing.Point(18, 31);
+            this.lblKernelRadius.Location = new System.Drawing.Point(28, 31);
             this.lblKernelRadius.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblKernelRadius.Name = "lblKernelRadius";
             this.lblKernelRadius.Size = new System.Drawing.Size(183, 19);
@@ -931,10 +995,10 @@
             this.gbSmoothMtd.Controls.Add(this.rbtnAvg);
             this.gbSmoothMtd.Controls.Add(this.rbtnMed);
             this.gbSmoothMtd.Font = new System.Drawing.Font("Segoe UI Variable Display Semil", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gbSmoothMtd.Location = new System.Drawing.Point(15, 609);
+            this.gbSmoothMtd.Location = new System.Drawing.Point(15, 535);
             this.gbSmoothMtd.Name = "gbSmoothMtd";
-            this.gbSmoothMtd.Size = new System.Drawing.Size(344, 192);
-            this.gbSmoothMtd.TabIndex = 35;
+            this.gbSmoothMtd.Size = new System.Drawing.Size(384, 219);
+            this.gbSmoothMtd.TabIndex = 4;
             this.gbSmoothMtd.TabStop = false;
             this.gbSmoothMtd.Text = "Smoothing Methods";
             // 
@@ -942,9 +1006,9 @@
             // 
             this.rbtnGaussMed.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnGaussMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F);
-            this.rbtnGaussMed.Location = new System.Drawing.Point(175, 84);
+            this.rbtnGaussMed.Location = new System.Drawing.Point(196, 95);
             this.rbtnGaussMed.Name = "rbtnGaussMed";
-            this.rbtnGaussMed.Size = new System.Drawing.Size(163, 40);
+            this.rbtnGaussMed.Size = new System.Drawing.Size(176, 40);
             this.rbtnGaussMed.TabIndex = 20;
             this.rbtnGaussMed.TabStop = true;
             this.rbtnGaussMed.Text = "Gaussian Median";
@@ -958,10 +1022,10 @@
             // 
             this.rbtnGauss.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnGauss.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnGauss.Location = new System.Drawing.Point(7, 129);
+            this.rbtnGauss.Location = new System.Drawing.Point(13, 142);
             this.rbtnGauss.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnGauss.Name = "rbtnGauss";
-            this.rbtnGauss.Size = new System.Drawing.Size(163, 40);
+            this.rbtnGauss.Size = new System.Drawing.Size(176, 40);
             this.rbtnGauss.TabIndex = 17;
             this.rbtnGauss.Text = "Gaussian Filtering";
             this.rbtnGauss.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -974,10 +1038,10 @@
             // 
             this.rbtnSG.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnSG.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnSG.Location = new System.Drawing.Point(175, 129);
+            this.rbtnSG.Location = new System.Drawing.Point(196, 142);
             this.rbtnSG.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnSG.Name = "rbtnSG";
-            this.rbtnSG.Size = new System.Drawing.Size(163, 40);
+            this.rbtnSG.Size = new System.Drawing.Size(176, 40);
             this.rbtnSG.TabIndex = 18;
             this.rbtnSG.Text = "Savitzky-Golay Filtering";
             this.rbtnSG.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -991,10 +1055,10 @@
             this.rbtnRect.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnRect.Checked = true;
             this.rbtnRect.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnRect.Location = new System.Drawing.Point(7, 40);
+            this.rbtnRect.Location = new System.Drawing.Point(13, 48);
             this.rbtnRect.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnRect.Name = "rbtnRect";
-            this.rbtnRect.Size = new System.Drawing.Size(163, 40);
+            this.rbtnRect.Size = new System.Drawing.Size(176, 40);
             this.rbtnRect.TabIndex = 14;
             this.rbtnRect.TabStop = true;
             this.rbtnRect.Text = "Rectangular Averaging";
@@ -1008,10 +1072,10 @@
             // 
             this.rbtnAvg.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnAvg.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnAvg.Location = new System.Drawing.Point(175, 40);
+            this.rbtnAvg.Location = new System.Drawing.Point(196, 48);
             this.rbtnAvg.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnAvg.Name = "rbtnAvg";
-            this.rbtnAvg.Size = new System.Drawing.Size(163, 40);
+            this.rbtnAvg.Size = new System.Drawing.Size(176, 40);
             this.rbtnAvg.TabIndex = 15;
             this.rbtnAvg.Text = "Binomial Averaging";
             this.rbtnAvg.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1024,10 +1088,10 @@
             // 
             this.rbtnMed.Appearance = System.Windows.Forms.Appearance.Button;
             this.rbtnMed.Font = new System.Drawing.Font("Segoe UI Variable Display", 10.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbtnMed.Location = new System.Drawing.Point(7, 84);
+            this.rbtnMed.Location = new System.Drawing.Point(13, 95);
             this.rbtnMed.Margin = new System.Windows.Forms.Padding(2);
             this.rbtnMed.Name = "rbtnMed";
-            this.rbtnMed.Size = new System.Drawing.Size(163, 40);
+            this.rbtnMed.Size = new System.Drawing.Size(176, 40);
             this.rbtnMed.TabIndex = 16;
             this.rbtnMed.Text = "Binomial Median";
             this.rbtnMed.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -1036,14 +1100,40 @@
             this.rbtnMed.MouseLeave += new System.EventHandler(this.rbtnMed_MouseLeave);
             this.rbtnMed.MouseHover += new System.EventHandler(this.rbtnMed_MouseHover);
             // 
+            // tlblSeparator6
+            // 
+            this.tlblSeparator6.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tlblSeparator6.ForeColor = System.Drawing.Color.White;
+            this.tlblSeparator6.Name = "tlblSeparator6";
+            this.tlblSeparator6.Size = new System.Drawing.Size(10, 19);
+            this.tlblSeparator6.Text = " ";
+            this.tlblSeparator6.Visible = false;
+            // 
+            // tlblSigmaFactor
+            // 
+            this.tlblSigmaFactor.ForeColor = System.Drawing.Color.White;
+            this.tlblSigmaFactor.Name = "tlblSigmaFactor";
+            this.tlblSigmaFactor.Size = new System.Drawing.Size(49, 19);
+            this.tlblSigmaFactor.Text = "Sigma : ";
+            this.tlblSigmaFactor.Visible = false;
+            // 
+            // slblSigmaFactor
+            // 
+            this.slblSigmaFactor.Font = new System.Drawing.Font("Segoe UI Variable Display", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.slblSigmaFactor.ForeColor = System.Drawing.Color.White;
+            this.slblSigmaFactor.Name = "slblSigmaFactor";
+            this.slblSigmaFactor.Size = new System.Drawing.Size(17, 19);
+            this.slblSigmaFactor.Text = "--";
+            this.slblSigmaFactor.Visible = false;
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(734, 871);
-            this.Controls.Add(this.gbSmoothMtd);
+            this.ClientSize = new System.Drawing.Size(814, 825);
             this.Controls.Add(this.gbSmoothParams);
+            this.Controls.Add(this.gbSmoothMtd);
             this.Controls.Add(this.btnInfo);
             this.Controls.Add(this.btnExportSettings);
             this.Controls.Add(this.txtDatasetTitle);
@@ -1143,6 +1233,12 @@
         private System.Windows.Forms.ToolStripStatusLabel tlblAlphaBlend;
         private System.Windows.Forms.ToolStripStatusLabel slblAlphaBlend;
         private System.Windows.Forms.RadioButton rbtnGaussMed;
+        private System.Windows.Forms.Label lblKernelWidth;
+        private System.Windows.Forms.ComboBox cbxSigmaFactor;
+        private System.Windows.Forms.Label lblSigmaFactor;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSeparator6;
+        private System.Windows.Forms.ToolStripStatusLabel tlblSigmaFactor;
+        private System.Windows.Forms.ToolStripStatusLabel slblSigmaFactor;
     }
 }
 

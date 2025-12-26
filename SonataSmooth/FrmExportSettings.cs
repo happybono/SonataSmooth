@@ -17,7 +17,9 @@ namespace SonataSmooth
         public int PolyOrder { get; set; } = 3;
         public int BoundaryMethod { get; set; } = 1;
         public int DerivOrder { get; set; } = 0;
-        public int Alpha { get; set; } = 19;
+        public double Alpha { get; set; } = 1.0;
+
+        public double SigmaFactor { get; set; } = 6.0;
 
         private const int RecommendedMinRadius = 3;
         private const int RecommendedMaxRadius = 7;
@@ -52,7 +54,11 @@ namespace SonataSmooth
             this.chbMed.CheckedChanged += AlphaRelated_CheckedChanged;
             this.chbGauss.CheckedChanged += AlphaRelated_CheckedChanged;
 
+            this.chbGaussMed.CheckedChanged += SigmaRelated_CheckedChanged;
+            this.chbGauss.CheckedChanged += SigmaRelated_CheckedChanged;
+
             UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -87,10 +93,13 @@ namespace SonataSmooth
             DoSavitzky = chbSG.Checked;
             DoAutoOpen = chbOpenFile.Checked;
 
+            Alpha = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
+            SigmaFactor = ParseSigmaOrDefault(cbxSigmaFactor.Text, 6.0);
+
             DoExcelExport = rbtnXLSX.Checked;
             DoCSVExport = rbtnCSV.Checked;
 
-            // Properties.Settings에 설정 값 저장
+            // Properties.Settings 에 설정 값 저장
             var s = SonataSmooth.Properties.Settings.Default;
             s.ExportSmoothingMethods = BuildExportMethodsString(DoRectAvg, DoBinomAvg, DoBinomMed, chbGaussMed.Checked, DoGauss, DoSavitzky);
             s.ExportFileFormat = rbtnCSV.Checked ? "CSV" : "XLSX";
@@ -102,13 +111,16 @@ namespace SonataSmooth
             s.BoundaryMethod = cbxBoundaryMethod.Text;
             s.DerivOrder = DerivOrder;
 
-            // FrmMain.cs 의 alpha 는 double 형식이므로 cbxAlpha 에서 Parsing 하여 적용한다"
+            // FrmMain.cs 의 alpha 는 double 형식이므로 cbxAlpha 에서 Parsing 하여 적용한다
             if (double.TryParse(cbxAlpha.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var alpha))
                 s.AlphaBlend = Math.Max(0.0, Math.Min(1.0, alpha));
 
+            if (double.TryParse(cbxAlpha.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var sigmaFactor))
+                s.SigmaFactor = Math.Max(0.0, sigmaFactor);
+
             s.Save();
 
-            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text);
+            _mainForm.SetComboValues(cbxKernelRadius.Text, cbxPolyOrder.Text, cbxBoundaryMethod.Text, cbxDerivOrder.Text, cbxAlpha.Text, cbxSigmaFactor.Text);
 
 
             this.DialogResult = DialogResult.OK;
@@ -132,7 +144,7 @@ namespace SonataSmooth
         {
             base.OnShown(e);
 
-            // Restore parameter combos
+            // 매개변수 조합 되돌리기
             cbxKernelRadius.Text = KernelRadius.ToString();
             cbxPolyOrder.Text = PolyOrder.ToString();
 
@@ -163,6 +175,44 @@ namespace SonataSmooth
             chbOpenFile.Checked = s.AutoOpenAfterSaved;
 
             UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
+        }
+
+        private static double ParseAlphaOrDefault(string text, double @default = 1.0)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return @default;
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var d))
+            {
+                if (d < 0.0) return 0.0;
+                if (d > 1.0) return 1.0;
+                return d;
+            }
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var d2))
+            {
+                if (d2 < 0.0) return 0.0;
+                if (d2 > 1.0) return 1.0;
+                return d2;
+            }
+            return @default;
+        }
+
+        private static double ParseSigmaOrDefault(string text, double @default = 1.0)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return @default;
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var d))
+            {
+                if (d < 1.0) return 1.0;
+                if (d > 12.0) return 12.0;
+                return d;
+            }
+            // 필요 시 현재 지역 설정으로 대체
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var d2))
+            {
+                if (d2 < 1.0) return 1.0;
+                if (d2 > 12.0) return 12.0;
+                return d2;
+            }
+            return @default;
         }
 
 
@@ -178,9 +228,26 @@ namespace SonataSmooth
             if (cbxAlpha != null) cbxAlpha.Enabled = enable;
         }
 
+        private void UpdateSigmaEnabled()
+        {
+            bool sigmaRelevant = chbGauss.Checked || chbGaussMed.Checked;
+            lblSigmaFactor.Enabled = sigmaRelevant;
+            cbxSigmaFactor.Enabled = sigmaRelevant;
+            lblKernelWidth.Enabled = sigmaRelevant;
+            if (cbxSigmaFactor.Enabled && string.IsNullOrWhiteSpace(cbxSigmaFactor.Text))
+            {
+                cbxSigmaFactor.Text = "6.0";
+            }
+        }
+
         private void AlphaRelated_CheckedChanged(object sender, EventArgs e)
         {
             UpdateAlphaEnabled();
+        }
+
+        private void SigmaRelated_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateSigmaEnabled();
         }
 
         private void FrmExportSettings_Load(object sender, EventArgs e)
@@ -192,7 +259,7 @@ namespace SonataSmooth
             }
 
             slblDesc.Size = new Size(
-                (int)(724 * dpiX / 96),
+                (int)(804 * dpiX / 96),
                 (int)(19 * dpiY / 96)
                 );
 
@@ -202,7 +269,7 @@ namespace SonataSmooth
             cbxDerivOrder.Enabled = chbSG.Checked;
         }
 
-        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder, string alpha)
+        public void ApplyParameters(string kernelRadius, string polyOrder, string boundaryMethod, string derivOrder, string alpha, string sigmaFactor)
         {
             cbxKernelRadius.Text = kernelRadius;
             cbxPolyOrder.Text = polyOrder;
@@ -212,14 +279,53 @@ namespace SonataSmooth
 
             cbxDerivOrder.Text = derivOrder;
             cbxAlpha.Text = alpha;
+            cbxSigmaFactor.Text = sigmaFactor;
 
             if (int.TryParse(kernelRadius, out var r)) this.KernelRadius = r;
             if (int.TryParse(polyOrder, out var p)) this.PolyOrder = p;
 
-            // 선택된 인덱스를 저장 (0 : Symmetric, 1 : Replicate, 2 : Adaptive, 3 : Zero-Pad)
+            // 선택된 index 를 저장 (0 : Symmetric, 1 : Replicate, 2 : Adaptive, 3 : Zero-Pad)
             this.BoundaryMethod = cbxBoundaryMethod.SelectedIndex;
 
             if (int.TryParse(derivOrder, out var d)) this.DerivOrder = Math.Max(0, Math.Min(10, d));
+        }
+
+        private void cbxKernelRadius_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(cbxKernelRadius.Text, out var r))
+            {
+                lblKernelWidth.Text = $"{2 * r + 1} ÷";
+            }
+        }
+
+        private void chbRect_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
+        }
+
+        private void chbAvg_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
+        }
+
+        private void chbMed_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
+        }
+
+        private void chbGaussMed_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
+        }
+
+        private void chbGauss_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateAlphaEnabled();
+            UpdateSigmaEnabled();
         }
 
         private void chbSG_CheckedChanged(object sender, EventArgs e)
@@ -237,6 +343,35 @@ namespace SonataSmooth
                 cbxPolyOrder.Enabled = false;
                 lblDerivOrder.Enabled = false;
                 cbxDerivOrder.Enabled = false;
+            }
+        }
+
+        private void btnSetDefault_Click(object sender, EventArgs e)
+        {
+            cbxKernelRadius.Text = "4";
+            cbxPolyOrder.Text = "2";
+            cbxDerivOrder.Text = "0";
+            cbxBoundaryMethod.SelectedIndex = 0;
+            cbxAlpha.Text = "1.00";
+            cbxSigmaFactor.Text = "6.0";
+
+            chbRect.Checked = true;
+            chbAvg.Checked = true;
+            chbMed.Checked = true;
+            chbGaussMed.Checked = true;
+            chbGauss.Checked = true;
+            chbSG.Checked = true;
+
+            rbtnCSV.Checked = true;
+            chbOpenFile.Checked = true;
+        }
+
+        private void FrmExportSettings_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
             }
         }
 
@@ -391,15 +526,6 @@ namespace SonataSmooth
             MouseLeaveHandler(sender, e);
         }
 
-        private void FrmExportSettings_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
-            }
-        }
-
         private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
@@ -470,31 +596,42 @@ namespace SonataSmooth
             MouseLeaveHandler(sender, e);
         }
 
-        private void btnSetDefault_Click(object sender, EventArgs e)
-        {
-            cbxKernelRadius.Text = "4";
-            cbxPolyOrder.Text = "2";
-            cbxDerivOrder.Text = "0";
-            cbxBoundaryMethod.SelectedIndex = 0;
-            cbxAlpha.Text = "1.00";
-
-            chbRect.Checked = true;
-            chbAvg.Checked = true;
-            chbMed.Checked = true;
-            chbGaussMed.Checked = true;
-            chbGauss.Checked = true;
-            chbSG.Checked = true;
-
-            rbtnCSV.Checked = true;
-            chbOpenFile.Checked = true;
-        }
-
         private void btnSetDefault_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Text = "Click to reset all settings to their default recommended values.";
         }
 
         private void btnSetDefault_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblSigmaFactor_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+        }
+
+        private void lblSigmaFactor_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void lblKernelWidth_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+        }
+
+        private void lblKernelWidth_MouseLeave(object sender, EventArgs e)
+        {
+            MouseLeaveHandler(sender, e);
+        }
+
+        private void cbxSigmaFactor_MouseHover(object sender, EventArgs e)
+        {
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+        }
+
+        private void cbxSigmaFactor_MouseLeave(object sender, EventArgs e)
         {
             MouseLeaveHandler(sender, e);
         }
