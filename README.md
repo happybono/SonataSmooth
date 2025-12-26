@@ -312,11 +312,23 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.4.2.0
 #### December 20, 2025
 > Minor bugs fixed.
-</details>
 
 ### v5.5.0.0
 #### December 22, 2025
 > Improved Excel export error handling : now distinguishes between Excel not installed, COM activation failure, and other interop errors, providing more specific user guidance.<br><br>
+> Minor bugs fixed.
+</details>
+
+### v5.6.0.0
+#### December 27, 2025
+> Overhauled the graphical user interface.<br><br>
+> Gaussian filters (Gaussian Weighted Median / Gaussian Filters) now use user‑selected `Sigma Factor` (1.0 – 12.0) for flexible smoothing.<br><br>
+> CSV/Excel export metadata now correctly reflects the actual Sigma Factor used in calculations.<br><br>
+> Exported data for Gaussian and Gaussian Median filters is always computed using the selected Sigma Factor value.<br><br>
+> Settings load / save unified for all smoothing parameters, with safe defaults on errors.<br><br>
+> Unified the logic for loading and saving user settings for all smoothing parameters, including `Sigma Factor`, to ensure all values are handled consistently and reliably.<br><br>
+> Improved error handling for corrupted or missing settings files, always reverting to safe defaults.<br><br>
+> Code refactoring for clarity and reliability.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
