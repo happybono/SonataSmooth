@@ -369,7 +369,7 @@ On first launch after an application upgrade, compatible settings are migrated a
 Key points :
 - One‑time migration flag : `HasUpgradedSettings`
 - Boundary Method stored and restored by text (e.g., "Symmetric", "Replicate", "Adaptive", "ZeroPad"); normalized strings ensure consistent display (aliases like "Zero Padding" → "ZeroPad")
-- Clamping / normalization:
+- Clamping / normalization :
   - `AlphaBlend` clamped to [0.0, 1.0]
   - `DerivOrder` clamped to [0, 10]
   - `SigmaFactor` clamped to [1.0, 12.0]
@@ -675,8 +675,8 @@ This means your median (or any other sliding-window) filter will span 5 consecut
 
 #### Sigma Factor (σ) in Gaussian-based Filters
 - **Sigma Factor** is a user-configurable parameter (default : 6.0, clamped to [1.0, 12.0]) that determines the standard deviation (σ) of the Gaussian kernel used in both **Gaussian Weighted Median Filtering** and **Gaussian Filtering**. In **Symmetric mode**, σ = (2 × radius + 1) / Sigma Factor; in **Adaptive mode**, σ = W / Sigma Factor (W : window length at each index). The actual Sigma Factor value is always reflected in all calculations and in the export metadata (CSV / Excel).
-  - **Symmetric mode**: σ = (2 × radius + 1) / Sigma Factor
-  - **Adaptive mode**: σ = W / Sigma Factor (where W is the window length at each index)
+  - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
+  - **Adaptive mode** : σ = W / Sigma Factor (where W is the window length at each index)
   - The Sigma Factor value is always reflected in all calculations and in the export metadata (CSV / Excel).
   - The value is clamped to the range [1.0, 12.0] for stability and consistency.
 
