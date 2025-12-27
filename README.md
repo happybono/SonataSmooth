@@ -369,9 +369,10 @@ On first launch after an application upgrade, compatible settings are migrated a
 Key points :
 - One‑time migration flag : `HasUpgradedSettings`
 - Boundary Method stored and restored by text (e.g., "Symmetric", "Replicate", "Adaptive", "ZeroPad"); normalized strings ensure consistent display (aliases like "Zero Padding" → "ZeroPad")
-- Clamping / normalization :
+- Clamping / normalization:
   - `AlphaBlend` clamped to [0.0, 1.0]
   - `DerivOrder` clamped to [0, 10]
+  - `SigmaFactor` clamped to [1.0, 12.0]
 - Settings are saved automatically on app close and when pressing the Save button in the settings panel.
 
 #### Dataset Title Validation
@@ -476,7 +477,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
   Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
   
 - **Gaussian Weighted Median Filtering (GWMF)** <br>
-  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / 6.0`, and weights are normalized; alpha blending applies at runtime.
+  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / sigmaFactor`, and weights are normalized; alpha blending applies at runtime.
 
 - **Gaussian Filtering**<br>
   Uses a bell-shaped curve for weights. Very smooth, but may let sharp jumps stay.
@@ -580,10 +581,11 @@ Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch sam
 
 Adaptive paths differ per filter :
 - `Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
+  - `Rect`: computes the simple mean of the truncated window (`W`), averaging only the in-range samples (no zero / repeat padding).
   - `Avg`: recomputes a local binomial row for truncated `W`, normalizes by its sum, and averages (no sort).
   - `Med`: recomputes local binomial weights for truncated `W`, sorts by value, and selects the weighted median (handles even / odd total weight).
-  - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`, normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
-  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`, normalizes, then computes a weighted average (convolution‑like sum, no sort).
+  - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / Sigma Factor` (Sigma Factor is always clamped to [1.0, 12.0]), normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
+  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / Sigma Factor` (Sigma Factor is always clamped to [1.0, 12.0]), normalizes, then computes a weighted average (convolution‑like sum, no sort).
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
 Note : `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
@@ -613,11 +615,11 @@ Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_supp
   - Performs weighted median over strictly in‑range values sorted by value
 
 - Gaussian Weighted Median :
-  - Recomputes local Gaussian weights for truncated `W` with `σ = W / 6.0`
+  - Recomputes local Gaussian weights for truncated `W` with `σ = W / sigmaFactor`
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
 
 - Gaussian :
-  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / 6.0`
+  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / sigmaFactor`
   - Coefficients are normalized (sum = 1); no padding distortions
 
 - Savitzky-Golay (Smoothing or Derivative) :
@@ -647,6 +649,7 @@ When large batches are added (paste / drag-drop / bulk append), the list auto-sc
 ##### Kernel Radius (`r`)
 -	Defines how many data points on each side of the target point are included in the smoothing window.
 -	The kernel width is calculated as `(2 × radius) + 1`.
+-   For Gaussian-based filters, the standard deviation (σ) is computed as : `σ = (2 × radius + 1) / Sigma Factor` where Sigma Factor is user-selectable (default : 6.0, range : 1.0 - 12.0).
 -	Recommended range : 3 to 7.
 -	If the kernel window is larger than the dataset, the app will show an error and prevent calibration / export.
 
@@ -670,10 +673,17 @@ $$
 
 This means your median (or any other sliding-window) filter will span 5 consecutive samples at each position.
 
+#### Sigma Factor (σ) in Gaussian-based Filters
+- **Sigma Factor** is a user-configurable parameter (default : 6.0, clamped to [1.0, 12.0]) that determines the standard deviation (σ) of the Gaussian kernel used in both **Gaussian Weighted Median Filtering** and **Gaussian Filtering**. In **Symmetric mode**, σ = (2 × radius + 1) / Sigma Factor; in **Adaptive mode**, σ = W / Sigma Factor (W : window length at each index). The actual Sigma Factor value is always reflected in all calculations and in the export metadata (CSV / Excel).
+  - **Symmetric mode**: σ = (2 × radius + 1) / Sigma Factor
+  - **Adaptive mode**: σ = W / Sigma Factor (where W is the window length at each index)
+  - The Sigma Factor value is always reflected in all calculations and in the export metadata (CSV / Excel).
+  - The value is clamped to the range [1.0, 12.0] for stability and consistency.
+
 ##### Polynomial Order (`polyOrder`)
 - Specifies the degree of the polynomial used to fit the data within each smoothing window (used only for Savitzky-Golay filtering).
--	Recommended range : 2 to 6.
--	Must be strictly less than the kernel window size; otherwise, an error is shown.
+  - Recommended range : 2 to 6.
+  - Must be strictly less than the kernel window size; otherwise, an error is shown.
 
 Polynomial order `polyOrder` specifies the highest degree of the polynomial fitted to the data within each smoothing window. A higher order can capture more complex curvature but may also overfit noise.
 The polynomial order is defined as : 
@@ -980,7 +990,8 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
         bool doGaussMed,
         bool doGauss,
         bool doSG,
-        double alpha = 1.0)
+        double alpha = 1.0,
+        double sigmaFactor = 6.0)
 {
     var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
     if (!vr.Success)
@@ -1000,8 +1011,8 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
 
     // Precompute weight vectors where applicable
     long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
-    double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
-    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / 6.0) : null;
+    double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (windowSize, (2.0 * r + 1) / sigmaFactor) : null;
+    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (windowSize, (2.0 * r + 1) / sigmaFactor) : null;
 
     // SG symmetric coefficients (used only when not in Adaptive boundary mode)
     double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
@@ -1189,7 +1200,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    double sigmaLocal = W / 6.0;
+                    double sigmaLocal = W / sigmaFactor;
                     double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
 
                     var values = new double[W];
@@ -1276,7 +1287,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    double sigmaLocal = W / 6.0;
+                    double sigmaLocal = W / sigmaFactor;
                     double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
                     double sum = 0.0;
                     for (int pos = 0; pos < W; pos++)
@@ -1375,7 +1386,7 @@ Note : Derivative support and adaptive asymmetric SG handling are integrated int
 
 ### 3. Rectangular (Uniform) Mean Filter
 #### How it works
-A simple sliding-window average over 2 × r + 1 points honoring the selected Boundary Mode (Symmetric, Replicate, Zero‑Pad). In Adaptive mode the window shrinks at edges and averages only in‑range samples.
+A simple sliding-window average over 2 × r + 1 points honoring the selected Boundary Mode (Symmetric, Replicate, Zero‑Pad). In Adaptive mode, the window shrinks at edges and averages only in‑range samples (no zero or repeat padding is used).  
 
 #### Principle
 Every neighbor contributes equally (uniform weights).
@@ -1499,8 +1510,9 @@ Computes the median within the kernel window using Gaussian weights centered at 
 
 - Window length : W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
 - Weights : Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
-  - Symmetric mode : σ = (2r + 1) / 6.0
-  - Adaptive mode : σ = W / 6.0 (recomputed per index i)
+  - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
+  - **Adaptive mode** : σ = W / Sigma Factor (W: window length at each index, recomputed per index)
+  - **Sigma Factor** is user-configurable (default: 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 - Weighted median selection :
   - Sort pairs `(value, weight)` by value ascending
   - Accumulate weights until reaching at least half of the total (≥ Σw / 2)
@@ -1540,7 +1552,7 @@ for (int k = -r; k <= r; k++)
 {
     int idx = i + k;
     values[k + r] = Sample(idx); // GetValueWithBoundary
-    wts[k + r] = gaussCoeffsForMedian[k + r]; // normalized Gaussian weights (σ = (2r + 1)/6.0)
+    wts[k + r] = gaussCoeffsForMedian[k + r]; // normalized Gaussian weights (σ = (2r + 1) / sigmaFactor)
 }
 
 // Sort by value ascending, carrying weights alongside
@@ -1596,7 +1608,7 @@ if (W < 1)
 }
 else
 {
-    double sigmaLocal = W / 6.0;
+    double sigmaLocal = W / sigmaFactor;
     double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal); // normalized per-window
 
     var values = new double[W];
@@ -1653,16 +1665,23 @@ Notes :
 
 ### 7. Gaussian Filter
 #### How it works
-Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode the kernel length W shrinks and σ = W / 6.0 is recomputed.
+Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode the kernel length W shrinks and σ = W / sigmaFactor is recomputed.
 
 #### Principle
-Gaussian weights emphasize central values, producing smooth results.
+Gaussian weights emphasize central values, producing smooth results.  
+  
+The standard deviation (σ) for the Gaussian kernel is calculated as :
+- **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
+- **Adaptive mode** : σ = W / Sigma Factor (W : window length at each index)
+- **Sigma Factor** is user-configurable (default : 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 
 #### Code Implementation
 ```csharp
 if (useGauss)
 {
-    double sigma = (2.0 * r + 1) / 6.0;
+    double sigma = (2.0 * r + 1) / sigmaFactor;
+    
+    // SigmaFactor is user-configurable (default : 6.0, range : 1.0 - 12.0)
     double[] gaussCoeffs = ComputeGaussianCoefficients(2 * r + 1, sigma);
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
 
@@ -1679,8 +1698,7 @@ if (useGauss)
 ```
 
 #### Gaussian Filter - Adaptive Note
-Adaptive recomputes a Gaussian kernel of length W with σ = W / 6.0. This keeps relative spread consistent across varying window sizes and avoids artificial flattening.
-Sigma recomputation uses σ = W / 6.0 (same formula used initially for full symmetric kernels), keeping relative spread consistent.
+Adaptive mode recomputes a Gaussian kernel of length W with σ = W / Sigma Factor (where Sigma Factor is clamped to [1.0, 12.0]). This ensures the relative spread remains consistent across varying window sizes and avoids artificial flattening. The actual Sigma Factor used is always reflected in export metadata and calculations.
 
 ### 8. Savitzky‑Golay Filter
 #### How it works
@@ -2111,7 +2129,8 @@ var (rectAvgResult,
         doGaussMed,
         doGauss,
         doSG,
-        alpha
+        alpha,
+        sigmaFactor
     );
 ```
 
@@ -2125,17 +2144,14 @@ await sw.WriteLineAsync("Smoothing Parameters");
 await sw.WriteLineAsync($"Kernel Radius : {r}");
 await sw.WriteLineAsync($"Kernel Width : {kernelWidth}");
 await sw.WriteLineAsync($"Boundary Method : {GetBoundaryMethodText(boundaryMode)}");
-
 if (doAvg || doMed || doGaussMed || doGauss)
-{
     await sw.WriteLineAsync($"Alpha Blend : {alpha}");
-}
-
+if (doGauss || doGaussMed)
+    await sw.WriteLineAsync($"Gaussian Sigma : {kernelWidth} ÷ {sigmaFactor} = {(kernelWidth / sigmaFactor).ToString("0.###", CultureInfo.InvariantCulture)}");
 if (doSG)
-{
     await sw.WriteLineAsync($"Polynomial Order : {polyOrder}");
+if (doSG)
     await sw.WriteLineAsync($"Derivative Order : {derivOrder}");
-}
 
 await sw.WriteLineAsync(string.Empty);
 await sw.WriteLineAsync($"Generated : {DateTime.Now.ToString("G", CultureInfo.CurrentCulture)}");
@@ -2226,17 +2242,21 @@ Additional details :
 #### Code Implementation
 Alpha metadata row : 
 ```csharp
-ws.Cells[7, 1] = (doAvg || doMed || doGauss || doGaussMed)
+ws.Cells[row++, 1] = (doAvg || doMed || doGauss || doGaussMed)
     ? $"Alpha Blend : {alpha.ToString("0.00", CultureInfo.InvariantCulture)}"
     : "Alpha Blend : N/A";
 
-ws.Cells[8, 1] = doSG
-    ? $"Polynomial Order : {polyOrder}"
-    : "Polynomial Order : N/A";
+if (doGauss || doGaussMed)
+{
+    int kernelWidth = 2 * r + 1;
+    ws.Cells[row++, 1] = $"Gaussian Sigma : {kernelWidth} ÷ {sigmaFactor} = {(kernelWidth / sigmaFactor).ToString("0.###", CultureInfo.InvariantCulture)}";
+}
 
-ws.Cells[9, 1] = doSG
-    ? $"Derivative Order : {derivOrder}"
-    : "Derivative Order : N/A";
+if (doSG)
+{
+    ws.Cells[row++, 1] = $"Polynomial Order : {polyOrder}";
+    ws.Cells[row++, 1] = $"Derivative Order : {derivOrder}";
+}
 ```
 
 SaveFileDialog with marquee while open : 
@@ -2541,6 +2561,8 @@ This behavior ensures :
 #### Export Metadata Enhancements
 Both CSV and Excel exports now include :  
 - Kernel Radius and computed Kernel Width
+- Sigma Factor (actual value used in calculation, as selected by the user and clamped to [1.0, 12.0])
+- Computed Gaussian Sigma (σ = kernel width / Sigma Factor, or W / Sigma Factor in Adaptive mode; always matches the runtime calculation)
 - Polynomial Order (if SG selected)
 - Derivative Order (if SG selected)
 - Boundary Method (reflects selected mode, including Adaptive)
