@@ -73,7 +73,7 @@ res.GaussWMed   = zeros(n,1);
 res.Gauss       = zeros(n,1);
 res.SG          = zeros(n,1);
 
-% For SG (non-adaptive): compute symmetric SG coefficients once if needed
+% For SG (non-adaptive) : compute symmetric SG coefficients once if needed
 sgFull = [];
 if mode ~= "adaptive"
     sgFull = sg_coeffs_symmetric(windowSize, polyOrder, derivOrder, delta);
@@ -287,7 +287,7 @@ start0 = center0 - left;
 end
 
 function [left,right] = sg_adaptive_left_right(i0, n, r)
-% Adaptive SG: fixed length (2r + 1), shift window to stay inside
+% Adaptive SG : fixed length (2r + 1), shift window to stay inside
 desiredW = 2*r + 1;
 
 left  = min(r, i0);
