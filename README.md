@@ -46,6 +46,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 <img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/happybono/SonataSmooth">
 <img alt="GitHub Repo Languages" src="https://img.shields.io/github/languages/count/happybono/SonataSmooth">
 <img alt="GitHub Top Languages" src="https://img.shields.io/github/languages/top/happybono/SonataSmooth">
+<img alt="Nuget Downloads" src="https://img.shields.io/nuget/dt/SonataSmooth.Tune?logo=NuGet&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FSonataSmooth.Tune">
 </div>
 
 ## What's New
