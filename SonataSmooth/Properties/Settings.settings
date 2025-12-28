@@ -32,5 +32,8 @@
     <Setting Name="HasUpgradedSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="SigmaFactor" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

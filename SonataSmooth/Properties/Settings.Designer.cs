@@ -142,5 +142,17 @@ namespace SonataSmooth.Properties {
                 this["HasUpgradedSettings"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public double SigmaFactor {
+            get {
+                return ((double)(this["SigmaFactor"]));
+            }
+            set {
+                this["SigmaFactor"] = value;
+            }
+        }
     }
 }
