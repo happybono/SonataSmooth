@@ -23,7 +23,7 @@ Validate numerical equivalence between **SonataSmooth (C#)** outputs and **MATLA
 ### 1. Generate the MATLAB reference CSV
 1. Run the MATLAB reference pipeline to create `MATLAB_Result.csv`.
    - Run this script :
-     - `SonataSmooth_Validation.m`
+     [`SonataSmooth_Validation.m`](https://github.com/happybono/SonataSmooth/blob/main/Validation/Matlab/SonataSmooth_Validation.m)
 
 ### 2. Export the SonataSmooth CSV
 1. Run SonataSmooth with the same input + parameters used in MATLAB.
