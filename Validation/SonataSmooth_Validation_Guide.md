@@ -14,7 +14,7 @@ Validate numerical equivalence between **SonataSmooth (C#)** outputs and **MATLA
 
 ## Output
 - Updated verification summary in the Excel template :
-  - `Overview` sheet : Match%, MatchCount, MismatchCount, MaxAbsDiff, MAE
+  - `Overview` sheet : `Match%`, `MatchCount`, `MismatchCount`, `MaxAbsDiff`, `MAE`
 
 ---
 
