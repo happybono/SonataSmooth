@@ -2679,4 +2679,4 @@ Together, these design decisions ensure that noisy inputs are transformed into c
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ## Copyright 
-Copyright ⓒ HappyBono 2025. All Rights Reserved.
+Copyright ⓒ HappyBono 2025 - 2026. All Rights Reserved.
