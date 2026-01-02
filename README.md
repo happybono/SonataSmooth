@@ -318,7 +318,6 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 #### December 22, 2025
 > Improved Excel export error handling : now distinguishes between Excel not installed, COM activation failure, and other interop errors, providing more specific user guidance.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v5.6.0.0
 #### December 28, 2025
@@ -330,6 +329,11 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Unified the logic for loading and saving user settings for all smoothing parameters, including `Sigma Factor`, to ensure all values are handled consistently and reliably.<br><br>
 > Improved error handling for corrupted or missing settings files, always reverting to safe defaults.<br><br>
 > Code refactoring for clarity and reliability.<br><br>
+> Minor bugs fixed.
+</details>
+
+### v5.6.1.0
+#### January 03, 2026
 > Minor bugs fixed.
 
 ## Required Components & Setup
