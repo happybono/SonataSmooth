@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Codies")]
 [assembly: AssemblyProduct("SonataSmooth")]
-[assembly: AssemblyCopyright("Copyright © HappyBono 2025")]
+[assembly: AssemblyCopyright("Copyright © HappyBono 2025 - 2026")]
 [assembly: AssemblyTrademark("SonataSmooth")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("5.6.0.0")]
-[assembly: AssemblyFileVersion("5.6.0.0")]
+[assembly: AssemblyVersion("5.6.1.0")]
+[assembly: AssemblyFileVersion("5.6.1.0")]
