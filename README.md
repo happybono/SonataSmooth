@@ -64,8 +64,7 @@ provided that such use does not constitute or support a commercial activity.
 
 By accessing or using the Restricted Component, you acknowledge its patent-pending status and agree to comply with these restrictions.  
 
-**This restriction applies retroactively and prospectively to all commits, contributions, and versions of this repository,  
-regardless of the date of disclosure or commit history.**
+**This restriction applies retroactively and prospectively to all commits, contributions, and versions of this repository, regardless of the date of disclosure or commit history.**
   
 <br>
 <div align="center">
