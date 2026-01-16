@@ -42,7 +42,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ## Special Licensing Notice : Binomial Weighted Median Filter  
 Most components of this project are licensed under MIT.  
 
-However, the **Binomial Weighted Median Filter (based on Pascal’s Triangle coefficients)** is patent-pending and has special restrictions:  
+However, the **Binomial Weighted Median Filter (based on Pascal’s Triangle coefficients)** is patent-pending and has special restrictions :  
 
 - ✅ Free for non-commercial research, education, and personal projects  
 - ❌ Commercial use, reproduction, or distribution requires prior written consent from the patent holder  
@@ -63,6 +63,9 @@ Non-commercial research, educational activities, and personal use are expressly 
 provided that such use does not constitute or support a commercial activity.  
 
 By accessing or using the Restricted Component, you acknowledge its patent-pending status and agree to comply with these restrictions.  
+
+**This restriction applies retroactively and prospectively to all commits, contributions, and versions of this repository,  
+regardless of the date of disclosure or commit history.**
   
 <br>
 <div align="center">
