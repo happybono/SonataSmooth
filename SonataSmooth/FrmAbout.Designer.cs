@@ -70,9 +70,9 @@
             this.slblCopyright.LinkColor = System.Drawing.Color.White;
             this.slblCopyright.Margin = new System.Windows.Forms.Padding(0);
             this.slblCopyright.Name = "slblCopyright";
-            this.slblCopyright.Size = new System.Drawing.Size(321, 24);
+            this.slblCopyright.Size = new System.Drawing.Size(352, 24);
             this.slblCopyright.Spring = true;
-            this.slblCopyright.Text = "ⓒ 2025 HappyBono. All rights reserved.";
+            this.slblCopyright.Text = "ⓒ 2025 - 2026 HappyBono. All rights reserved.";
             // 
             // lblLicenseTerms
             // 
@@ -162,6 +162,7 @@
             this.Controls.Add(this.lblAppTtl);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.btnDonation);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
