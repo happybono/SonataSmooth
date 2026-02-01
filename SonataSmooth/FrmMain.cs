@@ -456,6 +456,7 @@ namespace SonataSmooth
 
             ApplyExportPersistedToSettingsForm(s);
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void SaveUserSettings_Main()
@@ -819,7 +820,7 @@ namespace SonataSmooth
                     slblCalibratedType.Text = useRect ? "Rectangular Average"
                                          : useAvg ? "Binomial Average"
                                          : useMed && !useGaussMedian ? "Binomial Median"
-                                         : useGaussMedian ? "Gaussian Weighted Median" 
+                                         : useGaussMedian ? "Gaussian Weighted Median"
                                          : useSG ? "Savitzky-Golay"
                                          : useGauss ? "Gaussian Filter"
                                          : "Unknown";
@@ -928,6 +929,18 @@ namespace SonataSmooth
             }
         }
 
+        private void UpdateSigmaEnablement()
+        {
+            bool sigmaRelevant = rbtnGauss.Checked || (rbtnGaussMed != null && rbtnGaussMed.Checked);
+            lblSigmaFactor.Enabled = sigmaRelevant;
+            cbxSigmaFactor.Enabled = sigmaRelevant;
+            lblKernelWidth.Enabled = sigmaRelevant;
+            if (cbxSigmaFactor.Enabled && string.IsNullOrWhiteSpace(cbxSigmaFactor.Text))
+            {
+                cbxSigmaFactor.Text = "6.0";
+            }
+        }
+
         // 입력된 데이터에 대해 다양한 보정 방식 (Smoothing Filter) 을 적용하는 메서드.
         // 알파 (alpha) 매개변수를 추가했습니다 (기본 값 1.0). 이항 평균 (Binomial Average), 가중 중앙 값 (Weighted Median), 가우시안 (Gaussian) 보정 방식에 한해서만 적용됩니다 :
         // Output[i] = alpha * Filtered[i] + (1 - alpha) * Original[i].
@@ -978,7 +991,7 @@ namespace SonataSmooth
             var rect = new double[n];
             var binomAvg = new double[n];
             var median = new double[n];
-            var gaussMedian = new double[n]; 
+            var gaussMedian = new double[n];
             var gauss = new double[n];
             var sg = new double[n];
 
@@ -2272,33 +2285,33 @@ Are you sure you want to proceed?";
             }
         }
 
-private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int> progress, int baseProgress)
-{
-    const int BatchSize = 1000;
-    int total = items.Length;
-    int done = 0;
-    box.BeginUpdate();
-    try
-    {
-        while (done < total)
+        private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int> progress, int baseProgress)
         {
-            int cnt = Math.Min(BatchSize, total - done);
-            var buffer = new object[cnt];
-            for (int i = 0; i < cnt; i++)
-                buffer[i] = items[done + i];
-            box.Items.AddRange(buffer);
-            done += cnt;
-            int pct = baseProgress + (int)((long)done * (100 - baseProgress) / total);
-            progress.Report(pct);
-            await Task.Yield();
+            const int BatchSize = 1000;
+            int total = items.Length;
+            int done = 0;
+            box.BeginUpdate();
+            try
+            {
+                while (done < total)
+                {
+                    int cnt = Math.Min(BatchSize, total - done);
+                    var buffer = new object[cnt];
+                    for (int i = 0; i < cnt; i++)
+                        buffer[i] = items[done + i];
+                    box.Items.AddRange(buffer);
+                    done += cnt;
+                    int pct = baseProgress + (int)((long)done * (100 - baseProgress) / total);
+                    progress.Report(pct);
+                    await Task.Yield();
+                }
+            }
+            finally
+            {
+                box.EndUpdate();
+                box.TopIndex = box.Items.Count - 1;
+            }
         }
-    }
-    finally
-    {
-        box.EndUpdate();
-        box.TopIndex = box.Items.Count - 1;
-    }
-}
 
         private string GetDropText(DragEventArgs e)
         {
@@ -2833,6 +2846,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     SetBoundaryMethod("Symmetric");
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void rbtnSG_CheckedChanged(object sender, EventArgs e)
@@ -2864,6 +2878,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 if (cbxDerivOrder != null) cbxDerivOrder.Enabled = false;
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void FrmMain_Load(object sender, EventArgs e)
@@ -2885,6 +2900,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
 
             // Alpha 는 Binomial Average / Binomial Median / Gaussian Weighted Median / Gaussian 을 선택한 경우에 한하여 활성화
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
 
             using (Graphics g = this.CreateGraphics())
             {
@@ -4126,8 +4142,8 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                                     "Export Error",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
-                            }                        
-                        progress.Report(0);
+                            }
+                            progress.Report(0);
                         }
                         catch (Exception ex)
                         {
@@ -4192,7 +4208,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             catch (System.Runtime.InteropServices.COMException ex)
             {
                 // Excel 설치 여부 및 COM 예외 분기
-              if (IsExcelNotInstalled(ex))
+                if (IsExcelNotInstalled(ex))
                 {
                     var result = MessageBox.Show(
                         this,
@@ -4373,7 +4389,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 "COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
                 "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9"
             };
-            
+
             string titleUpper = title.ToUpperInvariant();
 
             var errors = new List<string>();
@@ -4536,11 +4552,12 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             if (rbtnRect.Checked)
             {
                 SetAlphaEnabled(false);
-                _userSelectedBoundary = false; 
+                _userSelectedBoundary = false;
                 if (!_suppressAutoBoundary)
                     SetBoundaryMethod("Replicate");
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void rbtnAvg_CheckedChanged(object sender, EventArgs e)
@@ -4553,6 +4570,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     SetBoundaryMethod("Symmetric");
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void rbtnMed_CheckedChanged(object sender, EventArgs e)
@@ -4565,6 +4583,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     SetBoundaryMethod("Symmetric");
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void rbtnGauss_CheckedChanged(object sender, EventArgs e)
@@ -4577,6 +4596,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                     SetBoundaryMethod("Symmetric");
             }
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void btnRefSelectSync_Click(object sender, EventArgs e)
@@ -4631,7 +4651,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
             }
         }
 
-        #region Mouse Hover and Leave Events
+        #region Event Handlers for Guide Text
         private void MouseLeaveHandler(object sender, EventArgs e)
         {
             if (isRefinedLoading || lbRefinedData.Items.Count == 0)
@@ -5138,6 +5158,7 @@ private async Task AddItemsInBatches(ListBox box, double[] items, IProgress<int>
                 settingsForm.cbxAlpha.Text = cbxAlpha.Text;
 
             UpdateAlphaEnablement();
+            UpdateSigmaEnablement();
         }
 
         private void cbxAlpha_MouseHover(object sender, EventArgs e)
