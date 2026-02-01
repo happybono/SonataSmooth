@@ -356,10 +356,14 @@ By accessing or using the Restricted Component, you acknowledge its patent-pendi
 > Improved error handling for corrupted or missing settings files, always reverting to safe defaults.<br><br>
 > Code refactoring for clarity and reliability.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v5.6.1.0
 #### January 03, 2026
+> Minor bugs fixed.
+</details>
+
+### v5.6.3.0
+#### February 02, 2026
 > Minor bugs fixed.
 
 ## Required Components & Setup
