@@ -51,18 +51,13 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ## Patent-Pending Component Restriction 
 > [!CAUTION]
-> Notwithstanding any rights granted under the MIT License applicable to the majority of this project,  
-> the algorithm known as the **Binomial Weighted Median Filter, derived from Pascal’s Triangle and its coefficients**  
-> (the "Restricted Component") is subject to additional limitations.  
+> Notwithstanding any rights granted under the MIT License applicable to the majority of this project, the algorithm known as the **Binomial Weighted Median Filter, derived from Pascal’s Triangle and its coefficients**  (the "Restricted Component") is subject to additional limitations.  
 >
-> Commercial use, reproduction, distribution, or incorporation of the Restricted Component into products or services  
-> is strictly prohibited without the prior written consent of the patent holder.  
+> Commercial use, reproduction, distribution, or incorporation of the Restricted Component into products or services is strictly prohibited without the prior written consent of the patent holder.  
 >
-> Any commercial exploitation - including but not limited to sale, licensing, or revenue-generating activities :  
-> requires a separate agreement with the patent holder.  
+> Any commercial exploitation - including but not limited to sale, licensing, or revenue-generating activities : requires a separate agreement with the patent holder.  
 >
-> Non-commercial research, educational activities, and personal use are expressly permitted,  
-> provided that such use does not constitute or support a commercial activity.  
+> Non-commercial research, educational activities, and personal use are expressly permitted, provided that such use does not constitute or support a commercial activity.  
 >
 > By accessing or using the Restricted Component, you acknowledge its patent-pending status and agree to comply with these restrictions.  
 >
