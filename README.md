@@ -370,9 +370,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 - [.NET Framework 4.8](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48) or [.NET Framework 4.8.1](https://dotnet.microsoft.com/en-us/download/dotnet-framework/net481)
   - Runtime : .NET Framework 4.8.1 (native ARM64 supported on Windows 11)
   - Architectures : ARM64 (native), x64 (native), x86 (native)
-  - Verified on ARM64 and x64 devices (native builds)
-  - Note : Any native dependencies (P / Invoke / COM) require ARM64 builds
-
+  - Verified on ARM64 and x64 devices (native builds)  
 - [Visual Studio 2026](https://visualstudio.microsoft.com/) (for development)
   - Development environment is recommended to use **Visual Studio 2022 or newer**
 - [Microsoft Office (Excel)](https://www.microsoft.com/en/microsoft-365/)
@@ -381,6 +379,9 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
   - Minimum recommended version : **Excel 2019 or later** for long-term support and reliability.
   - Bitness must match : **x86 app with 32‑bit Office, or x64 app with 64‑bit** Office.
   - CSV export does not require Microsoft Office.
+  
+> [!Note]
+> Any native dependencies (P / Invoke / COM) require ARM64 builds
 
 ### Dependencies
 - `System.Windows.Forms`
@@ -430,7 +431,8 @@ Export Enablement Rules :
 6. **Edit Data** : Use the "Modify Selected Entries" dialog (`btnInitEdit`) to batch-edit selected items in the initial dataset.
 7. **Export** : Click Export (`btnExport`) to save results as `.CSV` or `Excel (.xlsx)`, with optional chart visualization. Configure export options in the "Export Configuration" dialog (`btnExportSettings`).
 
-> Note : You do not need to run "Calibrate" before exporting. Both CSV and Excel exports recompute the selected filters directly from the Initial Dataset.
+> [!Note]
+> You do not need to run "Calibrate" before exporting. Both CSV and Excel exports recompute the selected filters directly from the Initial Dataset.
 
 ## UI Controls & Naming Conventions
 - **Initial Dataset ListBox** : `lbInitData`
@@ -620,7 +622,8 @@ Adaptive paths differ per filter :
   - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / Sigma Factor` (Sigma Factor is always clamped to [1.0, 12.0]), normalizes, then computes a weighted average (convolution‑like sum, no sort).
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
-Note : `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
+> [!Note]
+> `GetIndex` exists for compatibility; current code paths use `GetValueWithBoundary` (non‑Adaptive) or direct in‑range indexing (Adaptive).
 
 ### Choosing a Mode
 - Symmetric : recommended default for smooth analytical signals (mirror mapping).
@@ -999,7 +1002,8 @@ Adaptive mode introduces per-index dynamic window sizing or window shifting (Sav
 #### Principle
 Leverage all CPU cores to avoid blocking the UI. PLINQ's `.AsOrdered()` preserves the original order, and `.WithDegreeOfParallelism` matches the number of logical processors.  
   
-Note : The smoothing pass uses only `Parallel.For`; PLINQ is used solely for input parsing, not for kernel execution.
+> [!Note]
+> The smoothing pass uses only `Parallel.For`; PLINQ is used solely for input parsing, not for kernel execution.
 
 - **Parallelization** : Uses `Parallel.For` for the smoothing pass. PLINQ is used only for input parsing (clipboard / drag‑drop), not during kernel execution.
 - **Single-Pass Multi-Filter** : All enabled filters are computed together, minimizing memory usage and maximizing throughput.
@@ -1414,7 +1418,8 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
     return (rect, binomAvg, median, gaussMedian, gauss, sg);
 }
 ```
-Note : Derivative support and adaptive asymmetric SG handling are integrated into this unified pass. Parallelization is skipped for very small arrays (`n < 2000`) to avoid overhead.
+> [!Note]
+> Derivative support and adaptive asymmetric SG handling are integrated into this unified pass. Parallelization is skipped for very small arrays (`n < 2000`) to avoid overhead.
 
 ### 3. Rectangular (Uniform) Mean Filter
 #### How it works
@@ -1483,7 +1488,8 @@ In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of le
 #### How it works
 Computes the median of values in the window, weighted by binomial coefficients, to reduce noise while preserving edges.  
   
-Note : Labeled internally as "Weighted Median" (using binomial weights). README refers to it as "Binomial Median Filtering" - both denote the same weighted-median operation.
+> [!Note]
+> Labeled internally as "Weighted Median" (using binomial weights). README refers to it as "Binomial Median Filtering" - both denote the same weighted-median operation.
 
 #### Principle
 Median filtering is robust against outliers; binomial weights bias the median toward center points.
@@ -1689,11 +1695,11 @@ else
 gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
-Notes :
-- Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).
-- BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.
-- Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.
-- Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGaussMed || doGauss)`; in CSV, the header row uses the same condition.
+> [!Note]
+>  - Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).  
+>  - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.  
+>  - Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.  
+>  - Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGaussMed || doGauss)`; in CSV, the header row uses the same condition.
 
 ### 7. Gaussian Filter
 #### How it works
@@ -1769,7 +1775,8 @@ else if (useSG)
 }
 ```
 
-Note : This snippet shows the non‑Adaptive, smoothing‑only path. Runtime uses the derivative‑capable overload and switches to asymmetric coefficients near edges when Adaptive is selected.
+> [!Note]
+> This snippet shows the non‑Adaptive, smoothing‑only path. Runtime uses the derivative‑capable overload and switches to asymmetric coefficients near edges when Adaptive is selected.
 
 #### Derivative Order (`derivOrder`)
 Used only when Savitzky-Golay is selected.
@@ -2025,8 +2032,10 @@ private static double[] ComputeSavitzkyGolayCoefficients(
     return h;
 }
 ```
-(Implementation uses InvertMatrixStrict with partial pivoting and a dynamic tolerance 1e - 14 × rowScale for stability.)
-(Derivative-capable version in runtime adds derivOrder & delta parameters; see full adaptive + derivative implementation in the unified ApplySmoothing section above.)
+  
+> [!Note]
+> - Implementation uses InvertMatrixStrict with partial pivoting and a dynamic tolerance 1e - 14 × rowScale for stability.  
+> - Derivative-capable version in runtime adds derivOrder & delta parameters; see full adaptive + derivative implementation in the unified ApplySmoothing section above.
 
 ### 12. Numerical Pivot Calculation (Matrix Inversion)
 #### How it Works
@@ -2114,10 +2123,11 @@ private static double[,] InvertMatrixStrict(double[,] a)
 - It is robust against singular and ill-conditioned matrices, ensuring reliable filter performance.
 
 #### Additional Notes
-- All UI controls and code elements use clear, descriptive names for maintainability.
-- All heavy computations and file operations are performed asynchronously and in parallel for maximum responsiveness.
-- All UI updates and COM object accesses are performed on the UI thread for safety.
-- Status messages and tooltips are dynamically updated to guide the user through each operation.
+> [!Note]
+> - All UI controls and code elements use clear, descriptive names for maintainability.  
+> - All heavy computations and file operations are performed asynchronously and in parallel for maximum responsiveness.  
+> - All UI updates and COM object accesses are performed on the UI thread for safety.  
+> - Status messages and tooltips are dynamically updated to guide the user through each operation.
 
 ### 13. CSV Export Functionality
 #### How it works
@@ -2268,8 +2278,11 @@ Additional details :
 -	**Musical Metadata** : Excel document properties and comments are dynamically set with musical phrases and filter info for a unique, playful touch.
 -	**Chart Generation** : A line chart is automatically created to compare all filter outputs visually.
 -	**Robust COM Cleanup** : All Excel interop objects are released and garbage collected to avoid memory leaks.
--   **Metadata Rows** : A1 Title, A3 label, A4 Radius, A5 Width, A6 Boundary, A7 Alpha Blend, A8 Polynomial (or N/A), A9 Derivative (or N/A). (Note : The "Generated" timestamp row is written in CSV export; it is not written as a worksheet row in Excel export.)
+-   **Metadata Rows** : A1 Title, A3 label, A4 Radius, A5 Width, A6 Boundary, A7 Alpha Blend, A8 Gaussian Sigma, A9 Polynomial (or N/A), A10 Derivative (or N/A). 
 -   **Excel Built-in Document Properties set** : Title, Category, Author, Last Author, Keywords, Subject, Comments (random musical phrase + quartet Easter egg when exactly four methods are enabled).
+
+> [!Note]
+> The "Generated" timestamp row is written in CSV export; it is not written as a worksheet row in Excel export.
     
 #### Code Implementation
 Alpha metadata row : 
@@ -2440,7 +2453,9 @@ Completion message :
 
 This ensures consistent UX between CSV and Excel modes.
 
-(Note : The code sample omits the BuiltinDocumentProperties musical metadata and Easter egg block for brevity; runtime sets Title, Category, Author, Subject, Keywords, Comments with randomized phrases and quartet unlock message when exactly four methods are enabled.)
+> [!Note]
+> The code sample omits the BuiltinDocumentProperties musical metadata and Easter egg block for brevity; runtime sets Title, Category, Author, Subject, Keywords, Comments with randomized phrases and quartet unlock message when exactly four methods are enabled.
+  
 ```csharp
 private async void ExportExcelAsync()
 {
