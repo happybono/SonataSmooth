@@ -5175,7 +5175,7 @@ Are you sure you want to proceed?";
         private void rbtnGaussMed_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Reduces noise by computing a median with Gaussian weights in the kernel window, robust to spikes while emphasizing central values.";
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Higher values sharpen, lower values smooth more. (Default : 6.0)";
         }
 
         private void rbtnGaussMed_MouseLeave(object sender, EventArgs e)
@@ -5186,7 +5186,7 @@ Are you sure you want to proceed?";
         private void lblSigmaFactor_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Higher values sharpen, lower values smooth more. (Default : 6.0)";
         }
 
         private void lblSigmaFactor_MouseLeave(object sender, EventArgs e)
@@ -5197,7 +5197,7 @@ Are you sure you want to proceed?";
         private void lblKernelWidth_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Higher values sharpen, lower values smooth more. (Default : 6.0)";
         }
 
         private void lblKernelWidth_MouseLeave(object sender, EventArgs e)
@@ -5217,4 +5217,5 @@ Are you sure you want to proceed?";
         }
     }
     #endregion
+
 }
