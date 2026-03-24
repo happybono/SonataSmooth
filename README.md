@@ -357,10 +357,19 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.6.1.0
 #### January 03, 2026
 > Minor bugs fixed.
-</details>
 
 ### v5.6.3.0
 #### February 02, 2026
+> Minor bugs fixed.
+</details>
+
+### v5.7.0.0
+#### March 24, 2026
+> Savitzky–Golay numerical stability : Replaced Gauss-Jordan normal-equation inversion (AᵀA) with Householder QR decomposition for all SG coefficient builders. Reduces condition-number sensitivity for high polynomial orders and narrow windows.<br><br>
+> Adaptive boundary mode kernel centering fix : Weighted filters (Binomial Average, Binomial Median, Gaussian, Gaussian Weighted Median) now use the original pre-computed kernel restricted to available offsets and centered on position `i`, instead of recomputing a shorter kernel centered on the truncated window. This eliminates implementation-induced phase shift; only the inherent mathematical asymmetry from the window extent remains.<br><br>
+> Rectangular (uniform weights) and Savitzky-Golay (asymmetric polynomial coefficients) were already correct and remain unchanged.<br><br>
+> UI tooltip updated from "Adaptive (local polynomial + median)" to "Adaptive".<br><br>
+> Adaptive boundary mode kernel centering fix.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
