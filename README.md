@@ -369,7 +369,6 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Adaptive boundary mode kernel centering fix : Weighted filters (Binomial Average, Binomial Median, Gaussian, Gaussian Weighted Median) now use the original pre-computed kernel restricted to available offsets and centered on position `i`, instead of recomputing a shorter kernel centered on the truncated window. This eliminates implementation-induced phase shift; only the inherent mathematical asymmetry from the window extent remains.<br><br>
 > Rectangular (uniform weights) and Savitzky-Golay (asymmetric polynomial coefficients) were already correct and remain unchanged.<br><br>
 > UI tooltip updated from "Adaptive (local polynomial + median)" to "Adaptive".<br><br>
-> Adaptive boundary mode kernel centering fix.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
