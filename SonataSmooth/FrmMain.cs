@@ -62,8 +62,6 @@ namespace SonataSmooth
         private readonly FrmExportSettings settingsForm;
         private FrmAbout aboutForm;
         private int dataCount;
-        private int r;
-        private int polyOrder;
 
         private double dpiX;
         private double dpiY;
@@ -300,10 +298,9 @@ namespace SonataSmooth
                             bv = Convert.ToBoolean(value, CultureInfo.InvariantCulture);
                         }
                         catch
-                        {
-                            // 0/1 문자열 지원.
-                            int tmp;
-                            if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out tmp))
+                        { 
+                            // 0 / 1 문자열 지원.
+                            if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out int tmp))
                                 bv = tmp != 0;
                             else if (!bool.TryParse(str, out bv))
                                 return false;
@@ -311,8 +308,7 @@ namespace SonataSmooth
                     }
                     else
                     {
-                        int tmp;
-                        if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out tmp))
+                        if (int.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out int tmp))
                             bv = tmp != 0;
                         else if (!bool.TryParse(str, out bv))
                             return false;
@@ -323,8 +319,7 @@ namespace SonataSmooth
 
                 if (string.Equals(name, "BoundaryMethod", StringComparison.Ordinal) && targetType == typeof(string))
                 {
-                    int idx;
-                    if (int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Integer, CultureInfo.InvariantCulture, out idx))
+                    if (int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Integer, CultureInfo.InvariantCulture, out int idx))
                     {
                         result = NormalizeBoundaryMethodString(IndexToBoundaryText(idx));
                         return true;
@@ -384,7 +379,7 @@ namespace SonataSmooth
             cbxAlpha.Text = Math.Max(0.0, Math.Min(1.0, s.AlphaBlend)).ToString("0.00", CultureInfo.InvariantCulture);
 
             // Sigma 계수 (Gaussian / Weighted Median)
-            double sigma = 6.0;
+            double sigma;
             try
             {
                 sigma = s.SigmaFactor;
@@ -476,8 +471,7 @@ namespace SonataSmooth
             s.AlphaBlend = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
 
             // SigmaFactor 저장 (예외 및 범위 처리)
-            double sigma = 6.0;
-            if (cbxSigmaFactor != null && double.TryParse(cbxSigmaFactor.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out sigma))
+            if (cbxSigmaFactor != null && double.TryParse(cbxSigmaFactor.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out double sigma))
             {
                 if (sigma < 1.0 || sigma > 12.0 || double.IsNaN(sigma) || double.IsInfinity(sigma))
                     sigma = 6.0;
@@ -504,7 +498,7 @@ namespace SonataSmooth
             }
             s.BoundaryMethod = bmText.Trim();
 
-            // SmoothingMethod 를 Radio Button 선택 상태로 저장
+            // SmoothingMethod 를 RadioButton 선택 상태로 저장
             s.SmoothingMethod =
                 rbtnRect.Checked ? "Rect" :
                 rbtnAvg.Checked ? "Avg" :
@@ -541,7 +535,7 @@ namespace SonataSmooth
             }
         }
 
-        private struct OperationResult
+        private readonly struct OperationResult
         {
             public bool Success { get; }
             public string Error { get; }
@@ -608,7 +602,6 @@ namespace SonataSmooth
         /// </summary>
         private OperationResult TryParseParameters(out int r, out int polyOrder, out double sigma)
         {
-            r = 0;
             polyOrder = 0;
             sigma = 0;
             if (!int.TryParse(cbxKernelRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out r))
@@ -741,7 +734,7 @@ namespace SonataSmooth
                     results = await Task.Run(() =>
                     {
                         // 통합 ApplySmoothing 함수 호출
-                        var multi = ApplySmoothing(
+                        var (rect, binom, median, gaussMed, gauss, sg) = ApplySmoothing(
                             input,
                             r,
                             polyOrder,
@@ -759,12 +752,12 @@ namespace SonataSmooth
                         );
 
                         // 선택된 필터 결과만 반환
-                        if (useRect) return multi.Rect;
-                        if (useAvg) return multi.Binom;
-                        if (useMed && !useGaussMedian) return multi.Median;
-                        if (useGaussMedian) return multi.GaussMed;
-                        if (useGauss) return multi.Gauss;
-                        if (useSG) return multi.SG;
+                        if (useRect) return rect;
+                        if (useAvg) return binom;
+                        if (useMed && !useGaussMedian) return median;
+                        if (useGaussMedian) return gaussMed;
+                        if (useGauss) return gauss;
+                        if (useSG) return sg;
                         return new double[n];
                     });
                 }
@@ -819,7 +812,7 @@ namespace SonataSmooth
                     // 상태 표시줄에 적용된 보정 방식 표시
                     slblCalibratedType.Text = useRect ? "Rectangular Average"
                                          : useAvg ? "Binomial Average"
-                                         : useMed && !useGaussMedian ? "Binomial Median"
+                                         : useMed && !useGaussMedian ? "Binomial Weighted Median"
                                          : useGaussMedian ? "Gaussian Weighted Median"
                                          : useSG ? "Savitzky-Golay"
                                          : useGauss ? "Gaussian Filter"
@@ -945,21 +938,21 @@ namespace SonataSmooth
         // 알파 (alpha) 매개변수를 추가했습니다 (기본 값 1.0). 이항 평균 (Binomial Average), 가중 중앙 값 (Weighted Median), 가우시안 (Gaussian) 보정 방식에 한해서만 적용됩니다 :
         // Output[i] = alpha * Filtered[i] + (1 - alpha) * Original[i].
         private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, double[] Gauss, double[] SG)
-       ApplySmoothing(
-            double[] input,
-            int r,
-            int polyOrder,
-            int derivOrder,
-            double delta,
-            BoundaryMode boundaryMode,
-            bool doRect,
-            bool doAvg,
-            bool doMed,
-            bool doGaussMed,
-            bool doGauss,
-            bool doSG,
-            double alpha = 1.0,
-            double sigmaFactor = 6.0)
+         ApplySmoothing(
+              double[] input,
+              int r,
+              int polyOrder,
+              int derivOrder,
+              double delta,
+              BoundaryMode boundaryMode,
+              bool doRect,
+              bool doAvg,
+              bool doMed,
+              bool doGaussMed,
+              bool doGauss,
+              bool doSG,
+              double alpha = 1.0,
+              double sigmaFactor = 6.0)
         {
             var vr = ValidateSmoothingParameters(input?.Length ?? 0, r, polyOrder);
             if (!vr.Success)
@@ -976,7 +969,7 @@ namespace SonataSmooth
             int n = input.Length;
             int windowSize = 2 * r + 1;
 
-            long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
+            double[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
             double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / sigmaFactor) : null;
             double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / sigmaFactor) : null;
 
@@ -1019,7 +1012,7 @@ namespace SonataSmooth
 
             bool useParallel = n >= 2000;
 
-            Action<int> smoothingAction = i =>
+            void SmoothingAction(int i)
             {
                 // Rectangular (Blending 없음)
                 if (doRect)
@@ -1053,7 +1046,10 @@ namespace SonataSmooth
                         if (W < 1) { filtered = 0.0; }
                         else
                         {
-                            long[] localBinom = CalcBinomialCoefficients(W);
+                            // 전체 이항 계수 배열에서 중심점 (left) 이 피크 (r) 에 오도록 부분 추출 후 재정규화
+                            double[] localBinom = new double[W];
+                            for (int j = 0; j < W; j++)
+                                localBinom[j] = binom[(r - left) + j];
                             double localSum = 0.0;
                             for (int j = 0; j < W; j++) localSum += localBinom[j];
                             double sum = 0.0;
@@ -1083,23 +1079,26 @@ namespace SonataSmooth
                         if (W < 1) { filtered = 0.0; }
                         else
                         {
-                            long[] localBinom = CalcBinomialCoefficients(W);
-                            var pairs = new List<(double Value, long Weight)>(W);
+                            // 전체 이항 계수 배열에서 중심점 (left) 이 최고점 (r) 에 오도록 부분 추출
+                            double[] localBinom = new double[W];
+                            for (int j = 0; j < W; j++)
+                                localBinom[j] = binom[(r - left) + j];
+                            var pairs = new List<(double Value, double Weight)>(W);
                             for (int pos = 0; pos < W; pos++)
                                 pairs.Add((input[start + pos], localBinom[pos]));
                             if (pairs.Count == 0) { filtered = 0.0; }
                             else
                             {
                                 pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
-                                long totalWeight = 0;
+                                double totalWeight = 0;
                                 for (int j = 0; j < pairs.Count; j++)
                                     totalWeight += pairs[j].Weight;
                                 if (totalWeight <= 0) { filtered = 0.0; }
                                 else
                                 {
-                                    bool even = (totalWeight & 1L) == 0;
-                                    long half = totalWeight / 2;
-                                    long accum = 0;
+                                    bool even = Math.Abs(totalWeight - 2.0 * Math.Floor(totalWeight / 2.0)) < 0.5;
+                                    double half = Math.Floor(totalWeight / 2.0);
+                                    double accum = 0;
                                     filtered = pairs[pairs.Count - 1].Value;
                                     for (int j = 0; j < pairs.Count; j++)
                                     {
@@ -1140,8 +1139,17 @@ namespace SonataSmooth
                         if (W < 1) { filtered = 0.0; }
                         else
                         {
-                            double sigmaLocal = W / sigmaFactor;
-                            double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+                            // 전체 Gaussian 계수 배열에서 중심점 (left) 이 최고점 (r) 에 오도록 부분 추출 후 재정규화
+                            double[] localGauss = new double[W];
+                            double gNorm = 0.0;
+                            for (int j = 0; j < W; j++)
+                            {
+                                localGauss[j] = gaussCoeffsForMedian[(r - left) + j];
+                                gNorm += localGauss[j];
+                            }
+                            if (gNorm > 0.0)
+                                for (int j = 0; j < W; j++)
+                                    localGauss[j] /= gNorm;
 
                             var values = new double[W];
                             var wts = new double[W];
@@ -1223,8 +1231,17 @@ namespace SonataSmooth
                         if (W < 1) { filtered = 0.0; }
                         else
                         {
-                            double sigmaLocal = W / sigmaFactor;
-                            double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+                            // 전체 Gaussian 계수 배열에서 중심점 (left) 이 피크 (r) 에 오도록 부분 추출 후 재정규화
+                            double[] localGauss = new double[W];
+                            double gNorm = 0.0;
+                            for (int j = 0; j < W; j++)
+                            {
+                                localGauss[j] = gaussCoeffs[(r - left) + j];
+                                gNorm += localGauss[j];
+                            }
+                            if (gNorm > 0.0)
+                                for (int j = 0; j < W; j++)
+                                    localGauss[j] /= gNorm;
                             double sum = 0.0;
                             for (int pos = 0; pos < W; pos++)
                                 sum += localGauss[pos] * input[start + pos];
@@ -1298,16 +1315,16 @@ namespace SonataSmooth
                         }
                     }
                 }
-            };
+            }
 
             if (useParallel)
             {
-                Parallel.For(0, n, smoothingAction);
+                Parallel.For(0, n, SmoothingAction);
             }
             else
             {
                 for (int i = 0; i < n; i++)
-                    smoothingAction(i);
+                    SmoothingAction(i);
             }
 
             return (rect, binomAvg, median, gaussMedian, gauss, sg);
@@ -1399,7 +1416,7 @@ namespace SonataSmooth
         /// 이항 계수 가중 이동 중간 값 계산 메서드
         /// 향후 확장을 위해 alpha 파라미터를 추가함
         /// </summary>
-        private double WeightedMedianAt(double[] data, int center, int w, long[] binom, BoundaryMode boundaryMode, double alpha = 1.0)
+        private double WeightedMedianAt(double[] data, int center, int w, double[] binom, BoundaryMode boundaryMode, double alpha = 1.0)
         {
             // 내부적으로 사용될 경우 alpha 값을 로컬에서 제한 (Clamp) 처리
             double a = alpha;
@@ -1423,11 +1440,11 @@ namespace SonataSmooth
                 if (right < 0) right = 0;
                 int start = center - left;
 
-                var pairsStd = new List<(double Value, long Weight)>(desiredW);
+                var pairsStd = new List<(double Value, double Weight)>(desiredW);
                 for (int pos = 0; pos < desiredW; pos++)
                 {
                     double v = data[start + pos];
-                    long weight = binom[pos];
+                    double weight = binom[pos];
                     pairsStd.Add((v, weight));
                 }
 
@@ -1436,16 +1453,16 @@ namespace SonataSmooth
 
                 pairsStd.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
-                long totalWeightStd = 0;
+                double totalWeightStd = 0;
                 for (int i = 0; i < pairsStd.Count; i++)
                     totalWeightStd += pairsStd[i].Weight;
                 if (totalWeightStd <= 0)
                     return data[center];
 
-                bool evenStd = (totalWeightStd & 1L) == 0;
-                long halfStd = totalWeightStd / 2;
+                bool evenStd = Math.Abs(totalWeightStd - 2.0 * Math.Floor(totalWeightStd / 2.0)) < 0.5;
+                double halfStd = Math.Floor(totalWeightStd / 2.0);
 
-                long accumStd = 0;
+                double accumStd = 0;
                 for (int i = 0; i < pairsStd.Count; i++)
                 {
                     accumStd += pairsStd[i].Weight;
@@ -1464,13 +1481,13 @@ namespace SonataSmooth
                 return pairsStd[pairsStd.Count - 1].Value;
             }
 
-            var pairs = new List<(double Value, long Weight)>(2 * w + 1);
+            var pairs = new List<(double Value, double Weight)>(2 * w + 1);
 
             for (int k = -w; k <= w; k++)
             {
                 int idx = center + k;
                 double v = GetValueWithBoundary(data, idx, boundaryMode);
-                long weight = binom[k + w];
+                double weight = binom[k + w];
                 pairs.Add((v, weight));
             }
 
@@ -1479,17 +1496,17 @@ namespace SonataSmooth
 
             pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
-            long totalWeight = 0;
+            double totalWeight = 0;
             for (int i = 0; i < pairs.Count; i++)
                 totalWeight += pairs[i].Weight;
 
             if (totalWeight <= 0)
                 return data[center];
 
-            bool even = (totalWeight & 1L) == 0;
-            long half = totalWeight / 2;
+            bool even = Math.Abs(totalWeight - 2.0 * Math.Floor(totalWeight / 2.0)) < 0.5;
+            double half = Math.Floor(totalWeight / 2.0);
 
-            long accum = 0;
+            double accum = 0;
             for (int i = 0; i < pairs.Count; i++)
             {
                 accum += pairs[i].Weight;
@@ -1511,7 +1528,6 @@ namespace SonataSmooth
             return pairs[pairs.Count - 1].Value;
         }
 
-
         /// <summary>
         /// 주어진 길이 (length) 에 해당하는 이항계수 (파스칼 삼각형의 한 행) 를 계산하여 반환합니다.
         /// 예 : length = 5 → [1, 4, 6, 4, 1]
@@ -1522,36 +1538,25 @@ namespace SonataSmooth
         /// 
         /// - 첫 번째 계수 C(n, 0) 은 항상 1
         /// - 이후 C(n, k) = C(n, k - 1) * (n - (k - 1)) / k 공식을 이용해 반복 계산
-        /// - checked 블록으로 Overflow 감지
+        /// - double 사용으로 r 제한 해제 (이전 long 기반 length ≤ 63 제한 제거)
         /// 
         /// <param name="length">Kernel (윈도우) 의 크기. 반드시 1 이상이어야 합니다.</param>
-        private static long[] CalcBinomialCoefficients(int length)
+        private static double[] CalcBinomialCoefficients(int length)
         {
             if (length < 1)
                 throw new ArgumentException("length must be ≥ 1", nameof(length));
 
-            // 64비트 long 범위 내에서 안전하게 합계를 계산하기 위해 length 제한
-            // (2 ^ (length - 1) ≤ 2 ^ 62 조건)
-            if (length > 63)
-                throw new ArgumentOutOfRangeException(nameof(length),
-                    "length must be ≤ 63 to avoid 64-bit weight sum overflow (2 ^ (length - 1) <= 2 ^ 62). Reduce kernel radius.");
+            var c = new double[length];
+            c[0] = 1.0; // 첫 번째 계수는 항상 1
 
-            var c = new long[length];
-            c[0] = 1; // 첫 번째 계수는 항상 1
+            for (int i = 1; i < length; i++)
+            {
+                c[i] = c[i - 1] * (length - i) / i;
+                if (double.IsInfinity(c[i]) || double.IsNaN(c[i]))
+                    throw new InvalidOperationException(
+                        $"Binomial coefficient overflow for length = {length}. Try a smaller kernel radius.");
+            }
 
-            try
-            {
-                checked // Overflow 발생 시 예외 발생
-                {
-                    for (int i = 1; i < length; i++)
-                        c[i] = c[i - 1] * (length - i) / i;
-                }
-            }
-            catch (OverflowException ex)
-            {
-                throw new InvalidOperationException(
-                    $"Binomial coefficient overflow for length = {length}. Try a smaller kernel radius.", ex);
-            }
             return c;
         }
 
@@ -1560,6 +1565,140 @@ namespace SonataSmooth
             double f = 1.0;
             for (int i = 2; i <= n; i++) f *= i;
             return f;
+        }
+
+        /// <summary>
+        /// Householder 반사를 이용한 thin QR 분해 : A = Q × R.
+        /// Q 는 (rows × cols) 직교 열 행렬, R 은 (cols × cols) 상삼각 행렬.
+        /// 부호 규칙 v₀ = x₀ + sign(x₀) ‖x‖ 으로 소거 오류 (catastrophic cancellation) 를 방지합니다.
+        /// 복잡도 : O(rows × cols²).
+        /// </summary>
+        private static void HouseholderQR(double[,] A, int rows, int cols,
+                                          out double[,] Q, out double[,] R)
+        {
+            if (rows < cols)
+                throw new ArgumentException("Householder QR requires rows ≥ cols.");
+
+            // 작업 복사본 : 상삼각 부분에 R 이 기록됨
+            var work = new double[rows, cols];
+            for (int i = 0; i < rows; i++)
+                for (int j = 0; j < cols; j++)
+                    work[i, j] = A[i, j];
+
+            // Householder 벡터와 τ 스칼라를 저장하여 Q 를 지연 구성
+            var vecs = new double[cols][];
+            var taus = new double[cols];
+
+            for (int k = 0; k < cols; k++)
+            {
+                int len = rows - k;
+                var v = new double[len];
+                for (int i = 0; i < len; i++)
+                    v[i] = work[k + i, k];
+
+                // 대각선 아래 열의 norm
+                double norm = 0.0;
+                for (int i = 0; i < len; i++)
+                    norm += v[i] * v[i];
+                norm = Math.Sqrt(norm);
+
+                // 부호 선택 : v[0] 에서의 소거 오류 방지
+                double sign = v[0] >= 0.0 ? 1.0 : -1.0;
+                v[0] += sign * norm;
+
+                double vNormSq = 0.0;
+                for (int i = 0; i < len; i++)
+                    vNormSq += v[i] * v[i];
+
+                double tau = vNormSq > 1e-30 ? 2.0 / vNormSq : 0.0;
+
+                vecs[k] = v;
+                taus[k] = tau;
+
+                // Hₖ = I − τ × v × vᵀ 를 work 의 나머지 열에 적용
+                for (int j = k; j < cols; j++)
+                {
+                    double dot = 0.0;
+                    for (int i = 0; i < len; i++)
+                        dot += v[i] * work[k + i, j];
+                    dot *= tau;
+                    for (int i = 0; i < len; i++)
+                        work[k + i, j] -= dot * v[i];
+                }
+            }
+
+            // 상삼각 R 추출
+            R = new double[cols, cols];
+            for (int i = 0; i < cols; i++)
+                for (int j = i; j < cols; j++)
+                    R[i, j] = work[i, j];
+
+            // H₁ H₂ … Hₙ 을 단위 행렬의 처음 cols 개 열에 적용하여 thin Q 구성
+            Q = new double[rows, cols];
+            for (int j = 0; j < cols; j++)
+            {
+                var col = new double[rows];
+                col[j] = 1.0;
+
+                // 역순 반사 : Hₙ … H₂ H₁ → Q 열 매핑
+                for (int k = cols - 1; k >= 0; k--)
+                {
+                    var v = vecs[k];
+                    double tau = taus[k];
+                    int len = rows - k;
+
+                    double dot = 0.0;
+                    for (int i = 0; i < len; i++)
+                        dot += v[i] * col[k + i];
+                    dot *= tau;
+                    for (int i = 0; i < len; i++)
+                        col[k + i] -= dot * v[i];
+                }
+
+                for (int i = 0; i < rows; i++)
+                    Q[i, j] = col[i];
+            }
+        }
+
+        /// <summary>
+        /// 유사역행렬 B = R⁻¹ Qᵀ 의 특정 행을 전체 역행렬 계산 없이 추출합니다.
+        /// Rᵀc = eₐ 를 전방 대입으로 풀고 h = Q × c 를 계산합니다.
+        /// </summary>
+        /// <param name="Q">직교 인자 (rows × cols).</param>
+        /// <param name="R">상삼각 인자 (cols × cols).</param>
+        /// <param name="rows">Q 의 행 수 (= 윈도우 내 데이터 포인트 수).</param>
+        /// <param name="cols">열 수 (= 다항식 차수 + 1).</param>
+        /// <param name="rowIndex">추출할 행 인덱스 (0 = 스무딩, d = d 차 미분).</param>
+        /// <returns>길이가 <paramref name="rows"/> 인 계수 벡터.</returns>
+        private static double[] ExtractPseudoInverseRow(double[,] Q, double[,] R,
+                                                        int rows, int cols, int rowIndex)
+        {
+            // 전방 대입 : Rᵀ c = e_{rowIndex} (Rᵀ 는 하삼각)
+            var c = new double[cols];
+            for (int i = 0; i < cols; i++)
+            {
+                double rhs = (i == rowIndex) ? 1.0 : 0.0;
+                for (int j = 0; j < i; j++)
+                    rhs -= R[j, i] * c[j];          // Rᵀ[i, j] = R[j, i]
+
+                double diag = R[i, i];
+                if (Math.Abs(diag) < 1e-14)
+                    throw new InvalidOperationException(
+                        "Design matrix is rank-deficient (near-zero diagonal in R during QR solve).");
+                c[i] = rhs / diag;
+            }
+
+            // h = Q × c : 길이 = rows
+            var h = new double[rows];
+            for (int k = 0; k < rows; k++)
+            {
+                double sum = 0.0;
+                for (int j = 0; j < cols; j++)
+                    sum += Q[k, j] * c[j];
+                h[k] = sum;
+            }
+
+            return h;
         }
 
         // Savitzky-Golay 보정 방식 : 계수 계산 메서드 (대칭 창)
@@ -1583,6 +1722,7 @@ namespace SonataSmooth
             int m = polyOrder;
             int half = windowSize / 2;
 
+            // 디자인 행렬 A 구성
             var A = new double[windowSize, m + 1];
             for (int i = -half; i <= half; i++)
             {
@@ -1595,37 +1735,16 @@ namespace SonataSmooth
                 }
             }
 
-            var ATA = new double[m + 1, m + 1];
-            for (int i = 0; i <= m; i++)
-                for (int j = 0; j <= m; j++)
-                {
-                    double s = 0;
-                    for (int k = 0; k < windowSize; k++)
-                        s += A[k, i] * A[k, j];
-                    ATA[i, j] = s;
-                }
+            // Householder QR 분해를 이용한 계수 계산
+            HouseholderQR(A, windowSize, m + 1, out var Q, out var R);
+            var h = ExtractPseudoInverseRow(Q, R, windowSize, m + 1, derivOrder);
 
-            var invATA = InvertMatrixStrict(ATA);
-
-            var AT = new double[m + 1, windowSize];
-            for (int i = 0; i <= m; i++)
-                for (int k = 0; k < windowSize; k++)
-                    AT[i, k] = A[k, i];
-
-            var h = new double[windowSize];
-            for (int k = 0; k < windowSize; k++)
-            {
-                double sum = 0;
-                for (int j = 0; j <= m; j++)
-                    sum += invATA[derivOrder, j] * AT[j, k];
-                h[k] = sum;
-            }
-
+            // 정규화
             if (derivOrder == 0)
             {
                 double hSum = 0;
                 for (int i = 0; i < windowSize; i++) hSum += h[i];
-                if (Math.Abs(hSum) < 1e-20)
+                if (Math.Abs(hSum) < 1e-14)
                     throw new InvalidOperationException("Computed Savitzky-Golay coefficients sum to ~ 0.");
                 for (int i = 0; i < windowSize; i++) h[i] /= hSum;
             }
@@ -1641,6 +1760,7 @@ namespace SonataSmooth
         /// <summary>
         /// 비대칭 SG 계수 계산 : 중심에서 좌측 left, 우측 right 범위 (총 W = left + right + 1) 를 가지는 창에 대해
         /// 0 차 미분 (스무딩) 계수 벡터를 생성. 합은 1 로 정규화. (캐시 사용)
+        /// Householder QR 분해를 이용하여 수치 안정성을 개선합니다.
         /// </summary>
         private static double[] ComputeSGCoefficientsAsymmetric(int left, int right, int polyOrder)
         {
@@ -1657,11 +1777,11 @@ namespace SonataSmooth
                     return cached;
             }
 
-            // 디자인 행렬 A : 행은 x 가 -left 부터 +right 까지의 값 열은 x^0 부터 x^m 까지의 항
+            // 디자인 행렬 A
             var A = new double[W, m + 1];
             for (int rIdx = 0; rIdx < W; rIdx++)
             {
-                double x = rIdx - (double)left; // 중심은 0
+                double x = rIdx - (double)left;
                 double p = 1.0;
                 for (int c = 0; c <= m; c++)
                 {
@@ -1670,42 +1790,17 @@ namespace SonataSmooth
                 }
             }
 
-            // ATA = A^T A
-            var ATA = new double[m + 1, m + 1];
-            for (int i = 0; i <= m; i++)
-                for (int j = 0; j <= m; j++)
-                {
-                    double s = 0.0;
-                    for (int rIdx = 0; rIdx < W; rIdx++)
-                        s += A[rIdx, i] * A[rIdx, j];
-                    ATA[i, j] = s;
-                }
-
-            var invATA = InvertMatrixStrict(ATA);
-
-            // AT
-            var AT = new double[m + 1, W];
-            for (int i = 0; i <= m; i++)
-                for (int rIdx = 0; rIdx < W; rIdx++)
-                    AT[i, rIdx] = A[rIdx, i];
-
-            // 중심 x = 0 에서 평활화를 수행할 때 상수항 (0 차 항) 에 해당하는 행을 선택
-            var h = new double[W];
-            for (int k = 0; k < W; k++)
-            {
-                double sum = 0.0;
-                for (int j = 0; j <= m; j++)
-                    sum += invATA[0, j] * AT[j, k];
-                h[k] = sum;
-            }
+            // Householder QR 분해를 이용한 계수 계산
+            HouseholderQR(A, W, m + 1, out var Q, out var R);
+            var h = ExtractPseudoInverseRow(Q, R, W, m + 1, 0);
 
             // DC 성분이 유지되도록 정규화
             double ssum = 0.0;
             for (int i = 0; i < W; i++) ssum += h[i];
-            if (Math.Abs(ssum) > 0)
-            {
-                for (int i = 0; i < W; i++) h[i] /= ssum;
-            }
+
+            if (Math.Abs(ssum) < 1e-14)
+                throw new InvalidOperationException("Asymmetric smoothing coefficients sum to ~ 0.");
+            for (int i = 0; i < W; i++) h[i] /= ssum;
 
             lock (_sgAsymCoeffCacheLock)
             {
@@ -1715,12 +1810,7 @@ namespace SonataSmooth
             }
         }
 
-        private static double[] ComputeSGCoefficientsAsymmetricDerivative(
-    int left,
-    int right,
-    int polyOrder,
-    int derivOrder,
-    double delta)
+        private static double[] ComputeSGCoefficientsAsymmetricDerivative(int left, int right, int polyOrder, int derivOrder, double delta)
         {
             if (left < 0 || right < 0) throw new ArgumentOutOfRangeException("left / right must be ≥ 0.");
             if (derivOrder < 0) throw new ArgumentOutOfRangeException(nameof(derivOrder));
@@ -1742,6 +1832,7 @@ namespace SonataSmooth
                     return cached;
             }
 
+            // 디자인 행렬 A 구성
             var A = new double[W, m + 1];
             for (int rIdx = 0; rIdx < W; rIdx++)
             {
@@ -1754,37 +1845,16 @@ namespace SonataSmooth
                 }
             }
 
-            var ATA = new double[m + 1, m + 1];
-            for (int i = 0; i <= m; i++)
-                for (int j = 0; j <= m; j++)
-                {
-                    double s = 0.0;
-                    for (int rIdx = 0; rIdx < W; rIdx++)
-                        s += A[rIdx, i] * A[rIdx, j];
-                    ATA[i, j] = s;
-                }
+            // Householder QR 분해를 이용한 계수 계산
+            HouseholderQR(A, W, m + 1, out var Q, out var R);
+            var h = ExtractPseudoInverseRow(Q, R, W, m + 1, derivOrder);
 
-            var invATA = InvertMatrixStrict(ATA);
-
-            var AT = new double[m + 1, W];
-            for (int i = 0; i <= m; i++)
-                for (int rIdx = 0; rIdx < W; rIdx++)
-                    AT[i, rIdx] = A[rIdx, i];
-
-            var h = new double[W];
-            for (int k = 0; k < W; k++)
-            {
-                double acc = 0.0;
-                for (int j = 0; j <= m; j++)
-                    acc += invATA[derivOrder, j] * AT[j, k];
-                h[k] = acc;
-            }
-
+            // 정규화
             if (derivOrder == 0)
             {
                 double ssum = 0.0;
                 for (int i = 0; i < W; i++) ssum += h[i];
-                if (Math.Abs(ssum) < 1e-20)
+                if (Math.Abs(ssum) < 1e-14)
                     throw new InvalidOperationException("Asymmetric smoothing coefficients sum to ~ 0.");
                 for (int i = 0; i < W; i++) h[i] /= ssum;
             }
@@ -1800,74 +1870,6 @@ namespace SonataSmooth
                     _sgAsymDerivCoeffCache[key] = h;
                 return _sgAsymDerivCoeffCache[key];
             }
-        }
-
-        // 행렬 역행렬 (실패 시 예외 Throw)
-        private static double[,] InvertMatrixStrict(double[,] a)
-        {
-            int n = a.GetLength(0);
-            if (a.GetLength(1) != n)
-                throw new ArgumentException("Matrix must be square.", nameof(a));
-
-            var aug = new double[n, 2 * n];
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = 0; j < n; j++)
-                    aug[i, j] = a[i, j];
-                aug[i, n + i] = 1.0;
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                int maxRow = i;
-                double maxVal = Math.Abs(aug[i, i]);
-                for (int r = i + 1; r < n; r++)
-                {
-                    double v = Math.Abs(aug[r, i]);
-                    if (v > maxVal)
-                    {
-                        maxVal = v;
-                        maxRow = r;
-                    }
-                }
-
-                if (maxRow != i)
-                {
-                    for (int c = 0; c < 2 * n; c++)
-                    {
-                        double tmp = aug[i, c];
-                        aug[i, c] = aug[maxRow, c];
-                        aug[maxRow, c] = tmp;
-                    }
-                }
-
-                double pivot = aug[i, i];
-                double rowScale = 0;
-                for (int c = i; c < n; c++)
-                    rowScale = Math.Max(rowScale, Math.Abs(aug[i, c]));
-                double tol = Math.Max(rowScale * 1e-14, double.Epsilon);
-                if (Math.Abs(pivot) < tol)
-                    throw new InvalidOperationException("Matrix is singular or ill-conditioned for inversion.");
-
-                for (int c = 0; c < 2 * n; c++)
-                    aug[i, c] /= pivot;
-
-                for (int r = 0; r < n; r++)
-                {
-                    if (r == i) continue;
-                    double factor = aug[r, i];
-                    if (Math.Abs(factor) < 1e-20) continue;
-                    for (int c = 0; c < 2 * n; c++)
-                        aug[r, c] -= factor * aug[i, c];
-                }
-            }
-
-            var inv = new double[n, n];
-            for (int i = 0; i < n; i++)
-                for (int j = 0; j < n; j++)
-                    inv[i, j] = aug[i, j + n];
-
-            return inv;
         }
 
         // 입력된 파라미터의 유효성 검사 메서드 (윈도우 크기 및 다항식 차수)
@@ -2193,9 +2195,6 @@ Are you sure you want to proceed?";
 
         private void lbInitData_DragEnter(object sender, DragEventArgs e)
         {
-            string[] availableFormats = e.Data.GetFormats();
-            int beforeCount = lbInitData.Items.Count;
-
             if (e.Data.GetDataPresent("Text"))
             {
                 e.Effect = DragDropEffects.Copy;
@@ -2336,7 +2335,7 @@ Are you sure you want to proceed?";
         private async void btnInitSelectClr_Click(object sender, EventArgs e)
         {
             int deselectedCount = lbInitData.SelectedIndices.Count;
-            await ClearSelectionWithProgress(lbInitData, pbMain, lblInitCnt);
+            await ClearSelectionWithProgress(lbInitData, pbMain);
 
             slblDesc.Text = $"Deselected {deselectedCount} selected item{(deselectedCount != 1 ? "s" : "")} from Initial Dataset.";
             slblDesc.Visible = true;
@@ -2345,9 +2344,8 @@ Are you sure you want to proceed?";
         }
 
         private async Task DeleteSelectedItemsPreserveSelection(
-            ListBox listBox,
-            System.Windows.Forms.ProgressBar progressBar,
-            Label countLabel)
+      ListBox listBox,
+      System.Windows.Forms.ProgressBar progressBar)
         {
             var indicesToRemove = listBox
                 .SelectedIndices
@@ -2445,7 +2443,7 @@ Are you sure you want to proceed?";
                 return;
             }
 
-            await DeleteSelectedItemsPreserveSelection(lbInitData, pbMain, lblInitCnt);
+            await DeleteSelectedItemsPreserveSelection(lbInitData, pbMain);
 
             slblDesc.Visible = true;
 
@@ -2645,15 +2643,14 @@ Are you sure you want to proceed?";
         private async void btnRefSelectClr_Click(object sender, EventArgs e)
         {
             int deselectedCount = lbRefinedData.SelectedIndices.Count;
-            await ClearSelectionWithProgress(lbRefinedData, pbMain, lblInitCnt);
+            await ClearSelectionWithProgress(lbRefinedData, pbMain);
 
             slblDesc.Text = $"Deselected {deselectedCount} selected item{(deselectedCount != 1 ? "s" : "")} from Refined Dataset.";
             slblDesc.Visible = true;
 
             UpdatelbRefinedDataBtnsState(null, EventArgs.Empty);
         }
-
-        private async Task ClearSelectionWithProgress(ListBox lb, System.Windows.Forms.ProgressBar progressBar, Label lblCount)
+        private async Task ClearSelectionWithProgress(ListBox lb, System.Windows.Forms.ProgressBar progressBar)
         {
             int selectedCount = lb.SelectedIndices.Count;
             if (selectedCount == 0)
@@ -2745,6 +2742,12 @@ Are you sure you want to proceed?";
                 e.SuppressKeyPress = true;
             }
 
+            if (e.KeyData == (Keys.Control | Keys.Oemplus))
+            {
+                btnInitSelectSync.PerformClick();
+                e.SuppressKeyPress = true;
+            }
+
             lblInitCnt.Text = "Count : " + lbInitData.Items.Count;
         }
 
@@ -2772,6 +2775,12 @@ Are you sure you want to proceed?";
                 if (e.KeyData == Keys.Escape)
                 {
                     btnRefSelectClr.PerformClick();
+                    e.SuppressKeyPress = true;
+                }
+
+                if (e.KeyData == (Keys.Control | Keys.Oemplus))
+                {
+                    btnRefSelectSync.PerformClick();
                     e.SuppressKeyPress = true;
                 }
 
@@ -2933,10 +2942,6 @@ Are you sure you want to proceed?";
 
             dataCount = lbInitData.Items.Count;
 
-            // ComboBox 값으로부터 Parsing
-            int.TryParse(cbxKernelRadius.Text, out r);
-            int.TryParse(cbxPolyOrder.Text, out polyOrder);
-
             this.KeyPreview = true;
         }
 
@@ -3019,7 +3024,7 @@ Are you sure you want to proceed?";
                 pbMain.Value = 0;
             }
 
-            int r = 4, polyOrder = 3, n = 0, derivOrder = 0;
+            int r = 0, polyOrder = 0, n = 0, derivOrder = 0;
             bool doRect = false, doAvg = false, doMed = false, doGaussMed = false, doGauss = false, doSG = false;
             var boundaryMode = GetBoundaryMode();
             string excelTitle = "";
@@ -3095,7 +3100,7 @@ Are you sure you want to proceed?";
                 return;
             }
 
-            long[] binom = CalcBinomialCoefficients(2 * r + 1);
+            double[] binom = CalcBinomialCoefficients(2 * r + 1);
 
             var rectAvg = new double[n];
             var binomAvg = new double[n];
@@ -3202,7 +3207,7 @@ Are you sure you want to proceed?";
     };
             if (doRect) columns.Add(("Rectangular Averaging", rectAvg));
             if (doAvg) columns.Add(("Binomial Averaging", binomAvg));
-            if (doMed) columns.Add(("Binomial Median Filtering", binomMed));
+            if (doMed) columns.Add(("Binomial Weighted Median Filtering", binomMed));
             if (doGaussMed) columns.Add(("Gaussian Weighted Median Filtering", gaussMedFilt));
             if (doGauss) columns.Add(("Gaussian Filtering", gaussFilt));
             if (doSG) columns.Add(("Savitzky-Golay Filtering", sgFilt));
@@ -3502,8 +3507,10 @@ Are you sure you want to proceed?";
                 {
                     tcs.SetException(ex);
                 }
-            });
-            sta.IsBackground = true;
+            })
+            {
+                IsBackground = true
+            };
             sta.SetApartmentState(ApartmentState.STA);
             sta.Start();
 
@@ -3705,7 +3712,7 @@ Are you sure you want to proceed?";
                         var smoothingMethods = new List<string>();
                         if (doRect) smoothingMethods.Add("Rectangular Average");
                         if (doAvg) smoothingMethods.Add("Binomial Average");
-                        if (doMed) smoothingMethods.Add("Binomial Median");
+                        if (doMed) smoothingMethods.Add("Binomial Weighted Median");
                         if (doGaussMed) smoothingMethods.Add("Gaussian Weighted Median");
                         if (doGauss) smoothingMethods.Add("Gaussian");
                         if (doSG) smoothingMethods.Add("Savitzky-Golay");
@@ -3939,9 +3946,9 @@ Are you sure you want to proceed?";
                     if (doMed)
                     {
                         start = col;
-                        col = FillData("Binomial Median Filtering", binomMed, col, segmentStart, segmentStart + segmentWidth)
+                        col = FillData("Binomial Weighted Median Filtering", binomMed, col, segmentStart, segmentStart + segmentWidth)
                             .GetAwaiter().GetResult() + 2;
-                        sections.Add(("Binomial Median Filtering", start, col - 2));
+                        sections.Add(("Binomial Weighted Median Filtering", start, col - 2));
                         segmentStart += segmentWidth;
                     }
                     if (doGaussMed)
@@ -5097,7 +5104,7 @@ Are you sure you want to proceed?";
         private void lblBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive, or Zero-Pad.";
         }
 
         private void lblBoundaryMethod_MouseLeave(object sender, EventArgs e)
@@ -5108,7 +5115,7 @@ Are you sure you want to proceed?";
         private void cbxBoundaryMethod_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive (local polynomial + median), or Zero-Pad.";
+            slblDesc.Text = "Specifies how edge data points are treated during smoothing : Symmetric, Replicate, Adaptive, or Zero-Pad.";
         }
 
         private void cbxBoundaryMethod_MouseLeave(object sender, EventArgs e)
@@ -5175,7 +5182,7 @@ Are you sure you want to proceed?";
         private void rbtnGaussMed_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Higher values sharpen, lower values smooth more. (Default : 6.0)";
+            slblDesc.Text = "Reduces noise by computing a median with Gaussian weights in the kernel window, robust to spikes while emphasizing central values.";
         }
 
         private void rbtnGaussMed_MouseLeave(object sender, EventArgs e)
@@ -5208,7 +5215,7 @@ Are you sure you want to proceed?";
         private void cbxSigmaFactor_MouseHover(object sender, EventArgs e)
         {
             slblDesc.Visible = true;
-            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Lower values sharpen, higher values smooth more. (Default : 6.0)";
+            slblDesc.Text = "Sets Gaussian kernel width : Sigma = (kernel width) ÷ Sigma Factor. Higher values sharpen, lower values smooth more. (Default : 6.0)";
         }
 
         private void cbxSigmaFactor_MouseLeave(object sender, EventArgs e)
@@ -5217,5 +5224,4 @@ Are you sure you want to proceed?";
         }
     }
     #endregion
-
 }
