@@ -616,10 +616,10 @@ Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch sam
 Adaptive paths differ per filter :
 - `Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
   - `Rect`: computes the simple mean of the truncated window (`W`), averaging only the in-range samples (no zero / repeat padding).
-  - `Avg`: recomputes a local binomial row for truncated `W`, normalizes by its sum, and averages (no sort).
-  - `Med`: recomputes local binomial weights for truncated `W`, sorts by value, and selects the weighted median (handles even / odd total weight).
-  - `GaussMed`: recomputes local Gaussian weights for truncated `W` with `σ = W / Sigma Factor` (Sigma Factor is always clamped to [1.0, 12.0]), normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
-  - `Gauss`: recomputes a Gaussian kernel for truncated `W` with `σ = W / Sigma Factor` (Sigma Factor is always clamped to [1.0, 12.0]), normalizes, then computes a weighted average (convolution‑like sum, no sort).
+  - `Avg`: sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − left)`, re‑normalizes by their local sum, and averages (no sort).
+  - `Med`: sub‑extracts `W` binomial weights from the full‑size array using offset `(r − left)`, sorts by value, and selects the weighted median (handles even / odd total weight).
+  - `GaussMed`: sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − left)`, re‑normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
+  - `Gauss`: sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − left)`, re‑normalizes, then computes a weighted average (convolution‑like sum, no sort).
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
 > [!Note]
@@ -642,19 +642,19 @@ Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_supp
   - Averages only in‑range samples (no zero / replicate bias)
 
 - Binomial Average :
-  - Computes a fresh binomial row for the truncated `W` using `CalcBinomialCoefficients(W)`
-  - Normalizes by the local sum; does not slice the full `2r + 1` row
+  - Sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array at offset `(r − left)`
+  - Re‑normalizes by the local sum; does not call `CalcBinomialCoefficients(W)` per index
 
 - Binomial Median (Weighted Median with binomial weights) :
-  - Recomputes local binomial weights for truncated `W`
+  - Sub‑extracts `W` binomial weights from the full‑size array at offset `(r − left)`
   - Performs weighted median over strictly in‑range values sorted by value
 
 - Gaussian Weighted Median :
-  - Recomputes local Gaussian weights for truncated `W` with `σ = W / sigmaFactor`
+  - Sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, re‑normalizes
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
 
 - Gaussian :
-  - Recomputes a Gaussian kernel for truncated `W` with `σ = W / sigmaFactor`
+  - Sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, re‑normalizes
   - Coefficients are normalized (sum = 1); no padding distortions
 
 - Savitzky-Golay (Smoothing or Derivative) :
@@ -1046,9 +1046,9 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
     int windowSize = 2 * r + 1;
 
     // Precompute weight vectors where applicable
-    long[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
-    double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (windowSize, (2.0 * r + 1) / sigmaFactor) : null;
-    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (windowSize, (2.0 * r + 1) / sigmaFactor) : null;
+    double[] binom = (doAvg || doMed) ? CalcBinomialCoefficients(windowSize) : null;
+    double[] gaussCoeffsForMedian = doGaussMed ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / sigmaFactor) : null;
+    double[] gaussCoeffs = doGauss ? ComputeGaussianCoefficients(windowSize, (2.0 * r + 1) / sigmaFactor) : null;
 
     // SG symmetric coefficients (used only when not in Adaptive boundary mode)
     double[] sgSmoothCoeffs = (doSG && derivOrder == 0 && boundaryMode != BoundaryMode.Adaptive)
@@ -1130,7 +1130,10 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    long[] localBinom = CalcBinomialCoefficients(W);
+                    // Sub-extract from pre-computed full-size binomial array
+                    double[] localBinom = new double[W];
+                    for (int j = 0; j < W; j++)
+                        localBinom[j] = binom[(r - left) + j];
                     double localSum = 0.0;
                     for (int j = 0; j < W; j++) localSum += localBinom[j];
 
@@ -1165,8 +1168,11 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    long[] localBinom = CalcBinomialCoefficients(W);
-                    var pairs = new List<(double Value, long Weight)>(W);
+                    // Sub-extract from pre-computed full-size binomial array
+                    double[] localBinom = new double[W];
+                    for (int j = 0; j < W; j++)
+                        localBinom[j] = binom[(r - left) + j];
+                    var pairs = new List<(double Value, double Weight)>(W);
                     for (int pos = 0; pos < W; pos++)
                         pairs.Add((input[start + pos], localBinom[pos]));
 
@@ -1178,7 +1184,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                     {
                         pairs.Sort((aV, bV) => aV.Value.CompareTo(bV.Value));
 
-                        long totalWeight = 0;
+                        double totalWeight = 0;
                         for (int j = 0; j < pairs.Count; j++)
                             totalWeight += pairs[j].Weight;
 
@@ -1188,9 +1194,9 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                         }
                         else
                         {
-                            bool even = (totalWeight & 1L) == 0;
-                            long half = totalWeight / 2;
-                            long accum = 0;
+                            bool even = Math.Abs(totalWeight - 2.0 * Math.Floor(totalWeight / 2.0)) < 0.5;
+                            double half = Math.Floor(totalWeight / 2.0);
+                            double accum = 0;
                             filtered = pairs[pairs.Count - 1].Value;
 
                             for (int j = 0; j < pairs.Count; j++)
@@ -1236,8 +1242,17 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    double sigmaLocal = W / sigmaFactor;
-                    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+                    // Sub-extract from pre-computed full-size Gaussian array
+                    double[] localGauss = new double[W];
+                    double gNorm = 0.0;
+                    for (int j = 0; j < W; j++)
+                    {
+                        localGauss[j] = gaussCoeffsForMedian[(r - left) + j];
+                        gNorm += localGauss[j];
+                    }
+                    if (gNorm > 0.0)
+                        for (int j = 0; j < W; j++)
+                            localGauss[j] /= gNorm;
 
                     var values = new double[W];
                     var wts = new double[W];
@@ -1245,7 +1260,7 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                     {
                         int absIdx = start + pos;
                         values[pos] = input[absIdx];
-                        wts[pos] = localGauss[pos]; // weights centered in the local window
+                        wts[pos] = localGauss[pos];
                     }
 
                     Array.Sort(values, wts);
@@ -1323,8 +1338,17 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
                 }
                 else
                 {
-                    double sigmaLocal = W / sigmaFactor;
-                    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal);
+                    // Sub-extract from pre-computed full-size Gaussian array
+                    double[] localGauss = new double[W];
+                    double gNorm = 0.0;
+                    for (int j = 0; j < W; j++)
+                    {
+                        localGauss[j] = gaussCoeffs[(r - left) + j];
+                        gNorm += localGauss[j];
+                    }
+                    if (gNorm > 0.0)
+                        for (int j = 0; j < W; j++)
+                            localGauss[j] /= gNorm;
                     double sum = 0.0;
                     for (int pos = 0; pos < W; pos++)
                         sum += localGauss[pos] * input[start + pos];
@@ -1464,7 +1488,7 @@ A discrete approximation of Gaussian smoothing (binomial coefficients approximat
 ```csharp
 else if (useAvg)
 {
-    long[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double[] binom = CalcBinomialCoefficients(2 * r + 1);
     double binomSum = binom.Sum();
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
     
@@ -1481,7 +1505,7 @@ else if (useAvg)
 ```
 
 #### Binomial (Weighted) Average - Adaptive Note
-In Adaptive mode, the kernel width shrinks at edges and a NEW binomial row of length W is computed (`CalcBinomialCoefficients(W)`), ensuring correct symmetric weighting rather than truncating the full-length coefficients.
+In Adaptive mode, the kernel width shrinks at edges and the corresponding `W` coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − left)`, then re‑normalized by their local sum. This preserves the correct symmetric weighting centered on the current data point without recomputing a new binomial row per index.
 
 
 ### 5. Binomial (Weighted) Median Filter
@@ -1501,23 +1525,23 @@ Median filtering is robust against outliers; binomial weights bias the median to
 ```csharp
 else if (useMed)
 {
-    long[] binom = CalcBinomialCoefficients(2 * r + 1);
+    double[] binom = CalcBinomialCoefficients(2 * r + 1);
     double Sample(int idx) => GetValueWithBoundary(input, idx, boundaryMode);
-    
+
     for (int i = 0; i < input.Length; i++)
     {
-        var pairs = new List<(double Value, long Weight)>();
+        var pairs = new List<(double Value, double Weight)>();
         for (int k = -r; k <= r; k++)
         {
             pairs.Add((Sample(i + k), binom[k + r]));
         }
-    
+
         pairs.Sort((a, b) => a.Value.CompareTo(b.Value));
-        long totalWeight = pairs.Sum(p => p.Weight);
-        long half = totalWeight / 2;
-        bool even = (totalWeight & 1) == 0;
-    
-        long acc = 0;
+        double totalWeight = pairs.Sum(p => p.Weight);
+        double half = Math.Floor(totalWeight / 2.0);
+        bool even = Math.Abs(totalWeight - 2.0 * Math.Floor(totalWeight / 2.0)) < 0.5;
+
+        double acc = 0;
         for (int j = 0; j < pairs.Count; j++)
         {
             acc += pairs[j].Weight;
@@ -1538,8 +1562,8 @@ else if (useMed)
 ```
 
 #### Weighted Median - Adaptive Note
-Adaptive recalculates local binomial weights for truncated W and performs weighted median over only in-range samples - removing edge padding bias.
-(Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the truncated‑recompute strategy documented above.)
+Adaptive sub‑extracts the corresponding `W` binomial weights from the pre‑computed full‑size `(2r + 1)` array at offset `(r − left)` and performs weighted median over only in-range samples — removing edge padding bias.
+(Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the sub‑extraction strategy documented above.)
 
 
 ### 6. Gaussian Weighted Median Filtering (GWMF)
@@ -1549,7 +1573,7 @@ Computes the median within the kernel window using Gaussian weights centered at 
 - Window length : W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
 - Weights : Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
   - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
-  - **Adaptive mode** : σ = W / Sigma Factor (W: window length at each index, recomputed per index)
+  - **Adaptive mode** : `W` Gaussian weights are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, then re‑normalized
   - **Sigma Factor** is user-configurable (default: 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 - Weighted median selection :
   - Sort pairs `(value, weight)` by value ascending
@@ -1557,15 +1581,15 @@ Computes the median within the kernel window using Gaussian weights centered at 
   - The value at that position is the weighted median
 - Boundary handling :
   - Non-Adaptive : `Sample(i + k)` uses `GetValueWithBoundary` for Symmetric / Replicate / ZeroPad
-  - Adaptive : window truncates to available samples; weights are recomputed for W, and only in-range samples are used (no padding)
+  - Adaptive : window truncates to available samples; `W` weights are sub‑extracted from the pre‑computed full‑size Gaussian array at offset `(r − left)` and re‑normalized, and only in-range samples are used (no padding)
 - Alpha blend (runtime, if enabled): `output[i] = α × filtered[i] + (1 − α) × input[i]` with α ∈ [0.00, 1.00]
 
 #### Principle
 GWMF combines the robustness of median filtering with the smoothness bias of Gaussian weighting :
 - Robustness : The median is insensitive to extreme outliers compared to means.
 - Locality : Gaussian weights peak at the center, ensuring nearby samples dominate.
-- Edge correctness : Adaptive recomputes σ and weights for truncated windows, avoiding artificial padding biases.
-- Stability : In symmetric mode weights are centered; in Adaptive mode weights remain centered in the local truncated window.
+- Edge correctness : Adaptive sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes, avoiding artificial padding biases.
+- Stability : In symmetric mode weights are centered; in Adaptive mode weights are sub‑extracted centered on the current data point from the pre‑computed array.
 
 Mathematically :
 - Kernel positions k ∈ [−r, …, r] (symmetric) or k ∈ [−left, …, right] (adaptive shift / truncate)
@@ -1631,7 +1655,7 @@ else
 gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
-Adaptive window (recomputes σ and weights for truncated window W at each index) :
+Adaptive window (sub‑extracts weights from pre‑computed full‑size Gaussian array at each index) :
 ```csharp
 // Adaptive GWMF inside ApplySmoothing (FrmMain.cs)
 int left = Math.Min(r, i);
@@ -1646,8 +1670,17 @@ if (W < 1)
 }
 else
 {
-    double sigmaLocal = W / sigmaFactor;
-    double[] localGauss = ComputeGaussianCoefficients(W, sigmaLocal); // normalized per-window
+    // Sub-extract from pre-computed full-size Gaussian array
+    double[] localGauss = new double[W];
+    double gNorm = 0.0;
+    for (int j = 0; j < W; j++)
+    {
+        localGauss[j] = gaussCoeffsForMedian[(r - left) + j];
+        gNorm += localGauss[j];
+    }
+    if (gNorm > 0.0)
+        for (int j = 0; j < W; j++)
+            localGauss[j] /= gNorm;
 
     var values = new double[W];
     var wts = new double[W];
@@ -1697,20 +1730,20 @@ gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 
 > [!Note]
 >  - Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).  
->  - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses direct in-range slicing and per-window σ to avoid distortions.  
+>  - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes to avoid distortions.  
 >  - Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.  
 >  - Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGaussMed || doGauss)`; in CSV, the header row uses the same condition.
 
 ### 7. Gaussian Filter
 #### How it works
-Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode the kernel length W shrinks and σ = W / sigmaFactor is recomputed.
+Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode, `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalized.
 
 #### Principle
 Gaussian weights emphasize central values, producing smooth results.  
   
 The standard deviation (σ) for the Gaussian kernel is calculated as :
 - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
-- **Adaptive mode** : σ = W / Sigma Factor (W : window length at each index)
+- **Adaptive mode** : `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` array at offset `(r − left)`, then re‑normalized (sum = 1)
 - **Sigma Factor** is user-configurable (default : 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 
 #### Code Implementation
@@ -1736,7 +1769,7 @@ if (useGauss)
 ```
 
 #### Gaussian Filter - Adaptive Note
-Adaptive mode recomputes a Gaussian kernel of length W with σ = W / Sigma Factor (where Sigma Factor is clamped to [1.0, 12.0]). This ensures the relative spread remains consistent across varying window sizes and avoids artificial flattening. The actual Sigma Factor used is always reflected in export metadata and calculations.
+Adaptive mode sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes so the local weights sum to 1. This preserves the correct weight distribution centered on the current data point without recomputing a new Gaussian kernel per index, avoiding artificial flattening. The actual Sigma Factor used is always reflected in export metadata and calculations.
 
 ### 8. Savitzky‑Golay Filter
 #### How it works
@@ -1886,48 +1919,38 @@ Calculates binomial coefficients for a given window size, which are used as weig
 
 #### Code Implementation
 ```csharp
-private static long[] CalcBinomialCoefficients(int length)
+private static double[] CalcBinomialCoefficients(int length)
 {
     if (length < 1)
         throw new ArgumentException("length must be ≥ 1", nameof(length));
 
-    // Limit 'length' to ensure the sum can be safely calculated within the 64-bit long range
-    // (Condition : 2 ^ (length - 1) ≤ 2 ^ 62)
-    if (length > 63)
-        throw new ArgumentOutOfRangeException(nameof(length),
-            "length must be ≤ 63 to avoid 64-bit weight sum overflow (2 ^ (length - 1) <= 2 ^ 62). Reduce kernel radius.");
+    var c = new double[length];
+    c[0] = 1.0; // The first coefficient is always 1
 
-    var c = new long[length];
-    c[0] = 1; // The first coefficient is always 1
+    for (int i = 1; i < length; i++)
+    {
+        c[i] = c[i - 1] * (length - i) / i;
+        if (double.IsInfinity(c[i]) || double.IsNaN(c[i]))
+            throw new InvalidOperationException(
+                $"Binomial coefficient overflow for length = {length}. Try a smaller kernel radius.");
+    }
 
-    try
-    {
-        checked // Throw an exception if an overflow occurs
-        {
-            for (int i = 1; i < length; i++)
-                c[i] = c[i - 1] * (length - i) / i;
-        }
-    }
-    catch (OverflowException ex)
-    {
-        throw new InvalidOperationException(
-            $"Binomial coefficient overflow for length = {length}. Try a smaller kernel radius.", ex);
-    }
     return c;
 }
 ```
 - This function generates the coefficients for the (length - 1) th row of Pascal's triangle, which are used as weights for the filters. 
-- Maximum supported window length for binomial weighting is 63 (length ≤ 63) to prevent 64‑bit overflow of the cumulative weight (2^(length − 1) ≤ 2^62). Attempts above this throw an exception.
+- Returns `double[]` (previously `long[]`) to remove the `length ≤ 63` restriction. Overflow is detected by checking for `Infinity` / `NaN` after each step instead of relying on `checked` integer arithmetic.
 
 ### 11. Savitzky-Golay Coefficients Computation
 #### How it works
-Constructs a Vandermonde matrix for the window, computes its normal equations, inverts the Gram matrix, and multiplies back by the transposed design matrix. The first row of the resulting "smoother matrix" yields the filter coefficients.
+Constructs a Vandermonde design matrix for the window, factors it via **Householder QR decomposition** (`A = Q × R`), and extracts the desired row of the pseudoinverse (`R⁻¹ Qᵀ`) without forming the full inverse. The resulting coefficient vector yields the filter weights for smoothing (`derivOrder = 0`) or derivative estimation (`derivOrder > 0`).
 
 #### Principle
 Savitzky-Golay filters derive from least‐squares polynomial fitting.
 - Build matrix A where each row contains powers of the relative offset within the window.
-- Form the normal equations (AᵀA), invert them, and multiply by Aᵀ to get the pseudoinverse.
-- The convolution coefficients for smoothing (value at central point) are the first row of this pseudoinverse.
+- Factor A via Householder QR decomposition : A = Q × R (thin Q is rows × cols, R is upper-triangular cols × cols).
+- Extract row `derivOrder` of the pseudoinverse B = R⁻¹ Qᵀ by solving Rᵀ c = e_{derivOrder} (forward substitution) and computing h = Q × c.
+- The resulting vector h gives the convolution coefficients for the desired derivative order (row 0 = smoothing).
 
 
 #### Code Implementation
@@ -1940,22 +1963,16 @@ private static double[] ComputeSavitzkyGolayCoefficients(
 {
     if (windowSize <= 0)
         throw new ArgumentOutOfRangeException(nameof(windowSize), "windowSize must be > 0.");
-
     if ((windowSize & 1) == 0)
         throw new ArgumentException("windowSize must be odd (2 * r + 1).", nameof(windowSize));
-
     if (polyOrder < 0)
         throw new ArgumentOutOfRangeException(nameof(polyOrder), "polyOrder must be ≥ 0.");
-
     if (polyOrder >= windowSize)
         throw new ArgumentException("polyOrder must be < windowSize.", nameof(polyOrder));
-
     if (derivOrder < 0)
         throw new ArgumentOutOfRangeException(nameof(derivOrder), "derivOrder must be ≥ 0.");
-
     if (derivOrder > polyOrder)
         throw new ArgumentException("derivOrder must be ≤ polyOrder.");
-
     if (delta <= 0)
         throw new ArgumentOutOfRangeException(nameof(delta), "delta must be > 0.");
 
@@ -1967,160 +1984,183 @@ private static double[] ComputeSavitzkyGolayCoefficients(
     for (int i = -half; i <= half; i++)
     {
         double x = i;
-        double p = 1.0;
+        double pow = 1.0;
         for (int j = 0; j <= m; j++)
         {
-            A[i + half, j] = p;
-            p *= x;
+            A[i + half, j] = pow;
+            pow *= x;
         }
     }
 
-    // Normal equations (A^T A)
-    var ATA = new double[m + 1, m + 1];
-    for (int i = 0; i <= m; i++)
-    {
-        for (int j = 0; j <= m; j++)
-        {
-            double s = 0;
-            for (int k = 0; k < windowSize; k++)
-                s += A[k, i] * A[k, j];
-            ATA[i, j] = s;
-        }
-    }
-
-    var invATA = InvertMatrixStrict(ATA);
-
-    // A^T
-    var AT = new double[m + 1, windowSize];
-    for (int i = 0; i <= m; i++)
-    {
-        for (int k = 0; k < windowSize; k++)
-            AT[i, k] = A[k, i];
-    }
-
-    // Coefficient row for derivOrder
-    var h = new double[windowSize];
-    for (int k = 0; k < windowSize; k++)
-    {
-        double sum = 0;
-        for (int j = 0; j <= m; j++)
-            sum += invATA[derivOrder, j] * AT[j, k];
-        h[k] = sum;
-    }
+    // Householder QR decomposition
+    HouseholderQR(A, windowSize, m + 1, out var Q, out var R);
+    var h = ExtractPseudoInverseRow(Q, R, windowSize, m + 1, derivOrder);
 
     if (derivOrder == 0)
     {
         // DC normalization for smoothing
-        double total = 0;
-        for (int i = 0; i < windowSize; i++)
-            total += h[i];
+        double hSum = 0;
+        for (int i = 0; i < windowSize; i++) hSum += h[i];
 
-        if (Math.Abs(total) < 1e-20)
+        if (Math.Abs(hSum) < 1e-14)
             throw new InvalidOperationException("Computed Savitzky-Golay coefficients sum to ~ 0.");
 
-        for (int i = 0; i < windowSize; i++)
-            h[i] /= total;
+        for (int i = 0; i < windowSize; i++) h[i] /= hSum;
     }
     else
     {
         // Derivative scaling : factorial(d) / Δ^d
         double scale = FactorialAsDouble(derivOrder) / Math.Pow(delta, derivOrder);
-        for (int i = 0; i < windowSize; i++)
-            h[i] *= scale;
+        for (int i = 0; i < windowSize; i++) h[i] *= scale;
     }
 
     return h;
 }
 ```
-  
+
 > [!Note]
-> - Implementation uses InvertMatrixStrict with partial pivoting and a dynamic tolerance 1e - 14 × rowScale for stability.  
+> - Implementation uses Householder QR decomposition (`HouseholderQR`) followed by `ExtractPseudoInverseRow` for numerically stable coefficient computation, replacing the previous Gauss‑Jordan `InvertMatrixStrict` approach.  
+> - The sign convention `v₀ = x₀ + sign(x₀) ‖x‖` prevents catastrophic cancellation in the Householder reflections.
+> - Rank deficiency is detected by checking for near-zero diagonals in R during forward substitution.
 > - Derivative-capable version in runtime adds derivOrder & delta parameters; see full adaptive + derivative implementation in the unified ApplySmoothing section above.
 
-### 12. Numerical Pivot Calculation (Matrix Inversion)
+### 12. Householder QR Decomposition & Pseudo-Inverse Row Extraction
 #### How it Works
-SonataSmooth uses a robust numerical matrix inversion routine for Savitzky-Golay filter coefficient calculation.  
-This routine applies **Gauss-Jordan elimination with partial pivoting** and a **dynamic, scale-based tolerance** to ensure numerical stability and prevent division-by-zero or propagation of NaN / Infinity values.
+SonataSmooth uses **Householder QR decomposition** for numerically stable Savitzky-Golay filter coefficient calculation, replacing the previous Gauss-Jordan (`InvertMatrixStrict`) approach.
 
-- For each column, the row with the largest absolute value is selected as the pivot and swapped to the top.
-- The pivot row is normalized, and all other rows are updated to eliminate the current column.
-- If the pivot is below a dynamic threshold (based on the row's scale and machine epsilon), the matrix is considered singular and an InvalidOperationException is thrown.
+- The design matrix A (rows × cols) is factored as A = Q × R using Householder reflections.
+- Q is a thin orthogonal matrix (rows × cols); R is an upper-triangular matrix (cols × cols).
+- The sign convention `v₀ = x₀ + sign(x₀) ‖x‖` prevents catastrophic cancellation during reflection construction.
+- To extract a specific row of the pseudoinverse B = R⁻¹ Qᵀ, the system Rᵀ c = e_{rowIndex} is solved by forward substitution, then h = Q × c is computed — without forming the full inverse.
+- Rank deficiency is detected by checking for near-zero diagonals in R during forward substitution.
 
 #### Principle
-- **Partial Pivoting** : Improves numerical stability by always using the largest available pivot.
-- **Dynamic Tolerance** : Prevents catastrophic errors by comparing the pivot to a scaled threshold, not a fixed value.
-- **Singular Matrix Handling** : If the matrix cannot be inverted (pivot too small), an InvalidOperationException is thrown to prevent propagating errors.
+- **Householder Reflections** : Orthogonal transformations that zero out sub-diagonal elements column by column, producing the QR factorization with O(rows × cols²) complexity.
+- **Numerical Stability** : QR decomposition avoids forming the normal equations (AᵀA), which can square the condition number. The signed-reflection convention prevents catastrophic cancellation.
+- **Efficient Row Extraction** : Instead of computing the full pseudoinverse, only the row corresponding to the desired derivative order is extracted via forward substitution and a single matrix-vector product.
+- **Singular Matrix Handling** : If a diagonal of R is near zero (`< 1e-14`), an `InvalidOperationException` is thrown to prevent propagating errors.
 
-This approach ensures that Savitzky-Golay and other matrix-based filters remain stable and reliable, even for ill-conditioned or nearly singular matrices.
+This approach ensures that Savitzky-Golay and other least-squares-based filters remain stable and reliable, even for ill-conditioned design matrices.
 
 #### Code Implementation
+**Householder QR Decomposition :**
 ```csharp
-private static double[,] InvertMatrixStrict(double[,] a)
+private static void HouseholderQR(double[,] A, int rows, int cols,
+                                  out double[,] Q, out double[,] R)
 {
-    int n = a.GetLength(0);
-    if (a.GetLength(1) != n)
-        throw new ArgumentException("Matrix must be square.", nameof(a));
+    if (rows < cols)
+        throw new ArgumentException("Householder QR requires rows ≥ cols.");
 
-    var aug = new double[n, 2 * n];
-    for (int i = 0; i < n; i++)
+    var work = new double[rows, cols];
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            work[i, j] = A[i, j];
+
+    var vecs = new double[cols][];
+    var taus = new double[cols];
+
+    for (int k = 0; k < cols; k++)
     {
-        for (int j = 0; j < n; j++)
-            aug[i, j] = a[i, j];
-        aug[i, n + i] = 1.0;
-    }
+        int len = rows - k;
+        var v = new double[len];
+        for (int i = 0; i < len; i++)
+            v[i] = work[k + i, k];
 
-    for (int i = 0; i < n; i++)
-    {
-        int maxRow = i;
-        double maxVal = Math.Abs(aug[i, i]);
-        for (int r = i + 1; r < n; r++)
+        double norm = 0.0;
+        for (int i = 0; i < len; i++)
+            norm += v[i] * v[i];
+        norm = Math.Sqrt(norm);
+
+        double sign = v[0] >= 0.0 ? 1.0 : -1.0;
+        v[0] += sign * norm;
+
+        double vNormSq = 0.0;
+        for (int i = 0; i < len; i++)
+            vNormSq += v[i] * v[i];
+
+        double tau = vNormSq > 1e-30 ? 2.0 / vNormSq : 0.0;
+
+        vecs[k] = v;
+        taus[k] = tau;
+
+        for (int j = k; j < cols; j++)
         {
-            double v = Math.Abs(aug[r, i]);
-            if (v > maxVal) { maxVal = v; maxRow = r; }
-        }
-
-        if (maxRow != i)
-        {
-            for (int c = 0; c < 2 * n; c++)
-            {
-                double tmp = aug[i, c];
-                aug[i, c] = aug[maxRow, c];
-                aug[maxRow, c] = tmp;
-            }
-        }
-
-        double pivot = aug[i, i];
-        double rowScale = 0;
-        for (int c = i; c < n; c++)
-            rowScale = Math.Max(rowScale, Math.Abs(aug[i, c]));
-        double tol = Math.Max(rowScale * 1e-14, double.Epsilon);
-        if (Math.Abs(pivot) < tol)
-            throw new InvalidOperationException("Matrix is singular or ill-conditioned for inversion.");
-
-        for (int c = 0; c < 2 * n; c++)
-            aug[i, c] /= pivot;
-
-        for (int r = 0; r < n; r++)
-        {
-            if (r == i) continue;
-            double factor = aug[r, i];
-            if (Math.Abs(factor) < 1e-20) continue;
-            for (int c = 0; c < 2 * n; c++)
-                aug[r, c] -= factor * aug[i, c];
+            double dot = 0.0;
+            for (int i = 0; i < len; i++)
+                dot += v[i] * work[k + i, j];
+            dot *= tau;
+            for (int i = 0; i < len; i++)
+                work[k + i, j] -= dot * v[i];
         }
     }
 
-    var inv = new double[n, n];
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            inv[i, j] = aug[i, j + n];
+    R = new double[cols, cols];
+    for (int i = 0; i < cols; i++)
+        for (int j = i; j < cols; j++)
+            R[i, j] = work[i, j];
 
-    return inv;
+    Q = new double[rows, cols];
+    for (int j = 0; j < cols; j++)
+    {
+        var col = new double[rows];
+        col[j] = 1.0;
+
+        for (int k = cols - 1; k >= 0; k--)
+        {
+            var v = vecs[k];
+            double tau = taus[k];
+            int len = rows - k;
+
+            double dot = 0.0;
+            for (int i = 0; i < len; i++)
+                dot += v[i] * col[k + i];
+            dot *= tau;
+            for (int i = 0; i < len; i++)
+                col[k + i] -= dot * v[i];
+        }
+
+        for (int i = 0; i < rows; i++)
+            Q[i, j] = col[i];
+    }
 }
 ```
 
-- This function is used internally for Savitzky-Golay coefficient calculation and any other matrix inversion needs in the application.
-- It is robust against singular and ill-conditioned matrices, ensuring reliable filter performance.
+**Pseudo-Inverse Row Extraction :**
+```csharp
+private static double[] ExtractPseudoInverseRow(double[,] Q, double[,] R,
+                                                int rows, int cols, int rowIndex)
+{
+    // Forward substitution : Rᵀ c = e_{rowIndex}
+    var c = new double[cols];
+    for (int i = 0; i < cols; i++)
+    {
+        double rhs = (i == rowIndex) ? 1.0 : 0.0;
+        for (int j = 0; j < i; j++)
+            rhs -= R[j, i] * c[j];          // Rᵀ[i, j] = R[j, i]
+
+        double diag = R[i, i];
+        if (Math.Abs(diag) < 1e-14)
+            throw new InvalidOperationException(
+                "Design matrix is rank-deficient (near-zero diagonal in R during QR solve).");
+        c[i] = rhs / diag;
+    }
+
+    // h = Q × c
+    var h = new double[rows];
+    for (int k = 0; k < rows; k++)
+    {
+        double sum = 0.0;
+        for (int j = 0; j < cols; j++)
+            sum += Q[k, j] * c[j];
+        h[k] = sum;
+    }
+
+    return h;
+}
+```
+
+- `HouseholderQR` is used internally by `ComputeSavitzkyGolayCoefficients` (symmetric windows) and `ComputeSGCoefficientsAsymmetric` / `ComputeSGCoefficientsAsymmetricDerivative` (adaptive asymmetric windows) for all Savitzky-Golay coefficient computation.
+- The two-step approach (QR factorization + single-row extraction) avoids the O(n³) cost of a full matrix inversion, improving both speed and numerical precision.
 
 #### Additional Notes
 > [!Note]
