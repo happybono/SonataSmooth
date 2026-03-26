@@ -1,16 +1,16 @@
 
 %% SonataSmooth (C# ApplySmoothing-compatible) MATLAB Reference
 % - Matches BoundaryMode mapping + Adaptive procedures + Alpha blend
-% - Filters: RectAvg, BinomAvg, BinomMedian, GaussWMedian, Gauss, Savitzky-Golay
-% - Boundary modes: Symmetric, Replicate, Adaptive, ZeroPad
+% - Filters        : RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, Savitzky-Golay
+% - Boundary modes : Symmetric, Replicate, Adaptive, ZeroPad
 %
 % IMPORTANT :
-% - Adaptive (Rect / BinomAvg / BinomMedian / GaussWMed / Gauss): center fixed, window shrinks :
+% - Adaptive (Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss) : center fixed, window shrinks :
 %       left = min(r, i0), right = min(r, n - 1 - i0), start = i0 - left
-% - Adaptive (SG) : fixed length (2r + 1) but shift window to stay inside [0 .. n - 1]
+% - Adaptive (SG) : fixed length (2r + 1) but shift window to stay inside [0 ... n - 1]
 % - Binomial / Gaussian kernels in Adaptive are RECOMPUTED for local W (not slice + renorm)
-% - Binomial weighted median tie-break: if totalWeight even & accum == half -> average (current, next)
-% - Gaussian weighted median: sort(values, weights), pick first where accum >= half (NO averaging)
+% - Binomial weighted median tie-break : if totalWeight even & accum == half -> average (current, next)
+% - Gaussian weighted median : sort(values, weights), pick first where accum >= half (NO averaging)
 
 clear; clc;
 
@@ -26,8 +26,8 @@ polyOrder  = 5;
 derivOrder = 0;
 delta      = 1.0;
 
-alpha = 0.7;           % used for BinomAvg / BinomMedian / GaussWMed / Gauss only
-sigmaFactor = 10.0;    % sigma = (2r + 1) / sigmaFactor, allowed range [1.0..12.0]
+alpha = 0.7;           % used for BinomAvg / BinomWMedian / GaussWMedian / Gauss only
+sigmaFactor = 10.0;    % sigma = (2r + 1) / sigmaFactor, allowed range [1.0 ... 12.0]
 
 boundaryMode = "Adaptive";  % "Symmetric" | "Replicate" | "Adaptive" | "ZeroPad"
 
@@ -35,8 +35,8 @@ boundaryMode = "Adaptive";  % "Symmetric" | "Replicate" | "Adaptive" | "ZeroPad"
 res = sonata_apply_smoothing_csharp(x, r, polyOrder, derivOrder, delta, boundaryMode, alpha, sigmaFactor);
 
 T = table((1:numel(x))', x, ...
-    res.Rect, res.BinomAvg, res.BinomMedian, res.GaussWMed, res.Gauss, res.SG, ...
-    'VariableNames', {'Index','Initial','RectAvg','BinomAvg','BinomMedian','GaussWMedian','Gauss','SG'});
+    res.Rect, res.BinomAvg, res.BinomWMedian, res.GaussWMedian, res.Gauss, res.SG, ...
+    'VariableNames', {'Index','Initial','RectAvg','BinomAvg','BinomWMedian','GaussWMedian','Gauss','SG'});
 
 disp(T);
 
@@ -51,7 +51,7 @@ n = numel(input);
 validate_params(n, r, polyOrder, derivOrder, delta, sigmaFactor);
 mode = normalize_mode(boundaryMode);
 
-windowSize = 2*r + 1;
+windowSize = 2 * r + 1;
 
 % alpha clamp 
 a = alpha;
@@ -66,12 +66,12 @@ sigmaFull = windowSize  /  sigmaFactor;                       % sigma = (2r + 1)
 gaussFull = compute_gaussian_coeffs(windowSize, sigmaFull);   % normalized double weights
 
 % Outputs
-res.Rect        = zeros(n,1);
-res.BinomAvg    = zeros(n,1);
-res.BinomMedian = zeros(n,1);
-res.GaussWMed   = zeros(n,1);
-res.Gauss       = zeros(n,1);
-res.SG          = zeros(n,1);
+res.Rect           = zeros(n,1);
+res.BinomAvg       = zeros(n,1);
+res.BinomWMedian   = zeros(n,1);
+res.GaussWMedian   = zeros(n,1);
+res.Gauss          = zeros(n,1);
+res.SG             = zeros(n,1);
 
 % For SG (non-adaptive) : compute symmetric SG coefficients once if needed
 sgFull = [];
@@ -80,14 +80,14 @@ if mode ~= "adaptive"
 end
 
 for i0 = 0:(n-1)  % i0 : 0-based index
-    i = i0 + 1;  % MATLAB index
+    i = i0 + 1;   % MATLAB index
 
     % ---- RectAvg (no alpha) ----
     if mode == "adaptive"
         [left,right,start0] = adaptive_window_center_fixed(i0, n, r);
         W = left + right + 1;
         if W > 0
-            seg = input((start0+1):(start0+W));
+            seg = input((start0 + 1):(start0 + W));
             res.Rect(i) = sum(seg)  /  W;
         else
             res.Rect(i) = 0.0;
@@ -109,7 +109,7 @@ for i0 = 0:(n-1)  % i0 : 0-based index
         else
             localBinom = calc_binomial_coeffs_long(W);
             localSum   = sum(double(localBinom));
-            seg = input((start0+1):(start0+W));
+            seg = input((start0 + 1):(start0 + W));
             filtered = sum(seg(:) .* double(localBinom(:)))  /  localSum;
         end
     else
@@ -130,19 +130,19 @@ for i0 = 0:(n-1)  % i0 : 0-based index
             filtered = 0.0;
         else
             localBinom = calc_binomial_coeffs_long(W);
-            vals = input((start0+1):(start0+W));
+            vals = input((start0 + 1):(start0 + W));
             filtered = weighted_median_long(vals, localBinom); % tie = average
         end
     else
         W = windowSize;
-        vals = zeros(W,1);
+        vals = zeros(W, 1);
         wts  = binomFull(:);
         for k = -r:r
-            vals(k+r+1) = sample_with_boundary(input, i0 + k, mode);
+            vals(k + r + 1) = sample_with_boundary(input, i0 + k, mode);
         end
         filtered = weighted_median_long(vals, wts); % same rule
     end
-    res.BinomMedian(i) = a * filtered + (1.0 - a) * input(i);
+    res.BinomWMedian(i) = a * filtered + (1.0 - a) * input(i);
 
     % ---- Gaussian Weighted Median (alpha blend; accum >= half; NO tie-average) ----
     if mode == "adaptive"
@@ -153,15 +153,15 @@ for i0 = 0:(n-1)  % i0 : 0-based index
         else
             sigmaLocal = W  /  sigmaFactor;                       % sigma = W  /  sigmaFactor (NO square)
             wts = compute_gaussian_coeffs(W, sigmaLocal);         % normalized
-            vals = input((start0+1):(start0+W));                  % adaptive uses in-range segment
+            vals = input((start0 + 1):(start0 + W));              % adaptive uses in-range segment
             filtered = weighted_median_double(vals, wts, true);   % use >= half
         end
     else
         W = windowSize;
-        vals = zeros(W,1);
+        vals = zeros(W, 1);
         wts  = gaussFull(:);
         for k = -r:r
-            vals(k+r+1) = sample_with_boundary(input, i0 + k, mode);
+            vals(k + r + 1) = sample_with_boundary(input, i0 + k, mode);
         end
         total = sum(wts);
         if total > 0
@@ -170,7 +170,7 @@ for i0 = 0:(n-1)  % i0 : 0-based index
             filtered = sample_with_boundary(input, i0, mode);     % fallback
         end
     end
-    res.GaussWMed(i) = a * filtered + (1.0 - a) * input(i);
+    res.GaussWMedian(i) = a * filtered + (1.0 - a) * input(i);
 
     % ---- Gaussian filter (alpha blend) ----
     if mode == "adaptive"
@@ -181,7 +181,7 @@ for i0 = 0:(n-1)  % i0 : 0-based index
         else
             sigmaLocal = W  /  sigmaFactor;
             wts = compute_gaussian_coeffs(W, sigmaLocal);         % normalized
-            vals = input((start0+1):(start0+W));
+            vals = input((start0 + 1):(start0 + W));
             filtered = sum(wts(:) .* vals(:));                    % weights sum to 1
         end
     else
@@ -204,7 +204,7 @@ for i0 = 0:(n-1)  % i0 : 0-based index
             W = left + right + 1;
             effPoly = min(polyOrder, W - 1);
             if derivOrder > effPoly
-                error("Edge-adaptive SG window too small for derivative (W=%d, effPoly=%d, deriv=%d).", W, effPoly, derivOrder);
+                error("Edge-adaptive SG window too small for derivative (W = %d, effPoly = %d, deriv = %d).", W, effPoly, derivOrder);
             end
             coeffs = sg_coeffs_asym_deriv(left, right, effPoly, derivOrder, delta);
         end
@@ -238,7 +238,7 @@ switch mode
         if idx0 < 0
             idx0 = -idx0 - 1;
         elseif idx0 >= n
-            idx0 = 2*n - idx0 - 1;
+            idx0 = 2 * n - idx0 - 1;
         end
         if idx0 < 0 || idx0 >= n
             v = 0.0;
@@ -266,7 +266,7 @@ switch mode
         if idx0 < 0
             idx0 = -idx0 - 1;
         elseif idx0 >= n
-            idx0 = 2*n - idx0 - 1;
+            idx0 = 2 * n - idx0 - 1;
         end
         if idx0 < 0 || idx0 >= n
             v = 0.0;
@@ -275,20 +275,20 @@ switch mode
         end
 
     otherwise
-        error("Unknown boundary mode: %s", mode);
+        error("Unknown boundary mode : %s", mode);
 end
 end
 
 function [left,right,start0] = adaptive_window_center_fixed(center0, n, r)
-% GetAdaptiveWindow(i): left = min(r, i), right=min(r, n - 1 - i), start = i-left
+% GetAdaptiveWindow(i) : left = min(r, i), right=min(r, n - 1 - i), start = i - left
 left  = min(r, center0);
-right = min(r, (n-1) - center0);
+right = min(r, (n - 1) - center0);
 start0 = center0 - left;
 end
 
 function [left,right] = sg_adaptive_left_right(i0, n, r)
 % Adaptive SG : fixed length (2r + 1), shift window to stay inside
-desiredW = 2*r + 1;
+desiredW = 2 * r + 1;
 
 left  = min(r, i0);
 right = desiredW - 1 - left;
@@ -317,7 +317,7 @@ c = zeros(len,1,'int64');
 c(1) = int64(1);
 for i = 2:len
     % c[i] = c[i - 1] * (len - i) / i (integer math, exact division)
-    c(i) = idivide(c(i-1) * int64(len - (i-1)), int64(i-1), 'floor');
+    c(i) = idivide(c(i - 1) * int64(len - (i - 1)), int64(i - 1), 'floor');
 end
 end
 
@@ -333,8 +333,8 @@ g = zeros(len,1);
 s = 0.0;
 for i = 0:(len-1)
     x = i - w;
-    g(i+1) = exp(-(x*x)  /  twoSigmaSq);
-    s = s + g(i+1);
+    g(i + 1) = exp(-(x * x)  /  twoSigmaSq);
+    s = s + g(i + 1);
 end
 if s <= 0, error("Gaussian kernel sum <= 0"); end
 g = g  /  s;
@@ -342,8 +342,8 @@ end
 
 %% ---------------- Weighted medians ----------------
 function m = weighted_median_long(values, weightsLong)
-% Binomial weighted median: sort by Value, accumulate int64 weights
-% if totalWeight even and accum==half -> average(current,next)
+% Binomial weighted median : sort by Value, accumulate int64 weights
+% if totalWeight even and accum==half -> average(current, next)
 values = values(:);
 w = int64(weightsLong(:));
 
@@ -360,7 +360,7 @@ even = bitand(totalW, int64(1)) == 0;
 half = idivide(totalW, int64(2), 'floor');
 acc = int64(0);
 
-m = vs(end);                                      % default
+m = vs(end);                                       % default
 for j = 1:numel(vs)
     acc = acc + ws(j);
     if acc > half
@@ -369,7 +369,7 @@ for j = 1:numel(vs)
     end
     if even && acc == half
         if j < numel(vs)
-            nextVal = vs(j+1);
+            nextVal = vs(j + 1);
         else
             nextVal = vs(j);
         end
@@ -420,19 +420,19 @@ function h = sg_coeffs_symmetric(windowSize, polyOrder, derivOrder, delta)
 % ComputeSavitzkyGolayCoefficients(windowSize, polyOrder, derivOrder, delta)
 if windowSize <= 0, error("windowSize must be > 0"); end
 if mod(windowSize,2) == 0, error("windowSize must be odd"); end
-if polyOrder < 0 || polyOrder >= windowSize, error("polyOrder must be 0..windowSize-1"); end
+if polyOrder < 0 || polyOrder >= windowSize, error("polyOrder must be 0 ... windowSize - 1"); end
 if derivOrder < 0 || derivOrder > polyOrder, error("derivOrder must be <= polyOrder"); end
 if delta <= 0, error("delta must be > 0"); end
 
 m = polyOrder;
 half = floor(windowSize / 2);
 
-A = zeros(windowSize, m+1);
+A = zeros(windowSize, m + 1);
 row = 1;
 for xi = -half:half
     pow = 1.0;
     for j = 0:m
-        A(row, j+1) = pow;
+        A(row, j + 1) = pow;
         pow = pow * xi;
     end
     row = row + 1;
@@ -444,7 +444,7 @@ AT = A';
 
 h = zeros(windowSize,1);
 for k = 1:windowSize
-    h(k) = invATA(derivOrder+1, :) * AT(:, k);
+    h(k) = invATA(derivOrder + 1, :) * AT(:, k);
 end
 
 if derivOrder == 0
@@ -464,9 +464,9 @@ W = left + right + 1;
 m = min(max(polyOrder,0), W-1);
 
 xv = (-left:right).';
-A = zeros(W, m+1);
+A = zeros(W, m + 1);
 for p = 0:m
-    A(:, p+1) = xv.^p;
+    A(:, p + 1) = xv.^p;
 end
 
 ATA = A' * A;
@@ -487,15 +487,15 @@ end
 function h = sg_coeffs_asym_deriv(left, right, polyOrder, derivOrder, delta)
 % ComputeSGCoefficientsAsymmetricDerivative(left, right, polyOrder, derivOrder, delta)
 W = left + right + 1;
-m = min(max(polyOrder,0), W-1);
+m = min(max(polyOrder,0), W - 1);
 if derivOrder > m
     error("derivOrder must be <= effective polyOrder");
 end
 
 xv = (-left:right).';
-A = zeros(W, m+1);
+A = zeros(W, m + 1);
 for p = 0:m
-    A(:, p+1) = xv.^p;
+    A(:, p + 1) = xv.^p;
 end
 
 ATA = A' * A;
@@ -504,7 +504,7 @@ AT = A';
 
 h = zeros(W,1);
 for k = 1:W
-    h(k) = invATA(derivOrder+1,:) * AT(:,k);
+    h(k) = invATA(derivOrder + 1,:) * AT(:,k);
 end
 
 if derivOrder == 0
@@ -520,7 +520,7 @@ end
 
 function invA = inv_strict(A)
 % Mirrors InvertMatrixStrict behavior (simplified guard)
-if size(A,1) ~= size(A,2)
+if size(A, 1) ~= size(A, 2)
     error("Matrix must be square");
 end
 if rcond(A) < 1e-14
@@ -530,13 +530,13 @@ invA = inv(A);
 end
 
 function validate_params(n, r, polyOrder, derivOrder, delta, sigmaFactor)
-windowSize = 2*r + 1;
+windowSize = 2 * r + 1;
 
 if r < 0 || fix(r) ~= r
     error("r must be non-negative integer.");
 end
 if windowSize > n
-    error("windowSize (=2*r+1) must be <= dataCount.");
+    error("windowSize (= 2 * r + 1) must be <= dataCount.");
 end
 
 if polyOrder < 0 || fix(polyOrder) ~= polyOrder
@@ -558,6 +558,6 @@ if delta <= 0
 end
 
 if sigmaFactor < 1.0 || sigmaFactor > 12.0 || isnan(sigmaFactor) || isinf(sigmaFactor)
-    error("sigmaFactor out of range (1..12)");
+    error("sigmaFactor out of range (1 ... 12)");
 end
 end
