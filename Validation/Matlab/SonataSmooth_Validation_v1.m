@@ -1,5 +1,5 @@
 
-%% SonataSmooth (C# ApplySmoothing-parity) MATLAB Reference
+%% SonataSmooth (C# ApplySmoothing parity) MATLAB Reference
 % - Matches BoundaryMode mapping + Adaptive procedures + Alpha blend
 % - Filters        : RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, Savitzky-Golay
 % - Boundary modes : Symmetric, Replicate, Adaptive, ZeroPad
