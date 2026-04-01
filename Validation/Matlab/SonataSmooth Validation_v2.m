@@ -20,8 +20,8 @@
 % - Adaptive Gaussian : uses ORIGINAL sigma = windowSize / sigmaFactor centered on i,
 %   truncated at boundaries and renormalized (avoids phase distortion from local sigma)
 % - Binomial coefficients : double precision (C# CalcBinomialCoefficients : c[i] = c[i - 1] * (len - i) / i)
-% - Binomial weighted median : epsilon-aware half-boundary midpoint handling (aligned with C# style)
-% - Gaussian weighted median : uses same C# weighted-median tie handling (epsilon-aware midpoint on half-boundary)
+% - Binomial weighted median : current C# uses exact even-total / accum == half midpoint handling
+% - Gaussian weighted median : uses ORIGINAL sigma centered on i, then selects first value where accum >= half (NO tie-average), matching current C# exactly
 % - SG : Householder QR decomposition (C# HouseholderQR + ExtractPseudoInverseRow)
 
 clear; clc;
@@ -205,28 +205,77 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
     end
     res.BinomWMedian(i) = a * filtered + (1.0 - a) * safeInput(i);
 
-    % ---- Gaussian Weighted Median (alpha blend; C# parity) ----
-    % Adaptive : C# recomputes a LOCAL Gaussian kernel for the shrunken window,
-    % i.e. sigmaLocal = W / sigmaFactor, then applies the same weighted-median
-    % selection rule used by the double-domain implementation.
+    % ---- Gaussian Weighted Median (alpha blend; matches current C# exactly) ----
+    % Adaptive : use ORIGINAL sigma centered on i, truncate to the in-range window,
+    % renormalize, then sort(values, weights) and pick the first value where
+    % accum >= half (NO tie-average).
     if mode == "adaptive"
         [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
         W = left + right + 1;
-        if W < 1
+        if W <= 0
             filtered = 0.0;
         else
-            sigmaLocal = W / sigmaFactor;
-            vals = safeInput((start0 + 1):(start0 + W));
-            wts = compute_gaussian_coeffs(W, sigmaLocal); % already normalized
-            filtered = weighted_median_double_csharp(vals, wts);
+            twoSigSq = 2.0 * sigma * sigma;
+            vals = zeros(W, 1);
+            wts  = zeros(W, 1);
+            wSum = 0.0;
+            for pos = 0:(W - 1)
+                offset = pos - left;
+                vals(pos + 1) = safeInput(start0 + pos + 1);
+                wts(pos + 1)  = exp(-(offset * offset) / twoSigSq);
+                wSum = wSum + wts(pos + 1);
+            end
+            if wSum > 0.0
+                wts = wts / wSum;
+            end
+
+            [vs, sortIdx] = sort(vals, 'ascend');
+            ws = wts(sortIdx);
+
+            total = sum(ws);
+            if total > 0.0
+                half = total / 2.0;
+                accum = 0.0;
+                sel = W;
+                for j = 1:W
+                    accum = accum + ws(j);
+                    if accum >= half
+                        sel = j;
+                        break;
+                    end
+                end
+                filtered = vs(sel);
+            else
+                filtered = 0.0;
+            end
         end
     else
         W = windowSize;
         vals = zeros(W, 1);
+        wts  = gaussFull(:);
         for k = -r:r
             vals(k + r + 1) = sample_with_boundary(safeInput, i0 + k, mode);
         end
-        filtered = weighted_median_double_csharp(vals, gaussFull(:));
+
+        [vs, sortIdx] = sort(vals, 'ascend');
+        ws = wts(sortIdx);
+
+        total = sum(ws);
+        if total > 0.0
+            half = total / 2.0;
+            accum = 0.0;
+            sel = W;
+            for j = 1:W
+                accum = accum + ws(j);
+                if accum >= half
+                    sel = j;
+                    break;
+                end
+            end
+            filtered = vs(sel);
+        else
+            filtered = sample_with_boundary(safeInput, i0, mode);
+        end
     end
     res.GaussWMedian(i) = a * filtered + (1.0 - a) * safeInput(i);
 
@@ -295,7 +344,7 @@ end
 end
 
 function output = apply_sg_derivative_csharp(input, r, polyOrder, derivativeOrder, delta, boundaryMode)
-% Matches FrmMain.ApplySGDerivative exactly
+% Matches SmoothingConductor.ApplySGDerivative exactly
 input = input(:);
 n = numel(input);
 validate_sg_derivative_params(n, r, polyOrder, derivativeOrder, delta);
@@ -476,51 +525,9 @@ end
 %% -------------------- Weighted medians --------------------
 function m = weighted_median_binom(values, weights)
 % Binomial weighted median with double weights.
-% Tightened to the same epsilon-aware half-boundary rule used for the
-% C#-style double-domain weighted median handling.
-values = values(:);
-weights = weights(:);
-
-[vs, sortIdx] = sort(values, 'ascend');
-ws = weights(sortIdx);
-
-total = sum(ws);
-if total <= 0.0
-    m = 0.0;
-    return;
-end
-
-half = total / 2.0;
-epsv = total * 1e-12;
-acc = 0.0;
-
-for j = 1:numel(vs)
-    acc = acc + ws(j);
-
-    if acc > half + epsv
-        m = vs(j);
-        return;
-    end
-
-    if acc >= half - epsv
-        if j < numel(vs)
-            m = (vs(j) + vs(j + 1)) / 2.0;
-        else
-            m = vs(j);
-        end
-        return;
-    end
-end
-
-m = vs(end);
-end
-
-function m = weighted_median_double_csharp(values, weights)
-% C# parity weighted median for double-domain values / weights.
-% Matches the double implementation used by Gaussian weighted median :
+% Matches current C# WeightedMedianDoubleWeights / WeightedMedianAt:
 %   sort ascending, accumulate weights
-%   if acc > half + eps  -> current value
-%   if acc >= half - eps -> midpoint(current, next) when possible
+%   tie-break : if mod(total, 2) == 0 & accum == half -> average(current, next)
 values = values(:);
 weights = weights(:);
 
@@ -534,29 +541,28 @@ if total <= 0.0
 end
 
 half = total / 2.0;
-epsv = total * 1e-12;
-acc = 0.0;
+even = mod(total, 2.0) == 0.0;
+accum = 0.0;
+m = vs(end);
 
 for j = 1:numel(vs)
-    acc = acc + ws(j);
-
-    if acc > half + epsv
+    accum = accum + ws(j);
+    if accum > half
         m = vs(j);
         return;
     end
-
-    if acc >= half - epsv
+    if even && accum == half
         if j < numel(vs)
-            m = (vs(j) + vs(j + 1)) / 2.0;
+            nextVal = vs(j + 1);
         else
-            m = vs(j);
+            nextVal = vs(j);
         end
+        m = (vs(j) + nextVal) / 2.0;
         return;
     end
 end
-
-m = vs(end);
 end
+
 
 %% -------------------- SG coefficient builders (Householder QR) --------------------
 function h = sg_coeffs_symmetric_qr(windowSize, polyOrder, derivOrder, delta)
@@ -812,11 +818,3 @@ if isnan(sigmaFactor) || isinf(sigmaFactor) || sigmaFactor <= 0.0
     error('sigmaFactor must be finite and > 0.');
 end
 end
-
-% T represents the table (Index, Initial, RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, SG)
-writetable(T, 'MATLAB_Result_Symmetric_3.csv', ...
-    'Delimiter', ',', ...
-    'WriteVariableNames', true);
-
-% Verification (Optional)
-disp("Saved: MATLAB_Result_Symmetric_3.csv");
