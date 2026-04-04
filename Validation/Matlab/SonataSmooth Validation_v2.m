@@ -818,11 +818,3 @@ if isnan(sigmaFactor) || isinf(sigmaFactor) || sigmaFactor <= 0.0
     error('sigmaFactor must be finite and > 0.');
 end
 end
-
-% T represents the table (Index, Initial, RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, SG)
-writetable(T, 'MATLAB_Result_Symmetric_3.csv', ...
-    'Delimiter', ',', ...
-    'WriteVariableNames', true);
-
-% Verification (Optional)
-disp("Saved: MATLAB_Result_Symmetric_3.csv");
