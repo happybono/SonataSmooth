@@ -1005,8 +1005,9 @@ namespace SonataSmooth
 
             void GetAdaptiveWindow(int center, out int left, out int right, out int start)
             {
-                left = Math.Min(r, center);
-                right = Math.Min(r, n - 1 - center);
+                int symR = Math.Min(r, Math.Min(center, n - 1 - center));
+                left = symR;
+                right = symR;
                 start = center - left;
             }
 
@@ -1132,8 +1133,9 @@ namespace SonataSmooth
                     double filtered;
                     if (boundaryMode == BoundaryMode.Adaptive)
                     {
-                        int left = Math.Min(r, i);
-                        int right = Math.Min(r, n - 1 - i);
+                        int symRGM = Math.Min(r, Math.Min(i, n - 1 - i));
+                        int left = symRGM;
+                        int right = symRGM;
                         int start = i - left;
                         int W = left + right + 1;
                         if (W < 1) { filtered = 0.0; }
@@ -1428,23 +1430,17 @@ namespace SonataSmooth
             if (boundaryMode == BoundaryMode.Adaptive)
             {
                 int n = data.Length;
-                int left = Math.Min(w, center);
-                int right = desiredW - 1 - left;
-                if (center + right > n - 1)
-                {
-                    int shift = (center + right) - (n - 1);
-                    right -= shift;
-                    left += shift;
-                }
-                if (left < 0) left = 0;
-                if (right < 0) right = 0;
+                int symR = Math.Min(w, Math.Min(center, n - 1 - center));
+                int left = symR;
+                int right = symR;
                 int start = center - left;
+                int W = 2 * symR + 1;
 
-                var pairsStd = new List<(double Value, double Weight)>(desiredW);
-                for (int pos = 0; pos < desiredW; pos++)
+                var pairsStd = new List<(double Value, double Weight)>(W);
+                for (int pos = 0; pos < W; pos++)
                 {
                     double v = data[start + pos];
-                    double weight = binom[pos];
+                    double weight = binom[(w - symR) + pos];
                     pairsStd.Add((v, weight));
                 }
 
