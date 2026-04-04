@@ -1,17 +1,17 @@
 %% SonataSmooth (C# ApplySmoothing exact parity) MATLAB Reference
-% Matches SmoothingConductor.ApplySmoothing exactly for all smoothing filters,
+% Matches FrmMain.ApplySmoothing exactly for all smoothing filters,,
 % boundary modes, alpha blend, and sigmaFactor behavior.
 %
 % IMPORTANT
 % - This reference now supports BOTH of the C# entry points below :
-%   1. SmoothingConductor.ApplySmoothing when derivOrder == 0
-%   2. SmoothingConductor.ApplySGDerivative when derivOrder > 0
+%   1. FrmMain.ApplySmoothing when derivOrder == 0
+%   2. FrmMain.ApplySGDerivative when derivOrder > 0
 % - For derivOrder > 0, only Savitzky-Golay derivative output is produced, matching C#.
 %
 % Filters        : RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, Savitzky-Golay
 % Boundary modes : Symmetric, Replicate, Adaptive, ZeroPad
 %
-% KEY MATCHING DETAILS (C# SmoothingConductor.cs parity) :
+% KEY MATCHING DETAILS (C# FrmMain.cs - ApplySmoothing parity) :
 % - Adaptive (Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss) : symmetric shrinking (zero-phase) :
 %       symR = min(r, min(i, n - 1 - i)), start = i - symR, W = 2 * symR + 1
 % - Adaptive (SG) : fixed length (2r + 1) when possible, shifted to stay inside [0 ... n - 1]
@@ -344,7 +344,7 @@ end
 end
 
 function output = apply_sg_derivative_csharp(input, r, polyOrder, derivativeOrder, delta, boundaryMode)
-% Matches SmoothingConductor.ApplySGDerivative exactly
+% Matches FrmMain.ApplySGDerivative exactly
 input = input(:);
 n = numel(input);
 validate_sg_derivative_params(n, r, polyOrder, derivativeOrder, delta);
