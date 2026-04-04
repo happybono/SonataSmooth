@@ -1,21 +1,21 @@
-%% SonataSmooth (C# ApplySmoothing parity) MATLAB Reference
-% Matches FrmMain.ApplySmoothing exactly for all smoothing filters,
+%% SonataSmooth (C# ApplySmoothing exact parity) MATLAB Reference
+% Matches SmoothingConductor.ApplySmoothing exactly for all smoothing filters,
 % boundary modes, alpha blend, and sigmaFactor behavior.
 %
 % IMPORTANT
 % - This reference now supports BOTH of the C# entry points below :
-%   1. FrmMain.ApplySmoothing when derivOrder == 0
-%   2. FrmMain.ApplySGDerivative when derivOrder > 0
+%   1. SmoothingConductor.ApplySmoothing when derivOrder == 0
+%   2. SmoothingConductor.ApplySGDerivative when derivOrder > 0
 % - For derivOrder > 0, only Savitzky-Golay derivative output is produced, matching C#.
 %
 % Filters        : RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, Savitzky-Golay
 % Boundary modes : Symmetric, Replicate, Adaptive, ZeroPad
 %
-% KEY MATCHING DETAILS (C# FrmMain.cs - ApplySmoothing parity) :
-% - Adaptive (Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss) : center fixed, window shrinks :
-%       left = min(r, i), right = min(r, n - 1 - i), start = i - left
+% KEY MATCHING DETAILS (C# SmoothingConductor.cs parity) :
+% - Adaptive (Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss) : symmetric shrinking (zero-phase) :
+%       symR = min(r, min(i, n - 1 - i)), start = i - symR, W = 2 * symR + 1
 % - Adaptive (SG) : fixed length (2r + 1) when possible, shifted to stay inside [0 ... n - 1]
-% - Adaptive Binomial : SLICED from full-size kernel binom[(pos - left) + r], then renormalized
+% - Adaptive Binomial : SLICED from full-size kernel binom[(pos - symR) + r], then renormalized
 %   (not recomputed for local W -- matches C# ApplySmoothing exactly)
 % - Adaptive Gaussian : uses ORIGINAL sigma = windowSize / sigmaFactor centered on i,
 %   truncated at boundaries and renormalized (avoids phase distortion from local sigma)
@@ -128,8 +128,8 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
 
     % ---- RectAvg (no alpha) ----
     if mode == "adaptive"
-        [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
-        W = left + right + 1;
+        [symR, start0] = adaptive_window_center_fixed(i0, n, r);
+        W = 2 * symR + 1;
         if W > 0
             seg = safeInput((start0 + 1):(start0 + W));
             res.Rect(i) = sum(seg) / W;
@@ -145,17 +145,17 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
     end
 
     % ---- Binomial Avg (alpha blend) ----
-    % Adaptive : SLICE from full kernel binom[(pos - left) + r], then renormalize
+    % Adaptive : SLICE from full kernel binom[(pos - symR) + r], then renormalize
     if mode == "adaptive"
-        [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
-        W = left + right + 1;
+        [symR, start0] = adaptive_window_center_fixed(i0, n, r);
+        W = 2 * symR + 1;
         if W < 1
             filtered = 0.0;
         else
             localSum = 0.0;
             s = 0.0;
             for pos = 0:(W - 1)
-                w = binomFull((pos - left) + r + 1);   % slice from full kernel (1-based)
+                w = binomFull((pos - symR) + r + 1);   % slice from full kernel (1-based)
                 localSum = localSum + w;
                 s = s + safeInput(start0 + pos + 1) * w;
             end
@@ -182,14 +182,14 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
     % ---- Binomial Median (alpha blend; tie = average) ----
     % Adaptive : SLICE from full kernel for weights
     if mode == "adaptive"
-        [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
-        W = left + right + 1;
+        [symR, start0] = adaptive_window_center_fixed(i0, n, r);
+        W = 2 * symR + 1;
         if W < 1
             filtered = 0.0;
         else
             localWeights = zeros(W, 1);
             for pos = 0:(W - 1)
-                localWeights(pos+1) = binomFull((pos - left) + r + 1);
+                localWeights(pos+1) = binomFull((pos - symR) + r + 1);
             end
             vals = safeInput((start0 + 1):(start0 + W));
             filtered = weighted_median_binom(vals, localWeights);
@@ -210,8 +210,8 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
     % renormalize, then sort(values, weights) and pick the first value where
     % accum >= half (NO tie-average).
     if mode == "adaptive"
-        [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
-        W = left + right + 1;
+        [symR, start0] = adaptive_window_center_fixed(i0, n, r);
+        W = 2 * symR + 1;
         if W <= 0
             filtered = 0.0;
         else
@@ -220,7 +220,7 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
             wts  = zeros(W, 1);
             wSum = 0.0;
             for pos = 0:(W - 1)
-                offset = pos - left;
+                offset = pos - symR;
                 vals(pos + 1) = safeInput(start0 + pos + 1);
                 wts(pos + 1)  = exp(-(offset * offset) / twoSigSq);
                 wSum = wSum + wts(pos + 1);
@@ -280,10 +280,10 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
     res.GaussWMedian(i) = a * filtered + (1.0 - a) * safeInput(i);
 
     % ---- Gaussian filter (alpha blend) ----
-    % Adaptive : uses ORIGINAL sigma centered on i (no phase distortion)
+    % Adaptive : uses ORIGINAL sigma centered on i (symmetric shrinking, zero-phase)
     if mode == "adaptive"
-        [left, right, start0] = adaptive_window_center_fixed(i0, n, r);
-        W = left + right + 1;
+        [symR, start0] = adaptive_window_center_fixed(i0, n, r);
+        W = 2 * symR + 1;
         if W < 1
             filtered = 0.0;
         else
@@ -291,7 +291,7 @@ for i0 = 0:(n - 1)  % i0 : 0-based index
             localGauss = zeros(W, 1);
             wSum = 0.0;
             for pos = 0:(W - 1)
-                offset = pos - left;                        % signed distance from center i
+                offset = pos - symR;                        % signed distance from center i
                 localGauss(pos + 1) = exp(-(offset * offset) / twoSigSq);
                 wSum = wSum + localGauss(pos + 1);
             end
@@ -446,11 +446,11 @@ switch mode
 end
 end
 
-function [left, right, start0] = adaptive_window_center_fixed(center0, n, r)
-% Used by Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss (center fixed, window shrinks)
-left  = min(r, center0);
-right = min(r, (n - 1) - center0);
-start0 = center0 - left;
+function [symR, start0] = adaptive_window_center_fixed(center0, n, r)
+% Used by Rect / BinomAvg / BinomWMedian / GaussWMedian / Gauss (symmetric shrinking, zero-phase)
+% symR = min(r, min(center0, (n-1)-center0)) ensures left == right for zero-phase filtering
+symR   = min(r, min(center0, (n - 1) - center0));
+start0 = center0 - symR;
 end
 
 function [left, right] = get_adaptive_sides(i0, n, r)
@@ -818,3 +818,11 @@ if isnan(sigmaFactor) || isinf(sigmaFactor) || sigmaFactor <= 0.0
     error('sigmaFactor must be finite and > 0.');
 end
 end
+
+% T represents the table (Index, Initial, RectAvg, BinomAvg, BinomWMedian, GaussWMedian, Gauss, SG)
+writetable(T, 'MATLAB_Result_Symmetric_3.csv', ...
+    'Delimiter', ',', ...
+    'WriteVariableNames', true);
+
+% Verification (Optional)
+disp("Saved: MATLAB_Result_Symmetric_3.csv");
