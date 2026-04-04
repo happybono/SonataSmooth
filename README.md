@@ -519,7 +519,7 @@ Filters like **Binomial Averaging** use rows from Pascal's Triangle as weights. 
   Sorts nearby values and picks the middle one, using extra weight for the center. Removes sharp spikes while keeping the signal shape.
   
 - **Gaussian Weighted Median Filtering (GWMF)** <br>
-  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the kernel length W shrinks at edges, σ is recomputed as `W / sigmaFactor`, and weights are normalized; alpha blending applies at runtime.
+  Computes a median using Gaussian weights within the kernel window. It preserves smooth curves with robustness to occasional spikes. In Adaptive mode, the window shrinks symmetrically (`symR = min(r, min(i, n−1−i))`, `W = 2·symR + 1`), weights are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)` and re‑normalized; alpha blending applies at runtime.
 
 - **Gaussian Filtering**<br>
   Uses a bell-shaped curve for weights. Very smooth, but may let sharp jumps stay.
@@ -548,7 +548,7 @@ Edge handling determines which values are used when the kernel window extends be
 |-------------|---------------|-------------------------------------|----------|------|------|
 | Symmetric   | Mirror        | i < 0 → -i - 1<br>i ≥ n → 2n - i - 1 | Reflects across boundary | Smooth continuity; preserves slope | Can amplify extreme edge values if outlier |
 | Replicate   | Nearest       | i < 0 → 0<br>i ≥ n → n - 1          | Clamps to nearest endpoint | Stable on plateaus; simple | Flattens curvature; may bias means |
-| Adaptive    | Edge-aware    | Window dynamically trimmed or shifted; index sampling in SG may be asymmetric | Uses only in-range samples (non-SG) or shifts asymmetric SG window to keep length | Removes artificial padding; minimizes bias; accurate near edges | Varies window support; derivative order may be limited at extreme edges |
+| Adaptive    | Edge-aware    | Non‑SG : `symR = min(r, min(i, n−1−i))`, `W = 2·symR + 1` (symmetric shrinking)<br>SG : asymmetric window shift to maintain `2r + 1` length | Non‑SG : center‑fixed symmetric shrinking eliminates phase shift<br>SG : shifts asymmetric window to keep full polynomial support | Removes artificial padding; eliminates phase shift (non‑SG); accurate near edges | Varies window support; derivative order may be limited at extreme edges (SG) |
 | Zero Padding| Constant 0    | i < 0 or i ≥ n → 0                  | Outside treated as zero | Highlights decay / boundary contrast | Artificial dips; energy loss |
 
 Display names in exports : 
@@ -622,12 +622,12 @@ private double GetValueWithBoundary(double[] data, int idx, BoundaryMode mode)
 Non‑Adaptive paths (`Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`, `SG`) fetch samples through a unified accessor `GetValueWithBoundary(data, idx, mode)`.
 
 Adaptive paths differ per filter :
-- `Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`: the window is trimmed to in‑range samples and processed directly without padding.
-  - `Rect`: computes the simple mean of the truncated window (`W`), averaging only the in-range samples (no zero / repeat padding).
-  - `Avg`: sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − left)`, re‑normalizes by their local sum, and averages (no sort).
-  - `Med`: sub‑extracts `W` binomial weights from the full‑size array using offset `(r − left)`, sorts by value, and selects the weighted median (handles even / odd total weight).
-  - `GaussMed`: sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − left)`, re‑normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
-  - `Gauss`: sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − left)`, re‑normalizes, then computes a weighted average (convolution‑like sum, no sort).
+- `Rect`, `Avg`, `Med`, `GaussMed`, `Gauss`: the window shrinks symmetrically around the center point (`symR = min(r, min(i, n − 1 − i))`, `W = 2 · symR + 1`, `left = right = symR`). This center‑fixed symmetric shrinking eliminates phase shift.
+  - `Rect`: computes the simple mean of the symmetrically shrunk window (`W = 2 · symR + 1`), averaging only the in-range samples (no zero / repeat padding).
+  - `Avg`: sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − symR)`, re‑normalizes by their local sum, and averages (no sort).
+  - `Med`: sub‑extracts `W` binomial weights from the full‑size array using offset `(r − symR)`, sorts by value, and selects the weighted median (handles even / odd total weight).
+  - `GaussMed`: sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − symR)`, re‑normalizes; sorts `(value, weight)` pairs by value and selects the weighted median where cumulative weight ≥ 1 / 2.
+  - `Gauss`: sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array using offset `(r − symR)`, re‑normalizes, then computes a weighted average (convolution‑like sum, no sort).
 - `SG`: keeps the intended window length (`2r + 1`) by shifting an asymmetric window near edges. If full support cannot be met, the effective polynomial order is clamped to `effPoly = min(polyOrder, W - 1)`; a runtime check throws when `derivOrder > effPoly`. Asymmetric coefficients are recomputed per `(left, right)` shape and cached.
 
 > [!Note]
@@ -637,7 +637,7 @@ Adaptive paths differ per filter :
 - Symmetric : recommended default for smooth analytical signals (mirror mapping).
 - Replicate : suitable for stepwise / plateau sensor data (nearest endpoint).
 - ZeroPad : emphasizes decay / contrast at boundaries.
-- Adaptive : edge‑aware; window trimming or shifting per filter (see below).
+- Adaptive : edge‑aware; symmetric shrinking for non‑SG filters (`symR = min(r, min(i, n−1−i))`); asymmetric window shifting for SG (see below).
 
 Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_suppressAutoBoundary` prevents feedback loops):
 - Rectangular selected → Boundary Method set to "Replicate"
@@ -645,29 +645,45 @@ Auto‑switching behavior (suppressed if `_userSelectedBoundary` is true; `_supp
 - Savitzky-Golay selected → Boundary Method set to "Adaptive"
 
 ### Adaptive Mode (per‑filter logic)
+
+#### Symmetric Shrinking Principle (non‑SG filters)
+Non‑SG filters (Rectangular, Binomial Average, Binomial Median, Gaussian Weighted Median, Gaussian) use **center‑fixed symmetric shrinking** to handle data edges in Adaptive mode :
+
+1. **Symmetric radius** : `symR = min(r, min(i, n − 1 − i))` — the effective radius is the smaller of the original radius and the distance to the nearest edge.
+2. **Window construction** : `W = 2 × symR + 1`, `left = right = symR`, `start = i − symR`.
+3. **Center‑fixed guarantee** : Because `left = right`, the target index `i` is always at the exact center of the window. This eliminates phase shift entirely.
+4. **Coefficient sub‑extraction** : Weights are sub‑extracted from the pre‑computed full‑size `(2r + 1)` array at offset `(r − symR)`, preserving the original weight profile centered on the peak.
+
+Why symmetric shrinking eliminates phase shift :
+- The previous asymmetric approach (`left = min(r, i)`, `right = min(r, n−1−i)`) could produce `left ≠ right` at edges, causing the center of mass of the kernel to shift away from the target index.
+- Symmetric shrinking guarantees `left = right = symR`, so the kernel is always centered on the target point. Only the extent (width) decreases near edges, not the center position.
+
+This principle applies uniformly to Rectangular, Binomial Average, Binomial Median, Gaussian Weighted Median, and Gaussian filters. Savitzky‑Golay retains its asymmetric window shifting approach because it recomputes polynomial coefficients per window shape.
+
+#### Per‑filter Adaptive Logic
 - Rectangular (Moving Average) :
-  - Window shrinks at edges : `W = left + right + 1`
+  - Window shrinks symmetrically : `symR = min(r, min(i, n − 1 − i))`, `W = 2 × symR + 1`
   - Averages only in‑range samples (no zero / replicate bias)
 
 - Binomial Average :
-  - Sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array at offset `(r − left)`
+  - Sub‑extracts `W` coefficients from the pre‑computed full‑size `(2r + 1)` binomial array at offset `(r − symR)`
   - Re‑normalizes by the local sum; does not call `CalcBinomialCoefficients(W)` per index
 
 - Binomial Median (Weighted Median with binomial weights) :
-  - Sub‑extracts `W` binomial weights from the full‑size array at offset `(r − left)`
+  - Sub‑extracts `W` binomial weights from the full‑size array at offset `(r − symR)`
   - Performs weighted median over strictly in‑range values sorted by value
 
 - Gaussian Weighted Median :
-  - Sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, re‑normalizes
+  - Sub‑extracts `W` Gaussian weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)`, re‑normalizes
   - Sorts `(value, weight)` pairs by value; selects the smallest index where cumulative weight ≥ half of total
 
 - Gaussian :
-  - Sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, re‑normalizes
+  - Sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)`, re‑normalizes
   - Coefficients are normalized (sum = 1); no padding distortions
 
-- Savitzky-Golay (Smoothing or Derivative) :
+- Savitzky‑Golay (Smoothing or Derivative) :
   - Attempts to retain window length `2r + 1` by shifting left / right near edges
-  - Effective polynomial order: `effPoly = min(polyOrder, W - 1)`
+  - Effective polynomial order : `effPoly = min(polyOrder, W - 1)`
   - Throws `InvalidOperationException` if `derivOrder > effPoly`
   - Uses asymmetric coefficients from least‑squares on the shifted grid (recomputed for each `(left, right)` shape)
 
@@ -1091,11 +1107,12 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
     if (a < 0.0) a = 0.0;
     else if (a > 1.0) a = 1.0;
 
-    // Adaptive window helper (trim to available samples)
+    // Adaptive window helper (symmetric shrinking - center-fixed)
     void GetAdaptiveWindow(int center, out int left, out int right, out int start)
     {
-        left = Math.Min(r, center);
-        right = Math.Min(r, n - 1 - center);
+        int symR = Math.Min(r, Math.Min(center, n - 1 - center));
+        left = symR;
+        right = symR;
         start = center - left;
     }
 
@@ -1239,8 +1256,9 @@ private (double[] Rect, double[] Binom, double[] Median, double[] GaussMed, doub
             double filtered;
             if (boundaryMode == BoundaryMode.Adaptive)
             {
-                int left = Math.Min(r, i);
-                int right = Math.Min(r, n - 1 - i);
+                int symRGM = Math.Min(r, Math.Min(i, n - 1 - i));
+                int left = symRGM;
+                int right = symRGM;
                 int start = i - left;
                 int W = left + right + 1;
 
@@ -1513,7 +1531,7 @@ else if (useAvg)
 ```
 
 #### Binomial (Weighted) Average - Adaptive Note
-In Adaptive mode, the kernel width shrinks at edges and the corresponding `W` coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − left)`, then re‑normalized by their local sum. This preserves the correct symmetric weighting centered on the current data point without recomputing a new binomial row per index.
+In Adaptive mode, the window shrinks symmetrically (`symR = min(r, min(i, n−1−i))`, `W = 2 · symR + 1`) and the corresponding `W` coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` binomial array using offset `(r − symR)`, then re‑normalized by their local sum. Because `left = right = symR`, the target index is always at the center of the window, eliminating phase shift. This preserves the correct symmetric weighting centered on the current data point without recomputing a new binomial row per index.
 
 
 ### 5. Binomial (Weighted) Median Filter
@@ -1570,18 +1588,18 @@ else if (useMed)
 ```
 
 #### Weighted Median - Adaptive Note
-Adaptive sub‑extracts the corresponding `W` binomial weights from the pre‑computed full‑size `(2r + 1)` array at offset `(r − left)` and performs weighted median over only in-range samples — removing edge padding bias.
-(Implementation detail : An adaptive path also exists inside `WeightedMedianAt` that keeps full window length by sliding; `ApplySmoothing` intentionally bypasses it and uses the sub‑extraction strategy documented above.)
+Adaptive uses symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`, `W = 2 · symR + 1`) and sub‑extracts the corresponding `W` binomial weights from the pre‑computed full‑size `(2r + 1)` array at offset `(r − symR)`, then performs weighted median over only in‑range samples — removing edge padding bias and eliminating phase shift.
+(Implementation detail : `WeightedMedianAt` also uses symmetric shrinking with `binom[(w − symR) + pos]` indexing to extract center‑aligned weights.)
 
 
 ### 6. Gaussian Weighted Median Filtering (GWMF)
 #### How it works
 Computes the median within the kernel window using Gaussian weights centered at the target index. Unlike a mean filter, the median is robust to outliers; the Gaussian weights emphasize values closer to the center, improving fidelity on smooth curves while suppressing occasional spikes.
 
-- Window length : W = 2 × r + 1 (symmetric) or W = left + right + 1 (Adaptive edges)
+- Window length : W = 2 × r + 1 (symmetric) or W = 2 × symR + 1 (Adaptive symmetric shrinking)
 - Weights : Gaussian kernel `g[k] = exp(-(k^2) / (2σ^2))` normalized to sum to 1
   - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
-  - **Adaptive mode** : `W` Gaussian weights are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)`, then re‑normalized
+  - **Adaptive mode** : the window shrinks symmetrically (`symR = min(r, min(i, n−1−i))`, `W = 2 · symR + 1`); `W` Gaussian weights are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)`, then re‑normalized
   - **Sigma Factor** is user-configurable (default: 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 - Weighted median selection :
   - Sort pairs `(value, weight)` by value ascending
@@ -1589,18 +1607,18 @@ Computes the median within the kernel window using Gaussian weights centered at 
   - The value at that position is the weighted median
 - Boundary handling :
   - Non-Adaptive : `Sample(i + k)` uses `GetValueWithBoundary` for Symmetric / Replicate / ZeroPad
-  - Adaptive : window truncates to available samples; `W` weights are sub‑extracted from the pre‑computed full‑size Gaussian array at offset `(r − left)` and re‑normalized, and only in-range samples are used (no padding)
+  - Adaptive : window shrinks symmetrically (`symR = min(r, min(i, n − 1 − i))`, `W = 2 · symR + 1`); `W` weights are sub‑extracted from the pre‑computed full‑size Gaussian array at offset `(r − symR)` and re‑normalized, and only in-range samples are used (no padding)
 - Alpha blend (runtime, if enabled): `output[i] = α × filtered[i] + (1 − α) × input[i]` with α ∈ [0.00, 1.00]
 
 #### Principle
 GWMF combines the robustness of median filtering with the smoothness bias of Gaussian weighting :
 - Robustness : The median is insensitive to extreme outliers compared to means.
 - Locality : Gaussian weights peak at the center, ensuring nearby samples dominate.
-- Edge correctness : Adaptive sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes, avoiding artificial padding biases.
-- Stability : In symmetric mode weights are centered; in Adaptive mode weights are sub‑extracted centered on the current data point from the pre‑computed array.
+- Edge correctness : Adaptive uses symmetric shrinking (`left = right = symR`) to keep the target index at the center of the window, then sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)` and re‑normalizes, avoiding both padding bias and phase shift.
+- Stability : In symmetric mode weights are centered; in Adaptive mode weights are symmetrically sub‑extracted centered on the current data point from the pre‑computed array, guaranteeing zero phase shift.
 
 Mathematically :
-- Kernel positions k ∈ [−r, …, r] (symmetric) or k ∈ [−left, …, right] (adaptive shift / truncate)
+- Kernel positions k ∈ [−r, …, r] (symmetric) or k ∈ [−symR, …, symR] (adaptive symmetric shrinking)
 - Unnormalized weights : w(k) = exp(−k² / (2σ²))
 - Normalization : g(k) = w(k) / Σ_j w(j)
 - Weighted median v* solves min over threshold : find smallest index in sorted values s.t. Σ_{j ≤ *} g_sorted(j) ≥ 1 / 2
@@ -1663,11 +1681,12 @@ else
 gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 ```
 
-Adaptive window (sub‑extracts weights from pre‑computed full‑size Gaussian array at each index) :
+Adaptive window (symmetric shrinking — sub‑extracts weights from pre‑computed full‑size Gaussian array at each index) :
 ```csharp
 // Adaptive GWMF inside ApplySmoothing (FrmMain.cs)
-int left = Math.Min(r, i);
-int right = Math.Min(r, n - 1 - i);
+int symRGM = Math.Min(r, Math.Min(i, n - 1 - i));
+int left = symRGM;
+int right = symRGM;
 int start = i - left;
 int W = left + right + 1;
 
@@ -1738,20 +1757,20 @@ gaussMedian[i] = a * filtered + (1.0 - a) * input[i];
 
 > [!Note]
 >  - Weight generation strictly follows `ComputeGaussianCoefficients(length, sigma)` (positive σ, normalized coefficients, sum = 1).  
->  - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes to avoid distortions.  
+>  - BoundaryMode is honored via `GetValueWithBoundary` in non-Adaptive paths; Adaptive uses symmetric shrinking (`left = right = symR`) and sub‑extracts `W` weights from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)` and re‑normalizes to avoid distortions and phase shift.  
 >  - Alpha blending is clamped once (a ∈ [0, 1]) and applied to GWMF alongside Binomial Average, Binomial Median, and Gaussian filters.  
 >  - Export metadata includes "Alpha Blend" when any of Avg / Med / GaussMed / Gauss are selected. In Excel, the condition is `(doAvg || doMed || doGaussMed || doGauss)`; in CSV, the header row uses the same condition.
 
 ### 7. Gaussian Filter
 #### How it works
-Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode, `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalized.
+Applies a normalized 1D Gaussian kernel honoring the selected Boundary Mode (Symmetric, Replicate, ZeroPad, Adaptive). In Adaptive mode, the window shrinks symmetrically (`symR = min(r, min(i, n − 1 − i))`, `W = 2 · symR + 1`); `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)` and re‑normalized.
 
 #### Principle
 Gaussian weights emphasize central values, producing smooth results.  
   
 The standard deviation (σ) for the Gaussian kernel is calculated as :
 - **Symmetric mode** : σ = (2 × radius + 1) / Sigma Factor
-- **Adaptive mode** : `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` array at offset `(r − left)`, then re‑normalized (sum = 1)
+- **Adaptive mode** : the window shrinks symmetrically (`symR = min(r, min(i, n − 1 − i))`, `W = 2·symR + 1`); `W` Gaussian coefficients are sub‑extracted from the pre‑computed full‑size `(2r + 1)` array at offset `(r − symR)`, then re‑normalized (sum = 1)
 - **Sigma Factor** is user-configurable (default : 6.0), clamped to [1.0, 12.0], and applies to both Gaussian Weighted Median and Gaussian Filtering. The actual value used is always reflected in export metadata and calculations.
 
 #### Code Implementation
@@ -1777,8 +1796,8 @@ if (useGauss)
 ```
 
 #### Gaussian Filter - Adaptive Note
-Adaptive mode sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − left)` and re‑normalizes so the local weights sum to 1. This preserves the correct weight distribution centered on the current data point without recomputing a new Gaussian kernel per index, avoiding artificial flattening. The actual Sigma Factor used is always reflected in export metadata and calculations.
-
+Adaptive mode uses symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`, `W = 2 · symR + 1`) and sub‑extracts `W` Gaussian coefficients from the pre‑computed full‑size `(2r + 1)` Gaussian array at offset `(r − symR)` and re‑normalizes so the local weights sum to 1. Because `left = right = symR`, the target index is always at the center of the window, eliminating phase shift. This preserves the correct weight distribution centered on the current data point without recomputing a new Gaussian kernel per index, avoiding artificial flattening. The actual Sigma Factor used is always reflected in export metadata and calculations.
+ 
 ### 8. Savitzky‑Golay Filter
 #### How it works
 A fixed-size window of length **2 × r + 1** slides over the 1D signal.  
