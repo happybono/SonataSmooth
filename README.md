@@ -364,7 +364,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ### v5.7.0.0
 #### March 24, 2026
-> Savitzky–Golay numerical stability : Replaced Gauss-Jordan normal-equation inversion (AᵀA) with Householder QR decomposition for all SG coefficient builders. Reduces condition-number sensitivity for high polynomial orders and narrow windows.<br><br>
+> Savitzky-Golay numerical stability : Replaced Gauss-Jordan normal-equation inversion (AᵀA) with Householder QR decomposition for all SG coefficient builders. Reduces condition-number sensitivity for high polynomial orders and narrow windows.<br><br>
 > Adaptive boundary mode kernel centering fix : Weighted filters (Binomial Average, Binomial Median, Gaussian, Gaussian Weighted Median) now use the original pre-computed kernel restricted to available offsets and centered on position `i`, instead of recomputing a shorter kernel centered on the truncated window. This eliminates implementation-induced phase shift; only the inherent mathematical asymmetry from the window extent remains.<br><br>
 > Rectangular (uniform weights) and Savitzky-Golay (asymmetric polynomial coefficients) were already correct and remain unchanged.<br><br>
 > UI tooltip updated from "Adaptive (local polynomial + median)" to "Adaptive".<br><br>
@@ -373,7 +373,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 
 ### v6.0.0.0
 #### April 8, 2026
-> Adaptive boundary mode phase shift resolution : Previous fix (`v5.7.0.0`) reduced implementation‑induced phase shift but left residual asymmetry at data edges. In `v6.0.0.0`, non‑SG filters now adopt center‑fixed symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`), eliminating all artificial phase shift. Only the mathematically inherent Savitzky–Golay asymmetry remains.<br><br>
+> Adaptive boundary mode phase shift resolution : Previous fix (`v5.7.0.0`) reduced implementation‑induced phase shift but left residual asymmetry at data edges. In `v6.0.0.0`, non‑SG filters now adopt center‑fixed symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`), eliminating all artificial phase shift. Only the mathematically inherent Savitzky-Golay asymmetry remains.<br><br>
 > Validation artifacts restructuring : Legacy `v1`, `v2` directories removed. Validation artifacts are now aligned with actual app versioning (`v4` (`v4.X.X.X`), `v6` (`v6.X.X.X`)) to ensure consistency between release versions and test data. This simplifies regression tracking and eliminates confusion between internal numbering and public version scheme.<br><br>
 > MATLAB script updates : Under `SonataSmooth/Validation/Matlab/`, script filenames unified to match app versioning (`v4`, `v6`). `v6` scripts have been refactored and updated to reflect the new adaptive boundary mode implementation, ensuring validation workflows remain consistent with the latest algorithm changes.<br><br>
 > Minor bugs fixed.
@@ -921,7 +921,7 @@ Alpha `α` blends the original sample with the filtered output for selected meth
 - Applicable to: Binomial Averaging, Binomial Median, Gaussian Weighted Median Filtering (GWMF), Gaussian
 - Not applied to: Rectangular, Savitzky‑Golay (including derivatives)
 - Formula per element i : `output[i] = α * filtered[i] + (1 - α) * input[i]`
-- Range : 0.00 – 1.00 (clamped)
+- Range : 0.00 - 1.00 (clamped)
 - UI binding : `cbxAlpha` and `lblAlpha` are enabled only for `rbtnAvg`, `rbtnMed`, `rbtnGauss`, `rbtnGaussMed`
 
 Runtime usage in smoothing (extended to GWMF) :
@@ -2319,7 +2319,7 @@ Columns include :
 - Binomial Median Filtering (alpha‑blended)
 - Gaussian Weighted Median Filtering (alpha‑blended)
 - Gaussian Filtering (alpha‑blended)
-- Savitzky–Golay Filtering (no alpha blend)
+- Savitzky-Golay Filtering (no alpha blend)
 
 Progress is reported 0 - 100 as rows are written; the bar resets to 0 when done. Optional auto‑open for generated file(s) is supported.
 
