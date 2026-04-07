@@ -375,7 +375,7 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 #### April 8, 2026
 > Adaptive boundary mode phase shift resolution : Previous fix (`v5.7.0.0`) reduced implementation‑induced phase shift but left residual asymmetry at data edges. In `v6.0.0.0`, non‑SG filters now adopt center‑fixed symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`), eliminating all artificial phase shift. Only the mathematically inherent Savitzky–Golay asymmetry remains.<br><br>
 > Validation artifacts restructuring : Legacy `v1`, `v2` directories removed. Validation artifacts are now aligned with actual app versioning (`v4` (`v4.X.X.X`), `v6` (`v6.X.X.X`)) to ensure consistency between release versions and test data. This simplifies regression tracking and eliminates confusion between internal numbering and public version scheme.<br><br>
-> MATLAB script updates : Under `SonataSmooth/Validation/Matlab/`, script filenames unified to match app versioning (`v4`, `v6`). v6 scripts have been refactored and updated to reflect the new adaptive boundary mode implementation, ensuring validation workflows remain consistent with the latest algorithm changes.<br><br>
+> MATLAB script updates : Under `SonataSmooth/Validation/Matlab/`, script filenames unified to match app versioning (`v4`, `v6`). `v6` scripts have been refactored and updated to reflect the new adaptive boundary mode implementation, ensuring validation workflows remain consistent with the latest algorithm changes.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
