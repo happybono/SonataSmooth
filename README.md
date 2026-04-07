@@ -361,7 +361,6 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 ### v5.6.3.0
 #### February 02, 2026
 > Minor bugs fixed.
-</details>
 
 ### v5.7.0.0
 #### March 24, 2026
@@ -369,6 +368,12 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Adaptive boundary mode kernel centering fix : Weighted filters (Binomial Average, Binomial Median, Gaussian, Gaussian Weighted Median) now use the original pre-computed kernel restricted to available offsets and centered on position `i`, instead of recomputing a shorter kernel centered on the truncated window. This eliminates implementation-induced phase shift; only the inherent mathematical asymmetry from the window extent remains.<br><br>
 > Rectangular (uniform weights) and Savitzky-Golay (asymmetric polynomial coefficients) were already correct and remain unchanged.<br><br>
 > UI tooltip updated from "Adaptive (local polynomial + median)" to "Adaptive".<br><br>
+> Minor bugs fixed.
+</details>
+
+### v6.0.0.0
+#### April 8, 2026
+> Adaptive boundary mode phase shift resolution : Previous fix (v5.7.0.0) reduced implementation‑induced phase shift but left residual asymmetry at data edges. In v6.0.0.0, non‑SG filters now adopt center‑fixed symmetric shrinking (`symR = min(r, min(i, n − 1 − i))`), eliminating all artificial phase shift. Only the mathematically inherent Savitzky–Golay asymmetry remains.<br><br>
 > Minor bugs fixed.
 
 ## Required Components & Setup
