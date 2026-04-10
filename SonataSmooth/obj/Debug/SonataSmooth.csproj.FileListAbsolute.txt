@@ -1,13 +1,13 @@
-E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe.config
-E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.exe
-E:\My Lifestyle\Products\C#\SonataSmooth\bin\Debug\SonataSmooth.pdb
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.exe
-E:\My Lifestyle\Products\C#\SonataSmooth\obj\Debug\SonataSmooth.pdb
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\bin\Debug\SonataSmooth.exe.config
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\bin\Debug\SonataSmooth.exe
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\bin\Debug\SonataSmooth.pdb
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.csproj.AssemblyReference.cache
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.FrmAbout.resources
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.FrmExportSettings.resources
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.FrmMain.resources
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.FrmModify.resources
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.Properties.Resources.resources
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.csproj.GenerateResource.cache
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.csproj.CoreCompileInputs.cache
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.exe
+E:\My Lifestyle\Products\C#\SonataSmooth 1D Edition\SonataSmooth\obj\Debug\SonataSmooth.pdb
