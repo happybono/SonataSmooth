@@ -856,8 +856,8 @@ namespace SonataSmooth
 
                     if (showAlpha)
                     {
-                        double alphaforStatus = ParseAlphaOrDefault(cbxAlpha.Text, 1.0);
-                        slblAlphaBlend.Text = alphaforStatus.ToString("0.00", CultureInfo.InvariantCulture);
+                         // 실제 계산에 사용된 지역 변수 alpha 값을 그대로 표시
+                         slblAlphaBlend.Text = alpha.ToString("0.00", CultureInfo.InvariantCulture);
                     }
                 }
                 catch (Exception ex)
