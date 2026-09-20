@@ -376,11 +376,15 @@ While limited to single‑dimension datasets, it can be applied across a wide ra
 > Validation artifacts restructuring : Legacy `v1`, `v2` directories removed. Validation artifacts are now aligned with actual app versioning (`v4` (`v4.X.X.X`), `v6` (`v6.X.X.X`)) to ensure consistency between release versions and test data. This simplifies regression tracking and eliminates confusion between internal numbering and public version scheme.<br><br>
 > MATLAB script updates : Under `SonataSmooth/Validation/Matlab/`, script filenames unified to match app versioning (`v4`, `v6`). `v6` scripts have been refactored and updated to reflect the new adaptive boundary mode implementation, ensuring validation workflows remain consistent with the latest algorithm changes.<br><br>
 > Minor bugs fixed.
-</details>
 
 ### v6.0.1.0
 #### September 17, 2026
 > Fixed alpha status reporting to use the captured smoothing parameter, preventing mismatches when the ComboBox changed during async processing.
+</details>
+
+### v6.0.2.0
+#### September 20, 2026
+> Updated `app.manifest` and `app.config` to explicitly enforce PerMonitorV2 DPI awareness to resolve UI scaling and blurring issues caused by stricter rendering policies introduced in Windows 11 Build 22621.
 
 ## Required Components & Setup
 ### Prerequisites
